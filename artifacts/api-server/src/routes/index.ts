@@ -1,0 +1,46 @@
+import { Router, type IRouter } from "express";
+import healthRouter from "./health.js";
+import patientsRouter from "./patients.js";
+import emergencyRouter from "./emergency.js";
+import medicationsRouter from "./medications.js";
+import visitsRouter from "./visits.js";
+import labResultsRouter from "./lab_results.js";
+import alertsRouter from "./alerts.js";
+import aiRouter from "./ai.js";
+import adminRouter from "./admin.js";
+import labRouter from "./lab.js";
+import pharmacyRouter from "./pharmacy.js";
+import hospitalRouter from "./hospital.js";
+import insuranceRouter from "./insurance.js";
+import aiControlRouter from "./ai_control.js";
+import researchRouter from "./research.js";
+import familyRouter from "./family.js";
+import supplyChainRouter from "./supply_chain.js";
+import appointmentsRouter from "./appointments.js";
+import eventsRouter from "./events.js";
+import consentRouter from "./consent.js";
+
+const router: IRouter = Router();
+
+router.use(healthRouter);
+router.use("/events", eventsRouter);
+router.use("/patients", patientsRouter);
+router.use("/emergency", emergencyRouter);
+router.use("/medications", medicationsRouter);
+router.use("/visits", visitsRouter);
+router.use("/lab-results", labResultsRouter);
+router.use("/alerts", alertsRouter);
+router.use("/ai", aiRouter);
+router.use("/admin", adminRouter);
+router.use("/lab", labRouter);
+router.use("/pharmacy", pharmacyRouter);
+router.use("/hospital", hospitalRouter);
+router.use("/insurance", insuranceRouter);
+router.use("/ai-control", aiControlRouter);
+router.use("/research", researchRouter);
+router.use("/family", familyRouter);
+router.use("/supply-chain", supplyChainRouter);
+router.use("/appointments", appointmentsRouter);
+router.use("/consent", consentRouter);
+
+export default router;
