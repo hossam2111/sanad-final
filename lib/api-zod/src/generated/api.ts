@@ -516,6 +516,31 @@ export const GetPatientPredictionsResponse = zod.object({
 });
 
 /**
+ * @summary Stream AI clinical narrative (SSE)
+ */
+export const GetAiNarrativeParams = zod.object({
+  patientId: zod.coerce.number(),
+});
+
+/**
+ * @summary Ask AI a clinical question about a patient
+ */
+export const AskAiChatParams = zod.object({
+  patientId: zod.coerce.number(),
+});
+
+export const AskAiChatBody = zod.object({
+  question: zod.string(),
+});
+
+export const AskAiChatResponse = zod.object({
+  patientId: zod.number().optional(),
+  question: zod.string().optional(),
+  answer: zod.string().optional(),
+  model: zod.string().optional(),
+});
+
+/**
  * @summary Mark an alert as read
  */
 export const MarkAlertReadParams = zod.object({

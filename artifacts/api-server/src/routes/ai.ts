@@ -4,6 +4,7 @@ import { patientsTable, medicationsTable, labResultsTable, visitsTable, aiDecisi
 import { eq, desc } from "drizzle-orm";
 import { checkDrugInteractions, calculateRiskScore, generatePredictions } from "../lib/ai-engine.js";
 import { runDecisionEngine } from "../lib/decision-engine.js";
+import { streamClinicalNarrative, askClinicalQuestion, type PatientContext } from "../lib/claude-brain.js";
 
 const router = Router();
 
@@ -243,6 +244,142 @@ router.get("/audit/:patientId", async (req, res) => {
     .limit(30);
 
   res.json({ patientId, auditLog: logs });
+});
+
+async function buildPatientContext(
+  patientId: number,
+  patient: typeof patientsTable.$inferSelect,
+): Promise<PatientContext> {
+  const [medications, labResults, visits] = await Promise.all([
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)),
+    db.select().from(labResultsTable).where(eq(labResultsTable.patientId, patientId)).orderBy(desc(labResultsTable.testDate)).limit(10),
+    db.select().from(visitsTable).where(eq(visitsTable.patientId, patientId)).orderBy(desc(visitsTable.visitDate)).limit(5),
+  ]);
+
+  const decision = runDecisionEngine({
+    patient: {
+      dateOfBirth: patient.dateOfBirth,
+      chronicConditions: patient.chronicConditions,
+      allergies: patient.allergies,
+      riskScore: patient.riskScore ?? 0,
+    },
+    medications: medications.map(m => ({ drugName: m.drugName, isActive: m.isActive ?? false, startDate: m.startDate })),
+    labResults: labResults.map(l => ({ testName: l.testName, result: l.result, status: l.status, testDate: l.testDate, unit: l.unit })),
+    visits: visits.map(v => ({ visitDate: v.visitDate, visitType: v.visitType, diagnosis: v.diagnosis })),
+  });
+
+  const age = new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
+
+  return {
+    name: patient.fullName,
+    age,
+    nationalId: patient.nationalId,
+    chronicConditions: patient.chronicConditions ?? [],
+    allergies: patient.allergies ?? [],
+    activeMedications: medications.filter(m => m.isActive).map(m => m.drugName),
+    recentLabs: labResults.map(l => ({ test: l.testName, result: l.result, status: l.status, date: l.testDate })),
+    recentVisits: visits.map(v => ({ date: v.visitDate, type: v.visitType, diagnosis: v.diagnosis ?? "" })),
+    decision,
+  };
+}
+
+// ─── Claude AI Brain — Streaming Clinical Narrative ───────────────────────────
+// GET /api/ai/narrative/:patientId
+// Streams a real AI-generated clinical summary via SSE
+router.get("/narrative/:patientId", async (req, res) => {
+  if (!process.env["OPENAI_API_KEY"]) {
+    res.status(503).json({ error: "AI_UNAVAILABLE", message: "OPENAI_API_KEY not configured" });
+    return;
+  }
+
+  const patientId = parseInt(req.params["patientId"]!);
+  if (isNaN(patientId)) {
+    res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patientId" });
+    return;
+  }
+
+  const [patient] = await db
+    .select()
+    .from(patientsTable)
+    .where(eq(patientsTable.id, patientId))
+    .limit(1);
+
+  if (!patient) {
+    res.status(404).json({ error: "NOT_FOUND", message: "Patient not found" });
+    return;
+  }
+
+  const ctx = await buildPatientContext(patientId, patient);
+
+  // SSE headers for streaming
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders();
+
+  try {
+    await streamClinicalNarrative(
+      ctx,
+      (chunk, provider) => {
+        res.write(`data: ${JSON.stringify({ text: chunk, provider })}\n\n`);
+      },
+      () => {
+        res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+        res.end();
+      },
+      (err) => {
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+          res.end();
+        }
+      },
+    );
+  } catch (err) {
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ error: err instanceof Error ? err.message : "Stream error" })}\n\n`);
+      res.end();
+    }
+  }
+});
+
+// ─── Claude AI Brain — Clinical Q&A ──────────────────────────────────────────
+// POST /api/ai/chat/:patientId   body: { question: string }
+router.post("/chat/:patientId", async (req, res) => {
+  if (!process.env["OPENAI_API_KEY"]) {
+    res.status(503).json({ error: "AI_UNAVAILABLE", message: "OPENAI_API_KEY not configured" });
+    return;
+  }
+
+  const patientId = parseInt(req.params["patientId"]!);
+  if (isNaN(patientId)) {
+    res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patientId" });
+    return;
+  }
+
+  const { question } = req.body as { question?: string };
+
+  if (!question?.trim()) {
+    res.status(400).json({ error: "INVALID_REQUEST", message: "question is required" });
+    return;
+  }
+
+  const [patient] = await db
+    .select()
+    .from(patientsTable)
+    .where(eq(patientsTable.id, patientId))
+    .limit(1);
+
+  if (!patient) {
+    res.status(404).json({ error: "NOT_FOUND", message: "Patient not found" });
+    return;
+  }
+
+  const ctx = await buildPatientContext(patientId, patient);
+
+  const answer = await askClinicalQuestion(ctx, question);
+
+  res.json({ patientId, question, answer, model: "gpt-4o" });
 });
 
 export default router;

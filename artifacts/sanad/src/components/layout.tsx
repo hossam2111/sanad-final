@@ -1,5 +1,8 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
-import { Link, useLocation } from "wouter";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ShieldAlert, HeartPulse, User, Building2,
   LayoutDashboard, LogOut, Bell, Settings, LifeBuoy,
@@ -8,6 +11,8 @@ import {
 } from "lucide-react";
 import { cn } from "./shared";
 import { useAuth } from "@/contexts/auth-context";
+import { useLanguage } from "@/contexts/language-context";
+import { LanguageThemeToggle } from "@/components/language-theme-toggle";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 type Role = "emergency" | "doctor" | "citizen" | "admin" | "lab" | "pharmacy" | "hospital" | "insurance" | "ai-control" | "research" | "family" | "supply-chain";
@@ -181,10 +186,27 @@ const roleConfigs: Record<Role, {
   },
 };
 
+const roleText: Record<Role, { sublabel: string; nav: string; userRole: string }> = {
+  emergency: { sublabel: "الاستجابة للطوارئ", nav: "بحث الطوارئ", userRole: "مستجيب أول" },
+  doctor: { sublabel: "الاستخبارات الصحية", nav: "لوحة المريض", userRole: "طبيب - مدينة الملك فهد الطبية" },
+  citizen: { sublabel: "بوابة المواطن", nav: "سجلاتي الصحية", userRole: "السجل الصحي الوطني" },
+  admin: { sublabel: "لوحة الوزارة", nav: "لوحة التحليلات", userRole: "استخبارات صحة السكان" },
+  lab: { sublabel: "بوابة المختبر", nav: "نتائج المختبر", userRole: "فني مختبر أول" },
+  pharmacy: { sublabel: "بوابة الصيدلية", nav: "الصرف وفحص السلامة", userRole: "صيدلي سريري" },
+  hospital: { sublabel: "عمليات المستشفى", nav: "نظرة عامة على المستشفى", userRole: "مدينة الملك فهد الطبية" },
+  insurance: { sublabel: "عمليات التأمين", nav: "المطالبات وكشف الاحتيال", userRole: "قائد عمليات التأمين" },
+  "ai-control": { sublabel: "مركز التحكم بالذكاء الاصطناعي", nav: "مراقبة المحركات", userRole: "قائد أنظمة الذكاء الاصطناعي" },
+  research: { sublabel: "البحث السريري", nav: "رؤى البحث", userRole: "عالم بيانات صحية" },
+  family: { sublabel: "بوابة صحة الأسرة", nav: "خريطة صحة الأسرة", userRole: "وحدة الرعاية الوقائية" },
+  "supply-chain": { sublabel: "ذكاء سلسلة الإمداد", nav: "المخزون واللوجستيات", userRole: "مدير سلسلة إمداد الأدوية" },
+};
+
 export function Layout({ children, role }: { children: React.ReactNode; role: Role }) {
-  const [location] = useLocation();
+  const location = usePathname();
   const config = roleConfigs[role];
   const { user: authUser, logout } = useAuth();
+  const { locale, text } = useLanguage();
+  const router = useRouter();
   const [showAlerts, setShowAlerts] = useState(false);
   const bellRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -222,39 +244,34 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
   const systemAlerts = alertsData?.alerts ?? [];
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: "hsl(240 6% 97%)" }}>
+    <div className="flex h-screen overflow-hidden bg-background text-foreground">
 
       {/* ─── Sidebar ─── */}
       <aside
-        className="w-[220px] shrink-0 flex flex-col h-full"
-        style={{
-          background: "white",
-          borderRight: "1px solid rgba(0,0,0,0.06)",
-          boxShadow: "1px 0 0 rgba(0,0,0,0.03)",
-        }}
+        className="w-[220px] shrink-0 flex flex-col h-full border-e border-border bg-sidebar text-sidebar-foreground shadow-sm"
       >
         {/* Logo block */}
-        <div className="h-[60px] flex items-center gap-3 px-5" style={{ borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <div className="h-[60px] flex items-center gap-3 px-5 border-b border-border">
           <div className={cn(
             "w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0",
             config.accentBg
           )}>
             <img
-              src={`${import.meta.env.BASE_URL}images/sanad-logo.png`}
+              src="/images/sanad-logo.png"
               alt="Sanad"
               className="w-4 h-4 object-contain brightness-0 invert"
             />
           </div>
           <div>
             <p className="text-[15px] font-bold text-foreground leading-none tracking-tight">{config.label}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">{config.sublabel}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 font-medium">{locale === "ar" ? roleText[role].sublabel : config.sublabel}</p>
           </div>
         </div>
 
         {/* Nav */}
         <nav className="flex-1 px-3 pt-4 pb-2 space-y-0.5 overflow-y-auto sidebar-scroll">
           <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-[0.1em] px-2.5 mb-2 ml-0.5">
-            Menu
+            {text("Menu", "القائمة")}
           </p>
           {config.nav.map((item) => {
             const Icon = item.icon;
@@ -268,7 +285,7 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
                     : "text-muted-foreground hover:text-foreground hover:bg-black/[0.04]"
                 )}>
                   <Icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
+                  <span>{locale === "ar" ? roleText[role].nav : item.label}</span>
                 </div>
               </Link>
             );
@@ -276,13 +293,13 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
 
           <div className="pt-5 pb-1">
             <p className="text-[10px] font-semibold text-muted-foreground/70 uppercase tracking-[0.1em] px-2.5 mb-2 ml-0.5">
-              System
+              {text("System", "النظام")}
             </p>
           </div>
           {[
-            { icon: Bell, label: "Notifications" },
-            { icon: LifeBuoy, label: "Support" },
-            { icon: Settings, label: "Settings" },
+            { icon: Bell, label: text("Notifications", "الإشعارات") },
+            { icon: LifeBuoy, label: text("Support", "الدعم") },
+            { icon: Settings, label: text("Settings", "الإعدادات") },
           ].map(({ icon: Icon, label }) => (
             <div
               key={label}
@@ -295,10 +312,9 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
         </nav>
 
         {/* User block */}
-        <div className="px-3 pb-4" style={{ borderTop: "1px solid rgba(0,0,0,0.06)", paddingTop: "12px" }}>
+        <div className="px-3 pb-4 border-t border-border pt-3">
           <div
-            className="flex items-center gap-2.5 px-3 py-2.5 rounded-[14px] mb-1"
-            style={{ background: "hsl(240 6% 97%)" }}
+            className="flex items-center gap-2.5 px-3 py-2.5 rounded-[14px] mb-1 bg-secondary"
           >
             <div className={cn(
               "w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-[11px] font-bold",
@@ -308,15 +324,15 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[12px] font-semibold text-foreground truncate leading-tight">{authUser?.name ?? config.user}</p>
-              <p className="text-[10px] text-muted-foreground leading-tight truncate mt-0.5">{authUser?.jobTitle ?? config.userRole}</p>
+              <p className="text-[10px] text-muted-foreground leading-tight truncate mt-0.5">{authUser?.jobTitle ?? (locale === "ar" ? roleText[role].userRole : config.userRole)}</p>
             </div>
           </div>
           <div
-            onClick={() => { logout(); window.location.href = "/login"; }}
+            onClick={() => { logout(); router.push("/login"); }}
             className="flex items-center gap-3 px-3 py-2 rounded-[10px] text-muted-foreground hover:text-red-600 hover:bg-red-50 text-[12px] font-medium cursor-pointer transition-all duration-150"
           >
             <LogOut className="w-3.5 h-3.5 shrink-0" />
-            <span>Sign Out</span>
+            <span>{text("Sign Out", "تسجيل الخروج")}</span>
           </div>
         </div>
       </aside>
@@ -326,25 +342,20 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
 
         {/* Topbar */}
         <header
-          className="h-[60px] shrink-0 flex items-center justify-between px-7"
-          style={{
-            background: "rgba(255,255,255,0.85)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            borderBottom: "1px solid rgba(0,0,0,0.06)",
-          }}
+          className="h-[60px] shrink-0 flex items-center justify-between px-7 border-b border-border bg-card/85 backdrop-blur"
         >
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-medium text-muted-foreground">
-              {config.sublabel}
+              {locale === "ar" ? roleText[role].sublabel : config.sublabel}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageThemeToggle />
             <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
-              All Systems Operational
+              {text("All Systems Operational", "كل الأنظمة تعمل")}
             </div>
 
             {/* Alerts Bell */}
@@ -365,13 +376,13 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
               {showAlerts && (
                 <div
                   ref={dropdownRef}
-                  className="absolute right-0 top-10 w-[340px] bg-white rounded-2xl shadow-2xl border border-black/[0.07] z-50 overflow-hidden"
+                  className="absolute end-0 top-10 w-[340px] bg-card rounded-2xl shadow-2xl border border-border z-50 overflow-hidden"
                 >
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.06]">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                     <div>
-                      <p className="text-[13px] font-bold text-foreground">System Alerts</p>
+                      <p className="text-[13px] font-bold text-foreground">{text("System Alerts", "تنبيهات النظام")}</p>
                       {unreadCount > 0 && (
-                        <p className="text-[11px] text-muted-foreground">{unreadCount} unread</p>
+                        <p className="text-[11px] text-muted-foreground">{text(`${unreadCount} unread`, `${unreadCount} غير مقروء`)}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -380,7 +391,7 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
                           onClick={() => markAllReadMutation.mutate()}
                           className="text-[11px] font-medium text-primary hover:text-primary/80"
                         >
-                          Mark all read
+                          {text("Mark all read", "تحديد الكل كمقروء")}
                         </button>
                       )}
                       <button onClick={() => setShowAlerts(false)} className="text-muted-foreground hover:text-foreground">
@@ -393,7 +404,7 @@ export function Layout({ children, role }: { children: React.ReactNode; role: Ro
                     {systemAlerts.length === 0 ? (
                       <div className="flex flex-col items-center py-8 text-muted-foreground">
                         <CheckCircle2 className="w-8 h-8 mb-2 text-emerald-400" />
-                        <p className="text-[13px] font-medium">No alerts</p>
+                        <p className="text-[13px] font-medium">{text("No alerts", "لا توجد تنبيهات")}</p>
                       </div>
                     ) : (
                       systemAlerts.map((alert: any) => (

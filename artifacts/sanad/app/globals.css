@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'Inter', 'Noto Sans Arabic', sans-serif;
+  --font-display: 'Inter', 'Noto Sans Arabic', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-sidebar: hsl(var(--sidebar));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-risk-critical: hsl(var(--risk-critical));
+  --color-risk-high: hsl(var(--risk-high));
+  --color-risk-medium: hsl(var(--risk-medium));
+  --color-risk-low: hsl(var(--risk-low));
+  --color-risk-critical-bg: hsl(var(--risk-critical-bg));
+  --color-risk-high-bg: hsl(var(--risk-high-bg));
+  --color-risk-medium-bg: hsl(var(--risk-medium-bg));
+  --color-risk-low-bg: hsl(var(--risk-low-bg));
+
+  --radius-sm:  0.625rem;
+  --radius-md:  0.875rem;
+  --radius-lg:  1.125rem;
+  --radius-xl:  1.375rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 2rem;
+}
+
+.dark {
+  --background: 240 10% 8%;
+  --foreground: 0 0% 96%;
+  --card: 240 8% 12%;
+  --card-foreground: 0 0% 96%;
+  --primary: 211 100% 58%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 7% 16%;
+  --secondary-foreground: 0 0% 94%;
+  --muted: 240 7% 15%;
+  --muted-foreground: 240 5% 68%;
+  --accent: 211 100% 58%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 75% 58%;
+  --destructive-foreground: 0 0% 100%;
+  --warning: 35 95% 56%;
+  --warning-foreground: 240 10% 8%;
+  --success: 142 65% 45%;
+  --success-foreground: 0 0% 100%;
+  --sidebar: 240 8% 11%;
+  --sidebar-foreground: 0 0% 94%;
+  --border: 240 7% 22%;
+  --input: 240 7% 22%;
+  --ring: 211 100% 58%;
+  --risk-critical-bg: 0 55% 16%;
+  --risk-high-bg: 25 55% 16%;
+  --risk-medium-bg: 43 55% 15%;
+  --risk-low-bg: 142 45% 14%;
+}
+
+:root {
+  --background: 240 6% 97%;
+  --foreground: 240 10% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 8%;
+  --primary: 211 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 6% 95%;
+  --secondary-foreground: 240 8% 25%;
+  --muted: 240 5% 94%;
+  --muted-foreground: 240 5% 52%;
+  --accent: 211 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 85% 57%;
+  --destructive-foreground: 0 0% 100%;
+  --warning: 35 95% 50%;
+  --warning-foreground: 0 0% 100%;
+  --success: 142 71% 40%;
+  --success-foreground: 0 0% 100%;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 240 10% 10%;
+  --border: 240 6% 91%;
+  --input: 240 6% 91%;
+  --ring: 211 100% 50%;
+  --risk-critical: 0 85% 57%;
+  --risk-high: 25 95% 53%;
+  --risk-medium: 43 96% 56%;
+  --risk-low: 142 71% 40%;
+  --risk-critical-bg: 0 100% 97%;
+  --risk-high-bg: 25 100% 96%;
+  --risk-medium-bg: 43 100% 95%;
+  --risk-low-bg: 142 76% 95%;
+}
+
+@layer base {
+  * { @apply border-border; box-sizing: border-box; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, h4, h5, h6 { @apply font-semibold tracking-tight; }
+}
+
+.ios-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.data-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+.data-table th { @apply px-5 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest; background: hsl(240 6% 97%); border-bottom: 1px solid hsl(240 6% 91%); }
+.data-table td { @apply px-5 py-3.5 text-sm; border-bottom: 1px solid hsl(240 6% 93%); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: hsl(240 6% 97%); transition: background 0.15s ease; }
+
+.sidebar-scroll { scrollbar-width: none; }
+.sidebar-scroll::-webkit-scrollbar { width: 0; display: none; }
+
+* { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter { animation: fadeUp 0.25s ease both; }
+
+.sanad-print-summary { display: none; }
+
+@media print {
+  @page { margin: 18mm; }
+  body { background: #fff !important; }
+  body * { visibility: hidden !important; }
+  .sanad-print-summary, .sanad-print-summary * { visibility: visible !important; }
+  .sanad-print-hidden { display: none !important; }
+  .sanad-print-summary { display: block !important; position: absolute; inset: 0 auto auto 0; width: 100%; padding: 0; color: #111827; background: #fff; font-family: Inter, Arial, sans-serif; }
+  .sanad-print-summary-header { border-bottom: 2px solid #111827; margin-bottom: 18px; padding-bottom: 12px; text-align: center; }
+  .sanad-print-summary-header h1 { margin: 0; font-size: 22px; font-weight: 800; line-height: 1.35; }
+  .sanad-print-summary-meta { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 22px; }
+  .sanad-print-summary-meta div { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; }
+  .sanad-print-summary-meta dt { margin: 0 0 4px; color: #6b7280; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .sanad-print-summary-meta dd { margin: 0; color: #111827; font-size: 13px; font-weight: 700; }
+  .sanad-print-summary-body { min-height: 360px; white-space: pre-wrap; color: #111827; font-size: 13px; line-height: 1.75; }
+  .sanad-print-summary-footer { margin-top: 28px; border-top: 1px solid #d1d5db; padding-top: 10px; color: #4b5563; font-size: 11px; text-align: center; }
+}

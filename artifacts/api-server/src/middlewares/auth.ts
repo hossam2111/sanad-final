@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 
 const VALID_ROLES = new Set([
   "emergency",
@@ -31,16 +32,43 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 };
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  if (req.path === "/health" || req.path === "/" || req.path.startsWith("/events/stream")) {
+  if (req.path === "/health" || req.path === "/" || req.path.startsWith("/events/stream") || req.path === "/auth/login") {
     return next();
   }
 
-  const role = (req.headers["x-user-role"] as string | undefined) ?? (req.query["role"] as string | undefined);
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length).trim() : null;
+
+  if (!token) {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "Bearer token required",
+    });
+  }
+
+  const secret = process.env["JWT_SECRET"];
+  if (!secret) {
+    return res.status(500).json({
+      error: "Server Configuration Error",
+      message: "JWT secret is not configured",
+    });
+  }
+
+  let role: string | undefined;
+  try {
+    const decoded = jwt.verify(token, secret) as JwtPayload | string;
+    role = typeof decoded === "object" && typeof decoded.role === "string" ? decoded.role : undefined;
+  } catch {
+    return res.status(401).json({
+      error: "Unauthorized",
+      message: "Invalid or expired token",
+    });
+  }
 
   if (!role || !VALID_ROLES.has(role)) {
     return res.status(401).json({
       error: "Unauthorized",
-      message: "Valid X-User-Role header required",
+      message: "Valid token role required",
     });
   }
 

@@ -19,12 +19,15 @@ import type {
 import type {
   AdminStats,
   AlertListResponse,
+  AskAiChat200,
+  AskAiChatBody,
   CreatePatientRequest,
   CreateVisitRequest,
   DrugInteractionRequest,
   DrugInteractionResponse,
   EmergencyPatientData,
   ErrorResponse,
+  GetAiNarrative200,
   HealthStatus,
   LabResultListResponse,
   ListAlertsParams,
@@ -80,16 +83,16 @@ export const getHealthCheckQueryOptions = <
   TData = Awaited<ReturnType<typeof healthCheck>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Omit<UseQueryOptions<
     Awaited<ReturnType<typeof healthCheck>>,
     TError,
     TData
-  >;
+  >, "queryKey">;
   request?: SecondParameter<typeof customFetch>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getHealthCheckQueryKey();
+  const queryKey = getHealthCheckQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({
     signal,
@@ -115,11 +118,11 @@ export function useHealthCheck<
   TData = Awaited<ReturnType<typeof healthCheck>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Omit<UseQueryOptions<
     Awaited<ReturnType<typeof healthCheck>>,
     TError,
     TData
-  >;
+  >, "queryKey">;
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
@@ -170,17 +173,17 @@ export const getListPatientsQueryOptions = <
 >(
   params?: ListPatientsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listPatients>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getListPatientsQueryKey(params);
+  const queryKey = getListPatientsQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof listPatients>>> = ({
     signal,
@@ -208,11 +211,11 @@ export function useListPatients<
 >(
   params?: ListPatientsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listPatients>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -338,17 +341,17 @@ export const getGetPatientQueryOptions = <
 >(
   id: number,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof getPatient>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetPatientQueryKey(id);
+  const queryKey = getGetPatientQueryKey(id);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getPatient>>> = ({
     signal,
@@ -381,11 +384,11 @@ export function useGetPatient<
 >(
   id: number,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof getPatient>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -425,18 +428,18 @@ export const getGetPatientByNationalIdQueryOptions = <
 >(
   nationalId: string,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof getPatientByNationalId>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetPatientByNationalIdQueryKey(nationalId);
+    getGetPatientByNationalIdQueryKey(nationalId);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getPatientByNationalId>>
@@ -470,11 +473,11 @@ export function useGetPatientByNationalId<
 >(
   nationalId: string,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof getPatientByNationalId>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -517,18 +520,18 @@ export const getEmergencyLookupQueryOptions = <
 >(
   nationalId: string,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof emergencyLookup>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getEmergencyLookupQueryKey(nationalId);
+    getEmergencyLookupQueryKey(nationalId);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof emergencyLookup>>> = ({
     signal,
@@ -561,11 +564,11 @@ export function useEmergencyLookup<
 >(
   nationalId: string,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof emergencyLookup>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -617,17 +620,17 @@ export const getListMedicationsQueryOptions = <
 >(
   params: ListMedicationsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listMedications>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getListMedicationsQueryKey(params);
+  const queryKey = getListMedicationsQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof listMedications>>> = ({
     signal,
@@ -655,11 +658,11 @@ export function useListMedications<
 >(
   params: ListMedicationsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listMedications>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -798,17 +801,17 @@ export const getListVisitsQueryOptions = <
 >(
   params: ListVisitsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listVisits>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getListVisitsQueryKey(params);
+  const queryKey = getListVisitsQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof listVisits>>> = ({
     signal,
@@ -836,11 +839,11 @@ export function useListVisits<
 >(
   params: ListVisitsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listVisits>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -978,17 +981,17 @@ export const getListLabResultsQueryOptions = <
 >(
   params: ListLabResultsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listLabResults>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getListLabResultsQueryKey(params);
+  const queryKey = getListLabResultsQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof listLabResults>>> = ({
     signal,
@@ -1016,11 +1019,11 @@ export function useListLabResults<
 >(
   params: ListLabResultsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listLabResults>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1072,17 +1075,17 @@ export const getListAlertsQueryOptions = <
 >(
   params: ListAlertsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listAlerts>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getListAlertsQueryKey(params);
+  const queryKey = getListAlertsQueryKey(params);
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof listAlerts>>> = ({
     signal,
@@ -1110,11 +1113,11 @@ export function useListAlerts<
 >(
   params: ListAlertsParams,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof listAlerts>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1154,18 +1157,18 @@ export const getGetPatientRiskScoreQueryOptions = <
 >(
   patientId: number,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof getPatientRiskScore>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetPatientRiskScoreQueryKey(patientId);
+    getGetPatientRiskScoreQueryKey(patientId);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getPatientRiskScore>>
@@ -1199,11 +1202,11 @@ export function useGetPatientRiskScore<
 >(
   patientId: number,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof getPatientRiskScore>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1332,18 +1335,18 @@ export const getGetPatientPredictionsQueryOptions = <
 >(
   patientId: number,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof getPatientPredictions>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
   const queryKey =
-    queryOptions?.queryKey ?? getGetPatientPredictionsQueryKey(patientId);
+    getGetPatientPredictionsQueryKey(patientId);
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getPatientPredictions>>
@@ -1377,11 +1380,11 @@ export function useGetPatientPredictions<
 >(
   patientId: number,
   options?: {
-    query?: UseQueryOptions<
+    query?: Omit<UseQueryOptions<
       Awaited<ReturnType<typeof getPatientPredictions>>,
       TError,
       TData
-    >;
+    >, "queryKey">;
     request?: SecondParameter<typeof customFetch>;
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1393,6 +1396,181 @@ export function useGetPatientPredictions<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Stream AI clinical narrative (SSE)
+ */
+export const getGetAiNarrativeUrl = (patientId: number) => {
+  return `/api/ai/narrative/${patientId}`;
+};
+
+export const getAiNarrative = async (
+  patientId: number,
+  options?: RequestInit,
+): Promise<GetAiNarrative200> => {
+  return customFetch<GetAiNarrative200>(getGetAiNarrativeUrl(patientId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAiNarrativeQueryKey = (patientId: number) => {
+  return [`/api/ai/narrative/${patientId}`] as const;
+};
+
+export const getGetAiNarrativeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAiNarrative>>,
+  TError = ErrorType<void>,
+>(
+  patientId: number,
+  options?: {
+    query?: Omit<UseQueryOptions<
+      Awaited<ReturnType<typeof getAiNarrative>>,
+      TError,
+      TData
+    >, "queryKey">;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    getGetAiNarrativeQueryKey(patientId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAiNarrative>>> = ({
+    signal,
+  }) => getAiNarrative(patientId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!patientId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAiNarrative>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAiNarrativeQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAiNarrative>>
+>;
+export type GetAiNarrativeQueryError = ErrorType<void>;
+
+/**
+ * @summary Stream AI clinical narrative (SSE)
+ */
+
+export function useGetAiNarrative<
+  TData = Awaited<ReturnType<typeof getAiNarrative>>,
+  TError = ErrorType<void>,
+>(
+  patientId: number,
+  options?: {
+    query?: Omit<UseQueryOptions<
+      Awaited<ReturnType<typeof getAiNarrative>>,
+      TError,
+      TData
+    >, "queryKey">;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAiNarrativeQueryOptions(patientId, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Ask AI a clinical question about a patient
+ */
+export const getAskAiChatUrl = (patientId: number) => {
+  return `/api/ai/chat/${patientId}`;
+};
+
+export const askAiChat = async (
+  patientId: number,
+  askAiChatBody: AskAiChatBody,
+  options?: RequestInit,
+): Promise<AskAiChat200> => {
+  return customFetch<AskAiChat200>(getAskAiChatUrl(patientId), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(askAiChatBody),
+  });
+};
+
+export const getAskAiChatMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof askAiChat>>,
+    TError,
+    { patientId: number; data: BodyType<AskAiChatBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof askAiChat>>,
+  TError,
+  { patientId: number; data: BodyType<AskAiChatBody> },
+  TContext
+> => {
+  const mutationKey = ["askAiChat"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof askAiChat>>,
+    { patientId: number; data: BodyType<AskAiChatBody> }
+  > = (props) => {
+    const { patientId, data } = props ?? {};
+
+    return askAiChat(patientId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AskAiChatMutationResult = NonNullable<
+  Awaited<ReturnType<typeof askAiChat>>
+>;
+export type AskAiChatMutationBody = BodyType<AskAiChatBody>;
+export type AskAiChatMutationError = ErrorType<void>;
+
+/**
+ * @summary Ask AI a clinical question about a patient
+ */
+export const useAskAiChat = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof askAiChat>>,
+    TError,
+    { patientId: number; data: BodyType<AskAiChatBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof askAiChat>>,
+  TError,
+  { patientId: number; data: BodyType<AskAiChatBody> },
+  TContext
+> => {
+  return useMutation(getAskAiChatMutationOptions(options));
+};
 
 /**
  * @summary Mark an alert as read
@@ -1588,16 +1766,16 @@ export const getGetAdminStatsQueryOptions = <
   TData = Awaited<ReturnType<typeof getAdminStats>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Omit<UseQueryOptions<
     Awaited<ReturnType<typeof getAdminStats>>,
     TError,
     TData
-  >;
+  >, "queryKey">;
   request?: SecondParameter<typeof customFetch>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetAdminStatsQueryKey();
+  const queryKey = getGetAdminStatsQueryKey();
 
   const queryFn: QueryFunction<Awaited<ReturnType<typeof getAdminStats>>> = ({
     signal,
@@ -1623,11 +1801,11 @@ export function useGetAdminStats<
   TData = Awaited<ReturnType<typeof getAdminStats>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Omit<UseQueryOptions<
     Awaited<ReturnType<typeof getAdminStats>>,
     TError,
     TData
-  >;
+  >, "queryKey">;
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetAdminStatsQueryOptions(options);
@@ -1663,16 +1841,16 @@ export const getGetPopulationHealthQueryOptions = <
   TData = Awaited<ReturnType<typeof getPopulationHealth>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Omit<UseQueryOptions<
     Awaited<ReturnType<typeof getPopulationHealth>>,
     TError,
     TData
-  >;
+  >, "queryKey">;
   request?: SecondParameter<typeof customFetch>;
 }) => {
   const { query: queryOptions, request: requestOptions } = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getGetPopulationHealthQueryKey();
+  const queryKey = getGetPopulationHealthQueryKey();
 
   const queryFn: QueryFunction<
     Awaited<ReturnType<typeof getPopulationHealth>>
@@ -1698,11 +1876,11 @@ export function useGetPopulationHealth<
   TData = Awaited<ReturnType<typeof getPopulationHealth>>,
   TError = ErrorType<unknown>,
 >(options?: {
-  query?: UseQueryOptions<
+  query?: Omit<UseQueryOptions<
     Awaited<ReturnType<typeof getPopulationHealth>>,
     TError,
     TData
-  >;
+  >, "queryKey">;
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetPopulationHealthQueryOptions(options);
@@ -1713,3 +1891,4 @@ export function useGetPopulationHealth<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+

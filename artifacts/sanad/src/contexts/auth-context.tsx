@@ -1,4 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+"use client";
+
+import React, { createContext, useContext, useState } from "react";
+import { setAuthTokenGetter } from "@workspace/api-client-react";
 
 export type UserRole =
   | "emergency" | "doctor" | "citizen" | "admin" | "lab"
@@ -31,66 +34,109 @@ const ROLE_USERS: Record<UserRole, AuthUser> = {
 
 interface AuthContextValue {
   user: AuthUser | null;
-  login: (role: UserRole) => void;
+  login: (role: UserRole) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
-  login: () => {},
+  login: async () => {},
   logout: () => {},
   isAuthenticated: false,
 });
 
 const SESSION_KEY = "sanad_session";
-const ROLE_HEADER = "x-user-role";
+const TOKEN_KEY = "sanad_jwt";
 
-let _currentRole: string | null = null;
-const _nativeFetch = window.fetch.bind(window);
-
-function patchFetch(role: string | null) {
-  _currentRole = role;
-  window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
-    if (_currentRole && url.startsWith("/api")) {
-      const headers = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined));
-      if (!headers.has(ROLE_HEADER)) {
-        headers.set(ROLE_HEADER, _currentRole);
-      }
-      const nextInit = input instanceof Request
-        ? new Request(input, { headers })
-        : { ...init, headers };
-      return _nativeFetch(input instanceof Request ? new Request(input.url, { ...input, headers }) : input, nextInit as RequestInit);
-    }
-    return _nativeFetch(input, init);
+type LoginResponse = {
+  token: string;
+  expiresIn: number;
+  user: {
+    role: UserRole;
+    name: string;
+    jobTitle: string;
+    organization: string;
   };
+};
+
+function isLoginResponse(value: unknown): value is LoginResponse {
+  if (!value || typeof value !== "object") return false;
+  const data = value as Record<string, unknown>;
+  const user = data["user"];
+  return (
+    typeof data["token"] === "string" &&
+    typeof data["expiresIn"] === "number" &&
+    Boolean(user) &&
+    typeof user === "object" &&
+    typeof (user as Record<string, unknown>)["role"] === "string"
+  );
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
+    if (typeof window === "undefined") return null;
     try {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) {
+        const payload = JSON.parse(atob(token.split(".")[1]!)) as { exp?: number };
+        if (!payload.exp || payload.exp * 1000 <= Date.now()) {
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(SESSION_KEY);
+          return null;
+        }
+        setAuthTokenGetter(() => localStorage.getItem(TOKEN_KEY));
+      }
       const stored = localStorage.getItem(SESSION_KEY);
-      const u = stored ? JSON.parse(stored) : null;
-      if (u?.role) patchFetch(u.role);
-      return u;
+      return stored ? JSON.parse(stored) : null;
     } catch {
       return null;
     }
   });
 
-  const login = (role: UserRole) => {
-    const u = ROLE_USERS[role];
-    setUser(u);
-    localStorage.setItem(SESSION_KEY, JSON.stringify(u));
-    patchFetch(role);
+  const login = async (role: UserRole) => {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
+
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || `Login failed with status ${response.status}`);
+      }
+
+      const data: unknown = await response.json();
+      if (!isLoginResponse(data) || data.user.role !== role) {
+        throw new Error("Login response was invalid");
+      }
+
+      const localUser = ROLE_USERS[role];
+      const authenticatedUser: AuthUser = {
+        ...localUser,
+        name: data.user.name,
+        jobTitle: data.user.jobTitle,
+        organization: data.user.organization,
+      };
+
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(SESSION_KEY, JSON.stringify(authenticatedUser));
+      setAuthTokenGetter(() => localStorage.getItem(TOKEN_KEY));
+      setUser(authenticatedUser);
+    } catch (error) {
+      localStorage.removeItem(TOKEN_KEY);
+      setAuthTokenGetter(null);
+      console.error("SANAD login failed", error);
+      throw error instanceof Error ? error : new Error("Login failed");
+    }
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem(SESSION_KEY);
-    patchFetch(null);
-    window.fetch = _nativeFetch;
+    localStorage.removeItem(TOKEN_KEY);
+    setAuthTokenGetter(null);
   };
 
   return (

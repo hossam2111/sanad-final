@@ -444,6 +444,24 @@ export type ListAlertsParams = {
   patientId: number;
 };
 
+export type GetAiNarrative200 = {
+  text?: string;
+  done?: boolean;
+  provider?: string;
+  error?: string;
+};
+
+export type AskAiChatBody = {
+  question: string;
+};
+
+export type AskAiChat200 = {
+  patientId?: number;
+  question?: string;
+  answer?: string;
+  model?: string;
+};
+
 export type MarkAllAlertsReadBody = {
   patientId: number;
 };

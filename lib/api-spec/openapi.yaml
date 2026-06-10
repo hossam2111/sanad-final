@@ -21,6 +21,8 @@ tags:
     description: Lab results
   - name: alerts
     description: Patient alerts
+  - name: ai
+    description: AI clinical assistance
   - name: admin
     description: Admin analytics
 paths:
@@ -324,6 +326,78 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PredictionsResponse"
+
+  /ai/narrative/{patientId}:
+    get:
+      tags: [ai]
+      summary: Stream AI clinical narrative (SSE)
+      operationId: getAiNarrative
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+                  done:
+                    type: boolean
+                  provider:
+                    type: string
+                  error:
+                    type: string
+        "503":
+          description: AI unavailable
+
+  /ai/chat/{patientId}:
+    post:
+      tags: [ai]
+      summary: Ask AI a clinical question about a patient
+      operationId: askAiChat
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question:
+                  type: string
+      responses:
+        "200":
+          description: AI answer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId:
+                    type: integer
+                  question:
+                    type: string
+                  answer:
+                    type: string
+                  model:
+                    type: string
+        "400":
+          description: Bad request
+        "503":
+          description: AI unavailable
 
   /alerts/{id}/read:
     patch:

@@ -6,7 +6,7 @@ async function seed() {
   const patients = await db.insert(patientsTable).values([
     {
       nationalId: "1000000001",
-      fullName: "Mohammed Al-Qahtani",
+      fullName: "محمد القحطاني",
       dateOfBirth: "1965-03-15",
       gender: "male",
       bloodType: "O+",
@@ -19,7 +19,7 @@ async function seed() {
     },
     {
       nationalId: "1000000002",
-      fullName: "Fatima Al-Zahrani",
+      fullName: "فاطمة الزهراني",
       dateOfBirth: "1978-07-22",
       gender: "female",
       bloodType: "A+",
@@ -32,7 +32,7 @@ async function seed() {
     },
     {
       nationalId: "1000000003",
-      fullName: "Khalid Al-Rashidi",
+      fullName: "خالد الراشدي",
       dateOfBirth: "1955-11-08",
       gender: "male",
       bloodType: "B+",
@@ -45,7 +45,7 @@ async function seed() {
     },
     {
       nationalId: "1000000004",
-      fullName: "Nora Al-Shehri",
+      fullName: "نورة الشهري",
       dateOfBirth: "1990-04-17",
       gender: "female",
       bloodType: "AB+",
@@ -58,7 +58,7 @@ async function seed() {
     },
     {
       nationalId: "1000000005",
-      fullName: "Abdullah Al-Dosari",
+      fullName: "عبدالله الدوسري",
       dateOfBirth: "1945-09-03",
       gender: "male",
       bloodType: "A-",
@@ -71,7 +71,7 @@ async function seed() {
     },
     {
       nationalId: "1000000006",
-      fullName: "Sara Al-Ghamdi",
+      fullName: "سارة الغامدي",
       dateOfBirth: "1985-12-25",
       gender: "female",
       bloodType: "O-",
@@ -123,7 +123,7 @@ async function seed() {
     },
     {
       nationalId: "1000000010",
-      fullName: "Maryam Al-Anzi",
+      fullName: "مريم العنزي",
       dateOfBirth: "1962-05-30",
       gender: "female",
       bloodType: "AB-",
@@ -136,7 +136,7 @@ async function seed() {
     },
     { nationalId: "1000000011", fullName: "Bandar Al-Sulami", dateOfBirth: "1972-01-20", gender: "male", bloodType: "O+", phone: "+966511234567", emergencyContact: "Rima Al-Sulami", emergencyPhone: "+966511234568", chronicConditions: ["Hypertension"], allergies: [], riskScore: 15 },
     { nationalId: "1000000012", fullName: "Rima Al-Jaber", dateOfBirth: "1980-09-05", gender: "female", bloodType: "A+", phone: "+966512345678", emergencyContact: "Khalid Al-Jaber", emergencyPhone: "+966512345679", chronicConditions: ["Hyperthyroidism", "Anxiety"], allergies: ["Iodine"], riskScore: 28 },
-    { nationalId: "1000000013", fullName: "Faisal Al-Ahmadi", dateOfBirth: "1948-04-11", gender: "male", bloodType: "B+", phone: "+966513456789", emergencyContact: "Dalal Al-Ahmadi", emergencyPhone: "+966513456790", chronicConditions: ["Coronary Artery Disease", "Hypertension", "Type 2 Diabetes", "Stroke"], allergies: ["Aspirin", "Warfarin alternatives"], riskScore: 85 },
+    { nationalId: "1000000013", fullName: "فيصل الأحمدي", dateOfBirth: "1948-04-11", gender: "male", bloodType: "B+", phone: "+966513456789", emergencyContact: "Dalal Al-Ahmadi", emergencyPhone: "+966513456790", chronicConditions: ["Coronary Artery Disease", "Hypertension", "Type 2 Diabetes", "Stroke"], allergies: ["Aspirin", "Warfarin alternatives"], riskScore: 85 },
     { nationalId: "1000000014", fullName: "Dalal Al-Yami", dateOfBirth: "1993-11-17", gender: "female", bloodType: "O+", phone: "+966514567890", emergencyContact: "Sami Al-Yami", emergencyPhone: "+966514567891", chronicConditions: [], allergies: [], riskScore: 5 },
     { nationalId: "1000000015", fullName: "Sami Al-Bishi", dateOfBirth: "1967-07-09", gender: "male", bloodType: "A+", phone: "+966515678901", emergencyContact: "Nada Al-Bishi", emergencyPhone: "+966515678902", chronicConditions: ["COPD", "Hypertension"], allergies: ["Penicillin"], riskScore: 42 },
     { nationalId: "1000000016", fullName: "Nada Al-Qahtani", dateOfBirth: "1975-03-28", gender: "female", bloodType: "B+", phone: "+966516789012", emergencyContact: "Tariq Al-Qahtani", emergencyPhone: "+966516789013", chronicConditions: ["Lupus", "Depression"], allergies: ["Sulfa drugs", "NSAIDs"], riskScore: 50 },
@@ -146,7 +146,7 @@ async function seed() {
     { nationalId: "1000000020", fullName: "Reema Al-Dosari", dateOfBirth: "1997-08-07", gender: "female", bloodType: "O+", phone: "+966520123456", emergencyContact: "Walid Al-Dosari", emergencyPhone: "+966520123457", chronicConditions: [], allergies: ["Latex"], riskScore: 4 },
     { nationalId: "1000000021", fullName: "Walid Al-Ghamdi", dateOfBirth: "1960-05-25", gender: "male", bloodType: "B-", phone: "+966521234567", emergencyContact: "Hana Al-Ghamdi", emergencyPhone: "+966521234568", chronicConditions: ["Hypertension", "Hypercholesterolemia", "Atrial Fibrillation"], allergies: ["Ibuprofen"], riskScore: 55 },
     { nationalId: "1000000022", fullName: "Hana Al-Mutairi", dateOfBirth: "1987-12-12", gender: "female", bloodType: "A+", phone: "+966522345678", emergencyContact: "Yousef Al-Mutairi", emergencyPhone: "+966522345679", chronicConditions: ["Polycystic Ovary Syndrome"], allergies: [], riskScore: 14 },
-    { nationalId: "1000000023", fullName: "Yousef Al-Otaibi", dateOfBirth: "1943-08-30", gender: "male", bloodType: "O+", phone: "+966523456789", emergencyContact: "Mona Al-Otaibi", emergencyPhone: "+966523456790", chronicConditions: ["Heart Failure", "COPD", "Type 2 Diabetes", "Hypertension"], allergies: ["Aspirin", "Penicillin", "Iodine"], riskScore: 95 },
+    { nationalId: "1000000023", fullName: "يوسف العتيبي", dateOfBirth: "1943-08-30", gender: "male", bloodType: "O+", phone: "+966523456789", emergencyContact: "Mona Al-Otaibi", emergencyPhone: "+966523456790", chronicConditions: ["Heart Failure", "COPD", "Type 2 Diabetes", "Hypertension"], allergies: ["Aspirin", "Penicillin", "Iodine"], riskScore: 95 },
     { nationalId: "1000000024", fullName: "Mona Al-Harbi", dateOfBirth: "1991-04-04", gender: "female", bloodType: "AB+", phone: "+966524567890", emergencyContact: "Rayan Al-Harbi", emergencyPhone: "+966524567891", chronicConditions: ["Asthma"], allergies: ["Aspirin"], riskScore: 20 },
     { nationalId: "1000000025", fullName: "Rayan Al-Anzi", dateOfBirth: "1976-09-18", gender: "male", bloodType: "B+", phone: "+966525678901", emergencyContact: "Lina Al-Anzi", emergencyPhone: "+966525678902", chronicConditions: ["Hypertension", "Type 2 Diabetes"], allergies: [], riskScore: 32 },
     { nationalId: "1000000026", fullName: "Lina Al-Sulami", dateOfBirth: "1969-01-07", gender: "female", bloodType: "A+", phone: "+966526789012", emergencyContact: "Hamad Al-Sulami", emergencyPhone: "+966526789013", chronicConditions: ["Rheumatoid Arthritis", "Hypertension"], allergies: ["Gold compounds"], riskScore: 45 },
@@ -166,7 +166,7 @@ async function seed() {
     { nationalId: "1000000040", fullName: "Jawaher Al-Anzi", dateOfBirth: "1993-09-11", gender: "female", bloodType: "AB+", phone: "+966540123456", emergencyContact: "Badr Al-Anzi", emergencyPhone: "+966540123457", chronicConditions: [], allergies: [], riskScore: 6 },
     { nationalId: "1000000041", fullName: "Badr Al-Sulami", dateOfBirth: "1961-03-05", gender: "male", bloodType: "O+", phone: "+966541234567", emergencyContact: "Maha Al-Sulami", emergencyPhone: "+966541234568", chronicConditions: ["Hypertension", "Coronary Artery Disease"], allergies: ["Aspirin"], riskScore: 50 },
     { nationalId: "1000000042", fullName: "Maha Al-Jaber", dateOfBirth: "1979-11-22", gender: "female", bloodType: "B+", phone: "+966542345678", emergencyContact: "Nasser Al-Jaber", emergencyPhone: "+966542345679", chronicConditions: ["Hypothyroidism", "Depression"], allergies: [], riskScore: 25 },
-    { nationalId: "1000000043", fullName: "Nasser Al-Ahmadi", dateOfBirth: "1953-06-18", gender: "male", bloodType: "A+", phone: "+966543456789", emergencyContact: "Fatima Al-Ahmadi", emergencyPhone: "+966543456790", chronicConditions: ["Heart Failure", "Chronic Kidney Disease", "Type 2 Diabetes", "Hypertension", "Anemia"], allergies: ["Penicillin", "Sulfa drugs", "NSAIDs"], riskScore: 96 },
+    { nationalId: "1000000043", fullName: "ناصر الأحمدي", dateOfBirth: "1953-06-18", gender: "male", bloodType: "A+", phone: "+966543456789", emergencyContact: "Fatima Al-Ahmadi", emergencyPhone: "+966543456790", chronicConditions: ["Heart Failure", "Chronic Kidney Disease", "Type 2 Diabetes", "Hypertension", "Anemia"], allergies: ["Penicillin", "Sulfa drugs", "NSAIDs"], riskScore: 96 },
     { nationalId: "1000000044", fullName: "Aisha Al-Yami", dateOfBirth: "1996-04-30", gender: "female", bloodType: "O-", phone: "+966544567890", emergencyContact: "Majid Al-Yami", emergencyPhone: "+966544567891", chronicConditions: [], allergies: [], riskScore: 4 },
     { nationalId: "1000000045", fullName: "Majid Al-Bishi", dateOfBirth: "1968-12-14", gender: "male", bloodType: "AB+", phone: "+966545678901", emergencyContact: "Najwa Al-Bishi", emergencyPhone: "+966545678902", chronicConditions: ["Hypertension", "COPD"], allergies: ["Ibuprofen"], riskScore: 40 },
     { nationalId: "1000000046", fullName: "Najwa Al-Qahtani", dateOfBirth: "1982-08-26", gender: "female", bloodType: "A+", phone: "+966546789012", emergencyContact: "Essam Al-Qahtani", emergencyPhone: "+966546789013", chronicConditions: ["Polycystic Ovary Syndrome", "Hypothyroidism"], allergies: [], riskScore: 20 },
