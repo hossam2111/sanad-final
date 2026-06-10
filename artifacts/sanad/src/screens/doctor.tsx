@@ -11,6 +11,7 @@ import {
   ReferenceLine, XAxis, YAxis, CartesianGrid, Area, AreaChart,
 } from "recharts";
 import { Layout } from "@/components/layout";
+import { RiskBadge } from "@/components/ui/risk-badge";
 import {
   Card, CardHeader, CardTitle, CardBody,
   Input, Button, Badge, PageHeader, Tabs, KpiCard, StatusDot, Select, DataLabel, AlertBanner
@@ -422,8 +423,9 @@ export default function DoctorDashboard() {
                       <p className="text-[13px] font-semibold text-foreground truncate">{p.fullName}</p>
                       <p className="text-[10px] text-muted-foreground font-mono">{p.nationalId} · Age {new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear()}</p>
                     </div>
-                    {p.riskLevel === "critical" && <span className="text-[9px] font-bold bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full shrink-0">Critical</span>}
-                    {p.riskLevel === "high" && <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full shrink-0">High Risk</span>}
+                    {(p.riskLevel === "critical" || p.riskLevel === "high") && (
+                      <RiskBadge level={p.riskLevel} className="shrink-0 text-[9px] px-1.5 py-0.5" />
+                    )}
                   </button>
                 ))}
               </div>
@@ -488,22 +490,16 @@ export default function DoctorDashboard() {
                 </div>
 
                 {riskScore && (
-                  <div className={`px-6 py-4 flex flex-col items-center justify-center min-w-[120px] ${
-                    riskScore.riskLevel === "critical" ? "bg-red-50" :
-                    riskScore.riskLevel === "high" ? "bg-amber-50" : "bg-secondary/40"
-                  }`}>
+                  <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px] bg-secondary/40">
                     <DataLabel label="AI Risk Score">
-                      <p className={`text-3xl font-bold tabular-nums ${
-                        riskScore.riskLevel === "critical" ? "text-red-600" :
-                        riskScore.riskLevel === "high" ? "text-amber-600" : "text-primary"
-                      }`}>{riskScore.riskScore}<span className="text-base font-normal text-muted-foreground">/100</span></p>
+                      <p className="text-3xl font-bold tabular-nums text-foreground">
+                        {riskScore.riskScore}<span className="text-base font-normal text-muted-foreground">/100</span>
+                      </p>
                     </DataLabel>
-                    <Badge variant={
-                      riskScore.riskLevel === "critical" ? "destructive" :
-                      riskScore.riskLevel === "high" ? "warning" : "success"
-                    } className="mt-2 text-[10px]">
-                      {riskScore.riskLevel?.toUpperCase()}
-                    </Badge>
+                    <RiskBadge
+                      level={riskScore.riskLevel as "critical" | "high" | "medium" | "low"}
+                      className="mt-2"
+                    />
                   </div>
                 )}
 
@@ -585,26 +581,27 @@ export default function DoctorDashboard() {
               <div className="divide-y divide-border">
                 {/* Clinical Decision Panel */}
                 {riskScore && (
-                  <div className={`p-5 ${
-                    riskScore.riskLevel === "critical" ? "bg-red-50" :
-                    riskScore.riskLevel === "high" ? "bg-amber-50" : "bg-secondary/30"
-                  }`}>
+                  <div className="p-5 bg-secondary/30">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Brain className="w-3.5 h-3.5 text-violet-600" /> Clinical Intelligence — Decision Summary
                     </p>
                     <div className="flex items-stretch gap-4">
                       {/* Score Block */}
-                      <div className={`rounded-2xl px-6 py-4 flex flex-col items-center justify-center min-w-[130px] shrink-0 ${
-                        riskScore.riskLevel === "critical" ? "bg-red-600 text-white" :
-                        riskScore.riskLevel === "high" ? "bg-amber-500 text-white" :
-                        riskScore.riskLevel === "medium" ? "bg-sky-500 text-white" : "bg-emerald-500 text-white"
-                      }`}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">Risk Score</p>
-                        <p className="text-5xl font-bold tabular-nums leading-none">{riskScore.riskScore}</p>
-                        <p className="text-white/60 text-xs mt-1">/ 100</p>
-                        <div className="mt-3 border border-white/25 rounded-xl px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide">
-                          {riskScore.riskLevel}
-                        </div>
+                      <div className="rounded-2xl px-6 py-4 flex flex-col items-center justify-center min-w-[130px] shrink-0 bg-risk-critical-bg border border-risk-critical/20"
+                        style={{
+                          background: `hsl(var(--risk-${riskScore.riskLevel}-bg))`,
+                          borderColor: `hsl(var(--risk-${riskScore.riskLevel}) / 0.2)`,
+                        }}>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Risk Score</p>
+                        <p className="text-5xl font-bold tabular-nums leading-none"
+                          style={{ color: `hsl(var(--risk-${riskScore.riskLevel}))` }}>
+                          {riskScore.riskScore}
+                        </p>
+                        <p className="text-muted-foreground text-xs mt-1">/ 100</p>
+                        <RiskBadge
+                          level={riskScore.riskLevel as "critical" | "high" | "medium" | "low"}
+                          className="mt-3"
+                        />
                       </div>
 
                       {/* WHY Block */}
@@ -1466,17 +1463,21 @@ export default function DoctorDashboard() {
             {activeTab === "ai" && riskScore && (
               <div className="p-5">
                 <div className="flex items-start gap-6">
-                  <div className={`rounded-2xl p-6 min-w-[200px] text-center ${
-                    riskScore.riskLevel === "critical" ? "bg-red-600 text-white" :
-                    riskScore.riskLevel === "high" ? "bg-amber-500 text-white" :
-                    "bg-primary text-white"
-                  }`}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-3">AI Risk Score</p>
-                    <p className="text-6xl font-bold tabular-nums leading-none">{riskScore.riskScore}</p>
-                    <p className="text-white/60 text-sm mt-1">/ 100 risk score</p>
-                    <div className="mt-4 border border-white/20 rounded-xl px-3 py-1.5 text-xs font-bold uppercase tracking-wide">
-                      {riskScore.riskLevel} risk level
-                    </div>
+                  <div className="rounded-2xl p-6 min-w-[200px] text-center border"
+                    style={{
+                      background: `hsl(var(--risk-${riskScore.riskLevel}-bg))`,
+                      borderColor: `hsl(var(--risk-${riskScore.riskLevel}) / 0.2)`,
+                    }}>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">AI Risk Score</p>
+                    <p className="text-6xl font-bold tabular-nums leading-none"
+                      style={{ color: `hsl(var(--risk-${riskScore.riskLevel}))` }}>
+                      {riskScore.riskScore}
+                    </p>
+                    <p className="text-muted-foreground text-sm mt-1">/ 100 risk score</p>
+                    <RiskBadge
+                      level={riskScore.riskLevel as "critical" | "high" | "medium" | "low"}
+                      className="mt-4"
+                    />
                   </div>
 
                   <div className="flex-1 space-y-4">

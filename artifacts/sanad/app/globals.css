@@ -70,6 +70,10 @@
   --border: 240 7% 22%;
   --input: 240 7% 22%;
   --ring: 211 100% 58%;
+  --risk-critical: 0 90% 65%;
+  --risk-high: 25 95% 62%;
+  --risk-medium: 43 96% 65%;
+  --risk-low: 142 71% 52%;
   --risk-critical-bg: 0 55% 16%;
   --risk-high-bg: 25 55% 16%;
   --risk-medium-bg: 43 55% 15%;
