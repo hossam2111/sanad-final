@@ -1,0 +1,84 @@
+import type { Request, Response } from "express";
+import { db } from "@workspace/db";
+import { patientsTable, consentTable } from "@workspace/db/schema";
+import { eq, and, desc, isNull } from "drizzle-orm";
+
+// Roles that act on patients institutionally (treatment / operations).
+// Everyone else is bound to a single record (citizen) or to consent-gated
+// access (family, insurance).
+export const CLINICAL_ROLES = new Set(["doctor", "emergency", "admin", "hospital", "lab", "pharmacy"]);
+
+export function isClinicalRole(role: string | undefined): boolean {
+  return !!role && CLINICAL_ROLES.has(role);
+}
+
+// nationalId → numeric patient id. Ids are immutable, so a short TTL only
+// bounds memory, not correctness.
+const idCache = new Map<string, { id: number; ts: number }>();
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+/** Numeric patient id of the citizen's own record, resolved from the token's nationalId. */
+export async function resolveOwnPatientId(req: Request): Promise<number | null> {
+  const nationalId = req.userNationalId;
+  if (!nationalId) return null;
+
+  const hit = idCache.get(nationalId);
+  if (hit && Date.now() - hit.ts < CACHE_TTL_MS) return hit.id;
+
+  const [row] = await db
+    .select({ id: patientsTable.id })
+    .from(patientsTable)
+    .where(eq(patientsTable.nationalId, nationalId))
+    .limit(1);
+  if (!row) return null;
+
+  idCache.set(nationalId, { id: row.id, ts: Date.now() });
+  return row.id;
+}
+
+function forbidNotOwner(res: Response): void {
+  res.status(403).json({
+    error: "FORBIDDEN",
+    message: "You may only access your own health record",
+  });
+}
+
+/**
+ * BOLA guard for numeric patient ids. Institutional roles pass through;
+ * citizens must match their own record. Returns true when the request may
+ * proceed (a 403 has already been written when it returns false).
+ */
+export async function requireOwnPatient(req: Request, res: Response, patientId: number): Promise<boolean> {
+  if (req.role !== "citizen") return true;
+  const ownId = await resolveOwnPatientId(req);
+  if (ownId !== null && Number.isFinite(patientId) && patientId === ownId) return true;
+  forbidNotOwner(res);
+  return false;
+}
+
+/** BOLA guard for 10-digit national ids — same contract as requireOwnPatient. */
+export function requireOwnNationalId(req: Request, res: Response, nationalId: string | undefined): boolean {
+  if (req.role !== "citizen") return true;
+  if (nationalId && req.userNationalId === nationalId) return true;
+  forbidNotOwner(res);
+  return false;
+}
+
+/**
+ * Latest active (non-revoked) consent decision for a patient, or null when the
+ * patient never recorded one — the caller applies the consent definition's
+ * default in that case.
+ */
+export async function getConsentState(patientId: number, consentType: string): Promise<boolean | null> {
+  const [row] = await db
+    .select({ granted: consentTable.granted })
+    .from(consentTable)
+    .where(and(
+      eq(consentTable.patientId, patientId),
+      eq(consentTable.consentType, consentType),
+      isNull(consentTable.revokedAt),
+    ))
+    .orderBy(desc(consentTable.updatedAt))
+    .limit(1);
+  return row ? row.granted : null;
+}
