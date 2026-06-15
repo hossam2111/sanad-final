@@ -1,4 +1,4 @@
-import { pgTable, serial, text, date, timestamp, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, date, timestamp, integer, index, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -9,6 +9,7 @@ export const patientsTable = pgTable("patients", {
   dateOfBirth: date("date_of_birth").notNull(),
   gender: text("gender", { enum: ["male", "female"] }).notNull(),
   bloodType: text("blood_type").notNull(),
+  hospitalId: varchar("hospital_id", { length: 20 }),
   phone: text("phone"),
   emergencyContact: text("emergency_contact"),
   emergencyPhone: text("emergency_phone"),

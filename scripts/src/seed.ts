@@ -37,6 +37,7 @@ import {
   db, pool,
   patientsTable, medicationsTable, visitsTable, labResultsTable,
   alertsTable, consentTable, appointmentsTable, aiDecisionsTable,
+  staffAssignmentsTable
 } from "@workspace/db";
 
 // ── Deterministic PRNG ────────────────────────────────────────────────────────
@@ -69,6 +70,8 @@ const HOSPITALS = [
   "Maternity & Children Hospital — Dammam",
   "Aseer Central Hospital — Abha",
 ] as const;
+const SCOPING_HOSPITALS = ["KAMC-RYD", "KFSH-RYD", "NGH-JED", "MOH-DMM", "KAUH-JED"] as const;
+type HospitalId = typeof SCOPING_HOSPITALS[number];
 const KFMC = HOSPITALS[0];
 const KKUH = HOSPITALS[2];
 
@@ -106,35 +109,41 @@ async function seed() {
   await reset();
 
   // ════════════════════════════════════════════════════════════════════════════
-  // THE CAST — ids 1–10 are scenario-engineered. The Al-Ghamdi household must
-  // occupy consecutive ids (the family engine links relatives by id adjacency).
+  // THE CAST — ids 1–10 are scenario-engineered. Family relationships are wired
+  // via family_relationships table (Sprint 2). Al-Ghamdi household (1–5) is
+  // assigned to KAMC-RYD so dr.rashidi sees them after Sprint 3 hospital scoping.
   // ════════════════════════════════════════════════════════════════════════════
   type PatientSeed = typeof patientsTable.$inferInsert;
   const cast: PatientSeed[] = [
     { // id 1 — S1 flagship + citizen demo account (auth: citizen_demo / Mohammed Al-Ghamdi)
       nationalId: "1000000001", fullName: "محمد الغامدي", dateOfBirth: "1965-03-15", gender: "male", bloodType: "O+",
+      hospitalId: "KAMC-RYD",
       phone: "+966501234567", emergencyContact: "فاطمة الغامدي (زوجة)", emergencyPhone: "+966501234568",
       chronicConditions: ["Hypertension", "Type 2 Diabetes", "Coronary Artery Disease"],
       allergies: ["Penicillin", "Sulfa drugs"], riskScore: 95,
     },
     { // id 2 — sister; shares T2DM (genetic-risk engine); has NOT granted family_linking (consent-gate demo)
       nationalId: "1000000002", fullName: "سعاد الغامدي", dateOfBirth: "1968-07-22", gender: "female", bloodType: "A+",
+      hospitalId: "KAMC-RYD",
       phone: "+966502345678", emergencyContact: "محمد الغامدي (أخ)", emergencyPhone: "+966501234567",
       chronicConditions: ["Type 2 Diabetes", "Hypothyroidism"], allergies: ["Latex"], riskScore: 45,
     },
     { // id 3 — brother; S2 interaction + S3 emergency patient
       nationalId: "1000000003", fullName: "خالد الغامدي", dateOfBirth: "1958-11-08", gender: "male", bloodType: "B+",
+      hospitalId: "KAMC-RYD",
       phone: "+966503456789", emergencyContact: "محمد الغامدي (أخ)", emergencyPhone: "+966501234567",
       chronicConditions: ["Heart Failure", "Atrial Fibrillation", "Chronic Kidney Disease", "Hypertension"],
       allergies: ["Iodine contrast", "Aspirin", "Codeine"], riskScore: 100,
     },
     { // id 4 — son, healthy (family tree contrast)
       nationalId: "1000000004", fullName: "عبدالرحمن الغامدي", dateOfBirth: "1993-04-17", gender: "male", bloodType: "O+",
+      hospitalId: "KAMC-RYD",
       phone: "+966504567890", emergencyContact: "محمد الغامدي (أب)", emergencyPhone: "+966501234567",
       chronicConditions: [], allergies: [], riskScore: 0,
     },
     { // id 5 — daughter, healthy; her wellness visit TODAY feeds admin "visits today"
       nationalId: "1000000005", fullName: "نورة الغامدي", dateOfBirth: "1997-12-25", gender: "female", bloodType: "O+",
+      hospitalId: "KAMC-RYD",
       phone: "+966505678901", emergencyContact: "محمد الغامدي (أب)", emergencyPhone: "+966501234567",
       chronicConditions: [], allergies: [], riskScore: 0,
     },
@@ -198,7 +207,7 @@ async function seed() {
       fullName: `${first} ${pick(FAMILIES)}`,
       dateOfBirth: dob,
       gender: male ? "male" : "female",
-      bloodType: pick(BLOOD),
+      bloodType: pick(BLOOD), hospitalId: pick(SCOPING_HOSPITALS),
       phone: `+9665${String(randInt(10000000, 99999999))}`,
       emergencyContact: male ? pick(FEMALE_NAMES) : pick(MALE_NAMES),
       emergencyPhone: `+9665${String(randInt(10000000, 99999999))}`,
@@ -211,6 +220,13 @@ async function seed() {
   const patients = await db.insert(patientsTable).values([...cast, ...background]).returning();
   const id = (idx: number) => patients[idx - 1]!.id; // 1-based cast index → DB id
   console.log(`Inserted ${patients.length} patients`);
+
+  const staffAssignments = [
+    { username: "dr.rashidi", hospitalId: "KAMC-RYD", role: "doctor" },
+    { username: "emergency_unit7", hospitalId: "KAMC-RYD", role: "emergency" },
+  ];
+  await db.insert(staffAssignmentsTable).values(staffAssignments).onConflictDoNothing();
+  console.log(`Inserted ${staffAssignments.length} staff assignments`);
 
   // ════════════════════════════════════════════════════════════════════════════
   // MEDICATIONS — every drug here is deliberate (engines key on names)
