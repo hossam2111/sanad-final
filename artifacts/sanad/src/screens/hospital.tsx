@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
   Card, CardHeader, CardTitle, CardBody,
@@ -10,9 +11,10 @@ import {
   HeartPulse, RefreshCw, CheckCircle2
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/language-context";
 
 async function fetchHospitalOverview() {
-  const res = await fetch("/api/hospital/overview");
+  const res = await apiFetch("/api/hospital/overview");
   if (!res.ok) throw new Error("Failed to fetch");
   return res.json();
 }
@@ -41,6 +43,7 @@ const OR_STATUS = {
 type TabId = "overview" | "icu" | "or" | "readmission";
 
 export default function HospitalPortal() {
+  const { text } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["hospital-overview"],
@@ -50,10 +53,10 @@ export default function HospitalPortal() {
 
   if (isLoading) {
     return (
-      <Layout role="hospital">
+      <Layout role="hospital" localized>
         <div className="flex items-center justify-center gap-3 py-20 text-muted-foreground">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
-          <span className="text-sm font-medium">Loading hospital operations...</span>
+          <span className="text-sm font-medium">{text("Loading hospital operations...", "جارٍ تحميل عمليات المستشفى...")}</span>
         </div>
       </Layout>
     );
@@ -62,59 +65,59 @@ export default function HospitalPortal() {
   const icuCritical = (data?.icuAlerts ?? []).filter((a: any) => a.severity === "critical").length;
 
   return (
-    <Layout role="hospital">
+    <Layout role="hospital" localized>
       <div className="flex items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-blue-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Building2 className="w-3 h-3" />
-          Hospital Operations Center
+          {text("Hospital Operations Center", "مركز عمليات المستشفى")}
         </div>
         {icuCritical > 0 && (
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-3 py-1.5 rounded-full ml-2 animate-pulse">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-3 py-1.5 rounded-full ms-2 animate-pulse">
             <AlertTriangle className="w-3 h-3" />
-            {icuCritical} ICU Critical Alert{icuCritical > 1 ? "s" : ""}
+            {text(`${icuCritical} ICU Critical Alert${icuCritical > 1 ? "s" : ""}`, `${icuCritical} تنبيه حرج بالعناية المركّزة`)}
           </div>
         )}
         <button
           onClick={() => refetch()}
-          className="ml-auto flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground bg-white border border-black/[0.08] px-3 py-1.5 rounded-full hover:text-foreground transition-colors"
+          className="ms-auto flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground bg-white border border-black/[0.08] px-3 py-1.5 rounded-full hover:text-foreground transition-colors"
         >
           <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} />
-          Refresh
+          {text("Refresh", "تحديث")}
         </button>
-        <span className="text-[11px] font-mono text-muted-foreground">Live · auto-refresh 60s</span>
+        <span className="text-[11px] font-mono text-muted-foreground">{text("Live · auto-refresh 60s", "مباشر · تحديث تلقائي 60ث")}</span>
       </div>
 
       <PageHeader
-        title={data?.hospitalName ?? "Hospital Portal"}
-        subtitle="Bed management · ICU alerts · OR scheduling · Readmission risk"
+        title={data?.hospitalName ?? text("Hospital Portal", "بوابة المستشفى")}
+        subtitle={text("Bed management · ICU alerts · OR scheduling · Readmission risk", "إدارة الأسرّة · تنبيهات العناية المركّزة · جدولة العمليات · خطر إعادة التنويم")}
       />
 
       {/* KPI row */}
       <div className="grid grid-cols-4 gap-4 mb-5">
         <KpiCard
-          title="Total Beds"
+          title={text("Total Beds", "إجمالي الأسرّة")}
           value={data?.totalBeds?.toLocaleString() ?? "—"}
           icon={BedDouble}
-          sub={`${data?.overallOccupancy}% occupied`}
-          trend={data?.overallOccupancy >= 80 ? "High Occupancy" : "Normal"}
+          sub={text(`${data?.overallOccupancy}% occupied`, `${data?.overallOccupancy}% إشغال`)}
+          trend={data?.overallOccupancy >= 80 ? text("High Occupancy", "إشغال مرتفع") : text("Normal", "طبيعي")}
         />
         <KpiCard
-          title="Occupied Beds"
+          title={text("Occupied Beds", "الأسرّة المشغولة")}
           value={data?.totalOccupied?.toLocaleString() ?? "—"}
           icon={Users}
-          sub={`${(data?.totalBeds ?? 0) - (data?.totalOccupied ?? 0)} available`}
+          sub={text(`${(data?.totalBeds ?? 0) - (data?.totalOccupied ?? 0)} available`, `${(data?.totalBeds ?? 0) - (data?.totalOccupied ?? 0)} متاح`)}
         />
         <KpiCard
-          title="OR Today"
+          title={text("OR Today", "عمليات اليوم")}
           value={data?.pendingSurgeries ?? "—"}
           icon={Stethoscope}
-          sub={`${(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} in progress`}
+          sub={text(`${(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} in progress`, `${(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} قيد التنفيذ`)}
         />
         <KpiCard
-          title="Avg Length of Stay"
-          value={`${data?.avgLengthOfStay} days`}
+          title={text("Avg Length of Stay", "متوسط مدة الإقامة")}
+          value={text(`${data?.avgLengthOfStay} days`, `${data?.avgLengthOfStay} يوم`)}
           icon={Zap}
-          sub={`${data?.dischargesToday} discharges today`}
+          sub={text(`${data?.dischargesToday} discharges today`, `${data?.dischargesToday} خروج اليوم`)}
         />
       </div>
 

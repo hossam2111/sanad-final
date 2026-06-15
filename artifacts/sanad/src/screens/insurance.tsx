@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Input, Button, Badge, PageHeader, KpiCard, DataLabel } from "@/components/shared";
 import {
@@ -7,23 +8,24 @@ import {
   RefreshCw, TrendingDown, Eye, MessageSquare
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/language-context";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart, Legend
 } from "recharts";
 
 async function fetchInsurancePatient(nationalId: string) {
-  const res = await fetch(`/api/insurance/patient/${nationalId}`);
+  const res = await apiFetch(`/api/insurance/patient/${nationalId}`);
   if (!res.ok) throw new Error("Patient not found");
   return res.json();
 }
 async function fetchInsuranceDashboard() {
-  const res = await fetch("/api/insurance/dashboard");
+  const res = await apiFetch("/api/insurance/dashboard");
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
 async function reviewClaim(claimId: string, action: string, notes: string) {
-  const res = await fetch(`/api/insurance/claim/${claimId}/review`, {
+  const res = await apiFetch(`/api/insurance/claim/${claimId}/review`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action, notes, reviewedBy: "Senior Insurance Analyst — Nasser Al-Dossari" }),
@@ -73,6 +75,7 @@ function AnomalyGauge({ score }: { score: number }) {
 }
 
 export default function InsurancePortal() {
+  const { text } = useLanguage();
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
@@ -102,21 +105,21 @@ export default function InsurancePortal() {
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: "dashboard", label: "Operations Dashboard", icon: <BarChart2 className="w-3.5 h-3.5" /> },
-    { id: "patient", label: "Policy Lookup", icon: <Search className="w-3.5 h-3.5" /> },
-    { id: "portfolio", label: "Portfolio Risk", icon: <Activity className="w-3.5 h-3.5" /> },
+    { id: "patient", label: text("Policy Lookup", "بحث الوثائق"), icon: <Search className="w-3.5 h-3.5" /> },
+    { id: "portfolio", label: text("Portfolio Risk", "خطورة المحفظة"), icon: <Activity className="w-3.5 h-3.5" /> },
   ];
 
   return (
-    <Layout role="insurance">
+    <Layout role="insurance" localized>
       <div className="flex items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-violet-600 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
-          <Shield className="w-3 h-3" /> Insurance Operations Center
+          <Shield className="w-3 h-3" /> {text("Insurance Operations Center", "مركز عمليات التأمين")}
         </div>
         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
-          AI Fraud Engine: Active · {dashboard?.fraudSuspected ?? "—"} cases flagged
+          {text(`AI Fraud Engine: Active · ${dashboard?.fraudSuspected ?? "—"} cases flagged`, `محرك كشف الاحتيال: نشط · ${dashboard?.fraudSuspected ?? "—"} حالة موسومة`)}
         </div>
-        <div className="ml-auto flex gap-1.5">
+        <div className="ms-auto flex gap-1.5">
           {tabs.map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full transition-all ${activeTab === t.id ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
@@ -129,20 +132,20 @@ export default function InsurancePortal() {
       {/* ─── DASHBOARD TAB ─── */}
       {activeTab === "dashboard" && (
         <div className="space-y-5">
-          <PageHeader title="Insurance Portal" subtitle="National health insurance operations, AI fraud detection, risk-based pricing, and portfolio analytics." />
+          <PageHeader title={text("Insurance Portal", "بوابة التأمين")} subtitle={text("National health insurance operations, AI fraud detection, risk-based pricing, and portfolio analytics.", "عمليات التأمين الصحي الوطني، وكشف الاحتيال بالذكاء الاصطناعي، والتسعير القائم على الخطورة، وتحليلات المحفظة.")} />
 
           {loadingDash ? (
             <div className="flex items-center gap-3 py-16 justify-center text-muted-foreground">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600" />
-              <span className="text-sm">Loading insurance operations...</span>
+              <span className="text-sm">{text("Loading insurance operations...", "جارٍ تحميل عمليات التأمين...")}</span>
             </div>
           ) : dashboard && (
             <>
               <div className="grid grid-cols-4 gap-4">
-                <KpiCard title="Active Policies" value={dashboard.totalPolicies?.toLocaleString()} sub="National coverage" icon={Users} iconBg="bg-violet-100" iconColor="text-violet-600" />
-                <KpiCard title="Total Claims" value={dashboard.totalClaims?.toLocaleString()} sub={`${dashboard.pendingClaims} awaiting review`} icon={Shield} iconBg="bg-primary/10" iconColor="text-primary" />
-                <KpiCard title="Total Payout" value={`SAR ${(dashboard.totalPayout / 1000).toFixed(0)}K`} sub={`Avg SAR ${dashboard.avgClaimValue?.toLocaleString()} per claim`} icon={DollarSign} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
-                <KpiCard title="Fraud Flagged" value={dashboard.fraudSuspected} sub={`${dashboard.fraudRate}% fraud rate`} icon={ShieldAlert} iconBg="bg-red-100" iconColor="text-red-600" />
+                <KpiCard title={text("Active Policies", "الوثائق النشطة")} value={dashboard.totalPolicies?.toLocaleString()} sub={text("National coverage", "تغطية وطنية")} icon={Users} iconBg="bg-violet-100" iconColor="text-violet-600" />
+                <KpiCard title={text("Total Claims", "إجمالي المطالبات")} value={dashboard.totalClaims?.toLocaleString()} sub={text(`${dashboard.pendingClaims} awaiting review`, `${dashboard.pendingClaims} بانتظار المراجعة`)} icon={Shield} iconBg="bg-primary/10" iconColor="text-primary" />
+                <KpiCard title={text("Total Payout", "إجمالي المدفوعات")} value={`${text("SAR", "ر.س")} ${(dashboard.totalPayout / 1000).toFixed(0)}K`} sub={text(`Avg SAR ${dashboard.avgClaimValue?.toLocaleString()} per claim`, `متوسط ${dashboard.avgClaimValue?.toLocaleString()} ر.س للمطالبة`)} icon={DollarSign} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
+                <KpiCard title={text("Fraud Flagged", "حالات احتيال موسومة")} value={dashboard.fraudSuspected} sub={text(`${dashboard.fraudRate}% fraud rate`, `معدّل الاحتيال ${dashboard.fraudRate}%`)} icon={ShieldAlert} iconBg="bg-red-100" iconColor="text-red-600" />
               </div>
 
               <div className="grid grid-cols-12 gap-5">
@@ -295,13 +298,13 @@ export default function InsurancePortal() {
       {activeTab === "patient" && (
         <div className="space-y-5">
           <div className="flex items-start justify-between mb-2">
-            <PageHeader title="Policy Lookup & Fraud Analysis" subtitle="AI-powered per-patient fraud scoring, anomaly detection, and claim review workflow." />
-            <form onSubmit={(e) => { e.preventDefault(); if (searchId.trim()) setNationalId(searchId.trim()); }} className="flex items-center gap-2 shrink-0 ml-6">
+            <PageHeader title={text("Policy Lookup & Fraud Analysis", "بحث الوثيقة وتحليل الاحتيال")} subtitle={text("AI-powered per-patient fraud scoring, anomaly detection, and claim review workflow.", "تقييم احتيال لكل مريض بالذكاء الاصطناعي، وكشف الشذوذ، وسير عمل مراجعة المطالبات.")} />
+            <form onSubmit={(e) => { e.preventDefault(); if (searchId.trim()) setNationalId(searchId.trim()); }} className="flex items-center gap-2 shrink-0 ms-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                <Input placeholder="National ID..." className="pl-9 w-52" value={searchId} onChange={(e) => setSearchId(e.target.value)} />
+                <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input placeholder={text("National ID...", "رقم الهوية...")} className="ps-9 w-52" value={searchId} onChange={(e) => setSearchId(e.target.value)} />
               </div>
-              <Button type="submit" size="md">Lookup Policy</Button>
+              <Button type="submit" size="md">{text("Lookup Policy", "بحث الوثيقة")}</Button>
             </form>
           </div>
 
@@ -311,9 +314,9 @@ export default function InsurancePortal() {
                 <div className="w-16 h-16 rounded-3xl bg-violet-50 flex items-center justify-center mx-auto mb-4">
                   <Shield className="w-7 h-7 text-violet-500" />
                 </div>
-                <p className="font-bold text-foreground mb-1">No Policy Selected</p>
-                <p className="text-sm text-muted-foreground mb-2">Enter a National ID to load full fraud analysis and claim review tools.</p>
-                <p className="text-xs text-muted-foreground font-mono bg-secondary inline-block px-3 py-1.5 rounded-xl">Demo: 1000000001 · 1000000003 · 1000000005</p>
+                <p className="font-bold text-foreground mb-1">{text("No Policy Selected", "لم يتم اختيار وثيقة")}</p>
+                <p className="text-sm text-muted-foreground mb-2">{text("Enter a National ID to load full fraud analysis and claim review tools.", "أدخل رقم الهوية لتحميل تحليل الاحتيال الكامل وأدوات مراجعة المطالبات.")}</p>
+                <p className="text-xs text-muted-foreground font-mono bg-secondary inline-block px-3 py-1.5 rounded-xl" dir="ltr">{text("Demo:", "للتجربة:")} 1000000007 · 1000000008 · 1000000001</p>
               </CardBody>
             </Card>
           )}
@@ -583,7 +586,7 @@ export default function InsurancePortal() {
       {/* ─── PORTFOLIO RISK TAB ─── */}
       {activeTab === "portfolio" && (
         <div className="space-y-5">
-          <PageHeader title="Portfolio Risk Intelligence" subtitle="National insurance portfolio risk distribution, pricing bands, and actuarial overview." />
+          <PageHeader title={text("Portfolio Risk Intelligence", "ذكاء خطورة المحفظة")} subtitle={text("National insurance portfolio risk distribution, pricing bands, and actuarial overview.", "توزيع خطورة محفظة التأمين الوطنية، ونطاقات التسعير، والنظرة الاكتوارية.")} />
           {dashboard && (
             <>
               <div className="grid grid-cols-4 gap-4">

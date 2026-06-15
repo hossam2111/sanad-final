@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { apiFetch } from "@/lib/api";
 import {
   Search, Shield, Activity, AlertCircle, Syringe, Clock,
   User as UserIcon, Pill, FlaskConical, Building2, X, Stethoscope, CalendarDays,
@@ -28,6 +29,8 @@ import {
 import { useAiDecision, useAuditLog } from "@/hooks/use-ai-decision";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
 import { useAuth } from "@/contexts/auth-context";
+import { useLanguage } from "@/contexts/language-context";
+import { T } from "@/lib/terms";
 import { useQuery } from "@tanstack/react-query";
 import { format, isValid } from "date-fns";
 
@@ -69,6 +72,52 @@ function visitBadgeVariant(visitType: string): NonNullable<TimelineEvent["badgeV
   return "outline";
 }
 
+// Professional Arabic equivalents for clinical visit types.
+const VISIT_TYPE_AR: Record<string, string> = {
+  emergency: "طوارئ",
+  inpatient: "تنويم",
+  outpatient: "عيادات خارجية",
+  "follow-up": "متابعة",
+};
+function visitTypeAr(visitType: string): string {
+  return VISIT_TYPE_AR[visitType] ?? visitType;
+}
+
+// Localized label for a timeline badge (visit type, or medication active/completed).
+function timelineBadgeLabel(badge: string, text: (en: string, ar: string) => string): string {
+  if (badge === "active") return text("active", "نشط");
+  if (badge === "completed") return text("completed", "مكتمل");
+  if (VISIT_TYPE_AR[badge]) return text(badge, VISIT_TYPE_AR[badge]!);
+  return badge;
+}
+
+// Localized alert / decision severity & urgency labels.
+const SEVERITY_AR: Record<string, string> = {
+  critical: "حرجة", high: "مرتفعة", moderate: "متوسطة", medium: "متوسطة", low: "منخفضة",
+  warning: "تحذير", info: "معلومة",
+};
+function severityLabel(sev: string, text: (en: string, ar: string) => string): string {
+  return SEVERITY_AR[sev] ? text(sev, SEVERITY_AR[sev]!) : sev;
+}
+const URGENCY_AR: Record<string, string> = {
+  immediate: "فوري", urgent: "عاجل", soon: "قريب", routine: "روتيني",
+};
+function urgencyLabel(u: string, text: (en: string, ar: string) => string): string {
+  return URGENCY_AR[u] ? text(u, URGENCY_AR[u]!) : u;
+}
+const RISK_LEVEL_AR: Record<string, string> = {
+  critical: "حرجة", high: "مرتفعة", medium: "متوسطة", low: "منخفضة",
+};
+function riskLevelLabel(r: string, text: (en: string, ar: string) => string): string {
+  return RISK_LEVEL_AR[r] ? text(r, RISK_LEVEL_AR[r]!) : r;
+}
+const TRAJECTORY_AR: Record<string, string> = {
+  rapidly_worsening: "تدهور سريع", worsening: "تدهور", stable: "مستقر", improving: "تحسّن",
+};
+function trajectoryLabel(t: string, text: (en: string, ar: string) => string): string {
+  return TRAJECTORY_AR[t] ? text(t.replace("_", " ").toUpperCase(), TRAJECTORY_AR[t]!) : t.replace("_", " ").toUpperCase();
+}
+
 function labBadgeVariant(status: string): NonNullable<TimelineEvent["badgeVariant"]> {
   if (status === "normal") return "success";
   if (status === "abnormal") return "warning";
@@ -85,6 +134,7 @@ export default function DoctorDashboard() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [patientId, setPatientId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
+  const [recordView, setRecordView] = useState<"timeline" | "medications" | "labs" | "visits">("timeline");
   const [showSsePanel, setShowSsePanel] = useState(false);
   const [narrativeText, setNarrativeText] = useState("");
   const [narrativeProvider, setNarrativeProvider] = useState("");
@@ -95,13 +145,14 @@ export default function DoctorDashboard() {
   const narrativeRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  const { text } = useLanguage();
   const { alerts: sseAlerts, connected: sseConnected, unreadCount: sseUnread, markRead: markSseRead, clearAll: clearSseAlerts } = useSseAlerts(user?.role ?? "");
 
   const { data: nameSearchResults } = useQuery({
     queryKey: ["patient-name-search", searchQuery],
     queryFn: async () => {
       if (searchQuery.length < 2) return { patients: [] };
-      const res = await fetch(`/api/patients?search=${encodeURIComponent(searchQuery)}&limit=6`);
+      const res = await apiFetch(`/api/patients?search=${encodeURIComponent(searchQuery)}&limit=6`);
       if (!res.ok) return { patients: [] };
       return res.json();
     },
@@ -158,7 +209,7 @@ export default function DoctorDashboard() {
     setNarrativeLoading(true);
     setChatAnswer("");
     try {
-      const res = await fetch(`/api/ai/narrative/${patient.id}`);
+      const res = await apiFetch(`/api/ai/narrative/${patient.id}`);
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -192,7 +243,7 @@ export default function DoctorDashboard() {
     setChatLoading(true);
     setChatAnswer("");
     try {
-      const res = await fetch(`/api/ai/chat/${patient.id}`, {
+      const res = await apiFetch(`/api/ai/chat/${patient.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: chatQuestion }),
@@ -248,7 +299,7 @@ export default function DoctorDashboard() {
       id: v.id,
       type: "visit" as const,
       date: safeDate(v.visitDate),
-      title: `${v.visitType.charAt(0).toUpperCase() + v.visitType.slice(1)} Visit — ${v.hospital}`,
+      title: text(`${v.visitType.charAt(0).toUpperCase() + v.visitType.slice(1)} Visit — ${v.hospital}`, `زيارة ${visitTypeAr(v.visitType)} — ${v.hospital}`),
       subtitle: v.diagnosis ?? "",
       badge: v.visitType,
       badgeVariant: visitBadgeVariant(v.visitType),
@@ -267,8 +318,8 @@ export default function DoctorDashboard() {
       id: m.id,
       type: "medication" as const,
       date: safeDate(m.startDate ?? new Date().toISOString()),
-      title: `Prescribed: ${m.drugName} ${m.dosage ?? ""}`,
-      subtitle: `By ${m.prescribedBy} · ${m.hospital}`,
+      title: text(`Prescribed: ${m.drugName} ${m.dosage ?? ""}`, `وصفة: ${m.drugName} ${m.dosage ?? ""}`),
+      subtitle: text(`By ${m.prescribedBy} · ${m.hospital}`, `بواسطة ${m.prescribedBy} · ${m.hospital}`),
       badge: m.isActive ? "active" : "completed",
       badgeVariant: medicationBadgeVariant(m.isActive),
     })) ?? []),
@@ -301,23 +352,31 @@ export default function DoctorDashboard() {
   const topPredictions = predictions.filter(p => p.severity === "critical" || p.severity === "high").slice(0, 3);
 
   return (
-    <Layout role="doctor">
+    <Layout role="doctor" localized>
       {criticalLabs > 0 && (
         <AlertBanner variant="destructive">
           <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
           <span>
-            <strong>Critical Lab Alert:</strong> {criticalLabs} lab result{criticalLabs > 1 ? "s" : ""} require immediate clinical review.
+            <strong>{text("Critical Lab Alert:", "تنبيه مختبر حرج:")}</strong>{" "}
+            {text(
+              `${criticalLabs} lab result${criticalLabs > 1 ? "s" : ""} require immediate clinical review.`,
+              `${criticalLabs} ${criticalLabs > 1 ? "نتائج مختبرية تتطلب" : "نتيجة مختبرية تتطلب"} مراجعة سريرية فورية.`,
+            )}
           </span>
-          <Badge variant="destructive" className="ml-auto shrink-0">{criticalLabs} critical</Badge>
+          <Badge variant="destructive" className="ml-auto shrink-0">{text(`${criticalLabs} critical`, `${criticalLabs} حرجة`)}</Badge>
         </AlertBanner>
       )}
       {criticalPredictions > 0 && (
         <AlertBanner variant="warning">
           <Brain className="w-4 h-4 text-amber-600 shrink-0" />
           <span>
-            <strong>AI Warning:</strong> {criticalPredictions} high-priority clinical prediction{criticalPredictions > 1 ? "s" : ""} require attention.
+            <strong>{text("AI Warning:", "إنذار ذكاء اصطناعي:")}</strong>{" "}
+            {text(
+              `${criticalPredictions} high-priority clinical prediction${criticalPredictions > 1 ? "s" : ""} require attention.`,
+              `${criticalPredictions} ${criticalPredictions > 1 ? "تنبؤات سريرية عالية الأولوية تتطلب" : "تنبؤ سريري عالي الأولوية يتطلب"} الانتباه.`,
+            )}
           </span>
-          <Badge variant="warning" className="ml-auto shrink-0">{criticalPredictions} flagged</Badge>
+          <Badge variant="warning" className="ml-auto shrink-0">{text(`${criticalPredictions} flagged`, `${criticalPredictions} موسومة`)}</Badge>
         </AlertBanner>
       )}
 
@@ -327,11 +386,11 @@ export default function DoctorDashboard() {
           <div className="flex items-center justify-between px-4 py-2 border-b border-red-200 bg-red-100/60">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="font-bold text-sm text-red-800">Live Lab Alerts</span>
-              <Badge variant="destructive" className="text-[10px]">{sseUnread} new</Badge>
+              <span className="font-bold text-sm text-red-800">{text("Live Lab Alerts", "تنبيهات مخبرية حيّة")}</span>
+              <Badge variant="destructive" className="text-[10px]">{text(`${sseUnread} new`, `${sseUnread} جديدة`)}</Badge>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={clearSseAlerts} className="text-[11px] text-red-600 hover:text-red-800 font-medium">Clear all</button>
+              <button onClick={clearSseAlerts} className="text-[11px] text-red-600 hover:text-red-800 font-medium">{text("Clear all", "مسح الكل")}</button>
               <button onClick={() => setShowSsePanel(false)} className="text-red-400 hover:text-red-700">
                 <X className="w-4 h-4" />
               </button>
@@ -352,10 +411,10 @@ export default function DoctorDashboard() {
                     onClick={() => { handleSelectPatient(alert.nationalId, alert.patientName); markSseRead(alert.id); }}
                     className="text-[10px] font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-lg px-2 py-1 transition-colors"
                   >
-                    View Patient
+                    {text("View Patient", "عرض المريض")}
                   </button>
                   {!alert.read && (
-                    <button onClick={() => markSseRead(alert.id)} className="text-[10px] text-red-400 hover:text-red-700">Dismiss</button>
+                    <button onClick={() => markSseRead(alert.id)} className="text-[10px] text-red-400 hover:text-red-700">{text("Dismiss", "تجاهل")}</button>
                   )}
                 </div>
               </div>
@@ -366,8 +425,11 @@ export default function DoctorDashboard() {
 
       <div className="flex items-start justify-between mb-6">
         <PageHeader
-          title="Physician Dashboard"
-          subtitle="Patient clinical records, prescribing, AI-assisted risk analysis, and predictive alerts."
+          title={text("Physician Dashboard", "لوحة الطبيب")}
+          subtitle={text(
+            "Patient clinical records, prescribing, AI-assisted risk analysis, and predictive alerts.",
+            "السجلات السريرية للمرضى، ووصف الأدوية، وتحليل المخاطر بمساعدة الذكاء الاصطناعي، والتنبيهات التنبؤية.",
+          )}
         />
         <div className="flex items-center gap-2 shrink-0 ml-6">
           {/* SSE Real-time Alert Bell */}
@@ -377,7 +439,7 @@ export default function DoctorDashboard() {
               className={`relative flex items-center justify-center w-10 h-10 rounded-full border transition-colors ${
                 sseUnread > 0 ? "bg-red-50 border-red-200 hover:bg-red-100" : "bg-white border-border hover:bg-secondary"
               }`}
-              title={sseConnected ? "Live alerts connected" : "Connecting to live alerts..."}
+              title={sseConnected ? text("Live alerts connected", "التنبيهات الحيّة متصلة") : text("Connecting to live alerts...", "جارٍ الاتصال بالتنبيهات الحيّة...")}
             >
               {sseUnread > 0 ? (
                 <Bell className="w-4.5 h-4.5 text-red-600" />
@@ -390,13 +452,13 @@ export default function DoctorDashboard() {
                 </span>
               )}
             </button>
-            <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} title={sseConnected ? "Live" : "Offline"} />
+            <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} title={sseConnected ? text("Live", "مباشر") : text("Offline", "غير متصل")} />
           </div>
         <form onSubmit={handleSearch} className="flex items-center gap-2">
           <div className="relative" ref={searchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder="Name or National ID..."
+              placeholder={text("Name or National ID...", "الاسم أو رقم الهوية...")}
               className="pl-9 w-64"
               value={searchQuery || searchId}
               onChange={(e) => {
@@ -421,7 +483,7 @@ export default function DoctorDashboard() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[13px] font-semibold text-foreground truncate">{p.fullName}</p>
-                      <p className="text-[10px] text-muted-foreground font-mono">{p.nationalId} · Age {new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear()}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono" dir="ltr">{p.nationalId} · {text("Age", "العمر")} {new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear()}</p>
                     </div>
                     {(p.riskLevel === "critical" || p.riskLevel === "high") && (
                       <RiskBadge level={p.riskLevel} className="shrink-0 text-[9px] px-1.5 py-0.5" />
@@ -431,7 +493,7 @@ export default function DoctorDashboard() {
               </div>
             )}
           </div>
-          <Button type="submit" size="md">Load</Button>
+          <Button type="submit" size="md">{text("Load", "استدعاء")}</Button>
         </form>
         </div>
       </div>
@@ -442,10 +504,10 @@ export default function DoctorDashboard() {
             <div className="w-16 h-16 rounded-3xl bg-secondary flex items-center justify-center mx-auto mb-4">
               <Stethoscope className="w-7 h-7 text-muted-foreground" />
             </div>
-            <p className="font-bold text-foreground mb-1">No Patient Selected</p>
-            <p className="text-sm text-muted-foreground mb-2">Enter a National ID above to load a patient record.</p>
-            <p className="text-xs text-muted-foreground font-mono bg-secondary inline-block px-3 py-1.5 rounded-xl">
-              Demo: 1000000001 · 1000000003 · 1000000005 · 1000000023
+            <p className="font-bold text-foreground mb-1">{text("No Patient Selected", "لم يتم اختيار مريض")}</p>
+            <p className="text-sm text-muted-foreground mb-2">{text("Enter a National ID above to load a patient record.", "أدخل رقم الهوية الوطنية أعلاه لاستدعاء سجل المريض.")}</p>
+            <p className="text-xs text-muted-foreground font-mono bg-secondary inline-block px-3 py-1.5 rounded-xl" dir="ltr">
+              {text("Demo:", "للتجربة:")} 1000000001 · 1000000003 · 1000000006 · 1000000009
             </p>
           </CardBody>
         </Card>
@@ -454,7 +516,7 @@ export default function DoctorDashboard() {
       {isLoading && (
         <div className="flex items-center gap-3 py-16 text-muted-foreground justify-center">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-          <span className="text-sm">Loading patient record...</span>
+          <span className="text-sm">{text("Loading patient record...", "جارٍ تحميل سجل المريض...")}</span>
         </div>
       )}
 
@@ -471,28 +533,28 @@ export default function DoctorDashboard() {
                   <div>
                     <h2 className="text-xl font-bold text-foreground mb-1">{patient.fullName}</h2>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs bg-secondary px-2.5 py-1 rounded-xl">{patient.nationalId}</span>
+                      <span className="font-mono text-xs bg-secondary px-2.5 py-1 rounded-xl" dir="ltr">{patient.nationalId}</span>
                       <span className="text-xs text-muted-foreground">
-                        DOB: {format(safeDate(patient.dateOfBirth), "dd MMM yyyy")}
+                        {text("DOB:", "تاريخ الميلاد:")} {format(safeDate(patient.dateOfBirth), "dd MMM yyyy")}
                       </span>
-                      <span className="text-xs text-muted-foreground">· {patient.gender}</span>
+                      <span className="text-xs text-muted-foreground">· {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}</span>
                       {(patient.allergies?.length ?? 0) > 0 && (
-                        <Badge variant="destructive">{patient.allergies?.length ?? 0} Allergi{(patient.allergies?.length ?? 0) > 1 ? "es" : "y"}</Badge>
+                        <Badge variant="destructive">{text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}</Badge>
                       )}
                     </div>
                   </div>
                 </div>
 
                 <div className="px-6 py-4 flex flex-col items-center justify-center bg-red-50 min-w-[90px]">
-                  <DataLabel label="Blood Type">
-                    <p className="text-3xl font-bold text-red-600">{patient.bloodType}</p>
+                  <DataLabel label={text("Blood Type", "فصيلة الدم")}>
+                    <p className="text-3xl font-bold text-red-600" dir="ltr">{patient.bloodType}</p>
                   </DataLabel>
                 </div>
 
                 {riskScore && (
                   <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px] bg-secondary/40">
-                    <DataLabel label="AI Risk Score">
-                      <p className="text-3xl font-bold tabular-nums text-foreground">
+                    <DataLabel label={text("AI Risk Score", "درجة الخطورة")}>
+                      <p className="text-3xl font-bold tabular-nums text-foreground" dir="ltr">
                         {riskScore.riskScore}<span className="text-base font-normal text-muted-foreground">/100</span>
                       </p>
                     </DataLabel>
@@ -506,7 +568,7 @@ export default function DoctorDashboard() {
                 <div className="px-5 py-4 flex flex-col justify-center gap-2 min-w-[160px]">
                   <PrescribeModal patientId={patient.id} />
                   <Button variant="outline" size="sm">
-                    <CalendarDays className="w-3.5 h-3.5" /> Schedule Visit
+                    <CalendarDays className="w-3.5 h-3.5" /> {text("Schedule Visit", "جدولة زيارة")}
                   </Button>
                 </div>
               </div>
@@ -516,41 +578,41 @@ export default function DoctorDashboard() {
           {/* KPI Row */}
           <div className="grid grid-cols-5 gap-4">
             <KpiCard
-              title="Active Medications"
+              title={text("Active Medications", "الأدوية الفعّالة")}
               value={activeMeds.length}
-              sub="Current prescriptions"
+              sub={text("Current prescriptions", "الوصفات الحالية")}
               icon={Pill}
               iconBg="bg-primary/10"
               iconColor="text-primary"
             />
             <KpiCard
-              title="Lab Results"
+              title={text("Lab Results", "نتائج المختبر")}
               value={labResults.length}
-              sub={`${criticalLabs} critical · ${abnormalLabs} abnormal`}
+              sub={text(`${criticalLabs} critical · ${abnormalLabs} abnormal`, `${criticalLabs} حرجة · ${abnormalLabs} غير طبيعية`)}
               icon={FlaskConical}
               iconBg={criticalLabs > 0 ? "bg-red-100" : "bg-sky-100"}
               iconColor={criticalLabs > 0 ? "text-red-600" : "text-sky-600"}
             />
             <KpiCard
-              title="Visit History"
+              title={text("Visit History", "سجل الزيارات")}
               value={patient.visits?.length ?? 0}
-              sub="Total hospital visits"
+              sub={text("Total hospital visits", "إجمالي الزيارات")}
               icon={Building2}
               iconBg="bg-emerald-100"
               iconColor="text-emerald-600"
             />
             <KpiCard
-              title="AI Predictions"
+              title={text("AI Predictions", "التنبؤات الذكية")}
               value={predictions.length}
-              sub={`${criticalPredictions} high priority`}
+              sub={text(`${criticalPredictions} high priority`, `${criticalPredictions} عالية الأولوية`)}
               icon={Brain}
               iconBg={criticalPredictions > 0 ? "bg-amber-100" : "bg-violet-100"}
               iconColor={criticalPredictions > 0 ? "text-amber-600" : "text-violet-600"}
             />
             <KpiCard
-              title="Active Alerts"
+              title={text("Active Alerts", "التنبيهات النشطة")}
               value={unreadAlerts}
-              sub={`${alerts.length} total alerts`}
+              sub={text(`${alerts.length} total alerts`, `${alerts.length} إجمالي التنبيهات`)}
               icon={Bell}
               iconBg={unreadAlerts > 0 ? "bg-red-100" : "bg-secondary"}
               iconColor={unreadAlerts > 0 ? "text-red-600" : "text-muted-foreground"}
@@ -561,30 +623,58 @@ export default function DoctorDashboard() {
           <Card>
             <Tabs
               tabs={[
-                { id: "overview", label: "Clinical Overview" },
-                { id: "decision", label: "🧠 Decision Engine" },
-                { id: "timeline", label: "Timeline" },
-                { id: "medications", label: "Medications", count: activeMeds.length },
-                { id: "labs", label: "Lab Results", count: labResults.length },
-                { id: "visits", label: "Visits", count: patient.visits?.length ?? 0 },
-                { id: "predictions", label: "AI Predictions", count: predictions.length },
-                { id: "alerts", label: "Alerts", count: unreadAlerts || undefined },
-                { id: "ai", label: "Risk Analysis" },
-                { id: "narrative", label: "✨ AI Narrative" },
-                { id: "audit", label: "Audit Trail" },
+                { id: "overview", label: text(...T.overview) },
+                { id: "record", label: text(...T.record) },
+                { id: "intelligence", label: text(...T.intelligence), count: criticalPredictions || undefined },
+                { id: "alerts", label: text(...T.alerts), count: unreadAlerts || undefined },
+                { id: "audit", label: text(...T.audit) },
               ]}
               active={activeTab}
               onChange={setActiveTab}
             />
+
+            {/* Record sub-views: one tab, four lenses on the same history. */}
+            {activeTab === "record" && (
+              <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-secondary/40 px-5 py-3">
+                {([
+                  { id: "timeline", label: text("Timeline", "الجدول الزمني") },
+                  { id: "medications", label: text(`Medications · ${activeMeds.length}`, `الأدوية · ${activeMeds.length}`) },
+                  { id: "labs", label: text(`Labs · ${labResults.length}`, `المختبر · ${labResults.length}`) },
+                  { id: "visits", label: text(`Visits · ${patient.visits?.length ?? 0}`, `الزيارات · ${patient.visits?.length ?? 0}`) },
+                ] as const).map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => setRecordView(v.id)}
+                    className={`h-8 rounded-full px-3.5 text-xs font-semibold transition-colors ${
+                      recordView === v.id
+                        ? "bg-primary text-white shadow-sm shadow-primary/25"
+                        : "bg-card text-muted-foreground border border-border hover:text-foreground"
+                    }`}
+                  >
+                    {v.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {activeTab === "overview" && (
               <div className="divide-y divide-border">
                 {/* Clinical Decision Panel */}
                 {riskScore && (
                   <div className="p-5 bg-secondary/30">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Brain className="w-3.5 h-3.5 text-violet-600" /> Clinical Intelligence — Decision Summary
-                    </p>
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                        <Brain className="w-3.5 h-3.5 text-violet-600" /> {text("Clinical Intelligence — Decision Summary", "التحليلات السريرية — ملخّص القرار")}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("intelligence")}
+                        className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80"
+                      >
+                        {text("Full analysis", "التحليل الكامل")} <ChevronRight className="h-3 w-3" />
+                      </button>
+                    </div>
                     <div className="flex items-stretch gap-4">
                       {/* Score Block */}
                       <div className="rounded-2xl px-6 py-4 flex flex-col items-center justify-center min-w-[130px] shrink-0 bg-risk-critical-bg border border-risk-critical/20"
@@ -592,8 +682,8 @@ export default function DoctorDashboard() {
                           background: `hsl(var(--risk-${riskScore.riskLevel}-bg))`,
                           borderColor: `hsl(var(--risk-${riskScore.riskLevel}) / 0.2)`,
                         }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">Risk Score</p>
-                        <p className="text-5xl font-bold tabular-nums leading-none"
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{text("Risk Score", "درجة الخطورة")}</p>
+                        <p className="text-5xl font-bold tabular-nums leading-none" dir="ltr"
                           style={{ color: `hsl(var(--risk-${riskScore.riskLevel}))` }}>
                           {riskScore.riskScore}
                         </p>
@@ -607,7 +697,7 @@ export default function DoctorDashboard() {
                       {/* WHY Block */}
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                          <TriangleAlert className="w-3 h-3 text-amber-500" /> WHY — Top Risk Factors
+                          <TriangleAlert className="w-3 h-3 text-amber-500" /> {text("WHY — Top Risk Factors", "المُبرّرات — أبرز عوامل الخطورة")}
                         </p>
                         <div className="space-y-1.5">
                           {riskScore.factors.slice(0, 4).map((f: any, i: number) => (
@@ -617,11 +707,11 @@ export default function DoctorDashboard() {
                                 f.impact === "moderate" ? "bg-amber-500" : "bg-primary"
                               }`} />
                               <span className="text-xs font-semibold text-foreground flex-1 truncate">{f.factor}</span>
-                              <Badge variant={f.impact === "high" ? "destructive" : f.impact === "moderate" ? "warning" : "info"} className="text-[9px] shrink-0">{f.impact}</Badge>
+                              <Badge variant={f.impact === "high" ? "destructive" : f.impact === "moderate" ? "warning" : "info"} className="text-[9px] shrink-0">{f.impact === "high" ? text("high", "مرتفع") : f.impact === "moderate" ? text("moderate", "متوسط") : text("low", "منخفض")}</Badge>
                             </div>
                           ))}
                           {riskScore.factors.length === 0 && (
-                            <p className="text-xs text-muted-foreground px-2">No significant risk factors detected.</p>
+                            <p className="text-xs text-muted-foreground px-2">{text("No significant risk factors detected.", "لم تُرصد عوامل خطورة جوهرية.")}</p>
                           )}
                         </div>
                       </div>
@@ -629,7 +719,7 @@ export default function DoctorDashboard() {
                       {/* ACTION Block */}
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                          <ChevronRight className="w-3 h-3 text-primary" /> RECOMMENDED ACTIONS
+                          <ChevronRight className="w-3 h-3 text-primary" /> {text("RECOMMENDED ACTIONS", "الإجراءات الموصى بها")}
                         </p>
                         <div className="space-y-1.5">
                           {riskScore.recommendations.slice(0, 3).map((rec: string, i: number) => (
@@ -641,7 +731,7 @@ export default function DoctorDashboard() {
                         </div>
                         {topPredictions.length > 0 && (
                           <div className="mt-2 px-3 py-2 bg-amber-100/60 border border-amber-200 rounded-xl">
-                            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">AI Alert</p>
+                            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">{text("AI Alert", "تنبيه ذكي")}</p>
                             <p className="text-xs text-amber-800 font-medium">{topPredictions[0]?.title}</p>
                           </div>
                         )}
@@ -654,7 +744,7 @@ export default function DoctorDashboard() {
                 <div className="grid grid-cols-2 divide-x divide-border">
                   <div className="p-5">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Activity className="w-3.5 h-3.5" /> Chronic Conditions
+                      <Activity className="w-3.5 h-3.5" /> {text("Chronic Conditions", "الأمراض المزمنة")}
                     </p>
                     {(patient.chronicConditions?.length ?? 0) > 0 ? (
                       <div className="space-y-2">
@@ -665,11 +755,11 @@ export default function DoctorDashboard() {
                           </div>
                         ))}
                       </div>
-                    ) : <p className="text-sm text-muted-foreground">None on record.</p>}
+                    ) : <p className="text-sm text-muted-foreground">{text("None on record.", "لا شيء مُسجّل.")}</p>}
                   </div>
                   <div className="p-5">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <AlertCircle className="w-3.5 h-3.5 text-red-500" /> Documented Allergies
+                      <AlertCircle className="w-3.5 h-3.5 text-red-500" /> {text("Documented Allergies", "الحساسية المُوثّقة")}
                     </p>
                     {(patient.allergies?.length ?? 0) > 0 ? (
                       <div className="space-y-2">
@@ -680,31 +770,31 @@ export default function DoctorDashboard() {
                           </div>
                         ))}
                       </div>
-                    ) : <p className="text-sm text-muted-foreground">No known allergies.</p>}
+                    ) : <p className="text-sm text-muted-foreground">{text("No known allergies.", "لا توجد حساسية معروفة.")}</p>}
                   </div>
                 </div>
               </div>
             )}
 
-            {activeTab === "timeline" && (
+            {activeTab === "record" && recordView === "timeline" && (
               <div className="p-5">
                 <div className="flex items-center gap-3 mb-5">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Unified Clinical Timeline</p>
-                  <div className="flex items-center gap-2 ml-auto">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-sky-500" /> Visit</div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-violet-500" /> Lab</div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Medication</div>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Unified Clinical Timeline", "الجدول الزمني السريري الموحّد")}</p>
+                  <div className="flex items-center gap-2 ms-auto">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-sky-500" /> {text("Visit", "زيارة")}</div>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-violet-500" /> {text("Lab", "مختبر")}</div>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-emerald-500" /> {text("Medication", "دواء")}</div>
                   </div>
                 </div>
                 <div className="relative">
-                  <div className="absolute left-5 top-0 bottom-0 w-px bg-border" />
+                  <div className="absolute start-5 top-0 bottom-0 w-px bg-border" />
                   <div className="space-y-4">
                     {timeline.slice(0, 30).map((event, idx) => {
                       const cfg = timelineIconMap[event.type];
                       const Icon = cfg.icon;
                       return (
-                        <div key={`${event.type}-${event.id}-${idx}`} className="flex gap-4 relative pl-14">
-                          <div className={`absolute left-2 top-1.5 w-6 h-6 rounded-full ${cfg.bg} flex items-center justify-center border-2 border-background z-10`}>
+                        <div key={`${event.type}-${event.id}-${idx}`} className="flex gap-4 relative ps-14">
+                          <div className={`absolute start-2 top-1.5 w-6 h-6 rounded-full ${cfg.bg} flex items-center justify-center border-2 border-background z-10`}>
                             <Icon className={`w-3 h-3 ${cfg.color}`} />
                           </div>
                           <div className="flex-1 min-w-0 pb-4 border-b border-border last:border-0">
@@ -715,9 +805,9 @@ export default function DoctorDashboard() {
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
                                 {event.badge && (
-                                  <Badge variant={event.badgeVariant ?? "outline"} className="text-[10px]">{event.badge}</Badge>
+                                  <Badge variant={event.badgeVariant ?? "outline"} className="text-[10px]">{timelineBadgeLabel(event.badge, text)}</Badge>
                                 )}
-                                <span className="text-[10px] text-muted-foreground font-mono whitespace-nowrap">
+                                <span className="text-[10px] text-muted-foreground font-mono whitespace-nowrap" dir="ltr">
                                   {format(event.date, "dd MMM yyyy")}
                                 </span>
                               </div>
@@ -727,36 +817,36 @@ export default function DoctorDashboard() {
                       );
                     })}
                     {timeline.length === 0 && (
-                      <p className="text-sm text-muted-foreground text-center py-8">No timeline data available.</p>
+                      <p className="text-sm text-muted-foreground text-center py-8">{text("No timeline data available.", "لا توجد بيانات في الجدول الزمني.")}</p>
                     )}
                   </div>
                 </div>
               </div>
             )}
 
-            {activeTab === "medications" && (
+            {activeTab === "record" && recordView === "medications" && (
               <div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-black/[0.05]" style={{ background: "hsl(240 6% 97%)" }}>
-                  <p className="text-xs font-semibold text-muted-foreground">{activeMeds.length} active prescription{activeMeds.length !== 1 ? "s" : ""}</p>
+                  <p className="text-xs font-semibold text-muted-foreground">{text(`${activeMeds.length} active prescription${activeMeds.length !== 1 ? "s" : ""}`, `${activeMeds.length} وصفة فعّالة`)}</p>
                   <PrescribeModal patientId={patient.id} />
                 </div>
                 <table className="w-full data-table">
                   <thead><tr>
-                    <th>Drug Name</th><th>Dosage</th><th>Frequency</th>
-                    <th>Prescribed By</th><th>Hospital</th><th>Start Date</th><th>Status</th>
+                    <th>{text("Drug Name", "اسم الدواء")}</th><th>{text("Dosage", "الجرعة")}</th><th>{text("Frequency", "التكرار")}</th>
+                    <th>{text("Prescribed By", "الطبيب الواصف")}</th><th>{text("Hospital", "المستشفى")}</th><th>{text("Start Date", "تاريخ البدء")}</th><th>{text("Status", "الحالة")}</th>
                   </tr></thead>
                   <tbody>
                     {patient.medications?.map(med => (
                       <tr key={med.id}>
                         <td className="font-bold text-foreground">{med.drugName}</td>
-                        <td className="font-mono text-sm">{med.dosage}</td>
+                        <td className="font-mono text-sm" dir="ltr">{med.dosage}</td>
                         <td className="text-muted-foreground">{med.frequency}</td>
                         <td>{med.prescribedBy}</td>
                         <td className="text-muted-foreground text-xs">{med.hospital}</td>
-                        <td className="text-muted-foreground font-mono text-xs">
+                        <td className="text-muted-foreground font-mono text-xs" dir="ltr">
                           {med.startDate ? format(safeDate(med.startDate), "dd MMM yyyy") : "—"}
                         </td>
-                        <td><Badge variant={med.isActive ? "success" : "outline"}>{med.isActive ? "Active" : "Completed"}</Badge></td>
+                        <td><Badge variant={med.isActive ? "success" : "outline"}>{med.isActive ? text("Active", "نشط") : text("Completed", "مكتمل")}</Badge></td>
                       </tr>
                     ))}
                   </tbody>
@@ -764,12 +854,12 @@ export default function DoctorDashboard() {
               </div>
             )}
 
-            {activeTab === "labs" && (
+            {activeTab === "record" && recordView === "labs" && (
               <div>
                 <div className="flex items-center gap-3 px-5 py-3 border-b border-black/[0.05]" style={{ background: "hsl(240 6% 97%)" }}>
-                  {criticalLabs > 0 && <Badge variant="destructive">{criticalLabs} Critical</Badge>}
-                  {abnormalLabs > 0 && <Badge variant="warning">{abnormalLabs} Abnormal</Badge>}
-                  <span className="text-xs text-muted-foreground ml-auto">{labResults.length} results · sparkline shows value trend over time</span>
+                  {criticalLabs > 0 && <Badge variant="destructive">{text(`${criticalLabs} Critical`, `${criticalLabs} حرجة`)}</Badge>}
+                  {abnormalLabs > 0 && <Badge variant="warning">{text(`${abnormalLabs} Abnormal`, `${abnormalLabs} غير طبيعية`)}</Badge>}
+                  <span className="text-xs text-muted-foreground ms-auto">{text(`${labResults.length} results · sparkline shows value trend over time`, `${labResults.length} نتيجة · يوضّح المخطط المصغّر اتجاه القيم عبر الزمن`)}</span>
                 </div>
 
                 {/* HbA1c Explicit Trend — Priority Glycemic Control Chart */}
@@ -834,7 +924,7 @@ export default function DoctorDashboard() {
                                     <p className="font-bold text-foreground">{d?.val}% HbA1c</p>
                                     <p className="text-muted-foreground">{d?.date}</p>
                                     <p className={`font-medium mt-0.5 ${d?.val >= 7.0 ? "text-red-600" : d?.val >= 5.7 ? "text-amber-600" : "text-emerald-600"}`}>
-                                      {d?.val >= 7.0 ? "Diabetic range" : d?.val >= 5.7 ? "Pre-diabetic" : "Normal"}
+                                      {d?.val >= 7.0 ? text("Diabetic range", "نطاق السكري") : d?.val >= 5.7 ? text("Pre-diabetic", "ما قبل السكري") : text("Normal", "طبيعي")}
                                     </p>
                                   </div>
                                 );
@@ -877,7 +967,7 @@ export default function DoctorDashboard() {
                           <p className="font-bold text-sm text-foreground truncate">{testName}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <StatusDot status={latest.status as any} />
-                            <Badge variant={latest.status === "normal" ? "success" : latest.status === "abnormal" ? "warning" : "destructive"} className="text-[10px]">{latest.status}</Badge>
+                            <Badge variant={latest.status === "normal" ? "success" : latest.status === "abnormal" ? "warning" : "destructive"} className="text-[10px]">{latest.status === "normal" ? text("normal", "طبيعي") : latest.status === "abnormal" ? text("abnormal", "غير طبيعي") : text("critical", "حرج")}</Badge>
                           </div>
                         </div>
 
@@ -947,9 +1037,9 @@ export default function DoctorDashboard() {
                         {/* Reference range + date */}
                         <div className="text-right shrink-0 min-w-[120px]">
                           {latest.referenceRange && (
-                            <p className="text-[10px] text-muted-foreground font-mono">Ref: {latest.referenceRange}</p>
+                            <p className="text-[10px] text-muted-foreground font-mono" dir="ltr">{text("Ref:", "المرجع:")} {latest.referenceRange}</p>
                           )}
-                          <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{format(safeDate(latest.testDate), "dd MMM yyyy")}</p>
+                          <p className="text-[10px] text-muted-foreground font-mono mt-0.5" dir="ltr">{format(safeDate(latest.testDate), "dd MMM yyyy")}</p>
                         </div>
                       </div>
                     );
@@ -958,24 +1048,24 @@ export default function DoctorDashboard() {
               </div>
             )}
 
-            {activeTab === "visits" && (
+            {activeTab === "record" && recordView === "visits" && (
               <div>
                 <div className="px-5 py-3 border-b border-black/[0.05]" style={{ background: "hsl(240 6% 97%)" }}>
-                  <p className="text-xs font-semibold text-muted-foreground">{patient.visits?.length ?? 0} recorded visits</p>
+                  <p className="text-xs font-semibold text-muted-foreground">{text(`${patient.visits?.length ?? 0} recorded visits`, `${patient.visits?.length ?? 0} زيارة مُسجّلة`)}</p>
                 </div>
                 <table className="w-full data-table">
                   <thead><tr>
-                    <th>Hospital</th><th>Department</th><th>Physician</th><th>Visit Type</th><th>Diagnosis</th><th>Date</th>
+                    <th>{text("Hospital", "المستشفى")}</th><th>{text("Department", "القسم")}</th><th>{text("Physician", "الطبيب")}</th><th>{text("Visit Type", "نوع الزيارة")}</th><th>{text("Diagnosis", "التشخيص")}</th><th>{text("Date", "التاريخ")}</th>
                   </tr></thead>
                   <tbody>
                     {patient.visits?.map(visit => (
                       <tr key={visit.id}>
                         <td className="font-bold text-foreground">{visit.hospital}</td>
                         <td>{visit.department}</td>
-                        <td className="text-muted-foreground">{visit.doctor ? `Dr. ${visit.doctor}` : "—"}</td>
-                        <td><Badge variant={visit.visitType === "emergency" ? "destructive" : visit.visitType === "inpatient" ? "warning" : "outline"}>{visit.visitType}</Badge></td>
+                        <td className="text-muted-foreground">{visit.doctor ? `${text("Dr.", "د.")} ${visit.doctor}` : "—"}</td>
+                        <td><Badge variant={visit.visitType === "emergency" ? "destructive" : visit.visitType === "inpatient" ? "warning" : "outline"}>{text(visit.visitType, visitTypeAr(visit.visitType))}</Badge></td>
                         <td className="text-muted-foreground max-w-xs truncate">{visit.diagnosis}</td>
-                        <td className="text-muted-foreground font-mono text-xs">{format(safeDate(visit.visitDate), "dd MMM yyyy")}</td>
+                        <td className="text-muted-foreground font-mono text-xs" dir="ltr">{format(safeDate(visit.visitDate), "dd MMM yyyy")}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -983,60 +1073,12 @@ export default function DoctorDashboard() {
               </div>
             )}
 
-            {activeTab === "predictions" && (
-              <div className="p-5">
-                <div className="flex items-center gap-3 mb-5">
-                  <Brain className="w-4 h-4 text-violet-600" />
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">AI Clinical Predictions</p>
-                  <Badge variant="outline" className="ml-auto">{predictions.length} total</Badge>
-                </div>
-                {predictions.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <Brain className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="font-bold text-foreground mb-1">No Predictions Generated</p>
-                    <p className="text-sm text-muted-foreground">Insufficient clinical data for predictive analysis.</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {predictions.map((p, i) => {
-                      const style = predictionSeverityStyle[p.severity] ?? predictionSeverityStyle.low;
-                      return (
-                        <div key={i} className={`p-4 ${style.bg} border ${style.border} rounded-2xl`}>
-                          <div className="flex items-start gap-3">
-                            <div className={`w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0`}>
-                              {p.severity === "critical" || p.severity === "high" ? (
-                                <TriangleAlert className={`w-4 h-4 ${style.icon}`} />
-                              ) : (
-                                <Zap className={`w-4 h-4 ${style.icon}`} />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge variant={style.badge as any} className="text-[10px]">{p.severity}</Badge>
-                                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">{p.type.replace("_", " ")}</span>
-                                <span className="ml-auto text-[10px] text-muted-foreground">Confidence: {p.confidence}</span>
-                              </div>
-                              <p className="font-bold text-sm text-foreground">{p.title}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>
-                              <div className="mt-2 p-2.5 bg-white/60 border border-white rounded-xl">
-                                <p className="text-xs font-semibold text-foreground">Recommendation: {p.recommendation}</p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-
             {activeTab === "alerts" && (
               <div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-black/[0.05]" style={{ background: "hsl(240 6% 97%)" }}>
                   <div className="flex items-center gap-2">
-                    {unreadAlerts > 0 && <Badge variant="destructive">{unreadAlerts} unread</Badge>}
-                    <span className="text-xs text-muted-foreground">{alerts.length} total alerts</span>
+                    {unreadAlerts > 0 && <Badge variant="destructive">{text(`${unreadAlerts} unread`, `${unreadAlerts} غير مقروء`)}</Badge>}
+                    <span className="text-xs text-muted-foreground">{text(`${alerts.length} total alerts`, `${alerts.length} إجمالي التنبيهات`)}</span>
                   </div>
                   {unreadAlerts > 0 && (
                     <Button
@@ -1049,15 +1091,15 @@ export default function DoctorDashboard() {
                         refetchAlerts();
                       }}
                     >
-                      <CheckCheck className="w-3.5 h-3.5" /> Mark all read
+                      <CheckCheck className="w-3.5 h-3.5" /> {text("Mark all read", "تحديد الكل كمقروء")}
                     </Button>
                   )}
                 </div>
                 {alerts.length === 0 ? (
                   <div className="py-12 text-center">
                     <BellOff className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="font-bold text-foreground mb-1">No Alerts</p>
-                    <p className="text-sm text-muted-foreground">No clinical alerts for this patient.</p>
+                    <p className="font-bold text-foreground mb-1">{text("No Alerts", "لا توجد تنبيهات")}</p>
+                    <p className="text-sm text-muted-foreground">{text("No clinical alerts for this patient.", "لا توجد تنبيهات سريرية لهذا المريض.")}</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-border">
@@ -1074,12 +1116,12 @@ export default function DoctorDashboard() {
                               alert.severity === "critical" ? "destructive" :
                               alert.severity === "high" ? "warning" :
                               alert.severity === "moderate" ? "info" : "outline"
-                            } className="text-[10px]">{alert.severity}</Badge>
+                            } className="text-[10px]">{severityLabel(alert.severity, text)}</Badge>
                             <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">{alert.alertType}</span>
                           </div>
                           <p className="font-bold text-sm text-foreground">{alert.title}</p>
                           <p className="text-xs text-muted-foreground mt-0.5">{alert.message}</p>
-                          <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                          <p className="text-[10px] text-muted-foreground mt-1 font-mono" dir="ltr">
                             {format(safeDate(alert.createdAt), "dd MMM yyyy HH:mm")}
                           </p>
                         </div>
@@ -1090,7 +1132,7 @@ export default function DoctorDashboard() {
                             onClick={() => handleMarkRead(alert.id)}
                             className="shrink-0 text-xs"
                           >
-                            <CheckCheck className="w-3.5 h-3.5" /> Read
+                            <CheckCheck className="w-3.5 h-3.5" /> {text("Read", "مقروء")}
                           </Button>
                         )}
                       </div>
@@ -1100,18 +1142,18 @@ export default function DoctorDashboard() {
               </div>
             )}
 
-            {activeTab === "decision" && (
+            {activeTab === "intelligence" && (
               <div className="p-5">
                 {decisionLoading && (
                   <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600" />
-                    <span className="text-sm font-medium">AI Decision Engine processing...</span>
+                    <span className="text-sm font-medium">{text("AI Decision Engine processing...", "محرك القرار الذكي قيد المعالجة...")}</span>
                   </div>
                 )}
                 {!decisionLoading && !aiDecision && (
                   <div className="py-12 text-center">
                     <Brain className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="font-bold text-foreground">No decision data</p>
+                    <p className="font-bold text-foreground">{text("No decision data", "لا توجد بيانات قرار")}</p>
                   </div>
                 )}
                 {!decisionLoading && aiDecision && (
@@ -1126,9 +1168,9 @@ export default function DoctorDashboard() {
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">Urgency Level</span>
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">{text("Urgency Level", "درجة الاستعجال")}</span>
                             <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-                              {aiDecision.urgency}
+                              {urgencyLabel(aiDecision.urgency, text)}
                             </span>
                           </div>
                           <p className="text-lg font-bold leading-snug">{aiDecision.primaryAction}</p>
@@ -1137,14 +1179,14 @@ export default function DoctorDashboard() {
                               <Clock className="w-3.5 h-3.5" /> {aiDecision.timeWindow}
                             </span>
                             <span className="flex items-center gap-1.5 text-xs font-semibold text-white/80">
-                              <Zap className="w-3.5 h-3.5" /> Confidence: {Math.round(aiDecision.confidence * 100)}%
+                              <Zap className="w-3.5 h-3.5" /> {text("Confidence:", "مستوى الثقة:")} {Math.round(aiDecision.confidence * 100)}%
                             </span>
                           </div>
                         </div>
-                        <div className="text-right shrink-0">
-                          <p className="text-5xl font-bold tabular-nums leading-none">{aiDecision.riskScore}</p>
+                        <div className="text-end shrink-0">
+                          <p className="text-5xl font-bold tabular-nums leading-none" dir="ltr">{aiDecision.riskScore}</p>
                           <p className="text-white/60 text-xs mt-1">/ 100</p>
-                          <p className="text-xs font-bold uppercase tracking-wide mt-2 text-white/80">{aiDecision.riskLevel} risk</p>
+                          <p className="text-xs font-bold uppercase tracking-wide mt-2 text-white/80">{text(`${aiDecision.riskLevel} risk`, `خطورة ${riskLevelLabel(aiDecision.riskLevel, text)}`)}</p>
                         </div>
                       </div>
                       {aiDecision.explainability.uncertaintyNote && (
@@ -1158,7 +1200,7 @@ export default function DoctorDashboard() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <TriangleAlert className="w-3.5 h-3.5 text-amber-500" /> WHY — Clinical Factors
+                          <TriangleAlert className="w-3.5 h-3.5 text-amber-500" /> {text("WHY — Clinical Factors", "المُبرّرات — العوامل السريرية")}
                         </p>
                         <div className="space-y-2">
                           {aiDecision.whyFactors.map((f, i) => (
@@ -1189,7 +1231,7 @@ export default function DoctorDashboard() {
                         {/* Recommendations */}
                         <div>
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <ChevronRight className="w-3.5 h-3.5 text-primary" /> Recommended Actions
+                            <ChevronRight className="w-3.5 h-3.5 text-primary" /> {text("Recommended Actions", "الإجراءات الموصى بها")}
                           </p>
                           <div className="space-y-2">
                             {aiDecision.recommendations.map((rec, i) => (
@@ -1203,7 +1245,7 @@ export default function DoctorDashboard() {
 
                         {/* Explainability */}
                         <div className="p-4 bg-secondary rounded-2xl">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Clinical Basis</p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("Clinical Basis", "الأساس السريري")}</p>
                           <div className="space-y-1">
                             {aiDecision.explainability.clinicalBasis.map((b, i) => (
                               <p key={i} className="text-xs text-foreground flex items-start gap-1.5">
@@ -1212,8 +1254,8 @@ export default function DoctorDashboard() {
                             ))}
                           </div>
                           <div className="flex items-center gap-2 mt-3">
-                            <span className="text-[10px] text-muted-foreground font-mono">SOURCE: {aiDecision.source}</span>
-                            <span className="ml-auto text-[10px] font-bold text-foreground">CONFIDENCE: {Math.round(aiDecision.confidence * 100)}%</span>
+                            <span className="text-[10px] text-muted-foreground font-mono">{text("SOURCE:", "المصدر:")} {aiDecision.source}</span>
+                            <span className="ms-auto text-[10px] font-bold text-foreground">{text("CONFIDENCE:", "مستوى الثقة:")} {Math.round(aiDecision.confidence * 100)}%</span>
                           </div>
                         </div>
                       </div>
@@ -1230,17 +1272,17 @@ export default function DoctorDashboard() {
                         <div className="flex items-start justify-between mb-3">
                           <div>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-2">
-                              <Brain className="w-3.5 h-3.5 text-violet-600" /> Digital Twin — {aiDecision.digitalTwin.timeframe}
+                              <Brain className="w-3.5 h-3.5 text-violet-600" /> {text("Digital Twin", "التوأم الرقمي")} — {aiDecision.digitalTwin.timeframe}
                             </p>
-                            <p className="font-bold text-foreground">Trajectory: <span className={
+                            <p className="font-bold text-foreground">{text("Trajectory:", "المسار:")} <span className={
                               aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "text-red-600" :
                               aiDecision.digitalTwin.riskTrajectory === "worsening" ? "text-amber-600" :
                               aiDecision.digitalTwin.riskTrajectory === "improving" ? "text-emerald-600" :
                               "text-muted-foreground"
-                            }>{aiDecision.digitalTwin.riskTrajectory.replace("_", " ").toUpperCase()}</span></p>
+                            }>{trajectoryLabel(aiDecision.digitalTwin.riskTrajectory, text)}</span></p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xs text-muted-foreground">Projected Risk Score</p>
+                          <div className="text-end">
+                            <p className="text-xs text-muted-foreground">{text("Projected Risk Score", "درجة الخطورة المتوقعة")}</p>
                             <p className={`text-3xl font-bold tabular-nums ${
                               aiDecision.digitalTwin.projectedRiskScore >= 70 ? "text-red-600" :
                               aiDecision.digitalTwin.projectedRiskScore >= 50 ? "text-amber-600" : "text-emerald-600"
@@ -1267,7 +1309,7 @@ export default function DoctorDashboard() {
                     {aiDecision.behavioralFlags && aiDecision.behavioralFlags.length > 0 && (
                       <div>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <Activity className="w-3.5 h-3.5 text-sky-600" /> Behavioral AI Flags
+                          <Activity className="w-3.5 h-3.5 text-sky-600" /> {text("Behavioral AI Flags", "إشارات سلوكية ذكية")}
                         </p>
                         <div className="space-y-2">
                           {aiDecision.behavioralFlags.map((flag, i) => (
@@ -1282,9 +1324,9 @@ export default function DoctorDashboard() {
                               }`} />
                               <div>
                                 <p className="text-sm font-bold text-foreground">{flag.description}</p>
-                                <p className="text-xs text-muted-foreground mt-0.5">→ {flag.recommendation}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">{text("→", "←")} {flag.recommendation}</p>
                               </div>
-                              <Badge variant={flag.severity === "high" ? "warning" : flag.severity === "moderate" ? "info" : "outline"} className="ml-auto shrink-0 text-[9px]">{flag.severity}</Badge>
+                              <Badge variant={flag.severity === "high" ? "warning" : flag.severity === "moderate" ? "info" : "outline"} className="ms-auto shrink-0 text-[9px]">{severityLabel(flag.severity, text)}</Badge>
                             </div>
                           ))}
                         </div>
@@ -1295,16 +1337,60 @@ export default function DoctorDashboard() {
               </div>
             )}
 
+            {activeTab === "intelligence" && (
+              <div className="border-t border-border p-5">
+                <div className="flex items-center gap-3 mb-5">
+                  <Brain className="w-4 h-4 text-violet-600" />
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Predictive Warnings", "الإنذارات التنبؤية")}</p>
+                  <Badge variant="outline" className="ms-auto">{text(`${predictions.length} total`, `${predictions.length} الإجمالي`)}</Badge>
+                </div>
+                {predictions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">{text("No predictive warnings — insufficient clinical data for forecasting.", "لا توجد إنذارات تنبؤية — البيانات السريرية غير كافية للتنبؤ.")}</p>
+                ) : (
+                  <div className="space-y-3">
+                    {predictions.map((p, i) => {
+                      const style = predictionSeverityStyle[p.severity] ?? predictionSeverityStyle.low;
+                      return (
+                        <div key={i} className={`p-4 ${style.bg} border ${style.border} rounded-2xl`}>
+                          <div className="flex items-start gap-3">
+                            <div className={`w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0`}>
+                              {p.severity === "critical" || p.severity === "high" ? (
+                                <TriangleAlert className={`w-4 h-4 ${style.icon}`} />
+                              ) : (
+                                <Zap className={`w-4 h-4 ${style.icon}`} />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <Badge variant={style.badge as any} className="text-[10px]">{severityLabel(p.severity, text)}</Badge>
+                                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">{p.type.replace("_", " ")}</span>
+                                <span className="ms-auto text-[10px] text-muted-foreground">{text("Confidence:", "مستوى الثقة:")} {severityLabel(p.confidence, text)}</span>
+                              </div>
+                              <p className="font-bold text-sm text-foreground">{p.title}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>
+                              <div className="mt-2 p-2.5 bg-white/60 border border-white rounded-xl">
+                                <p className="text-xs font-semibold text-foreground">{text("Recommendation:", "التوصية:")} {p.recommendation}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeTab === "audit" && (
               <div className="p-5">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
-                  <Shield className="w-3.5 h-3.5 text-primary" /> Immutable Audit Trail — WHO · WHAT · WHEN · WHY
+                  <Shield className="w-3.5 h-3.5 text-primary" /> {text("Immutable Audit Trail — WHO · WHAT · WHEN · WHY", "سجل تدقيق غير قابل للتعديل — مَن · ماذا · متى · لماذا")}
                 </p>
                 {(!auditData || (auditData as any)?.auditLog?.length === 0) ? (
                   <div className="py-12 text-center">
                     <Shield className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                    <p className="font-bold text-foreground">No audit records yet</p>
-                    <p className="text-sm text-muted-foreground mt-1">Run the Decision Engine to generate audit entries.</p>
+                    <p className="font-bold text-foreground">{text("No audit records yet", "لا توجد سجلات تدقيق بعد")}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{text("Run the Decision Engine to generate audit entries.", "شغّل محرك القرار لتوليد سجلات التدقيق.")}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -1316,11 +1402,11 @@ export default function DoctorDashboard() {
                             <div>
                               <p className="text-xs font-bold text-foreground">{log.what}</p>
                               <p className="text-[10px] text-muted-foreground mt-0.5">
-                                WHO: <span className="font-semibold">{log.who}</span> · ROLE: {log.whoRole}
-                                {log.confidence && ` · CONFIDENCE: ${Math.round(log.confidence * 100)}%`}
+                                {text("WHO:", "مَن:")} <span className="font-semibold">{log.who}</span> · {text("ROLE:", "الدور:")} {log.whoRole}
+                                {log.confidence && ` · ${text("CONFIDENCE:", "الثقة:")} ${Math.round(log.confidence * 100)}%`}
                               </p>
                             </div>
-                            <p className="text-[10px] text-muted-foreground font-mono shrink-0">
+                            <p className="text-[10px] text-muted-foreground font-mono shrink-0" dir="ltr">
                               {log.createdAt ? format(new Date(log.createdAt), "dd MMM yyyy HH:mm") : "—"}
                             </p>
                           </div>
@@ -1332,7 +1418,7 @@ export default function DoctorDashboard() {
               </div>
             )}
 
-            {activeTab === "narrative" && (
+            {activeTab === "intelligence" && (
               <div className="p-5 space-y-5">
                 {/* Header */}
                 <div className="sanad-print-hidden flex items-center justify-between">
@@ -1341,8 +1427,8 @@ export default function DoctorDashboard() {
                       <Sparkles className="w-4 h-4 text-violet-600" />
                     </div>
                     <div>
-                      <p className="font-bold text-sm text-foreground">SANAD AI — Clinical Narrative</p>
-                      <p className="text-[11px] text-muted-foreground">{narrativeProvider || "GPT-4o → Gemini 2.5 Flash fallback"} · Real-time streaming · Bilingual</p>
+                      <p className="font-bold text-sm text-foreground">{text("SANAD AI — Clinical Narrative", "ذكاء سند — السرد السريري")}</p>
+                      <p className="text-[11px] text-muted-foreground">{narrativeProvider || text("Real-time clinical summary", "ملخّص سريري فوري")} · {text("Real-time streaming · Bilingual", "بث فوري · ثنائي اللغة")}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1352,7 +1438,7 @@ export default function DoctorDashboard() {
                       variant="outline"
                       size="sm"
                     >
-                      <Printer className="w-3.5 h-3.5" /> Print Summary
+                      <Printer className="w-3.5 h-3.5" /> {text("Print Summary", "طباعة الملخّص")}
                     </Button>
                     <Button
                       onClick={fetchNarrative}
@@ -1361,8 +1447,8 @@ export default function DoctorDashboard() {
                       size="sm"
                     >
                       {narrativeLoading
-                        ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> Generating...</>
-                        : <><Sparkles className="w-3.5 h-3.5" /> Generate Narrative</>
+                        ? <><RefreshCw className="w-3.5 h-3.5 animate-spin" /> {text("Generating...", "جارٍ التوليد...")}</>
+                        : <><Sparkles className="w-3.5 h-3.5" /> {text("Generate Narrative", "توليد السرد")}</>
                       }
                     </Button>
                   </div>
@@ -1374,20 +1460,20 @@ export default function DoctorDashboard() {
                   </header>
                   <dl className="sanad-print-summary-meta">
                     <div>
-                      <dt>Patient Name</dt>
+                      <dt>{text("Patient Name", "اسم المريض")}</dt>
                       <dd>{patient.fullName}</dd>
                     </div>
                     <div>
-                      <dt>National ID</dt>
-                      <dd>{patient.nationalId}</dd>
+                      <dt>{text("National ID", "رقم الهوية الوطنية")}</dt>
+                      <dd dir="ltr">{patient.nationalId}</dd>
                     </div>
                     <div>
-                      <dt>Date</dt>
-                      <dd>{format(new Date(), "dd MMM yyyy HH:mm")}</dd>
+                      <dt>{text("Date", "التاريخ")}</dt>
+                      <dd dir="ltr">{format(new Date(), "dd MMM yyyy HH:mm")}</dd>
                     </div>
                   </dl>
                   <article className="sanad-print-summary-body">
-                    {narrativeText || "No AI narrative has been generated yet."}
+                    {narrativeText || text("No AI narrative has been generated yet.", "لم يُولّد سرد ذكاء اصطناعي بعد.")}
                   </article>
                   <footer className="sanad-print-summary-footer">
                     تم توليده بواسطة SANAD AI · {format(new Date(), "dd MMM yyyy HH:mm")}
@@ -1402,13 +1488,13 @@ export default function DoctorDashboard() {
                   {!narrativeText && !narrativeLoading && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <Brain className="w-8 h-8 opacity-25" />
-                      <p className="text-sm">Click <strong>Generate Narrative</strong> to get a live AI clinical summary</p>
+                      <p className="text-sm">{text("Click", "اضغط")} <strong>{text("Generate Narrative", "توليد السرد")}</strong> {text("to get a live AI clinical summary", "للحصول على ملخّص سريري فوري بالذكاء الاصطناعي")}</p>
                     </div>
                   )}
                   {narrativeLoading && !narrativeText && (
                     <div className="flex items-center gap-2 text-violet-600 text-sm">
                       <RefreshCw className="w-4 h-4 animate-spin" />
-                      <span>Connecting to AI...</span>
+                      <span>{text("Connecting to AI...", "جارٍ الاتصال بالذكاء الاصطناعي...")}</span>
                     </div>
                   )}
                   {narrativeText && (
@@ -1425,13 +1511,13 @@ export default function DoctorDashboard() {
                 <div className="sanad-print-hidden rounded-2xl border border-border overflow-hidden">
                   <div className="flex items-center gap-2 px-4 py-2.5 bg-secondary border-b border-border">
                     <MessageSquare className="w-3.5 h-3.5 text-violet-500" />
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">Ask the AI about this patient</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{text("Ask the AI about this patient", "اسأل الذكاء الاصطناعي عن هذا المريض")}</p>
                   </div>
                   <div className="p-4 space-y-3">
                     <div className="flex gap-2">
                       <input
                         className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-400/40"
-                        placeholder="e.g. ما هي أبرز مخاطر هذا المريض؟ / What are the main drug risks?"
+                        placeholder={text("e.g. What are the main drug risks for this patient?", "مثال: ما هي أبرز المخاطر الدوائية لهذا المريض؟")}
                         value={chatQuestion}
                         onChange={e => setChatQuestion(e.target.value)}
                         onKeyDown={e => e.key === "Enter" && sendChatQuestion()}
@@ -1451,7 +1537,7 @@ export default function DoctorDashboard() {
                     </div>
                     {chatAnswer && (
                       <div className="rounded-xl bg-violet-50 border border-violet-100 p-3.5 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                        <p className="text-[10px] font-bold text-violet-500 uppercase tracking-widest mb-2">AI Response</p>
+                        <p className="text-[10px] font-bold text-violet-500 uppercase tracking-widest mb-2">{text("AI Response", "رد الذكاء الاصطناعي")}</p>
                         {chatAnswer}
                       </div>
                     )}
@@ -1460,7 +1546,7 @@ export default function DoctorDashboard() {
               </div>
             )}
 
-            {activeTab === "ai" && riskScore && (
+            {activeTab === "intelligence" && riskScore && (
               <div className="p-5">
                 <div className="flex items-start gap-6">
                   <div className="rounded-2xl p-6 min-w-[200px] text-center border"
@@ -1468,12 +1554,12 @@ export default function DoctorDashboard() {
                       background: `hsl(var(--risk-${riskScore.riskLevel}-bg))`,
                       borderColor: `hsl(var(--risk-${riskScore.riskLevel}) / 0.2)`,
                     }}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">AI Risk Score</p>
-                    <p className="text-6xl font-bold tabular-nums leading-none"
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">{text("AI Risk Score", "درجة الخطورة")}</p>
+                    <p className="text-6xl font-bold tabular-nums leading-none" dir="ltr"
                       style={{ color: `hsl(var(--risk-${riskScore.riskLevel}))` }}>
                       {riskScore.riskScore}
                     </p>
-                    <p className="text-muted-foreground text-sm mt-1">/ 100 risk score</p>
+                    <p className="text-muted-foreground text-sm mt-1">{text("/ 100 risk score", "/ 100 درجة الخطورة")}</p>
                     <RiskBadge
                       level={riskScore.riskLevel as "critical" | "high" | "medium" | "low"}
                       className="mt-4"
@@ -1483,7 +1569,7 @@ export default function DoctorDashboard() {
                   <div className="flex-1 space-y-4">
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
-                        {riskScore.factors.length} Risk Factors Identified
+                        {text(`${riskScore.factors.length} Risk Factors Identified`, `${riskScore.factors.length} عامل خطورة مُحدّد`)}
                       </p>
                       <div className="space-y-2.5">
                         {riskScore.factors.map((f: any, i: number) => (
@@ -1498,7 +1584,7 @@ export default function DoctorDashboard() {
                                 <Badge variant={
                                   f.impact === "high" ? "destructive" :
                                   f.impact === "moderate" ? "warning" : "info"
-                                } className="text-[10px] shrink-0">{f.impact} impact</Badge>
+                                } className="text-[10px] shrink-0">{text(`${f.impact} impact`, `تأثير ${f.impact === "high" ? "مرتفع" : f.impact === "moderate" ? "متوسط" : "منخفض"}`)}</Badge>
                               </div>
                               <p className="text-xs text-muted-foreground mt-0.5">{f.description}</p>
                             </div>
@@ -1509,7 +1595,7 @@ export default function DoctorDashboard() {
 
                     {riskScore.recommendations && riskScore.recommendations.length > 0 && (
                       <div>
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Clinical Recommendations</p>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">{text("Clinical Recommendations", "التوصيات السريرية")}</p>
                         <div className="space-y-2">
                           {riskScore.recommendations.map((rec: string, i: number) => (
                             <div key={i} className="flex items-start gap-2.5 p-3 bg-primary/5 border border-primary/10 rounded-xl">
@@ -1532,6 +1618,7 @@ export default function DoctorDashboard() {
 }
 
 function PrescribeModal({ patientId }: { patientId: number }) {
+  const { text } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [drugName, setDrugName] = useState("");
   const [dosage, setDosage] = useState("");
@@ -1566,7 +1653,7 @@ function PrescribeModal({ patientId }: { patientId: number }) {
   return (
     <>
       <Button onClick={() => setIsOpen(true)} size="sm" variant="primary" className="w-full">
-        <Syringe className="w-3.5 h-3.5" /> Prescribe Medication
+        <Syringe className="w-3.5 h-3.5" /> {text("Prescribe Medication", "وصف دواء")}
       </Button>
 
       {isOpen && (
@@ -1574,8 +1661,8 @@ function PrescribeModal({ patientId }: { patientId: number }) {
           <div className="bg-card rounded-3xl border border-border shadow-2xl w-full max-w-lg overflow-hidden">
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
               <div>
-                <h3 className="font-bold text-foreground text-base">Prescribe Medication</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">AI drug interaction check will be performed before confirming.</p>
+                <h3 className="font-bold text-foreground text-base">{text("Prescribe Medication", "وصف دواء")}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{text("AI drug interaction check will be performed before confirming.", "سيُجرى فحص التداخل الدوائي بالذكاء الاصطناعي قبل التأكيد.")}</p>
               </div>
               <button onClick={close} className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-border transition-colors">
                 <X className="w-4 h-4 text-muted-foreground" />
@@ -1585,36 +1672,36 @@ function PrescribeModal({ patientId }: { patientId: number }) {
             <div className="p-6 space-y-4">
               <form onSubmit={handleCheck} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Drug Name</label>
+                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("Drug Name", "اسم الدواء")}</label>
                   <Input
                     value={drugName}
                     onChange={e => setDrugName(e.target.value)}
-                    placeholder="e.g. Warfarin, Aspirin, Metformin..."
+                    placeholder={text("e.g. Warfarin, Aspirin, Metformin...", "مثال: وارفارين، أسبرين، ميتفورمين...")}
                     required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Dosage</label>
-                    <Input value={dosage} onChange={e => setDosage(e.target.value)} required placeholder="e.g. 50mg" />
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("Dosage", "الجرعة")}</label>
+                    <Input value={dosage} onChange={e => setDosage(e.target.value)} required placeholder={text("e.g. 50mg", "مثال: 50 مجم")} />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Frequency</label>
+                    <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("Frequency", "التكرار")}</label>
                     <Select value={frequency} onChange={e => setFrequency(e.target.value)} required>
-                      <option value="">Select...</option>
-                      <option>Once daily</option>
-                      <option>Twice daily</option>
-                      <option>Three times daily</option>
-                      <option>Every 8 hours</option>
-                      <option>As needed</option>
+                      <option value="">{text("Select...", "اختر...")}</option>
+                      <option value="Once daily">{text("Once daily", "مرة يوميًا")}</option>
+                      <option value="Twice daily">{text("Twice daily", "مرتين يوميًا")}</option>
+                      <option value="Three times daily">{text("Three times daily", "ثلاث مرات يوميًا")}</option>
+                      <option value="Every 8 hours">{text("Every 8 hours", "كل 8 ساعات")}</option>
+                      <option value="As needed">{text("As needed", "عند الحاجة")}</option>
                     </Select>
                   </div>
                 </div>
                 {!checkMutation.data && (
                   <div className="flex justify-end gap-2 pt-2">
-                    <Button type="button" variant="outline" onClick={close}>Cancel</Button>
+                    <Button type="button" variant="outline" onClick={close}>{text("Cancel", "إلغاء")}</Button>
                     <Button type="submit" isLoading={checkMutation.isPending}>
-                      <Shield className="w-3.5 h-3.5" /> Run AI Check
+                      <Shield className="w-3.5 h-3.5" /> {text("Run AI Check", "تشغيل الفحص الذكي")}
                     </Button>
                   </div>
                 )}
@@ -1628,8 +1715,8 @@ function PrescribeModal({ patientId }: { patientId: number }) {
                         <Shield className="w-4.5 h-4.5 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="font-bold text-emerald-700 text-sm">No Interactions Detected</p>
-                        <p className="text-xs text-muted-foreground">Safe to prescribe based on current medication profile.</p>
+                        <p className="font-bold text-emerald-700 text-sm">{text("No Interactions Detected", "لم تُكتشف تداخلات دوائية")}</p>
+                        <p className="text-xs text-muted-foreground">{text("Safe to prescribe based on current medication profile.", "آمن للوصف بناءً على ملف الأدوية الحالي.")}</p>
                       </div>
                     </div>
                   ) : (
@@ -1638,24 +1725,24 @@ function PrescribeModal({ patientId }: { patientId: number }) {
                         <div key={i} className="p-4 bg-red-50 border border-red-200 rounded-2xl">
                           <div className="flex items-center gap-2 mb-2">
                             <AlertCircle className="w-4 h-4 text-red-600" />
-                            <span className="text-sm font-bold text-red-700">Interaction: {w.conflictingDrug}</span>
-                            <Badge variant={w.severity === "critical" ? "destructive" : "warning"} className="ml-auto text-[10px]">{w.severity}</Badge>
+                            <span className="text-sm font-bold text-red-700">{text("Interaction:", "تداخل:")} {w.conflictingDrug}</span>
+                            <Badge variant={w.severity === "critical" ? "destructive" : "warning"} className="ms-auto text-[10px]">{severityLabel(w.severity, text)}</Badge>
                           </div>
-                          <p className="text-xs text-foreground/80 mb-2 ml-6">{w.description}</p>
-                          <p className="text-xs font-semibold bg-white border border-red-100 rounded-xl p-2 ml-6">{w.recommendation}</p>
+                          <p className="text-xs text-foreground/80 mb-2 ms-6">{w.description}</p>
+                          <p className="text-xs font-semibold bg-white border border-red-100 rounded-xl p-2 ms-6">{w.recommendation}</p>
                         </div>
                       ))}
                     </div>
                   )}
                   <div className="flex justify-end gap-2 pt-1">
-                    <Button variant="outline" size="sm" onClick={close}>Cancel</Button>
+                    <Button variant="outline" size="sm" onClick={close}>{text("Cancel", "إلغاء")}</Button>
                     <Button
                       variant={checkMutation.data.safe ? "primary" : "destructive"}
                       size="sm"
                       onClick={handlePrescribe}
                       isLoading={prescribeMutation.isPending}
                     >
-                      {checkMutation.data.safe ? "Confirm & Prescribe" : "Override & Prescribe"}
+                      {checkMutation.data.safe ? text("Confirm & Prescribe", "تأكيد ووصف") : text("Override & Prescribe", "تجاوز ووصف")}
                     </Button>
                   </div>
                 </div>

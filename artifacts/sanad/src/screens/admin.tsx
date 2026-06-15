@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody, KpiCard, Badge, AlertBanner } from "@/components/shared";
 import { useGetAdminStats, useGetPopulationHealth } from "@workspace/api-client-react";
@@ -9,6 +10,7 @@ import {
   PieChart, Pie, Cell, LineChart, Line, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from "recharts";
 import { useQuery } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/language-context";
 
 const COLORS = ["#007AFF", "#34C759", "#FF9500", "#FF3B30", "#5856D6", "#32ADE6", "#AF52DE"];
 const RISK_COLORS = { Low: "#22c55e", Medium: "#f59e0b", High: "#f97316", Critical: "#ef4444" };
@@ -38,6 +40,7 @@ const RISK_FILL: Record<string, string> = {
 };
 
 function KSAHeatmap({ regions }: { regions: any[] }) {
+  const { text } = useLanguage();
   const [hovered, setHovered] = useState<string | null>(null);
   const regionMap = Object.fromEntries(regions.map(r => [r.region, r]));
 
@@ -122,16 +125,16 @@ function KSAHeatmap({ regions }: { regions: any[] }) {
                     filter="drop-shadow(0 4px 12px rgba(0,0,0,0.12))" />
                   <text x={pos.cx} y={pos.cy - pos.r - 56} textAnchor="middle" fill="hsl(240 10% 10%)" fontSize="9" fontWeight="bold">{name}</text>
                   <text x={pos.cx} y={pos.cy - pos.r - 43} textAnchor="middle" fill="hsl(240 5% 50%)" fontSize="8">
-                    {data.patients?.toLocaleString()} patients
+                    {text(`${data.patients?.toLocaleString()} patients`, `${data.patients?.toLocaleString()} مريض`)}
                   </text>
                   <text x={pos.cx} y={pos.cy - pos.r - 31} textAnchor="middle" fill={fill} fontSize="8.5" fontWeight="bold">
-                    Risk: {data.riskRate}% — {data.riskLevel.toUpperCase()}
+                    {text("Risk:", "الخطورة:")} {data.riskRate}% — {data.riskLevel === "critical" ? text("CRITICAL", "حرجة") : data.riskLevel === "high" ? text("HIGH", "مرتفعة") : data.riskLevel === "medium" ? text("MEDIUM", "متوسطة") : text("LOW", "منخفضة")}
                   </text>
                   <text x={pos.cx} y={pos.cy - pos.r - 19} textAnchor="middle" fill="hsl(240 5% 50%)" fontSize="7.5">
-                    {data.highRisk} high-risk · {data.hospitals} hospitals
+                    {text(`${data.highRisk} high-risk · ${data.hospitals} hospitals`, `${data.highRisk} مرتفع الخطورة · ${data.hospitals} مستشفى`)}
                   </text>
                   <text x={pos.cx} y={pos.cy - pos.r - 8} textAnchor="middle" fill="hsl(240 5% 50%)" fontSize="7.5">
-                    Coverage: {data.coverage}
+                    {text(`Coverage: ${data.coverage}`, `التغطية: ${data.coverage}`)}
                   </text>
                 </g>
               )}
@@ -144,7 +147,7 @@ function KSAHeatmap({ regions }: { regions: any[] }) {
           <g key={level} transform={`translate(${20 + i * 115}, 405)`}>
             <circle cx={7} cy={7} r={7} fill={RISK_FILL[level]} />
             <text x={18} y={11} fill="hsl(240 5% 45%)" fontSize="8" fontWeight="600" style={{ textTransform: "uppercase" }}>
-              {level.charAt(0).toUpperCase() + level.slice(1)}
+              {level === "low" ? text("Low", "منخفضة") : level === "medium" ? text("Medium", "متوسطة") : level === "high" ? text("High", "مرتفعة") : text("Critical", "حرجة")}
             </text>
           </g>
         ))}
@@ -154,12 +157,13 @@ function KSAHeatmap({ regions }: { regions: any[] }) {
 }
 
 async function fetchAppointmentsSummary() {
-  const res = await fetch("/api/appointments/all?limit=100");
+  const res = await apiFetch("/api/appointments/all?limit=100");
   if (!res.ok) return { appointments: [] };
   return res.json();
 }
 
 export default function AdminDashboard() {
+  const { text } = useLanguage();
   const { data: statsRaw, isLoading: statsLoading } = useGetAdminStats();
   const { data: popHealth, isLoading: healthLoading } = useGetPopulationHealth();
   const { data: intelligence } = useNationalIntelligence();
@@ -169,10 +173,10 @@ export default function AdminDashboard() {
 
   if (statsLoading || healthLoading) {
     return (
-      <Layout role="admin">
+      <Layout role="admin" localized>
         <div className="flex items-center gap-3 py-20 justify-center text-muted-foreground">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
-          <span className="text-sm font-medium">Aggregating national health data...</span>
+          <span className="text-sm font-medium">{text("Aggregating national health data...", "جارٍ تجميع البيانات الصحية الوطنية...")}</span>
         </div>
       </Layout>
     );
@@ -182,23 +186,23 @@ export default function AdminDashboard() {
   const upcomingAppts = appointments.filter((a: any) => a.status === "confirmed").slice(0, 6);
 
   return (
-    <Layout role="admin">
+    <Layout role="admin" localized>
       {stats && stats.highRiskPatients > 0 && (
         <AlertBanner variant="warning">
           <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
           <span>
-            <strong>{stats.highRiskPatients} patients</strong> currently classified as high or critical risk require clinical follow-up.
+            <strong>{text(`${stats.highRiskPatients} patients`, `${stats.highRiskPatients} مريض`)}</strong> {text("currently classified as high or critical risk require clinical follow-up.", "مصنّفون حاليًا ضمن الخطورة المرتفعة أو الحرجة ويحتاجون إلى متابعة سريرية.")}
           </span>
-          <Badge variant="warning" className="ml-auto shrink-0">{stats.highRiskPatients} flagged</Badge>
+          <Badge variant="warning" className="ms-auto shrink-0">{text(`${stats.highRiskPatients} flagged`, `${stats.highRiskPatients} موسوم`)}</Badge>
         </AlertBanner>
       )}
 
       <div className="flex items-start justify-between mb-6">
         <PageHeader
-          title="Ministry of Health — Analytics Command Center"
-          subtitle="Real-time national infrastructure metrics and population health intelligence."
+          title={text("Ministry of Health — Analytics Command Center", "وزارة الصحة — مركز قيادة التحليلات")}
+          subtitle={text("Real-time national infrastructure metrics and population health intelligence.", "مؤشّرات البنية التحتية الوطنية الفورية وذكاء صحة السكان.")}
         />
-        <span className="text-xs font-mono bg-card border border-border rounded-xl px-3 py-2 text-muted-foreground shrink-0 ml-4">
+        <span className="text-xs font-mono bg-card border border-border rounded-xl px-3 py-2 text-muted-foreground shrink-0 ms-4" dir="ltr">
           {new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" })}
         </span>
       </div>
@@ -206,10 +210,10 @@ export default function AdminDashboard() {
       {/* KPI Row */}
       {stats && (
         <div className="grid grid-cols-4 gap-4 mb-6">
-          <KpiCard title="Registered Patients" value={stats.totalPatients.toLocaleString()} sub="Active national records" icon={Users} iconBg="bg-primary/10" iconColor="text-primary" trend="+2.4%" />
-          <KpiCard title="Visits Today" value={stats.totalVisitsToday.toLocaleString()} sub="Across all facilities" icon={Activity} iconBg="bg-sky-100" iconColor="text-sky-600" trend="+12%" />
-          <KpiCard title="AI Interactions Blocked" value={stats.drugInteractionsBlocked.toLocaleString()} sub="Drug conflicts prevented" icon={ShieldAlert} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
-          <KpiCard title="Connected Hospitals" value={stats.hospitalsConnected.toLocaleString()} sub="Nationwide network" icon={Building} iconBg="bg-violet-100" iconColor="text-violet-600" />
+          <KpiCard title={text("Registered Patients", "المرضى المسجّلون")} value={(stats.totalPatients ?? 0).toLocaleString()} sub={text("Active national records", "سجلات وطنية نشطة")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
+          <KpiCard title={text("Visits Today", "زيارات اليوم")} value={(stats.totalVisitsToday ?? 0).toLocaleString()} sub={text("Across all facilities", "في جميع المنشآت")} icon={Activity} iconBg="bg-sky-100" iconColor="text-sky-600" />
+          <KpiCard title={text("Drug Conflicts Prevented", "تداخلات دوائية مُنعت")} value={(stats.drugInteractionsBlocked ?? 0).toLocaleString()} sub={text("Blocked by interaction screening", "حُجبت عبر فحص التداخلات")} icon={ShieldAlert} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
+          <KpiCard title={text("AI Decisions Made", "قرارات الذكاء الاصطناعي")} value={(stats.aiDecisionsMade ?? 0).toLocaleString()} sub={text(`${(stats.activeAlerts ?? 0).toLocaleString()} active alerts`, `${(stats.activeAlerts ?? 0).toLocaleString()} تنبيه نشط`)} icon={Building} iconBg="bg-violet-100" iconColor="text-violet-600" />
         </div>
       )}
 
@@ -220,10 +224,10 @@ export default function AdminDashboard() {
           {/* Monthly Trend */}
           <Card className="col-span-8">
             <CardHeader>
-              <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>Monthly Visit Trend</CardTitle></div>
+              <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>{text("Monthly Visit Trend", "اتجاه الزيارات الشهري")}</CardTitle></div>
               <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"><span className="w-3 h-0.5 bg-primary inline-block rounded-full" /> Total Visits</span>
-                <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"><span className="w-3 h-0.5 bg-destructive inline-block rounded-full" /> Emergency</span>
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"><span className="w-3 h-0.5 bg-primary inline-block rounded-full" /> {text("Total Visits", "إجمالي الزيارات")}</span>
+                <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"><span className="w-3 h-0.5 bg-destructive inline-block rounded-full" /> {text("Emergency", "الطوارئ")}</span>
               </div>
             </CardHeader>
             <CardBody>
@@ -244,7 +248,7 @@ export default function AdminDashboard() {
 
           {/* Blood Type Pie */}
           <Card className="col-span-4">
-            <CardHeader><CardTitle>Blood Type Distribution</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{text("Blood Type Distribution", "توزيع فصائل الدم")}</CardTitle></CardHeader>
             <CardBody>
               <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
@@ -272,15 +276,15 @@ export default function AdminDashboard() {
             <Card className="col-span-7">
               <CardHeader>
                 <MapPin className="w-4 h-4 text-primary" />
-                <CardTitle>National Risk Heatmap — KSA</CardTitle>
-                <Badge variant="outline" className="ml-auto text-[10px]">
-                  {stats.regionalStats.filter((r: any) => r.riskLevel === "critical").length} critical regions
+                <CardTitle>{text("National Risk Heatmap — KSA", "خريطة الخطورة الوطنية — المملكة")}</CardTitle>
+                <Badge variant="outline" className="ms-auto text-[10px]">
+                  {text(`${stats.regionalStats.filter((r: any) => r.riskLevel === "critical").length} critical regions`, `${stats.regionalStats.filter((r: any) => r.riskLevel === "critical").length} مناطق حرجة`)}
                 </Badge>
               </CardHeader>
               <CardBody>
                 <KSAHeatmap regions={stats.regionalStats} />
                 <p className="text-[10px] text-muted-foreground text-center mt-2">
-                  Circle size = relative patient volume · Color = risk level · Hover for details
+                  {text("Circle size = relative patient volume · Color = risk level · Hover for details", "حجم الدائرة = حجم المرضى النسبي · اللون = مستوى الخطورة · مرّر للتفاصيل")}
                 </p>
               </CardBody>
             </Card>
@@ -289,8 +293,8 @@ export default function AdminDashboard() {
           {/* Conditions Bar */}
           <Card className="col-span-5">
             <CardHeader>
-              <CardTitle>Top Chronic Conditions</CardTitle>
-              <Badge variant="default">{popHealth.conditionBreakdown?.length} tracked</Badge>
+              <CardTitle>{text("Top Chronic Conditions", "أبرز الأمراض المزمنة")}</CardTitle>
+              <Badge variant="default">{text(`${popHealth.conditionBreakdown?.length} tracked`, `${popHealth.conditionBreakdown?.length} متابَع`)}</Badge>
             </CardHeader>
             <CardBody>
               <div className="h-72">
@@ -309,7 +313,7 @@ export default function AdminDashboard() {
 
           {/* Age Distribution */}
           <Card className="col-span-6">
-            <CardHeader><CardTitle>Population Age Distribution</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{text("Population Age Distribution", "التوزيع العمري للسكان")}</CardTitle></CardHeader>
             <CardBody>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -329,8 +333,8 @@ export default function AdminDashboard() {
           {stats?.riskDistribution && (
             <Card className="col-span-6">
               <CardHeader>
-                <div className="flex items-center gap-2"><PieIcon className="w-4 h-4 text-amber-600" /><CardTitle>Patient Risk Distribution</CardTitle></div>
-                <Badge variant="warning">{stats.highRiskPatients} high/critical</Badge>
+                <div className="flex items-center gap-2"><PieIcon className="w-4 h-4 text-amber-600" /><CardTitle>{text("Patient Risk Distribution", "توزيع خطورة المرضى")}</CardTitle></div>
+                <Badge variant="warning">{text(`${stats.highRiskPatients} high/critical`, `${stats.highRiskPatients} مرتفعة/حرجة`)}</Badge>
               </CardHeader>
               <CardBody>
                 <div className="h-44">
@@ -352,7 +356,7 @@ export default function AdminDashboard() {
                     <div key={i} className="flex items-center justify-between px-3 py-2 bg-secondary rounded-xl">
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ background: RISK_COLORS[d.level as keyof typeof RISK_COLORS] }} />
-                        <span className="text-xs font-medium text-foreground">{d.level}</span>
+                        <span className="text-xs font-medium text-foreground">{d.level === "Low" ? text("Low", "منخفضة") : d.level === "Medium" ? text("Medium", "متوسطة") : d.level === "High" ? text("High", "مرتفعة") : d.level === "Critical" ? text("Critical", "حرجة") : d.level}</span>
                       </div>
                       <span className="text-xs font-bold text-muted-foreground tabular-nums">{d.count}</span>
                     </div>
@@ -367,31 +371,31 @@ export default function AdminDashboard() {
             <Card className="col-span-12">
               <CardHeader>
                 <Calendar className="w-4 h-4 text-sky-600" />
-                <CardTitle>National Appointments — Upcoming Confirmed</CardTitle>
-                <Badge variant="info" className="ml-auto">{appointments.filter((a: any) => a.status === "confirmed").length} total</Badge>
+                <CardTitle>{text("National Appointments — Upcoming Confirmed", "المواعيد الوطنية — المؤكّدة القادمة")}</CardTitle>
+                <Badge variant="info" className="ms-auto">{text(`${appointments.filter((a: any) => a.status === "confirmed").length} total`, `${appointments.filter((a: any) => a.status === "confirmed").length} الإجمالي`)}</Badge>
               </CardHeader>
               <table className="w-full data-table">
                 <thead>
                   <tr>
-                    <th>Reference</th>
-                    <th>Patient</th>
-                    <th>Hospital</th>
-                    <th>Department</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
+                    <th>{text("Reference", "المرجع")}</th>
+                    <th>{text("Patient", "المريض")}</th>
+                    <th>{text("Hospital", "المستشفى")}</th>
+                    <th>{text("Department", "القسم")}</th>
+                    <th>{text("Date", "التاريخ")}</th>
+                    <th>{text("Time", "الوقت")}</th>
+                    <th>{text("Status", "الحالة")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {upcomingAppts.map((a: any, i: number) => (
                     <tr key={i}>
-                      <td className="font-mono text-xs text-muted-foreground">{a.referenceNo}</td>
+                      <td className="font-mono text-xs text-muted-foreground" dir="ltr">{a.referenceNo}</td>
                       <td className="font-bold text-foreground">{a.patientName}</td>
                       <td className="text-muted-foreground text-xs">{a.hospital.split("—")[0]?.trim()}</td>
                       <td><Badge variant="outline" className="text-[10px]">{a.department}</Badge></td>
-                      <td className="font-mono text-xs">{a.appointmentDate}</td>
-                      <td className="font-mono text-xs font-bold">{a.appointmentTime}</td>
-                      <td><Badge variant="success" className="text-[10px]">Confirmed</Badge></td>
+                      <td className="font-mono text-xs" dir="ltr">{a.appointmentDate}</td>
+                      <td className="font-mono text-xs font-bold" dir="ltr">{a.appointmentTime}</td>
+                      <td><Badge variant="success" className="text-[10px]">{text("Confirmed", "مؤكّد")}</Badge></td>
                     </tr>
                   ))}
                 </tbody>
@@ -404,14 +408,14 @@ export default function AdminDashboard() {
             <Card className="col-span-12">
               <CardHeader>
                 <Brain className="w-4 h-4 text-violet-600" />
-                <CardTitle>National AI Intelligence Platform</CardTitle>
-                <Badge variant="outline" className="ml-auto">LIVE · v3.0</Badge>
+                <CardTitle>{text("National AI Intelligence Platform", "منصّة الذكاء الاصطناعي الوطنية")}</CardTitle>
+                <Badge variant="outline" className="ms-auto">{text("LIVE · v3.0", "مباشر · v3.0")}</Badge>
               </CardHeader>
               <CardBody className="space-y-6">
                 {/* AI Engine Status */}
                 <div>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Zap className="w-3.5 h-3.5 text-amber-500" /> AI Engine Cluster — 9 Active Engines
+                    <Zap className="w-3.5 h-3.5 text-amber-500" /> {text("AI Engine Cluster — 9 Active Engines", "عنقود محرّكات الذكاء — 9 محرّكات نشطة")}
                   </p>
                   <div className="grid grid-cols-3 gap-2.5">
                     {[
@@ -429,7 +433,7 @@ export default function AdminDashboard() {
                         <div className={`w-2 h-2 rounded-full shrink-0 ${engine.status === "online" ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"}`} />
                         <div>
                           <p className="text-xs font-bold text-foreground">{engine.name}</p>
-                          <p className="text-[10px] text-muted-foreground">{engine.version} · {engine.status}</p>
+                          <p className="text-[10px] text-muted-foreground">{engine.version} · {engine.status === "online" ? text("online", "متّصل") : text("standby", "احتياطي")}</p>
                         </div>
                       </div>
                     ))}
@@ -440,7 +444,7 @@ export default function AdminDashboard() {
                 {(intelligence as any)?.epidemicRadar && (intelligence as any).epidemicRadar.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Radio className="w-3.5 h-3.5 text-red-500" /> Epidemic Radar — Disease Surveillance
+                      <Radio className="w-3.5 h-3.5 text-red-500" /> {text("Epidemic Radar — Disease Surveillance", "رادار الأوبئة — ترصّد الأمراض")}
                     </p>
                     <div className="grid grid-cols-2 gap-2.5">
                       {(intelligence as any).epidemicRadar.map((item: any, i: number) => (
@@ -451,9 +455,9 @@ export default function AdminDashboard() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <p className="text-sm font-bold text-foreground">{item.condition}</p>
-                              <Badge variant={item.alert === "high" ? "destructive" : item.alert === "medium" ? "warning" : "outline"} className="text-[9px] shrink-0">{item.alert}</Badge>
+                              <Badge variant={item.alert === "high" ? "destructive" : item.alert === "medium" ? "warning" : "outline"} className="text-[9px] shrink-0">{item.alert === "high" ? text("high", "مرتفع") : item.alert === "medium" ? text("medium", "متوسط") : text("low", "منخفض")}</Badge>
                             </div>
-                            <p className="text-[10px] text-muted-foreground mt-0.5">{item.count} cases · {item.trend}</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">{text(`${item.count} cases`, `${item.count} حالة`)} · {item.trend}</p>
                           </div>
                         </div>
                       ))}
@@ -465,7 +469,7 @@ export default function AdminDashboard() {
                 {(intelligence as any)?.policyInsights && (intelligence as any).policyInsights.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Lightbulb className="w-3.5 h-3.5 text-violet-500" /> AI Policy Intelligence Recommendations
+                      <Lightbulb className="w-3.5 h-3.5 text-violet-500" /> {text("AI Policy Intelligence Recommendations", "توصيات ذكاء السياسات الصحية")}
                     </p>
                     <div className="space-y-2">
                       {(intelligence as any).policyInsights.map((insight: any, i: number) => (
@@ -474,9 +478,9 @@ export default function AdminDashboard() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <p className="text-sm font-bold text-foreground">{insight.insight}</p>
-                              <Badge variant={insight.priority === "high" ? "info" : "outline"} className="text-[9px] shrink-0">{insight.priority}</Badge>
+                              <Badge variant={insight.priority === "high" ? "info" : "outline"} className="text-[9px] shrink-0">{insight.priority === "high" ? text("high", "مرتفعة") : text("medium", "متوسطة")}</Badge>
                             </div>
-                            {insight.action && (<p className="text-[10px] text-muted-foreground mt-0.5">→ {insight.action}</p>)}
+                            {insight.action && (<p className="text-[10px] text-muted-foreground mt-0.5">{text("→", "←")} {insight.action}</p>)}
                           </div>
                         </div>
                       ))}
@@ -487,10 +491,10 @@ export default function AdminDashboard() {
                 {/* National Metrics Footer */}
                 <div className="grid grid-cols-4 gap-3">
                   {[
-                    { label: "AI Decisions Today", value: (intelligence as any)?.aiDecisionsToday ?? "0", icon: Brain },
-                    { label: "Event Bus Throughput", value: (intelligence as any)?.eventBusThroughput ?? "—", icon: Zap },
-                    { label: "Audit Records", value: (intelligence as any)?.auditRecords ?? "0", icon: Target },
-                    { label: "Avg Response Time", value: (intelligence as any)?.avgResponseMs ? `${(intelligence as any).avgResponseMs}ms` : "—", icon: Activity },
+                    { label: text("AI Decisions Today", "قرارات اليوم"), value: (intelligence as any)?.aiDecisionsToday ?? "0", icon: Brain },
+                    { label: text("Event Bus Throughput", "إنتاجية ناقل الأحداث"), value: (intelligence as any)?.eventBusThroughput ?? "—", icon: Zap },
+                    { label: text("Audit Records", "سجلات التدقيق"), value: (intelligence as any)?.auditRecords ?? "0", icon: Target },
+                    { label: text("Avg Response Time", "متوسط زمن الاستجابة"), value: (intelligence as any)?.avgResponseMs ? `${(intelligence as any).avgResponseMs}ms` : "—", icon: Activity },
                   ].map((m, i) => (
                     <div key={i} className="px-4 py-3.5 bg-secondary rounded-2xl border border-border">
                       <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">

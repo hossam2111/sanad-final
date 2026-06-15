@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
   Card, CardHeader, CardTitle, CardBody,
@@ -11,18 +12,19 @@ import {
   Receipt, Bell, Grid3X3, Minus, Users
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/language-context";
 import { useAuth } from "@/contexts/auth-context";
 import { format } from "date-fns";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
 
 async function fetchPharmacyPatient(nationalId: string) {
-  const res = await fetch(`/api/pharmacy/patient/${nationalId}`);
+  const res = await apiFetch(`/api/pharmacy/patient/${nationalId}`);
   if (!res.ok) throw new Error("Patient not found");
   return res.json();
 }
 
 async function dispenseMed(medicationId: number, pharmacistName: string) {
-  const res = await fetch(`/api/pharmacy/dispense/${medicationId}`, {
+  const res = await apiFetch(`/api/pharmacy/dispense/${medicationId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pharmacistName }),
@@ -66,10 +68,6 @@ const SEVERITY_CELL: Record<string, string> = {
 const SEVERITY_ORDER: Record<string, number> = {
   CONTRAINDICATED: 0, MAJOR: 1, HIGH: 2, MODERATE: 3, MINOR: 4,
 };
-
-function generateRefNo() {
-  return `SANAD-RX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-}
 
 function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
   const drugs = prescriptions.map((p) => p.drugName);
@@ -298,6 +296,7 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
 
 export default function PharmacyPortal() {
   const { user } = useAuth();
+  const { text } = useLanguage();
   const pharmacistName = user?.name ?? "Pharmacist";
   const { alerts: sseAlerts, connected: sseConnected } = useSseAlerts("pharmacy");
 
@@ -330,14 +329,14 @@ export default function PharmacyPortal() {
       const presc = data?.prescriptions?.find((p: any) => p.id === id);
       if (presc && data?.patient) {
         const newReceipt: DispenseReceipt = {
-          refNo: generateRefNo(),
+          refNo: result.referenceNo, // server-issued — auditable against the dispense event
           drugName: presc.drugName,
           dosage: presc.dosage,
           frequency: presc.frequency,
           patient: data.patient.name,
           nationalId: data.patient.nationalId,
           pharmacist: pharmacistName,
-          dispensedAt: new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" }),
+          dispensedAt: new Date(result.dispensedAt ?? Date.now()).toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" }),
           insurance: result.insurance ?? presc.insurance,
           supplyChainStatus: result.supplyChainStatus,
           safe: presc.dispenseCheck?.safe ?? true,
@@ -384,7 +383,7 @@ export default function PharmacyPortal() {
       </style></head><body>
       <div class="header"><h1>🏥 SANAD National Health Platform</h1>
         <p>Ministry of Health — Kingdom of Saudi Arabia</p>
-        <p>Prescription Reference: SANAD-RX-${Date.now()} · ${new Date().toLocaleDateString("en-SA")}</p>
+        <p>Active Prescription List — ${data.patient.nationalId} · ${new Date().toLocaleDateString("en-SA")}</p>
       </div>
       ${data.patient.allergies?.length ? `<div class="allergy-bar">⚠ KNOWN ALLERGIES: ${data.patient.allergies.join(" · ")}</div>` : ""}
       <div class="patient-row">
@@ -416,21 +415,21 @@ export default function PharmacyPortal() {
   ];
 
   return (
-    <Layout role="pharmacy">
+    <Layout role="pharmacy" localized>
       {receipt && <ReceiptModal receipt={receipt} onClose={() => setReceipt(null)} />}
 
       <div className="flex items-start justify-between mb-6">
         <PageHeader
-          title="Pharmacy Portal"
-          subtitle="Prescription dispensing · AI drug safety · Insurance verification"
+          title={text("Pharmacy Portal", "بوابة الصيدلية")}
+          subtitle={text("Prescription dispensing · AI drug safety · Insurance verification", "صرف الوصفات · سلامة الدواء بالذكاء · التحقّق من التأمين")}
         />
-        <div className="flex items-center gap-2 shrink-0 ml-4">
+        <div className="flex items-center gap-2 shrink-0 ms-4">
           <button
             onClick={() => setShowLog((v) => !v)}
             className="relative flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-white hover:bg-secondary transition-colors"
           >
             <Receipt className="w-3.5 h-3.5 text-violet-600" />
-            Today's Log
+            {text("Today's Log", "سجل اليوم")}
             {todayLog.length > 0 && (
               <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-violet-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                 {todayLog.length}
@@ -440,7 +439,7 @@ export default function PharmacyPortal() {
           <div className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-white">
             <Bell className={`w-3.5 h-3.5 ${sseConnected ? "text-emerald-500" : "text-gray-400"}`} />
             <div className={`w-1.5 h-1.5 rounded-full ${sseConnected ? "bg-emerald-500 animate-pulse" : "bg-gray-300"}`} />
-            <span className="text-muted-foreground">{sseConnected ? "Live" : "Connecting..."}</span>
+            <span className="text-muted-foreground">{sseConnected ? text("Live", "مباشر") : text("Connecting...", "جارٍ الاتصال...")}</span>
           </div>
         </div>
       </div>
@@ -450,7 +449,7 @@ export default function PharmacyPortal() {
         <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
           <ShieldAlert className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-xs font-bold text-red-700 mb-0.5">Critical Pharmacy Alert</p>
+            <p className="text-xs font-bold text-red-700 mb-0.5">{text("Critical Pharmacy Alert", "تنبيه صيدلية حرج")}</p>
             {sseAlerts.filter((a) => a.severity === "critical").slice(0, 2).map((a, i) => (
               <p key={i} className="text-xs text-red-600">{a.title}: {a.action}</p>
             ))}
@@ -463,14 +462,14 @@ export default function PharmacyPortal() {
         <Card className="mb-5 border-violet-200">
           <CardHeader>
             <Receipt className="w-4 h-4 text-violet-600" />
-            <CardTitle>Today's Dispense Log</CardTitle>
-            <Badge variant="outline" className="ml-auto">{todayLog.length} dispensed</Badge>
-            <button onClick={() => setShowLog(false)} className="ml-2 text-muted-foreground hover:text-foreground">
+            <CardTitle>{text("Today's Dispense Log", "سجل صرف اليوم")}</CardTitle>
+            <Badge variant="outline" className="ms-auto">{text(`${todayLog.length} dispensed`, `${todayLog.length} مصروف`)}</Badge>
+            <button onClick={() => setShowLog(false)} className="ms-2 text-muted-foreground hover:text-foreground">
               <X className="w-4 h-4" />
             </button>
           </CardHeader>
           {todayLog.length === 0 ? (
-            <CardBody className="py-6 text-center text-sm text-muted-foreground">No medications dispensed yet today.</CardBody>
+            <CardBody className="py-6 text-center text-sm text-muted-foreground">{text("No medications dispensed yet today.", "لم تُصرف أي أدوية اليوم بعد.")}</CardBody>
           ) : (
             <div className="divide-y divide-border">
               {todayLog.map((log, i) => (
@@ -482,8 +481,8 @@ export default function PharmacyPortal() {
                     <p className="font-bold text-sm text-foreground">{log.drugName} <span className="text-xs font-normal text-muted-foreground">{log.dosage}</span></p>
                     <p className="text-xs text-muted-foreground">{log.patient} · {log.nationalId}</p>
                   </div>
-                  <p className="text-[10px] font-mono text-muted-foreground shrink-0">{log.refNo.slice(-10)}</p>
-                  <Badge variant={log.safe ? "success" : "warning"} className="text-[9px] shrink-0">{log.safe ? "Cleared" : "Override"}</Badge>
+                  <p className="text-[10px] font-mono text-muted-foreground shrink-0" dir="ltr">{log.refNo.slice(-10)}</p>
+                  <Badge variant={log.safe ? "success" : "warning"} className="text-[9px] shrink-0">{log.safe ? text("Cleared", "مُجاز") : text("Override", "تجاوز")}</Badge>
                 </div>
               ))}
             </div>
@@ -493,17 +492,17 @@ export default function PharmacyPortal() {
 
       {/* KPI Row */}
       <div className="grid grid-cols-4 gap-4 mb-5">
-        <KpiCard title="Dispensed Today" value={String(todayLog.length)} sub="Medications issued" icon={Receipt} iconBg="bg-violet-100" iconColor="text-violet-600" />
-        <KpiCard title="Queue" value={String(queue.length)} sub="Patients waiting" icon={Users} iconBg="bg-blue-100" iconColor="text-blue-600" />
+        <KpiCard title={text("Dispensed Today", "صُرف اليوم")} value={String(todayLog.length)} sub={text("Medications issued", "أدوية مصروفة")} icon={Receipt} iconBg="bg-violet-100" iconColor="text-violet-600" />
+        <KpiCard title={text("Queue", "قائمة الانتظار")} value={String(queue.length)} sub={text("Patients waiting", "مرضى منتظرون")} icon={Users} iconBg="bg-blue-100" iconColor="text-blue-600" />
         <KpiCard
-          title="Interactions"
+          title={text("Interactions", "التداخلات")}
           value={String(data?.summary?.interactions ?? 0)}
-          sub="Drug conflicts flagged"
+          sub={text("Drug conflicts flagged", "تعارضات دوائية موسومة")}
           icon={ShieldAlert}
           iconBg={data?.summary?.interactions > 0 ? "bg-red-100" : "bg-secondary"}
           iconColor={data?.summary?.interactions > 0 ? "text-red-600" : "text-muted-foreground"}
         />
-        <KpiCard title="Insured" value={String(data?.summary?.insuranceCovered ?? 0)} sub="Coverage eligible" icon={CreditCard} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
+        <KpiCard title={text("Insured", "مؤمّن")} value={String(data?.summary?.insuranceCovered ?? 0)} sub={text("Coverage eligible", "مؤهّل للتغطية")} icon={CreditCard} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
       </div>
 
       {/* Search + Queue */}
@@ -511,16 +510,16 @@ export default function PharmacyPortal() {
         <CardBody>
           <form onSubmit={handleSearch} className="flex gap-3 mb-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Enter Patient National ID"
+                placeholder={text("Enter Patient National ID", "أدخل رقم هوية المريض")}
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
-                className="pl-9"
+                className="ps-9"
               />
             </div>
             <Button type="submit" disabled={!searchId.trim()} className="bg-violet-600 hover:bg-violet-700 text-white">
-              <Search className="w-4 h-4 mr-1.5" /> Retrieve Prescriptions
+              <Search className="w-4 h-4 me-1.5" /> {text("Retrieve Prescriptions", "استدعاء الوصفات")}
             </Button>
           </form>
 

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
   Card, CardHeader, CardTitle, CardBody,
@@ -9,19 +10,20 @@ import {
   Brain, TrendingUp, TrendingDown, Minus, ArrowRight, Plus, X, Activity
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/language-context";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Legend
 } from "recharts";
 
 async function fetchLabPatient(nationalId: string) {
-  const res = await fetch(`/api/lab/patient/${nationalId}`);
+  const res = await apiFetch(`/api/lab/patient/${nationalId}`);
   if (!res.ok) throw new Error("Patient not found");
   return res.json();
 }
 
 async function submitLabResult(data: Record<string, string>) {
-  const res = await fetch("/api/lab/result", {
+  const res = await apiFetch("/api/lab/result", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
@@ -37,6 +39,7 @@ const TEST_NAMES = [
 ];
 
 export default function LabPortal() {
+  const { text } = useLanguage();
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -132,10 +135,10 @@ export default function LabPortal() {
   };
 
   return (
-    <Layout role="lab">
+    <Layout role="lab" localized>
       <PageHeader
-        title="Lab Portal"
-        subtitle="Upload results · AI interpretation · Clinical flags"
+        title={text("Lab Portal", "بوابة المختبر")}
+        subtitle={text("Upload results · AI interpretation · Clinical flags", "رفع النتائج · التفسير الذكي · الإشارات السريرية")}
       />
 
       {/* Search */}
@@ -143,16 +146,16 @@ export default function LabPortal() {
         <CardBody>
           <form onSubmit={handleSearch} className="flex gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Patient National ID"
+                placeholder={text("Patient National ID", "رقم هوية المريض")}
                 value={searchId}
                 onChange={e => setSearchId(e.target.value)}
-                className="pl-9"
+                className="ps-9"
               />
             </div>
             <Button type="submit" disabled={!searchId.trim()}>
-              <Search className="w-4 h-4" /> Retrieve Patient
+              <Search className="w-4 h-4" /> {text("Retrieve Patient", "استدعاء المريض")}
             </Button>
           </form>
         </CardBody>
@@ -161,7 +164,7 @@ export default function LabPortal() {
       {isLoading && (
         <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-600" />
-          <span className="text-sm font-medium">Retrieving patient records...</span>
+          <span className="text-sm font-medium">{text("Retrieving patient records...", "جارٍ استدعاء سجلات المريض...")}</span>
         </div>
       )}
 
@@ -169,8 +172,8 @@ export default function LabPortal() {
         <Card>
           <CardBody className="py-10 text-center">
             <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
-            <p className="font-bold text-foreground">Patient Not Found</p>
-            <p className="text-sm text-muted-foreground mt-1">No records for National ID: {nationalId}</p>
+            <p className="font-bold text-foreground">{text("Patient Not Found", "المريض غير موجود")}</p>
+            <p className="text-sm text-muted-foreground mt-1">{text("No records for National ID:", "لا توجد سجلات لرقم الهوية:")} <span dir="ltr">{nationalId}</span></p>
           </CardBody>
         </Card>
       )}
@@ -184,38 +187,38 @@ export default function LabPortal() {
             "bg-teal-500"
           } text-white`}>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">Patient Identified</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Patient Identified", "تم تحديد المريض")}</p>
               <p className="text-xl font-bold">{data.patient.name}</p>
               <div className="flex items-center gap-4 mt-1.5 text-sm text-white/80">
-                <span>ID: {data.patient.nationalId}</span>
-                <span>Age: {data.patient.age}</span>
-                <span>Blood: {data.patient.bloodType}</span>
+                <span dir="ltr">{text("ID:", "الهوية:")} {data.patient.nationalId}</span>
+                <span>{text("Age:", "العمر:")} {data.patient.age}</span>
+                <span>{text("Blood:", "الفصيلة:")} {data.patient.bloodType}</span>
               </div>
               {data.patient.allergies && data.patient.allergies.length > 0 && (
                 <div className="mt-2 flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  <span className="text-xs font-bold">ALLERGIES: {data.patient.allergies.join(", ")}</span>
+                  <span className="text-xs font-bold">{text("ALLERGIES:", "الحساسية:")} {data.patient.allergies.join("، ")}</span>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-6 shrink-0">
               <div className="text-center">
-                <p className="text-[10px] text-white/70">Labs on Record</p>
+                <p className="text-[10px] text-white/70">{text("Labs on Record", "تحاليل مُسجّلة")}</p>
                 <p className="text-3xl font-bold">{data.summary.total}</p>
               </div>
               <div className="text-center">
-                <p className="text-[10px] text-white/70">Critical</p>
+                <p className="text-[10px] text-white/70">{text("Critical", "حرجة")}</p>
                 <p className="text-3xl font-bold">{data.summary.critical}</p>
               </div>
               <div className="text-center">
-                <p className="text-[10px] text-white/70">Abnormal</p>
+                <p className="text-[10px] text-white/70">{text("Abnormal", "غير طبيعية")}</p>
                 <p className="text-3xl font-bold">{data.summary.abnormal}</p>
               </div>
               <Button
                 onClick={() => setShowAddForm(true)}
                 className="bg-white/20 hover:bg-white/30 text-white border-0"
               >
-                <Plus className="w-4 h-4" /> Add Result
+                <Plus className="w-4 h-4" /> {text("Add Result", "إضافة نتيجة")}
               </Button>
             </div>
           </div>
@@ -225,9 +228,9 @@ export default function LabPortal() {
             <Card>
               <CardHeader>
                 <Activity className="w-4 h-4 text-teal-600" />
-                <CardTitle>Lab Trends — Clinical Progression</CardTitle>
-                <span className="ml-auto text-[11px] font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">
-                  {chartsToShow.length} test{chartsToShow.length > 1 ? "s" : ""} charted
+                <CardTitle>{text("Lab Trends — Clinical Progression", "اتجاهات المختبر — التطوّر السريري")}</CardTitle>
+                <span className="ms-auto text-[11px] font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">
+                  {text(`${chartsToShow.length} test${chartsToShow.length > 1 ? "s" : ""} charted`, `${chartsToShow.length} فحص مرسوم`)}
                 </span>
               </CardHeader>
               <CardBody>
@@ -320,20 +323,20 @@ export default function LabPortal() {
               <div className="flex items-start gap-3 mb-3">
                 <Brain className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">AI Lab Interpreter — Just Submitted</p>
-                  <p className="font-bold text-foreground">{lastResult.result?.testName} = {lastResult.result?.result} {lastResult.result?.unit}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{text("AI Lab Interpreter — Just Submitted", "مفسّر المختبر الذكي — أُرسل للتو")}</p>
+                  <p className="font-bold text-foreground" dir="ltr">{lastResult.result?.testName} = {lastResult.result?.result} {lastResult.result?.unit}</p>
                 </div>
-                <Badge variant={statusColor(lastResult.aiAnalysis?.status)} className="ml-auto">{lastResult.aiAnalysis?.status}</Badge>
+                <Badge variant={statusColor(lastResult.aiAnalysis?.status)} className="ms-auto">{lastResult.aiAnalysis?.status}</Badge>
               </div>
               <p className="text-sm text-foreground mb-2">{lastResult.aiAnalysis?.significance}</p>
               <div className="flex items-start gap-2 px-3 py-2.5 bg-white/60 rounded-xl">
-                <ArrowRight className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                <ArrowRight className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5 rtl:-scale-x-100" />
                 <p className="text-xs font-semibold text-foreground">{lastResult.aiAnalysis?.action}</p>
               </div>
               <div className="flex items-center gap-3 mt-2.5">
-                <span className="text-[10px] text-muted-foreground">RISK IMPACT: +{lastResult.aiAnalysis?.riskImpact} pts</span>
-                <span className="text-[10px] text-muted-foreground">CONFIDENCE: {Math.round(lastResult.aiAnalysis?.confidence * 100)}%</span>
-                <span className="text-[10px] text-muted-foreground ml-auto">EVENT: {lastResult.event}</span>
+                <span className="text-[10px] text-muted-foreground">{text("RISK IMPACT:", "أثر الخطورة:")} +{lastResult.aiAnalysis?.riskImpact} {text("pts", "نقاط")}</span>
+                <span className="text-[10px] text-muted-foreground">{text("CONFIDENCE:", "الثقة:")} {Math.round(lastResult.aiAnalysis?.confidence * 100)}%</span>
+                <span className="text-[10px] text-muted-foreground ms-auto">{text("EVENT:", "الحدث:")} {lastResult.event}</span>
               </div>
             </div>
           )}
@@ -343,62 +346,62 @@ export default function LabPortal() {
             <Card>
               <CardHeader>
                 <FlaskConical className="w-4 h-4 text-teal-600" />
-                <CardTitle>Upload New Lab Result</CardTitle>
-                <button onClick={() => setShowAddForm(false)} className="ml-auto text-muted-foreground hover:text-foreground">
+                <CardTitle>{text("Upload New Lab Result", "رفع نتيجة مخبرية جديدة")}</CardTitle>
+                <button onClick={() => setShowAddForm(false)} className="ms-auto text-muted-foreground hover:text-foreground">
                   <X className="w-4 h-4" />
                 </button>
               </CardHeader>
               <CardBody>
                 <div className="grid grid-cols-3 gap-4 mb-4">
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">Test Name *</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Test Name *", "اسم الفحص *")}</p>
                     <select
                       className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                       value={form.testName}
                       onChange={e => setForm(f => ({ ...f, testName: e.target.value }))}
                     >
-                      <option value="">Select test...</option>
+                      <option value="">{text("Select test...", "اختر الفحص...")}</option>
                       {TEST_NAMES.map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">Result Value *</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Result Value *", "قيمة النتيجة *")}</p>
                     <Input
-                      placeholder="e.g. 8.2"
+                      placeholder={text("e.g. 8.2", "مثال: 8.2")}
                       value={form.result}
                       onChange={e => setForm(f => ({ ...f, result: e.target.value }))}
                     />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">Unit</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Unit", "الوحدة")}</p>
                     <Input
-                      placeholder="e.g. mg/dL, %"
+                      placeholder={text("e.g. mg/dL, %", "مثال: mg/dL، %")}
                       value={form.unit}
                       onChange={e => setForm(f => ({ ...f, unit: e.target.value }))}
                     />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">Reference Range</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Reference Range", "النطاق المرجعي")}</p>
                     <Input
-                      placeholder="e.g. 70–99 mg/dL"
+                      placeholder={text("e.g. 70–99 mg/dL", "مثال: 70–99 mg/dL")}
                       value={form.referenceRange}
                       onChange={e => setForm(f => ({ ...f, referenceRange: e.target.value }))}
                     />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">Status *</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Status *", "الحالة *")}</p>
                     <select
                       className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                       value={form.status}
                       onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
                     >
-                      <option value="normal">Normal</option>
-                      <option value="abnormal">Abnormal</option>
-                      <option value="critical">Critical</option>
+                      <option value="normal">{text("Normal", "طبيعي")}</option>
+                      <option value="abnormal">{text("Abnormal", "غير طبيعي")}</option>
+                      <option value="critical">{text("Critical", "حرج")}</option>
                     </select>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">Hospital / Lab</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Hospital / Lab", "المستشفى / المختبر")}</p>
                     <Input
                       value={form.hospital}
                       onChange={e => setForm(f => ({ ...f, hospital: e.target.value }))}
@@ -406,9 +409,9 @@ export default function LabPortal() {
                   </div>
                 </div>
                 <div className="mb-4">
-                  <p className="text-xs font-semibold text-muted-foreground mb-1.5">Clinical Notes</p>
+                  <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Clinical Notes", "ملاحظات سريرية")}</p>
                   <Input
-                    placeholder="Optional clinical notes..."
+                    placeholder={text("Optional clinical notes...", "ملاحظات سريرية اختيارية...")}
                     value={form.notes}
                     onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                   />
@@ -420,9 +423,9 @@ export default function LabPortal() {
                     className="flex-1"
                   >
                     <Zap className="w-4 h-4" />
-                    {submitMutation.isPending ? "Submitting + AI Analysis..." : "Submit Result & Run AI Analysis"}
+                    {submitMutation.isPending ? text("Submitting + AI Analysis...", "جارٍ الإرسال + التحليل الذكي...") : text("Submit Result & Run AI Analysis", "إرسال النتيجة وتشغيل التحليل الذكي")}
                   </Button>
-                  <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
+                  <Button variant="outline" onClick={() => setShowAddForm(false)}>{text("Cancel", "إلغاء")}</Button>
                 </div>
               </CardBody>
             </Card>
@@ -432,14 +435,14 @@ export default function LabPortal() {
           <Card>
             <CardHeader>
               <FlaskConical className="w-4 h-4 text-teal-600" />
-              <CardTitle>Lab Results with AI Interpretation</CardTitle>
-              <Badge variant="outline" className="ml-auto">{data.labs.length} results</Badge>
+              <CardTitle>{text("Lab Results with AI Interpretation", "نتائج المختبر مع التفسير الذكي")}</CardTitle>
+              <Badge variant="outline" className="ms-auto">{text(`${data.labs.length} results`, `${data.labs.length} نتيجة`)}</Badge>
             </CardHeader>
             <div className="divide-y divide-border">
               {data.labs.length === 0 ? (
                 <div className="py-12 text-center">
                   <FlaskConical className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-                  <p className="font-bold text-foreground">No lab results on record</p>
+                  <p className="font-bold text-foreground">{text("No lab results on record", "لا توجد نتائج مخبرية مُسجّلة")}</p>
                 </div>
               ) : (
                 data.labs.map((lab: any) => (
@@ -454,11 +457,11 @@ export default function LabPortal() {
                             {trendIcon(lab.interpretation?.trend ?? "")}
                             <span className="text-[10px] font-bold text-muted-foreground">{lab.interpretation?.trend}</span>
                           </div>
-                          <span className="ml-auto text-[10px] text-muted-foreground font-mono">{lab.testDate}</span>
+                          <span className="ms-auto text-[10px] text-muted-foreground font-mono" dir="ltr">{lab.testDate}</span>
                         </div>
                         <div className="flex items-center gap-3 mb-2">
-                          <p className="text-lg font-bold tabular-nums text-foreground">{lab.result} <span className="text-sm font-normal text-muted-foreground">{lab.unit}</span></p>
-                          {lab.referenceRange && <p className="text-[10px] text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded-full">REF: {lab.referenceRange}</p>}
+                          <p className="text-lg font-bold tabular-nums text-foreground" dir="ltr">{lab.result} <span className="text-sm font-normal text-muted-foreground">{lab.unit}</span></p>
+                          {lab.referenceRange && <p className="text-[10px] text-muted-foreground font-mono bg-secondary px-2 py-0.5 rounded-full" dir="ltr">{text("REF:", "المرجع:")} {lab.referenceRange}</p>}
                           <p className="text-[10px] text-muted-foreground">{lab.hospital}</p>
                         </div>
                         <div className={`px-3 py-2.5 rounded-xl border text-xs ${
@@ -470,10 +473,10 @@ export default function LabPortal() {
                             <Brain className="w-3.5 h-3.5 text-violet-600 shrink-0 mt-0.5" />
                             <div>
                               <p className="font-semibold text-foreground mb-0.5">{lab.interpretation?.significance}</p>
-                              <p className="text-muted-foreground">→ {lab.interpretation?.action}</p>
+                              <p className="text-muted-foreground">{text("→", "←")} {lab.interpretation?.action}</p>
                               <div className="flex items-center gap-3 mt-1">
-                                <span className="text-[10px] font-mono text-muted-foreground">RISK IMPACT: +{lab.interpretation?.riskImpact}</span>
-                                <span className="text-[10px] font-mono text-muted-foreground">CONFIDENCE: {Math.round((lab.interpretation?.confidence ?? 0) * 100)}%</span>
+                                <span className="text-[10px] font-mono text-muted-foreground">{text("RISK IMPACT:", "أثر الخطورة:")} +{lab.interpretation?.riskImpact}</span>
+                                <span className="text-[10px] font-mono text-muted-foreground">{text("CONFIDENCE:", "الثقة:")} {Math.round((lab.interpretation?.confidence ?? 0) * 100)}%</span>
                               </div>
                             </div>
                           </div>
@@ -493,8 +496,8 @@ export default function LabPortal() {
           <div className="w-16 h-16 rounded-3xl bg-teal-100 flex items-center justify-center mx-auto mb-5">
             <FlaskConical className="w-8 h-8 text-teal-600" />
           </div>
-          <p className="text-xl font-bold text-foreground mb-2">Lab Results Portal</p>
-          <p className="text-sm text-muted-foreground max-w-sm">Enter a patient's National ID to retrieve their lab history and upload new results with AI interpretation.</p>
+          <p className="text-xl font-bold text-foreground mb-2">{text("Lab Results Portal", "بوابة نتائج المختبر")}</p>
+          <p className="text-sm text-muted-foreground max-w-sm">{text("Enter a patient's National ID to retrieve their lab history and upload new results with AI interpretation.", "أدخل رقم هوية المريض لاستدعاء سجل تحاليله ورفع نتائج جديدة مع التفسير الذكي.")}</p>
         </div>
       )}
     </Layout>

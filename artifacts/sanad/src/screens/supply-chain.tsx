@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard } from "@/components/shared";
 import {
@@ -7,18 +8,19 @@ import {
   MapPin, ShoppingCart, Calendar, ChevronRight, TrendingDown
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/language-context";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, AreaChart, Area, Legend, ReferenceLine
 } from "recharts";
 
 async function fetchInventory() {
-  const res = await fetch("/api/supply-chain/inventory");
+  const res = await apiFetch("/api/supply-chain/inventory");
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
 async function submitReorder(body: Record<string, any>) {
-  const res = await fetch("/api/supply-chain/reorder", {
+  const res = await apiFetch("/api/supply-chain/reorder", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -39,7 +41,7 @@ const STATUS_CFG: Record<string, { bg: string; border: string; text: string; bad
 type ShortagePrediction = { drug: string; day30: number; day60: number; day90: number; current: number; min: number };
 
 async function fetchRegionalDistribution() {
-  const res = await fetch("/api/supply-chain/regional-distribution");
+  const res = await apiFetch("/api/supply-chain/regional-distribution");
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
@@ -56,6 +58,7 @@ const CONSUMPTION_TREND = [
 type ViewTab = "inventory" | "predictions" | "distribution" | "reorder";
 
 export default function SupplyChainPortal() {
+  const { text } = useLanguage();
   const [activeTab, setActiveTab] = useState<ViewTab>("inventory");
   const [reorderResults, setReorderResults] = useState<Record<string, any>>({});
 
@@ -80,36 +83,36 @@ export default function SupplyChainPortal() {
 
   if (isLoading) {
     return (
-      <Layout role="supply-chain">
+      <Layout role="supply-chain" localized>
         <div className="flex items-center justify-center gap-3 py-20 text-muted-foreground">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-lime-600" />
-          <span className="text-sm font-medium">Loading inventory data...</span>
+          <span className="text-sm font-medium">{text("Loading inventory data...", "جارٍ تحميل بيانات المخزون...")}</span>
         </div>
       </Layout>
     );
   }
 
   const TABS: { id: ViewTab; label: string; icon: React.ElementType }[] = [
-    { id: "inventory", label: "Inventory Status", icon: Package },
-    { id: "predictions", label: "AI Shortage Predictions", icon: Brain },
-    { id: "distribution", label: "Regional Distribution", icon: Globe },
-    { id: "reorder", label: "Purchase Orders", icon: ShoppingCart },
+    { id: "inventory", label: text("Inventory Status", "حالة المخزون"), icon: Package },
+    { id: "predictions", label: text("AI Shortage Predictions", "تنبؤات النقص الذكية"), icon: Brain },
+    { id: "distribution", label: text("Regional Distribution", "التوزيع الإقليمي"), icon: Globe },
+    { id: "reorder", label: text("Purchase Orders", "أوامر الشراء"), icon: ShoppingCart },
   ];
 
   const criticals = data?.summary?.criticalShortages ?? 0;
 
   return (
-    <Layout role="supply-chain">
+    <Layout role="supply-chain" localized>
       {/* Priority Strip */}
       {criticals > 0 && (
         <div className="flex items-center gap-3 px-4 py-2.5 bg-red-600 text-white rounded-2xl mb-5">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <p className="text-xs font-bold uppercase tracking-widest">
-            {criticals} CRITICAL SHORTAGE{criticals > 1 ? "S" : ""} —{" "}
+            {text(`${criticals} CRITICAL SHORTAGE${criticals > 1 ? "S" : ""} —`, `${criticals} نقص حرج —`)}{" "}
             {data?.criticalAlerts?.map((a: any) => a.drug).join(" · ")}
           </p>
-          <button onClick={() => setActiveTab("reorder")} className="ml-auto text-[11px] font-bold bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
-            Issue Purchase Orders →
+          <button onClick={() => setActiveTab("reorder")} className="ms-auto text-[11px] font-bold bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
+            {text("Issue Purchase Orders →", "إصدار أوامر شراء ←")}
           </button>
         </div>
       )}
@@ -117,32 +120,32 @@ export default function SupplyChainPortal() {
       <div className="flex items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-lime-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Package className="w-3 h-3" />
-          Supply Chain
+          {text("Supply Chain", "سلسلة الإمداد")}
         </div>
         <div className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full ${criticals > 0 ? "text-red-600 bg-red-50" : "text-emerald-600 bg-emerald-50"}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${criticals > 0 ? "bg-red-500 animate-pulse" : "bg-emerald-500"}`} />
-          {criticals > 0 ? `${criticals} Critical Shortages` : "No Critical Shortages"}
+          {criticals > 0 ? text(`${criticals} Critical Shortages`, `${criticals} نقص حرج`) : text("No Critical Shortages", "لا يوجد نقص حرج")}
         </div>
-        <div className="ml-auto font-mono text-[11px] text-muted-foreground bg-secondary border border-border px-3 py-1.5 rounded-full">
-          Inventory Value: SAR {data?.summary?.totalInventoryValue?.toLocaleString()}
+        <div className="ms-auto font-mono text-[11px] text-muted-foreground bg-secondary border border-border px-3 py-1.5 rounded-full">
+          {text("Inventory Value:", "قيمة المخزون:")} {text("SAR", "ر.س")} {data?.summary?.totalInventoryValue?.toLocaleString()}
         </div>
       </div>
 
       <PageHeader
-        title="National Drug Supply Chain"
-        subtitle="Real-time inventory · AI shortage prediction · Regional distribution optimization · Procurement management"
+        title={text("National Drug Supply Chain", "سلسلة إمداد الأدوية الوطنية")}
+        subtitle={text("Real-time inventory · AI shortage prediction · Regional distribution optimization · Procurement management", "مخزون فوري · تنبؤ النقص بالذكاء · تحسين التوزيع الإقليمي · إدارة المشتريات")}
       />
 
       {/* KPI Strip */}
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <KpiCard title="Total Drug Lines" value={data?.summary?.totalDrugs} sub="Tracked nationally" icon={Package} iconBg="bg-lime-100" iconColor="text-lime-700" />
+        <KpiCard title={text("Total Drug Lines", "إجمالي أصناف الأدوية")} value={data?.summary?.totalDrugs} sub={text("Tracked nationally", "متابَعة وطنيًا")} icon={Package} iconBg="bg-lime-100" iconColor="text-lime-700" />
         <KpiCard
-          title="Critical Shortages" value={data?.summary?.criticalShortages}
-          sub={`${data?.summary?.reorderAlerts} reorder alerts active`}
+          title={text("Critical Shortages", "النقص الحرج")} value={data?.summary?.criticalShortages}
+          sub={text(`${data?.summary?.reorderAlerts} reorder alerts active`, `${data?.summary?.reorderAlerts} تنبيه إعادة طلب`)}
           icon={AlertTriangle} iconBg={criticals > 0 ? "bg-red-100" : "bg-emerald-100"} iconColor={criticals > 0 ? "text-red-600" : "text-emerald-600"}
         />
-        <KpiCard title="Adequate Stock" value={data?.summary?.adequate} sub="Lines fully stocked" icon={CheckCircle2} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
-        <KpiCard title="Inventory Value" value={`SAR ${data?.summary?.totalInventoryValue?.toLocaleString()}`} sub="Current stock value" icon={BarChart2} iconBg="bg-primary/10" iconColor="text-primary" />
+        <KpiCard title={text("Adequate Stock", "مخزون كافٍ")} value={data?.summary?.adequate} sub={text("Lines fully stocked", "أصناف مكتملة المخزون")} icon={CheckCircle2} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
+        <KpiCard title={text("Inventory Value", "قيمة المخزون")} value={`${text("SAR", "ر.س")} ${data?.summary?.totalInventoryValue?.toLocaleString()}`} sub={text("Current stock value", "قيمة المخزون الحالية")} icon={BarChart2} iconBg="bg-primary/10" iconColor="text-primary" />
       </div>
 
       {/* Tabs */}

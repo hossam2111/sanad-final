@@ -174,7 +174,7 @@ export function PageHeader({ title, subtitle, action }: {
         <h1 className="text-[22px] font-bold text-foreground tracking-tight leading-tight">{title}</h1>
         {subtitle && <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{subtitle}</p>}
       </div>
-      {action && <div className="shrink-0 ml-4">{action}</div>}
+      {action && <div className="shrink-0 ms-4">{action}</div>}
     </div>
   );
 }
@@ -233,6 +233,7 @@ export function Tabs({ tabs, active, onChange }: {
       {tabs.map(tab => (
         <button
           key={tab.id}
+          type="button"
           onClick={() => onChange(tab.id)}
           className={cn(
             "flex items-center gap-2 px-5 py-3.5 text-[13px] font-semibold border-b-2 -mb-px transition-all duration-150 whitespace-nowrap shrink-0",

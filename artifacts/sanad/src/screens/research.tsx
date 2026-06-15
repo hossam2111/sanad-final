@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard } from "@/components/shared";
 import {
@@ -7,6 +8,7 @@ import {
   ArrowUpRight, FileText, Filter, Globe, Star, ChevronRight, Database
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/language-context";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, LineChart, Line, ScatterChart, Scatter, Cell,
@@ -15,7 +17,7 @@ import {
 } from "recharts";
 
 async function fetchResearchInsights() {
-  const res = await fetch("/api/research/insights");
+  const res = await apiFetch("/api/research/insights");
   if (!res.ok) throw new Error("Failed to fetch");
   return res.json();
 }
@@ -134,12 +136,13 @@ const STATUS_CONFIG: Record<string, { bg: string; border: string; badge: any; do
 type ViewTab = "overview" | "studies" | "trends" | "correlations" | "cohorts";
 
 export default function ResearchPortal() {
+  const { text } = useLanguage();
   const [activeView, setActiveView] = useState<ViewTab>("overview");
   const [selectedConditions, setSelectedConditions] = useState<"conditions" | "labs" | "drugs" | "age">("conditions");
   const { data, isLoading } = useQuery({ queryKey: ["research-insights"], queryFn: fetchResearchInsights });
 
   const handleExport = async (format: "csv" | "json") => {
-    const res = await fetch(`/api/research/export?format=${format}`);
+    const res = await apiFetch(`/api/research/export?format=${format}`);
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -151,64 +154,64 @@ export default function ResearchPortal() {
 
   if (isLoading) {
     return (
-      <Layout role="research">
+      <Layout role="research" localized>
         <div className="flex items-center justify-center gap-3 py-20 text-muted-foreground">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-500" />
-          <span className="text-sm font-medium">Aggregating anonymized research data...</span>
+          <span className="text-sm font-medium">{text("Aggregating anonymized research data...", "جارٍ تجميع بيانات البحث المجهّلة...")}</span>
         </div>
       </Layout>
     );
   }
 
   const TABS: { id: ViewTab; label: string; icon: React.ElementType }[] = [
-    { id: "overview", label: "Population Overview", icon: BarChart2 },
-    { id: "studies", label: "Clinical Studies", icon: BookOpen },
-    { id: "trends", label: "Disease Trends", icon: TrendingUp },
-    { id: "correlations", label: "Correlation Analysis", icon: GitBranch },
-    { id: "cohorts", label: "Cohort Comparison", icon: Users },
+    { id: "overview", label: text("Population Overview", "نظرة عامة على السكان"), icon: BarChart2 },
+    { id: "studies", label: text("Clinical Studies", "الدراسات السريرية"), icon: BookOpen },
+    { id: "trends", label: text("Disease Trends", "اتجاهات الأمراض"), icon: TrendingUp },
+    { id: "correlations", label: text("Correlation Analysis", "تحليل الارتباط"), icon: GitBranch },
+    { id: "cohorts", label: text("Cohort Comparison", "مقارنة المجموعات"), icon: Users },
   ];
 
   return (
-    <Layout role="research">
+    <Layout role="research" localized>
       {/* Header Strip */}
       <div className="flex items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-teal-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <FlaskConical className="w-3 h-3" />
-          Research Portal
+          {text("Research Portal", "بوابة الأبحاث")}
         </div>
         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
           <Lock className="w-3 h-3" />
-          All data anonymized · GDPR + PDPL compliant
+          {text("All data anonymized · PDPL compliant", "جميع البيانات مجهّلة · متوافقة مع PDPL")}
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ms-auto flex items-center gap-2">
           <button
             onClick={() => handleExport("csv")}
             className="flex items-center gap-1.5 text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-full hover:bg-teal-100 transition-colors"
           >
             <Download className="w-3 h-3" />
-            Export CSV
+            {text("Export CSV", "تصدير CSV")}
           </button>
           <button
             onClick={() => handleExport("json")}
             className="flex items-center gap-1.5 text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-full hover:bg-violet-100 transition-colors"
           >
             <Database className="w-3 h-3" />
-            Export JSON
+            {text("Export JSON", "تصدير JSON")}
           </button>
         </div>
       </div>
 
       <PageHeader
-        title="Clinical Research & Population Analytics"
-        subtitle="Anonymized population-level health intelligence · Clinical study management · Disease correlation engine · National insights"
+        title={text("Clinical Research & Population Analytics", "البحث السريري وتحليلات السكان")}
+        subtitle={text("Anonymized population-level health intelligence · Clinical study management · Disease correlation engine · National insights", "ذكاء صحي مجهّل على مستوى السكان · إدارة الدراسات السريرية · محرك ارتباط الأمراض · رؤى وطنية")}
       />
 
       {/* KPI Strip */}
       <div className="grid grid-cols-4 gap-4 mb-6">
-        <KpiCard title="Anonymized Records" value={data?.totalAnonymizedRecords?.toLocaleString()} sub="Fully de-identified" icon={Users} iconBg="bg-teal-100" iconColor="text-teal-600" />
-        <KpiCard title="Active Studies" value={CLINICAL_STUDIES.filter(s => s.status === "active").length} sub={`${CLINICAL_STUDIES.length} total registered`} icon={BookOpen} iconBg="bg-violet-100" iconColor="text-violet-600" />
-        <KpiCard title="AI Decisions Analyzed" value={data?.aiMetrics?.totalDecisions?.toLocaleString()} sub={`${data?.aiMetrics?.avgConfidence}% avg confidence`} icon={Brain} iconBg="bg-amber-100" iconColor="text-amber-600" />
-        <KpiCard title="Lab Results" value={data?.totalLabResults?.toLocaleString()} sub="Cross-patient trend data" icon={FlaskConical} iconBg="bg-primary/10" iconColor="text-primary" />
+        <KpiCard title={text("Anonymized Records", "سجلات مجهّلة")} value={data?.totalAnonymizedRecords?.toLocaleString()} sub={text("Fully de-identified", "مجهّلة الهوية بالكامل")} icon={Users} iconBg="bg-teal-100" iconColor="text-teal-600" />
+        <KpiCard title={text("Active Studies", "الدراسات النشطة")} value={CLINICAL_STUDIES.filter(s => s.status === "active").length} sub={text(`${CLINICAL_STUDIES.length} total registered`, `${CLINICAL_STUDIES.length} مُسجّلة إجمالًا`)} icon={BookOpen} iconBg="bg-violet-100" iconColor="text-violet-600" />
+        <KpiCard title={text("AI Decisions Analyzed", "قرارات ذكاء مُحلّلة")} value={data?.aiMetrics?.totalDecisions?.toLocaleString()} sub={text(`${data?.aiMetrics?.avgConfidence}% avg confidence`, `${data?.aiMetrics?.avgConfidence}% متوسط الثقة`)} icon={Brain} iconBg="bg-amber-100" iconColor="text-amber-600" />
+        <KpiCard title={text("Lab Results", "نتائج المختبر")} value={data?.totalLabResults?.toLocaleString()} sub={text("Cross-patient trend data", "بيانات اتجاهات عبر المرضى")} icon={FlaskConical} iconBg="bg-primary/10" iconColor="text-primary" />
       </div>
 
       {/* Tabs */}
@@ -507,26 +510,6 @@ export default function ResearchPortal() {
             </CardBody>
           </Card>
 
-          <div className="grid grid-cols-4 gap-4">
-            {[
-              { name: "Type-2 Diabetes", current: "47%", change: "+9%", trend: "rising", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
-              { name: "Hypertension", current: "60%", change: "+8%", trend: "rising", color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
-              { name: "Chronic Kidney Disease", current: "19%", change: "+5%", trend: "rising", color: "text-violet-600", bg: "bg-violet-50", border: "border-violet-200" },
-              { name: "Obesity", current: "38%", change: "+7%", trend: "rising", color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
-            ].map((d, i) => (
-              <div key={i} className={`p-4 ${d.bg} border ${d.border} rounded-2xl`}>
-                <p className="text-xs font-bold text-muted-foreground mb-2">{d.name}</p>
-                <div className="flex items-end gap-2">
-                  <p className={`text-3xl font-bold ${d.color}`}>{d.current}</p>
-                  <p className="text-sm font-bold text-red-500 mb-1">{d.change} YTD</p>
-                </div>
-                <div className="flex items-center gap-1 mt-1">
-                  <ArrowUpRight className={`w-3 h-3 ${d.color}`} />
-                  <p className={`text-[10px] font-bold ${d.color}`}>RISING TREND</p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       )}
 

@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
   Card, CardHeader, CardTitle, CardBody,
@@ -8,30 +9,42 @@ import { useGetPatientByNationalId } from "@workspace/api-client-react";
 import { useAiDecision } from "@/hooks/use-ai-decision";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
+import { useAuth } from "@/contexts/auth-context";
+import { useLanguage } from "@/contexts/language-context";
+import { T } from "@/lib/terms";
+
+type TextFn = (en: string, ar: string) => string;
+
+const VISIT_TYPE_AR_C: Record<string, string> = {
+  emergency: "طوارئ", inpatient: "تنويم", outpatient: "عيادات خارجية", "follow-up": "متابعة",
+};
+function visitTypeArCitizen(visitType: string, text: TextFn): string {
+  return VISIT_TYPE_AR_C[visitType] ? text(visitType, VISIT_TYPE_AR_C[visitType]!) : visitType;
+}
 
 async function fetchDepartments() {
-  const res = await fetch("/api/appointments/departments");
+  const res = await apiFetch("/api/appointments/departments");
   if (!res.ok) throw new Error("Failed");
   return res.json() as Promise<{ departments: string[]; services: Record<string, string[]> }>;
 }
 async function fetchHospitals() {
-  const res = await fetch("/api/appointments/hospitals");
+  const res = await apiFetch("/api/appointments/hospitals");
   if (!res.ok) throw new Error("Failed");
   return res.json() as Promise<{ hospitals: string[] }>;
 }
 async function fetchSlots(date: string, hospital: string, department: string) {
   const p = new URLSearchParams({ date, hospital, department });
-  const res = await fetch(`/api/appointments/slots?${p}`);
+  const res = await apiFetch(`/api/appointments/slots?${p}`);
   if (!res.ok) throw new Error("Failed");
   return res.json() as Promise<{ slots: string[] }>;
 }
 async function fetchPatientAppointments(patientId: number) {
-  const res = await fetch(`/api/appointments/patient/${patientId}`);
+  const res = await apiFetch(`/api/appointments/patient/${patientId}`);
   if (!res.ok) throw new Error("Failed");
   return res.json() as Promise<{ appointments: any[] }>;
 }
 async function bookAppointment(payload: object) {
-  const res = await fetch("/api/appointments", {
+  const res = await apiFetch("/api/appointments", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -59,7 +72,7 @@ function computeHealthScore(patient: {
   medications?: Array<{ isActive: boolean }> | null;
   labResults?: Array<{ status: string }> | null;
   visits?: Array<{ visitDate: string; visitType: string }> | null;
-}): { score: number; grade: "A" | "B" | "C" | "D" | "F"; label: string; color: string; bg: string; summary: string } {
+}, text: TextFn): { score: number; grade: "A" | "B" | "C" | "D" | "F"; label: string; color: string; bg: string; summary: string } {
   let score = 100;
 
   const age = new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
@@ -92,31 +105,26 @@ function computeHealthScore(patient: {
   score -= recentEmergency * 8;
 
   score = Math.max(0, Math.min(100, score));
+  return { score, ...gradeLadder(score, text) };
+}
 
-  let grade: "A" | "B" | "C" | "D" | "F";
-  let label: string;
-  let color: string;
-  let bg: string;
-  let summary: string;
-
+function gradeLadder(score: number, text: TextFn): { grade: "A" | "B" | "C" | "D" | "F"; label: string; color: string; bg: string; summary: string } {
   if (score >= 85) {
-    grade = "A"; label = "Excellent"; color = "text-emerald-600"; bg = "bg-emerald-50";
-    summary = "Your health indicators are in great shape. Keep up your healthy habits!";
+    return { grade: "A", label: text("Excellent", "ممتازة"), color: "text-emerald-600", bg: "bg-emerald-50",
+      summary: text("Your health indicators are in great shape. Keep up your healthy habits!", "مؤشّراتك الصحية في حالة ممتازة. واصِل عاداتك الصحية!") };
   } else if (score >= 70) {
-    grade = "B"; label = "Good"; color = "text-sky-600"; bg = "bg-sky-50";
-    summary = "Your health is generally good. A few areas could benefit from attention.";
+    return { grade: "B", label: text("Good", "جيدة"), color: "text-sky-600", bg: "bg-sky-50",
+      summary: text("Your health is generally good. A few areas could benefit from attention.", "صحتك جيدة بشكل عام. هناك جوانب قليلة تستحق الاهتمام.") };
   } else if (score >= 55) {
-    grade = "C"; label = "Fair"; color = "text-amber-600"; bg = "bg-amber-50";
-    summary = "Some health factors need monitoring. Follow your doctor's recommendations.";
+    return { grade: "C", label: text("Fair", "مقبولة"), color: "text-amber-600", bg: "bg-amber-50",
+      summary: text("Some health factors need monitoring. Follow your doctor's recommendations.", "بعض العوامل الصحية بحاجة إلى متابعة. اتبع توصيات طبيبك.") };
   } else if (score >= 40) {
-    grade = "D"; label = "Needs Attention"; color = "text-orange-600"; bg = "bg-orange-50";
-    summary = "Multiple health concerns detected. Regular medical follow-up is important.";
+    return { grade: "D", label: text("Needs Attention", "تحتاج إلى عناية"), color: "text-orange-600", bg: "bg-orange-50",
+      summary: text("Multiple health concerns detected. Regular medical follow-up is important.", "رُصدت عدة مخاوف صحية. المتابعة الطبية المنتظمة مهمة.") };
   } else {
-    grade = "F"; label = "High Risk"; color = "text-red-600"; bg = "bg-red-50";
-    summary = "Significant health risks identified. Please see your doctor as soon as possible.";
+    return { grade: "F", label: text("High Risk", "خطورة مرتفعة"), color: "text-red-600", bg: "bg-red-50",
+      summary: text("Significant health risks identified. Please see your doctor as soon as possible.", "رُصدت مخاطر صحية كبيرة. يُرجى مراجعة طبيبك في أقرب وقت ممكن.") };
   }
-
-  return { score, grade, label, color, bg, summary };
 }
 
 function generateRecommendations(patient: {
@@ -125,7 +133,7 @@ function generateRecommendations(patient: {
   labResults?: Array<{ testName: string; status: string; result: string; unit?: string | null }> | null;
   medications?: Array<{ isActive: boolean; drugName: string }> | null;
   visits?: Array<{ visitDate: string }> | null;
-}): Array<{ icon: React.ElementType; title: string; description: string; priority: "high" | "medium" | "low"; category: string }> {
+}, text: TextFn): Array<{ icon: React.ElementType; title: string; description: string; priority: "high" | "medium" | "low"; category: string }> {
   const recs: Array<{ icon: React.ElementType; title: string; description: string; priority: "high" | "medium" | "low"; category: string }> = [];
   const conditions = (patient.chronicConditions || []).map(c => c.toLowerCase());
   const criticalLabs = (patient.labResults || []).filter(l => l.status === "critical");
@@ -135,77 +143,101 @@ function generateRecommendations(patient: {
   if (criticalLabs.length > 0) {
     recs.push({
       icon: ShieldAlert,
-      title: "Critical Lab Results Require Attention",
-      description: `${criticalLabs.length} lab result(s) are in the critical range: ${criticalLabs.map(l => l.testName).join(", ")}. Contact your doctor immediately.`,
+      title: text("Critical Lab Results Require Attention", "نتائج مخبرية حرجة تتطلب الانتباه"),
+      description: text(
+        `${criticalLabs.length} lab result(s) are in the critical range: ${criticalLabs.map(l => l.testName).join(", ")}. Contact your doctor immediately.`,
+        `${criticalLabs.length} من نتائجك المخبرية في النطاق الحرج: ${criticalLabs.map(l => l.testName).join("، ")}. تواصل مع طبيبك فورًا.`,
+      ),
       priority: "high",
-      category: "Urgent",
+      category: text("Urgent", "عاجل"),
     });
   }
 
   if (abnormalLabs.length > 0 && criticalLabs.length === 0) {
     recs.push({
       icon: FlaskConical,
-      title: "Follow Up on Abnormal Lab Results",
-      description: `${abnormalLabs.length} test(s) showed abnormal results. Schedule a follow-up appointment to review these with your doctor.`,
+      title: text("Follow Up on Abnormal Lab Results", "متابعة النتائج المخبرية غير الطبيعية"),
+      description: text(
+        `${abnormalLabs.length} test(s) showed abnormal results. Schedule a follow-up appointment to review these with your doctor.`,
+        `أظهرت ${abnormalLabs.length} من فحوصاتك نتائج غير طبيعية. احجز موعد متابعة لمراجعتها مع طبيبك.`,
+      ),
       priority: "medium",
-      category: "Lab Results",
+      category: text("Lab Results", "نتائج المختبر"),
     });
   }
 
   if (conditions.some(c => c.includes("diabetes") || c.includes("type 1") || c.includes("type 2"))) {
     recs.push({
       icon: Activity,
-      title: "Monitor Blood Sugar Daily",
-      description: "Check your fasting blood glucose every morning and after meals. Target HbA1c below 7%. Avoid sugary foods and refined carbohydrates.",
+      title: text("Monitor Blood Sugar Daily", "راقب سكر الدم يوميًا"),
+      description: text(
+        "Check your fasting blood glucose every morning and after meals. Target HbA1c below 7%. Avoid sugary foods and refined carbohydrates.",
+        "افحص سكر الدم الصائم كل صباح وبعد الوجبات. المستهدف: HbA1c أقل من 7%. تجنّب الأطعمة السكرية والنشويات المكررة.",
+      ),
       priority: "high",
-      category: "Diabetes Management",
+      category: text("Diabetes Management", "إدارة السكري"),
     });
     recs.push({
       icon: Stethoscope,
-      title: "Annual Diabetic Screening",
-      description: "Get annual eye exam, kidney function tests (creatinine, microalbumin), and foot examination to detect complications early.",
+      title: text("Annual Diabetic Screening", "الفحص السنوي لمضاعفات السكري"),
+      description: text(
+        "Get annual eye exam, kidney function tests (creatinine, microalbumin), and foot examination to detect complications early.",
+        "أجرِ فحص العين السنوي، وفحوصات وظائف الكلى (الكرياتينين، الألبومين الدقيق)، وفحص القدم لاكتشاف المضاعفات مبكرًا.",
+      ),
       priority: "medium",
-      category: "Preventive Care",
+      category: text("Preventive Care", "الرعاية الوقائية"),
     });
   }
 
   if (conditions.some(c => c.includes("hypertension") || c.includes("blood pressure"))) {
     recs.push({
       icon: Heart,
-      title: "Monitor Blood Pressure Regularly",
-      description: "Check your blood pressure at least twice a week. Target: below 130/80 mmHg. Reduce salt intake and avoid stress.",
+      title: text("Monitor Blood Pressure Regularly", "راقب ضغط الدم بانتظام"),
+      description: text(
+        "Check your blood pressure at least twice a week. Target: below 130/80 mmHg. Reduce salt intake and avoid stress.",
+        "افحص ضغط دمك مرتين أسبوعيًا على الأقل. المستهدف: أقل من 130/80 ملم زئبق. قلّل الملح وتجنّب التوتر.",
+      ),
       priority: "high",
-      category: "Cardiovascular",
+      category: text("Cardiovascular", "القلب والأوعية"),
     });
   }
 
   if (conditions.some(c => c.includes("heart"))) {
     recs.push({
       icon: Heart,
-      title: "Cardiac Monitoring",
-      description: "Avoid strenuous activity without medical clearance. Know the warning signs: chest pain, shortness of breath, or sudden dizziness require emergency care.",
+      title: text("Cardiac Monitoring", "متابعة حالة القلب"),
+      description: text(
+        "Avoid strenuous activity without medical clearance. Know the warning signs: chest pain, shortness of breath, or sudden dizziness require emergency care.",
+        "تجنّب المجهود الشديد دون إذن طبي. اعرف العلامات التحذيرية: ألم الصدر أو ضيق التنفّس أو الدوخة المفاجئة تستدعي رعاية طارئة.",
+      ),
       priority: "high",
-      category: "Cardiovascular",
+      category: text("Cardiovascular", "القلب والأوعية"),
     });
   }
 
   if (conditions.some(c => c.includes("ckd") || c.includes("kidney") || c.includes("renal"))) {
     recs.push({
       icon: FlaskConical,
-      title: "Protect Your Kidneys",
-      description: "Stay well hydrated. Avoid NSAIDs (ibuprofen, naproxen). Limit protein and potassium intake as advised. Check creatinine & eGFR every 3 months.",
+      title: text("Protect Your Kidneys", "احمِ كليتيك"),
+      description: text(
+        "Stay well hydrated. Avoid NSAIDs (ibuprofen, naproxen). Limit protein and potassium intake as advised. Check creatinine & eGFR every 3 months.",
+        "حافظ على ترطيب جيد. تجنّب مضادات الالتهاب غير الستيرويدية (إيبوبروفين، نابروكسين). قلّل البروتين والبوتاسيوم حسب الإرشادات. افحص الكرياتينين وeGFR كل 3 أشهر.",
+      ),
       priority: "high",
-      category: "Kidney Health",
+      category: text("Kidney Health", "صحة الكلى"),
     });
   }
 
   if (conditions.some(c => c.includes("asthma") || c.includes("copd"))) {
     recs.push({
       icon: Activity,
-      title: "Respiratory Health",
-      description: "Always carry your rescue inhaler. Avoid smoke, dust, and strong odors. Get annual flu vaccine. Track your peak flow readings.",
+      title: text("Respiratory Health", "صحة الجهاز التنفّسي"),
+      description: text(
+        "Always carry your rescue inhaler. Avoid smoke, dust, and strong odors. Get annual flu vaccine. Track your peak flow readings.",
+        "احمل دائمًا بخّاخ الإسعاف. تجنّب الدخان والغبار والروائح القوية. خذ لقاح الإنفلونزا السنوي. تابِع قياسات تدفّق الذروة.",
+      ),
       priority: "medium",
-      category: "Respiratory",
+      category: text("Respiratory", "الجهاز التنفّسي"),
     });
   }
 
@@ -213,10 +245,13 @@ function generateRecommendations(patient: {
   if (activeMeds.length >= 3) {
     recs.push({
       icon: Pill,
-      title: "Medication Adherence",
-      description: `You are on ${activeMeds.length} medications. Set daily reminders and never skip doses without consulting your doctor. Bring your medication list to every appointment.`,
+      title: text("Medication Adherence", "الالتزام بالأدوية"),
+      description: text(
+        `You are on ${activeMeds.length} medications. Set daily reminders and never skip doses without consulting your doctor. Bring your medication list to every appointment.`,
+        `أنت تتناول ${activeMeds.length} أدوية. اضبط تذكيرات يومية ولا تتخطَّ أي جرعة دون استشارة طبيبك. أحضِر قائمة أدويتك في كل موعد.`,
+      ),
       priority: "medium",
-      category: "Medications",
+      category: text("Medications", "الأدوية"),
     });
   }
 
@@ -228,37 +263,50 @@ function generateRecommendations(patient: {
   if (daysSinceVisit > 180 && conditions.length > 0) {
     recs.push({
       icon: CalendarDays,
-      title: "Schedule a Routine Check-up",
-      description: `It has been ${Math.round(daysSinceVisit / 30)} months since your last recorded visit. Regular check-ups are essential for managing your conditions.`,
+      title: text("Schedule a Routine Check-up", "احجز فحصًا دوريًا"),
+      description: text(
+        `It has been ${Math.round(daysSinceVisit / 30)} months since your last recorded visit. Regular check-ups are essential for managing your conditions.`,
+        `مضى ${Math.round(daysSinceVisit / 30)} شهرًا منذ آخر زيارة مُسجّلة لك. الفحوصات الدورية ضرورية لإدارة حالتك الصحية.`,
+      ),
       priority: "medium",
-      category: "Preventive Care",
+      category: text("Preventive Care", "الرعاية الوقائية"),
     });
   }
 
   if (age >= 50) {
     recs.push({
       icon: Stethoscope,
-      title: "Age-Appropriate Screenings",
+      title: text("Age-Appropriate Screenings", "فحوصات مناسبة للعمر"),
       description: age >= 65
-        ? "At your age, annual screenings for colon cancer, osteoporosis, and cardiovascular disease are recommended. Discuss vaccination schedules with your doctor."
-        : "Consider screenings for colorectal cancer (colonoscopy), blood pressure, cholesterol, and diabetes if not already monitored.",
+        ? text(
+            "At your age, annual screenings for colon cancer, osteoporosis, and cardiovascular disease are recommended. Discuss vaccination schedules with your doctor.",
+            "في عمرك، يُوصى بالفحوصات السنوية لسرطان القولون وهشاشة العظام وأمراض القلب والأوعية. ناقش جداول التطعيمات مع طبيبك.",
+          )
+        : text(
+            "Consider screenings for colorectal cancer (colonoscopy), blood pressure, cholesterol, and diabetes if not already monitored.",
+            "فكّر في فحوصات سرطان القولون والمستقيم (تنظير القولون) وضغط الدم والكوليسترول والسكري إن لم تكن متابَعة بالفعل.",
+          ),
       priority: "medium",
-      category: "Preventive Care",
+      category: text("Preventive Care", "الرعاية الوقائية"),
     });
   }
 
   recs.push({
     icon: Lightbulb,
-    title: "Healthy Lifestyle Habits",
-    description: "Walk 30 minutes daily, maintain a balanced diet rich in vegetables and whole grains, limit sodium to < 2g/day, sleep 7-8 hours, and manage stress through mindfulness.",
+    title: text("Healthy Lifestyle Habits", "عادات نمط حياة صحي"),
+    description: text(
+      "Walk 30 minutes daily, maintain a balanced diet rich in vegetables and whole grains, limit sodium to < 2g/day, sleep 7-8 hours, and manage stress through mindfulness.",
+      "امشِ 30 دقيقة يوميًا، واتّبع نظامًا غذائيًا متوازنًا غنيًا بالخضار والحبوب الكاملة، وقلّل الصوديوم إلى أقل من 2 غرام يوميًا، ونم 7–8 ساعات، وتعامل مع التوتر عبر اليقظة الذهنية.",
+    ),
     priority: "low",
-    category: "Lifestyle",
+    category: text("Lifestyle", "نمط الحياة"),
   });
 
   return recs.slice(0, 8);
 }
 
 function AppointmentBooking({ patientId }: { patientId: number }) {
+  const { text } = useLanguage();
   const today = new Date().toISOString().split("T")[0]!;
   const [hospital, setHospital] = useState("");
   const [department, setDepartment] = useState("");
@@ -311,7 +359,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
       {myAppointments.length > 0 && (
         <div>
           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-            <CalendarDays className="w-3.5 h-3.5" /> My Appointments
+            <CalendarDays className="w-3.5 h-3.5" /> {text("My Appointments", "مواعيدي")}
           </p>
           <div className="space-y-2">
             {myAppointments.map((apt: any) => (
@@ -323,10 +371,10 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <p className="text-sm font-bold text-foreground">{apt.department}</p>
-                    <Badge variant={apt.status === "confirmed" ? "success" : "outline"} className="text-[9px]">{apt.status}</Badge>
+                    <Badge variant={apt.status === "confirmed" ? "success" : "outline"} className="text-[9px]">{apt.status === "confirmed" ? text("confirmed", "مؤكّد") : apt.status === "cancelled" ? text("cancelled", "ملغى") : apt.status === "completed" ? text("completed", "مكتمل") : apt.status}</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground truncate">{apt.hospital}</p>
-                  <p className="text-[10px] font-mono text-muted-foreground mt-0.5">{apt.time} · Ref: {apt.referenceNo}</p>
+                  <p className="text-[10px] font-mono text-muted-foreground mt-0.5" dir="ltr">{apt.time} · {text("Ref:", "المرجع:")} {apt.referenceNo}</p>
                 </div>
               </div>
             ))}
@@ -377,46 +425,46 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
       {/* Booking Form */}
       <div>
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-          <Stethoscope className="w-3.5 h-3.5" /> Book New Appointment
+          <Stethoscope className="w-3.5 h-3.5" /> {text("Book New Appointment", "حجز موعد جديد")}
         </p>
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1.5">Hospital *</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Hospital *", "المستشفى *")}</p>
             <select
               className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary"
               value={hospital}
               onChange={e => { setHospital(e.target.value); setTime(""); }}
             >
-              <option value="">Select hospital...</option>
+              <option value="">{text("Select hospital...", "اختر المستشفى...")}</option>
               {hospData?.hospitals?.map((h: string) => <option key={h} value={h}>{h}</option>)}
             </select>
           </div>
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1.5">Department *</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Department *", "القسم *")}</p>
             <select
               className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary"
               value={department}
               onChange={e => { setDepartment(e.target.value); setService(""); setTime(""); }}
             >
-              <option value="">Select department...</option>
+              <option value="">{text("Select department...", "اختر القسم...")}</option>
               {deptData?.departments?.map((d: string) => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
           {services.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-muted-foreground mb-1.5">Service</p>
+              <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Service", "الخدمة")}</p>
               <select
                 className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                 value={service}
                 onChange={e => setService(e.target.value)}
               >
-                <option value="">General consultation...</option>
+                <option value="">{text("General consultation...", "استشارة عامة...")}</option>
                 {services.map((s: string) => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
           )}
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1.5">Date *</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Date *", "التاريخ *")}</p>
             <Input
               type="date"
               value={date}
@@ -429,9 +477,9 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
         {/* Time Slots */}
         {hospital && department && date && (
           <div className="mb-3">
-            <p className="text-xs font-semibold text-muted-foreground mb-2">Available Time Slots *</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-2">{text("Available Time Slots *", "المواعيد المتاحة *")}</p>
             {slots.length === 0 ? (
-              <p className="text-sm text-muted-foreground bg-secondary px-4 py-3 rounded-xl">No available slots for this date. Please try another date.</p>
+              <p className="text-sm text-muted-foreground bg-secondary px-4 py-3 rounded-xl">{text("No available slots for this date. Please try another date.", "لا توجد مواعيد متاحة في هذا التاريخ. يُرجى تجربة تاريخ آخر.")}</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {slots.map((s: string) => (
@@ -453,9 +501,9 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
         )}
 
         <div className="mb-4">
-          <p className="text-xs font-semibold text-muted-foreground mb-1.5">Notes (optional)</p>
+          <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Notes (optional)", "ملاحظات (اختياري)")}</p>
           <Input
-            placeholder="Any specific concerns or reason for visit..."
+            placeholder={text("Any specific concerns or reason for visit...", "أي مخاوف محددة أو سبب الزيارة...")}
             value={notes}
             onChange={e => setNotes(e.target.value)}
           />
@@ -473,7 +521,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
           className="w-full"
         >
           <CalendarDays className="w-4 h-4" />
-          {bookMutation.isPending ? "Booking appointment..." : "Confirm Appointment"}
+          {bookMutation.isPending ? text("Booking appointment...", "جارٍ الحجز...") : text("Confirm Appointment", "تأكيد الموعد")}
         </Button>
       </div>
     </div>
@@ -481,10 +529,23 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
 }
 
 export default function CitizenPortal() {
+  const { user: authUser } = useAuth();
+  const { text } = useLanguage();
   const [loginId, setLoginId] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState("health-score");
+  const [activeTab, setActiveTab] = useState("overview");
+  const [recordView, setRecordView] = useState<"medications" | "labs" | "visits">("medications");
   const [showSsePanel, setShowSsePanel] = useState(false);
+
+  // The citizen already authenticated at /login — their record loads
+  // directly from the session identity. The manual ID form below is only a
+  // fallback for sessions without a linked national ID.
+  useEffect(() => {
+    if (authUser?.nationalId && !isLoggedIn) {
+      setLoginId(authUser.nationalId);
+      setIsLoggedIn(true);
+    }
+  }, [authUser?.nationalId, isLoggedIn]);
 
   const { alerts: sseAlerts, connected: sseConnected, unreadCount: sseUnread, markRead: markSseRead, clearAll: clearSseAlerts } = useSseAlerts("citizen");
 
@@ -503,51 +564,59 @@ export default function CitizenPortal() {
     if (loginId.trim()) setIsLoggedIn(true);
   };
 
+  // The score shown to the citizen comes from the SAME server risk engine the
+  // physician sees (inverted to a well-being scale) — never from a parallel
+  // client-side heuristic that could contradict the clinical record.
   const healthScore = useMemo(() => {
     if (!patient) return null;
-    return computeHealthScore(patient);
-  }, [patient]);
+    if (aiDecision) {
+      const score = Math.max(0, Math.min(100, 100 - aiDecision.riskScore));
+      const graded = gradeLadder(score, text);
+      return { score, ...graded, summary: aiDecision.explainability?.summary || graded.summary };
+    }
+    return null; // wait for the engine instead of showing a contradictory local estimate
+  }, [patient, aiDecision]);
 
   const recommendations = useMemo(() => {
     if (!patient) return [];
-    return generateRecommendations(patient);
-  }, [patient]);
+    return generateRecommendations(patient, text);
+  }, [patient, text]);
 
   if (!isLoggedIn) {
     return (
-      <Layout role="citizen">
+      <Layout role="citizen" localized>
         <div className="max-w-md mx-auto mt-10">
           <div className="text-center mb-8">
             <div className="w-16 h-16 rounded-3xl bg-amber-100 flex items-center justify-center mx-auto mb-5">
               <Lock className="w-7 h-7 text-amber-600" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Citizen Health Portal</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">{text("Link your health record", "اربط سجلك الصحي")}</h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Secure access to your national health records, AI health score, and personalised recommendations.
+              {text("Your session isn't linked to a national record yet. Enter your National ID to load it.", "جلستك غير مرتبطة بسجل وطني بعد. أدخل رقم هويتك الوطنية لتحميله.")}
             </p>
           </div>
           <Card className="rounded-3xl">
             <CardBody className="p-7">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">National ID</label>
+                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("National ID", "رقم الهوية الوطنية")}</label>
                   <Input
                     value={loginId}
                     onChange={e => setLoginId(e.target.value)}
-                    placeholder="Enter your 10-digit National ID"
+                    placeholder={text("Enter your 10-digit National ID", "أدخل رقم هويتك المكوّن من 10 أرقام")}
                     className="font-mono text-sm h-11 rounded-2xl"
                     autoFocus
                   />
-                  <p className="text-xs text-muted-foreground mt-2">Demo IDs: 1000000001 · 1000000004 · 1000000010</p>
+                  <p className="text-xs text-muted-foreground mt-2" dir="ltr">{text("Demo IDs:", "أرقام تجريبية:")} 1000000001 · 1000000004 · 1000000010</p>
                 </div>
-                <Button type="submit" className="w-full bg-amber-500 hover:bg-amber-600 text-white" size="lg">
-                  <Lock className="w-4 h-4" /> Secure Login
+                <Button type="submit" className="w-full" size="lg">
+                  <Lock className="w-4 h-4" /> {text("Load My Record", "تحميل سجلي")}
                 </Button>
               </form>
             </CardBody>
           </Card>
           <p className="text-center text-xs text-muted-foreground mt-5 leading-relaxed">
-            Your data is protected under Saudi National Data Policy<br />and HIPAA-compliant security standards.
+            {text("Your data is protected under the Saudi Personal Data Protection Law (PDPL) and national health data governance standards.", "بياناتك محمية بموجب نظام حماية البيانات الشخصية السعودي (PDPL) ومعايير حوكمة البيانات الصحية الوطنية.")}
           </p>
         </div>
       </Layout>
@@ -556,10 +625,10 @@ export default function CitizenPortal() {
 
   if (isLoading) {
     return (
-      <Layout role="citizen">
+      <Layout role="citizen" localized>
         <div className="flex items-center gap-3 py-20 justify-center text-muted-foreground">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-500" />
-          <span className="text-sm">Loading your health records...</span>
+          <span className="text-sm">{text("Loading your health records...", "جارٍ تحميل سجلاتك الصحية...")}</span>
         </div>
       </Layout>
     );
@@ -567,13 +636,13 @@ export default function CitizenPortal() {
 
   if (!patient) {
     return (
-      <Layout role="citizen">
+      <Layout role="citizen" localized>
         <Card className="rounded-3xl">
           <CardBody className="py-16 text-center">
             <AlertCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-            <p className="font-bold text-foreground mb-1">No Records Found</p>
-            <p className="text-sm text-muted-foreground mb-4">National ID <span className="font-mono">{loginId}</span> was not found.</p>
-            <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }}>Try Again</Button>
+            <p className="font-bold text-foreground mb-1">{text("No Records Found", "لا توجد سجلات")}</p>
+            <p className="text-sm text-muted-foreground mb-4">{text("National ID", "رقم الهوية")} <span className="font-mono" dir="ltr">{loginId}</span> {text("was not found.", "غير موجود.")}</p>
+            <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }}>{text("Try Again", "إعادة المحاولة")}</Button>
           </CardBody>
         </Card>
       </Layout>
@@ -593,10 +662,10 @@ export default function CitizenPortal() {
   };
 
   return (
-    <Layout role="citizen">
+    <Layout role="citizen" localized>
       <PageHeader
-        title={`My Health — ${patient.fullName.split(" ")[0]}`}
-        subtitle="Your personal AI health score, recommendations, and complete national health record."
+        title={text(`My Health — ${patient.fullName.split(" ")[0]}`, `صحتي — ${patient.fullName.split(" ")[0]}`)}
+        subtitle={text("Your personal AI health score, recommendations, and complete national health record.", "درجتك الصحية الذكية، والتوصيات، وسجلك الصحي الوطني الكامل.")}
         action={
           <div className="flex items-center gap-2">
             {/* SSE Live Alert Bell */}
@@ -606,7 +675,7 @@ export default function CitizenPortal() {
                 className={`relative flex items-center justify-center w-9 h-9 rounded-xl border transition-all ${
                   sseUnread > 0 ? "bg-red-50 border-red-200 hover:bg-red-100" : "bg-white border-border hover:bg-secondary"
                 }`}
-                title={sseConnected ? "Live health alerts" : "Connecting..."}
+                title={sseConnected ? text("Live health alerts", "تنبيهات صحية حيّة") : text("Connecting...", "جارٍ الاتصال...")}
               >
                 <Bell className={`w-4 h-4 ${sseUnread > 0 ? "text-red-600" : "text-muted-foreground"}`} />
                 {sseUnread > 0 && (
@@ -618,7 +687,7 @@ export default function CitizenPortal() {
               <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} />
             </div>
             <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }}>
-              Sign Out
+              {text("Sign Out", "تسجيل الخروج")}
             </Button>
           </div>
         }
@@ -629,8 +698,8 @@ export default function CitizenPortal() {
         <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-red-200 bg-red-100/60">
             <Bell className="w-4 h-4 text-red-600" />
-            <span className="font-bold text-sm text-red-800">Live Health Alerts</span>
-            {sseUnread > 0 && <Badge variant="destructive" className="text-[10px]">{sseUnread} new</Badge>}
+            <span className="font-bold text-sm text-red-800">{text("Live Health Alerts", "تنبيهات صحية حيّة")}</span>
+            {sseUnread > 0 && <Badge variant="destructive" className="text-[10px]">{text(`${sseUnread} new`, `${sseUnread} جديد`)}</Badge>}
             <button onClick={() => { clearSseAlerts(); setShowSsePanel(false); }} className="ml-auto text-red-400 hover:text-red-600">
               <X className="w-4 h-4" />
             </button>
@@ -659,9 +728,9 @@ export default function CitizenPortal() {
         <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl">
           <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
           <p className="text-sm font-semibold text-red-700">
-            <strong>{criticalCount} critical lab result{criticalCount > 1 ? "s" : ""}</strong> — please contact your doctor as soon as possible.
+            <strong>{text(`${criticalCount} critical lab result${criticalCount > 1 ? "s" : ""}`, `${criticalCount} نتيجة مخبرية حرجة`)}</strong> — {text("please contact your doctor as soon as possible.", "يُرجى التواصل مع طبيبك في أقرب وقت ممكن.")}
           </p>
-          <Badge variant="destructive" className="ml-auto shrink-0">Urgent</Badge>
+          <Badge variant="destructive" className="ms-auto shrink-0">{text("Urgent", "عاجل")}</Badge>
         </div>
       )}
 
@@ -675,14 +744,14 @@ export default function CitizenPortal() {
             <div className="flex-1">
               <h2 className="text-xl font-bold text-foreground mb-1.5">{patient.fullName}</h2>
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="font-mono bg-secondary text-xs px-2.5 py-1 rounded-xl">{patient.nationalId}</span>
-                <span className="text-xs text-muted-foreground">DOB: {format(new Date(patient.dateOfBirth), "dd MMM yyyy")}</span>
-                <span className="text-xs text-muted-foreground">· {patient.gender}</span>
-                <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-0.5 rounded-full">Blood: {patient.bloodType}</span>
+                <span className="font-mono bg-secondary text-xs px-2.5 py-1 rounded-xl" dir="ltr">{patient.nationalId}</span>
+                <span className="text-xs text-muted-foreground">{text("DOB:", "تاريخ الميلاد:")} {format(new Date(patient.dateOfBirth), "dd MMM yyyy")}</span>
+                <span className="text-xs text-muted-foreground">· {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}</span>
+                <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-0.5 rounded-full">{text("Blood:", "فصيلة الدم:")} <span dir="ltr">{patient.bloodType}</span></span>
               </div>
             </div>
             {(patient.allergies?.length ?? 0) > 0 && (
-              <Badge variant="destructive">{patient.allergies?.length ?? 0} Allerg{(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}</Badge>
+              <Badge variant="destructive">{text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}</Badge>
             )}
           </CardBody>
         </Card>
@@ -690,7 +759,7 @@ export default function CitizenPortal() {
         {healthScore && (
           <Card className={`col-span-3 ${healthScore.bg} border-${healthScore.bg.replace("bg-", "border-")}`}>
             <CardBody className="flex flex-col items-center justify-center py-5 text-center">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">AI Health Score</p>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("AI Health Score", "درجتك الصحية")}</p>
               <div className="relative w-24 h-24 mb-2">
                 <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90">
                   <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E5E7EB" strokeWidth="2.5" />
@@ -711,7 +780,7 @@ export default function CitizenPortal() {
                 variant={healthScore.grade === "A" ? "success" : healthScore.grade === "B" ? "info" : healthScore.grade === "C" ? "warning" : "destructive"}
                 className="text-xs"
               >
-                Grade {healthScore.grade} — {healthScore.label}
+                {text(`Grade ${healthScore.grade}`, `تقدير ${healthScore.grade}`)} — {healthScore.label}
               </Badge>
             </CardBody>
           </Card>
@@ -720,19 +789,19 @@ export default function CitizenPortal() {
         <Card className="col-span-2">
           <CardBody className="flex flex-col gap-3 justify-center h-full py-5 px-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Pill className="w-3.5 h-3.5 text-amber-500" /> Active Meds</div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Pill className="w-3.5 h-3.5 text-amber-500" /> {text("Active Meds", "الأدوية الفعّالة")}</div>
               <span className="font-bold text-foreground">{activeMeds.length}</span>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><FlaskConical className="w-3.5 h-3.5 text-sky-500" /> Lab Results</div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><FlaskConical className="w-3.5 h-3.5 text-sky-500" /> {text("Lab Results", "نتائج المختبر")}</div>
               <span className="font-bold text-foreground">{labResults.length}</span>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Bell className="w-3.5 h-3.5 text-red-500" /> Abnormal</div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Bell className="w-3.5 h-3.5 text-red-500" /> {text("Abnormal", "غير طبيعية")}</div>
               <span className={`font-bold ${abnormal > 0 ? "text-amber-600" : "text-foreground"}`}>{abnormal}</span>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lightbulb className="w-3.5 h-3.5 text-violet-500" /> AI Tips</div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lightbulb className="w-3.5 h-3.5 text-violet-500" /> {text("AI Tips", "نصائح ذكية")}</div>
               <span className={`font-bold ${highPriorityRecs > 0 ? "text-red-600" : "text-foreground"}`}>{recommendations.length}</span>
             </div>
           </CardBody>
@@ -743,26 +812,46 @@ export default function CitizenPortal() {
       <Card>
         <Tabs
           tabs={[
-            { id: "health-score", label: "Health Score & AI Tips" },
-            { id: "digital-twin", label: "🧠 My Health Forecast" },
-            { id: "appointments", label: "📅 Book Appointment" },
-            { id: "summary", label: "Health Summary" },
-            { id: "medications", label: "Prescriptions", count: activeMeds.length },
-            { id: "labs", label: "Lab Results", count: labResults.length },
-            { id: "visits", label: "Visit History", count: patient.visits?.length ?? 0 },
-            { id: "consent", label: "🔐 My Consents" },
+            { id: "overview", label: text(...T.overview) },
+            { id: "record", label: text("My Record", "سجلي الطبي") },
+            { id: "appointments", label: text(...T.appointments) },
+            { id: "consent", label: text(...T.privacy) },
           ]}
           active={activeTab}
           onChange={setActiveTab}
         />
 
-        {activeTab === "digital-twin" && (
+        {/* Record sub-views: one tab, three lenses on the same record. */}
+        {activeTab === "record" && (
+          <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-secondary/40 px-5 py-3">
+            {([
+              { id: "medications", label: text(`Prescriptions · ${activeMeds.length}`, `الوصفات · ${activeMeds.length}`) },
+              { id: "labs", label: text(`Lab Results · ${labResults.length}`, `نتائج المختبر · ${labResults.length}`) },
+              { id: "visits", label: text(`Visits · ${patient.visits?.length ?? 0}`, `الزيارات · ${patient.visits?.length ?? 0}`) },
+            ] as const).map((v) => (
+              <button
+                key={v.id}
+                type="button"
+                onClick={() => setRecordView(v.id)}
+                className={`h-8 rounded-full px-3.5 text-xs font-semibold transition-colors ${
+                  recordView === v.id
+                    ? "bg-primary text-white shadow-sm shadow-primary/25"
+                    : "bg-card text-muted-foreground border border-border hover:text-foreground"
+                }`}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {activeTab === "overview" && (
           <div className="p-5">
             {!aiDecision ? (
               <div className="py-12 text-center">
                 <Brain className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                <p className="font-bold text-foreground mb-1">Loading Your Health Forecast</p>
-                <p className="text-sm text-muted-foreground">The AI is analyzing your health data...</p>
+                <p className="font-bold text-foreground mb-1">{text("Loading Your Health Forecast", "جارٍ تحميل توقّعاتك الصحية")}</p>
+                <p className="text-sm text-muted-foreground">{text("The AI is analyzing your health data...", "يحلّل الذكاء الاصطناعي بياناتك الصحية...")}</p>
               </div>
             ) : (
               <div className="space-y-5">
@@ -775,18 +864,18 @@ export default function CitizenPortal() {
                 }`}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-2">Your Health Forecast (12 months)</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-2">{text("Your Health Forecast (12 months)", "توقّعاتك الصحية (12 شهرًا)")}</p>
                       <p className="text-xl font-bold leading-snug">
-                        {aiDecision.digitalTwin?.riskTrajectory === "rapidly_worsening" ? "Urgent attention needed" :
-                         aiDecision.digitalTwin?.riskTrajectory === "worsening" ? "Health is declining — take action" :
-                         aiDecision.digitalTwin?.riskTrajectory === "improving" ? "Great news! Health is improving" :
-                         "Health is stable"}
+                        {aiDecision.digitalTwin?.riskTrajectory === "rapidly_worsening" ? text("Urgent attention needed", "تحتاج إلى عناية عاجلة") :
+                         aiDecision.digitalTwin?.riskTrajectory === "worsening" ? text("Health is declining — take action", "صحتك في تراجع — اتّخذ إجراءً") :
+                         aiDecision.digitalTwin?.riskTrajectory === "improving" ? text("Great news! Health is improving", "خبر رائع! صحتك تتحسّن") :
+                         text("Health is stable", "صحتك مستقرّة")}
                       </p>
                       <p className="text-sm text-white/80 mt-1.5">{aiDecision.explainability?.summary}</p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-[10px] text-white/70 uppercase tracking-widest">Predicted Risk</p>
-                      <p className="text-5xl font-bold tabular-nums">{aiDecision.digitalTwin?.projectedRiskScore ?? "—"}</p>
+                    <div className="text-end shrink-0">
+                      <p className="text-[10px] text-white/70 uppercase tracking-widest">{text("Predicted Risk", "الخطورة المتوقعة")}</p>
+                      <p className="text-5xl font-bold tabular-nums" dir="ltr">{aiDecision.digitalTwin?.projectedRiskScore ?? "—"}</p>
                       <p className="text-[10px] text-white/60">/ 100</p>
                     </div>
                   </div>
@@ -801,7 +890,7 @@ export default function CitizenPortal() {
                 {aiDecision.digitalTwin?.predictedConditions && aiDecision.digitalTwin.predictedConditions.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <AlertCircle className="w-3.5 h-3.5 text-amber-500" /> Conditions to Watch Out For
+                      <AlertCircle className="w-3.5 h-3.5 text-amber-500" /> {text("Conditions to Watch Out For", "حالات يجب الانتباه لها")}
                     </p>
                     <div className="space-y-2">
                       {aiDecision.digitalTwin.predictedConditions.map((c, i) => (
@@ -818,7 +907,7 @@ export default function CitizenPortal() {
                 {aiDecision.digitalTwin?.keyDrivers && aiDecision.digitalTwin.keyDrivers.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Activity className="w-3.5 h-3.5 text-primary" /> Key Health Drivers
+                      <Activity className="w-3.5 h-3.5 text-primary" /> {text("Key Health Drivers", "أبرز محرّكات صحتك")}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {aiDecision.digitalTwin.keyDrivers.map((driver, i) => (
@@ -835,7 +924,7 @@ export default function CitizenPortal() {
                 {aiDecision.recommendations && aiDecision.recommendations.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Lightbulb className="w-3.5 h-3.5 text-primary" /> Personalized Recommendations
+                      <Lightbulb className="w-3.5 h-3.5 text-primary" /> {text("Personalized Recommendations", "توصيات مخصّصة لك")}
                     </p>
                     <div className="space-y-2">
                       {aiDecision.recommendations.map((rec, i) => (
@@ -852,7 +941,7 @@ export default function CitizenPortal() {
                 <div className="px-4 py-3.5 bg-secondary border border-border rounded-2xl">
                   <p className="text-[10px] text-muted-foreground flex items-start gap-2">
                     <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-                    This AI forecast is based on your current health records and is intended for informational purposes only. Always consult your doctor before making any health decisions.
+                    {text("This AI forecast is based on your current health records and is intended for informational purposes only. Always consult your doctor before making any health decisions.", "يستند هذا التوقّع الذكي إلى سجلاتك الصحية الحالية وهو لأغراض إعلامية فقط. استشر طبيبك دائمًا قبل اتّخاذ أي قرارات صحية.")}
                   </p>
                 </div>
               </div>
@@ -860,7 +949,7 @@ export default function CitizenPortal() {
           </div>
         )}
 
-        {activeTab === "health-score" && healthScore && (
+        {activeTab === "overview" && healthScore && (
           <div className="p-5 space-y-5">
             {/* Score interpretation */}
             <div className={`flex items-start gap-4 p-5 ${healthScore.bg} border border-border rounded-2xl`}>
@@ -886,13 +975,13 @@ export default function CitizenPortal() {
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className={`text-2xl font-bold ${healthScore.color}`}>{healthScore.label}</h3>
                   <Badge variant={healthScore.grade === "A" ? "success" : healthScore.grade === "B" ? "info" : healthScore.grade === "C" ? "warning" : "destructive"}>
-                    Grade {healthScore.grade}
+                    {text(`Grade ${healthScore.grade}`, `تقدير ${healthScore.grade}`)}
                   </Badge>
                 </div>
                 <p className="text-sm text-foreground font-medium leading-relaxed">{healthScore.summary}</p>
                 <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Based on your live medical data</span>
-                  <span className="flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> AI-powered analysis</span>
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> {text("Based on your live medical data", "بناءً على بياناتك الطبية الحيّة")}</span>
+                  <span className="flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> {text("AI-powered analysis", "تحليل بالذكاء الاصطناعي")}</span>
                 </div>
               </div>
             </div>
@@ -900,14 +989,14 @@ export default function CitizenPortal() {
             {/* Score Factors */}
             <div>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Star className="w-3.5 h-3.5" /> Score Breakdown
+                <Star className="w-3.5 h-3.5" /> {text("Score Breakdown", "تفصيل الدرجة")}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: "Chronic Conditions", value: patient.chronicConditions?.length ?? 0, max: 5, good: 0, icon: Activity },
-                  { label: "Active Medications", value: activeMeds.length, max: 8, good: 2, icon: Pill },
-                  { label: "Abnormal Labs", value: abnormal, max: 5, good: 0, icon: FlaskConical },
-                  { label: "Recent Visits", value: patient.visits?.length ?? 0, max: 10, good: 1, icon: CalendarDays },
+                  { label: text("Chronic Conditions", "الأمراض المزمنة"), value: patient.chronicConditions?.length ?? 0, max: 5, good: 0, icon: Activity },
+                  { label: text("Active Medications", "الأدوية الفعّالة"), value: activeMeds.length, max: 8, good: 2, icon: Pill },
+                  { label: text("Abnormal Labs", "تحاليل غير طبيعية"), value: abnormal, max: 5, good: 0, icon: FlaskConical },
+                  { label: text("Recent Visits", "الزيارات الأخيرة"), value: patient.visits?.length ?? 0, max: 10, good: 1, icon: CalendarDays },
                 ].map((item) => {
                   const pct = Math.max(5, 100 - (item.value / item.max) * 100);
                   const isGood = item.value <= item.good;
@@ -935,7 +1024,7 @@ export default function CitizenPortal() {
             {/* AI Recommendations */}
             <div>
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Lightbulb className="w-3.5 h-3.5" /> Personalised Health Recommendations
+                <Lightbulb className="w-3.5 h-3.5" /> {text("Personalised Health Recommendations", "توصيات صحية مخصّصة")}
               </p>
               <div className="space-y-2.5">
                 {recommendations.map((rec, i) => {
@@ -962,7 +1051,7 @@ export default function CitizenPortal() {
                 {recommendations.length === 0 && (
                   <div className="flex items-center gap-3 px-4 py-5 bg-emerald-50 border border-emerald-100 rounded-2xl">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <p className="text-sm font-semibold text-emerald-700">No urgent recommendations. Continue your healthy routine!</p>
+                    <p className="text-sm font-semibold text-emerald-700">{text("No urgent recommendations. Continue your healthy routine!", "لا توجد توصيات عاجلة. واصِل روتينك الصحي!")}</p>
                   </div>
                 )}
               </div>
@@ -974,11 +1063,11 @@ export default function CitizenPortal() {
           <AppointmentBooking patientId={(patient as any).id} />
         )}
 
-        {activeTab === "summary" && (
+        {activeTab === "overview" && (
           <div className="grid grid-cols-2 divide-x divide-border">
             <div className="p-5">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5" /> Chronic Conditions
+                <Activity className="w-3.5 h-3.5" /> {text("Chronic Conditions", "الأمراض المزمنة")}
               </p>
               {(patient.chronicConditions?.length ?? 0) > 0 ? (
                 <div className="space-y-2">
@@ -989,11 +1078,11 @@ export default function CitizenPortal() {
                     </div>
                   ))}
                 </div>
-              ) : <p className="text-sm text-muted-foreground">No chronic conditions on record.</p>}
+              ) : <p className="text-sm text-muted-foreground">{text("No chronic conditions on record.", "لا توجد أمراض مزمنة مُسجّلة.")}</p>}
             </div>
             <div className="p-5">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Bell className="w-3.5 h-3.5 text-red-500" /> Documented Allergies
+                <Bell className="w-3.5 h-3.5 text-red-500" /> {text("Documented Allergies", "الحساسية المُوثّقة")}
               </p>
               {(patient.allergies?.length ?? 0) > 0 ? (
                 <div className="space-y-2">
@@ -1004,47 +1093,47 @@ export default function CitizenPortal() {
                     </div>
                   ))}
                 </div>
-              ) : <p className="text-sm text-muted-foreground">No known allergies.</p>}
+              ) : <p className="text-sm text-muted-foreground">{text("No known allergies.", "لا توجد حساسية معروفة.")}</p>}
             </div>
           </div>
         )}
 
-        {activeTab === "medications" && (
+        {activeTab === "record" && recordView === "medications" && (
           <table className="w-full data-table">
             <thead><tr>
-              <th>Drug Name</th><th>Dosage</th><th>Frequency</th><th>Prescribed By</th><th>Facility</th><th>Status</th>
+              <th>{text("Drug Name", "اسم الدواء")}</th><th>{text("Dosage", "الجرعة")}</th><th>{text("Frequency", "التكرار")}</th><th>{text("Prescribed By", "الطبيب الواصف")}</th><th>{text("Facility", "المنشأة")}</th><th>{text("Status", "الحالة")}</th>
             </tr></thead>
             <tbody>
               {patient.medications?.map(med => (
                 <tr key={med.id}>
                   <td className="font-bold text-foreground">{med.drugName}</td>
-                  <td className="font-mono text-sm">{med.dosage}</td>
+                  <td className="font-mono text-sm" dir="ltr">{med.dosage}</td>
                   <td className="text-muted-foreground">{med.frequency}</td>
                   <td>{med.prescribedBy}</td>
                   <td className="text-muted-foreground text-xs">{med.hospital}</td>
-                  <td><Badge variant={med.isActive ? "success" : "outline"}>{med.isActive ? "Active" : "Completed"}</Badge></td>
+                  <td><Badge variant={med.isActive ? "success" : "outline"}>{med.isActive ? text("Active", "نشط") : text("Completed", "مكتمل")}</Badge></td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
 
-        {activeTab === "labs" && (
+        {activeTab === "record" && recordView === "labs" && (
           <table className="w-full data-table">
             <thead><tr>
-              <th>Test Name</th><th>Result</th><th>Reference Range</th><th>Date</th><th>Status</th>
+              <th>{text("Test Name", "اسم الفحص")}</th><th>{text("Result", "النتيجة")}</th><th>{text("Reference Range", "النطاق المرجعي")}</th><th>{text("Date", "التاريخ")}</th><th>{text("Status", "الحالة")}</th>
             </tr></thead>
             <tbody>
               {labResults.map(lab => (
                 <tr key={lab.id}>
                   <td className="font-bold text-foreground">{lab.testName}</td>
-                  <td className="font-mono font-semibold">{lab.result} <span className="text-muted-foreground font-normal">{lab.unit}</span></td>
-                  <td className="text-muted-foreground text-xs font-mono">{lab.referenceRange || "—"}</td>
-                  <td className="text-muted-foreground font-mono text-xs">{format(new Date(lab.testDate), "dd MMM yyyy")}</td>
+                  <td className="font-mono font-semibold" dir="ltr">{lab.result} <span className="text-muted-foreground font-normal">{lab.unit}</span></td>
+                  <td className="text-muted-foreground text-xs font-mono" dir="ltr">{lab.referenceRange || "—"}</td>
+                  <td className="text-muted-foreground font-mono text-xs" dir="ltr">{format(new Date(lab.testDate), "dd MMM yyyy")}</td>
                   <td>
                     <div className="flex items-center gap-2">
                       <StatusDot status={lab.status as any} />
-                      <Badge variant={lab.status === "normal" ? "success" : lab.status === "abnormal" ? "warning" : "destructive"}>{lab.status}</Badge>
+                      <Badge variant={lab.status === "normal" ? "success" : lab.status === "abnormal" ? "warning" : "destructive"}>{lab.status === "normal" ? text("normal", "طبيعي") : lab.status === "abnormal" ? text("abnormal", "غير طبيعي") : text("critical", "حرج")}</Badge>
                     </div>
                   </td>
                 </tr>
@@ -1053,19 +1142,19 @@ export default function CitizenPortal() {
           </table>
         )}
 
-        {activeTab === "visits" && (
+        {activeTab === "record" && recordView === "visits" && (
           <table className="w-full data-table">
             <thead><tr>
-              <th>Hospital</th><th>Department</th><th>Visit Type</th><th>Diagnosis</th><th>Date</th>
+              <th>{text("Hospital", "المستشفى")}</th><th>{text("Department", "القسم")}</th><th>{text("Visit Type", "نوع الزيارة")}</th><th>{text("Diagnosis", "التشخيص")}</th><th>{text("Date", "التاريخ")}</th>
             </tr></thead>
             <tbody>
               {patient.visits?.map(visit => (
                 <tr key={visit.id}>
                   <td className="font-bold text-foreground">{visit.hospital}</td>
                   <td>{visit.department}</td>
-                  <td><Badge variant="outline">{visit.visitType}</Badge></td>
+                  <td><Badge variant="outline">{visitTypeArCitizen(visit.visitType, text)}</Badge></td>
                   <td className="text-muted-foreground max-w-xs truncate">{visit.diagnosis}</td>
-                  <td className="text-muted-foreground font-mono text-xs">{format(new Date(visit.visitDate), "dd MMM yyyy")}</td>
+                  <td className="text-muted-foreground font-mono text-xs" dir="ltr">{format(new Date(visit.visitDate), "dd MMM yyyy")}</td>
                 </tr>
               ))}
             </tbody>
@@ -1098,13 +1187,13 @@ const SEVERITY_CFG = {
 };
 
 async function fetchConsent(nationalId: string) {
-  const res = await fetch(`/api/consent/patient/${nationalId}`);
+  const res = await apiFetch(`/api/consent/patient/${nationalId}`);
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
 
 async function updateConsent(payload: { nationalId: string; consentType: string; granted: boolean }) {
-  const res = await fetch("/api/consent/grant", {
+  const res = await apiFetch("/api/consent/grant", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -1117,6 +1206,7 @@ async function updateConsent(payload: { nationalId: string; consentType: string;
 }
 
 function ConsentTab({ nationalId, patientName }: { nationalId: string; patientName: string }) {
+  const { text } = useLanguage();
   const qc = useQueryClient();
   const [toggling, setToggling] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<{ msg: string; ok: boolean } | null>(null);
@@ -1145,7 +1235,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
   const handleToggle = (consentType: string, currentGranted: boolean, canRevoke: boolean) => {
     const nextGranted = !currentGranted;
     if (!canRevoke && !nextGranted) {
-      setToast({ msg: "This consent is required for platform operation and cannot be revoked.", ok: false });
+      setToast({ msg: text("This consent is required for platform operation and cannot be revoked.", "هذه الموافقة ضرورية لتشغيل المنصّة ولا يمكن سحبها."), ok: false });
       setTimeout(() => setToast(null), 4000);
       return;
     }
@@ -1157,7 +1247,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
     return (
       <div className="flex items-center justify-center py-16 gap-3 text-muted-foreground">
         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
-        <span className="text-sm font-medium">Loading your consent preferences...</span>
+        <span className="text-sm font-medium">{text("Loading your consent preferences...", "جارٍ تحميل تفضيلات الموافقة...")}</span>
       </div>
     );
   }
@@ -1184,25 +1274,25 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
           <Lock className="w-5 h-5 text-blue-600" />
         </div>
         <div className="flex-1">
-          <p className="font-bold text-foreground text-sm">Your Data. Your Control.</p>
+          <p className="font-bold text-foreground text-sm">{text("Your Data. Your Control.", "بياناتك. تحت سيطرتك.")}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            You decide who can access your health information and for what purpose. All consent changes are logged and audited per MOH Circular 42/1445.
+            {text("You decide who can access your health information and for what purpose. All consent changes are logged and audited per MOH Circular 42/1445.", "أنت من يقرّر مَن يطّلع على معلوماتك الصحية ولأي غرض. تُسجَّل جميع تغييرات الموافقة وتُدقَّق وفق تعميم وزارة الصحة 42/1445.")}
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs shrink-0">
           <div className="text-center">
             <p className="text-lg font-black text-emerald-600">{summary.granted ?? 0}</p>
-            <p className="text-muted-foreground">Active</p>
+            <p className="text-muted-foreground">{text("Active", "نشطة")}</p>
           </div>
           <div className="w-px h-8 bg-border" />
           <div className="text-center">
             <p className="text-lg font-black text-red-500">{summary.revoked ?? 0}</p>
-            <p className="text-muted-foreground">Revoked</p>
+            <p className="text-muted-foreground">{text("Revoked", "مسحوبة")}</p>
           </div>
           <div className="w-px h-8 bg-border" />
           <div className="text-center">
             <p className="text-lg font-black text-foreground">{summary.total ?? 0}</p>
-            <p className="text-muted-foreground">Total</p>
+            <p className="text-muted-foreground">{text("Total", "الإجمالي")}</p>
           </div>
         </div>
       </div>
@@ -1250,7 +1340,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
                 <div className="flex-1">
                   <p className="text-[9px] text-muted-foreground/70 font-medium truncate">{consent.legalBasis}</p>
                   {!consent.canRevoke && (
-                    <p className="text-[9px] text-amber-600 font-bold mt-0.5">⚠ Required — cannot revoke</p>
+                    <p className="text-[9px] text-amber-600 font-bold mt-0.5">{text("⚠ Required — cannot revoke", "⚠ مطلوبة — لا يمكن سحبها")}</p>
                   )}
                 </div>
 
@@ -1270,14 +1360,14 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
                   ) : (
                     <ToggleLeft className="w-3.5 h-3.5" />
                   )}
-                  {consent.granted ? "Granted" : "Revoked"}
+                  {consent.granted ? text("Granted", "ممنوحة") : text("Revoked", "مسحوبة")}
                 </button>
               </div>
 
               {consent.grantedAt && consent.granted && (
                 <p className="text-[9px] text-muted-foreground/60 mt-2">
-                  Granted {format(new Date(consent.grantedAt), "dd MMM yyyy")}
-                  {consent.expiresAt && ` · Expires ${format(new Date(consent.expiresAt), "dd MMM yyyy")}`}
+                  {text("Granted", "مُنحت")} {format(new Date(consent.grantedAt), "dd MMM yyyy")}
+                  {consent.expiresAt && ` · ${text("Expires", "تنتهي")} ${format(new Date(consent.expiresAt), "dd MMM yyyy")}`}
                 </p>
               )}
             </div>
@@ -1290,8 +1380,8 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
         <div className="rounded-2xl border border-border overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-3 bg-secondary/30 border-b border-border">
             <Eye className="w-4 h-4 text-muted-foreground" />
-            <p className="text-xs font-bold text-foreground">Consent Audit Trail</p>
-            <Badge variant="outline" className="ml-auto text-[10px]">{history.length} events</Badge>
+            <p className="text-xs font-bold text-foreground">{text("Consent Audit Trail", "سجل تدقيق الموافقات")}</p>
+            <Badge variant="outline" className="ms-auto text-[10px]">{text(`${history.length} events`, `${history.length} حدث`)}</Badge>
           </div>
           <div className="divide-y divide-border max-h-48 overflow-y-auto">
             {history.map((h: any, i: number) => (
@@ -1305,10 +1395,10 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
                   }
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-foreground capitalize">{h.type.replace(/_/g, " ")} — {h.action}</p>
+                  <p className="text-xs font-bold text-foreground capitalize">{h.type.replace(/_/g, " ")} — {h.action === "granted" ? text("granted", "مُنحت") : text("revoked", "سُحبت")}</p>
                   <p className="text-[10px] text-muted-foreground truncate">{h.grantedTo}</p>
                 </div>
-                <p className="text-[10px] text-muted-foreground shrink-0 font-mono">
+                <p className="text-[10px] text-muted-foreground shrink-0 font-mono" dir="ltr">
                   {h.timestamp ? format(new Date(h.timestamp), "dd MMM yy HH:mm") : "—"}
                 </p>
               </div>
@@ -1320,7 +1410,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       {/* Legal footer */}
       <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-secondary/30 text-[10px] text-muted-foreground">
         <Lock className="w-3 h-3 shrink-0" />
-        All consent actions are cryptographically logged and immutable · PDPL-compliant · MOH Circular 42/1445
+        {text("All consent actions are cryptographically logged and immutable · PDPL-compliant · MOH Circular 42/1445", "تُسجَّل جميع إجراءات الموافقة تشفيريًا وبصورة غير قابلة للتعديل · متوافقة مع PDPL · تعميم وزارة الصحة 42/1445")}
       </div>
     </div>
   );

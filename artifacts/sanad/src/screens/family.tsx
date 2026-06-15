@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Input, Button, Badge, PageHeader, DataLabel } from "@/components/shared";
 import {
@@ -6,14 +7,29 @@ import {
   User, X, ChevronRight, TrendingUp, Brain, Zap, CheckCircle2, Clock, Info
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/language-context";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, BarChart, Bar, Cell, Legend
 } from "recharts";
 
+class FamilyAccessError extends Error {
+  consentRequired: boolean;
+  constructor(message: string, consentRequired: boolean) {
+    super(message);
+    this.consentRequired = consentRequired;
+  }
+}
+
 async function fetchFamilyData(nationalId: string) {
-  const res = await fetch(`/api/family/patient/${nationalId}`);
-  if (!res.ok) throw new Error("Not found");
+  const res = await apiFetch(`/api/family/patient/${nationalId}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new FamilyAccessError(
+      body?.message ?? "Patient not found",
+      body?.error === "CONSENT_REQUIRED",
+    );
+  }
   return res.json();
 }
 
@@ -89,47 +105,49 @@ function FamilyMemberCard({ member, isPatient = false }: { member: any; isPatien
 type TabId = "tree" | "genetics" | "burden" | "screening";
 
 export default function FamilyPortal() {
+  const { text } = useLanguage();
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("tree");
   const [expandedRisk, setExpandedRisk] = useState<number | null>(null);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, error } = useQuery({
     queryKey: ["family-data", nationalId],
     queryFn: () => fetchFamilyData(nationalId),
     enabled: !!nationalId,
     retry: false,
   });
+  const consentRequired = error instanceof FamilyAccessError && error.consentRequired;
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
-    { id: "tree", label: "Family Tree", icon: <Users className="w-3.5 h-3.5" /> },
-    { id: "genetics", label: "Genetic Risks", icon: <Dna className="w-3.5 h-3.5" /> },
-    { id: "burden", label: "Condition Burden", icon: <Activity className="w-3.5 h-3.5" /> },
-    { id: "screening", label: "Screening Plan", icon: <Shield className="w-3.5 h-3.5" /> },
+    { id: "tree", label: text("Family Tree", "شجرة العائلة"), icon: <Users className="w-3.5 h-3.5" /> },
+    { id: "genetics", label: text("Genetic Risks", "المخاطر الوراثية"), icon: <Dna className="w-3.5 h-3.5" /> },
+    { id: "burden", label: text("Condition Burden", "عبء الأمراض"), icon: <Activity className="w-3.5 h-3.5" /> },
+    { id: "screening", label: text("Screening Plan", "خطة الفحص"), icon: <Shield className="w-3.5 h-3.5" /> },
   ];
 
   return (
-    <Layout role="family">
+    <Layout role="family" localized>
       <div className="flex items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-pink-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
-          <Users className="w-3 h-3" /> Family Health Portal
+          <Users className="w-3 h-3" /> {text("Family Health Portal", "بوابة صحة الأسرة")}
         </div>
         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-violet-600 bg-violet-50 px-3 py-1.5 rounded-full">
-          <Dna className="w-3 h-3" /> Genetic Risk Intelligence Active
+          <Dna className="w-3 h-3" /> {text("Genetic Risk Intelligence Active", "ذكاء المخاطر الوراثية نشط")}
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); if (searchId.trim()) { setNationalId(searchId.trim()); setActiveTab("tree"); } }} className="flex items-center gap-2 ml-auto">
+        <form onSubmit={(e) => { e.preventDefault(); if (searchId.trim()) { setNationalId(searchId.trim()); setActiveTab("tree"); } }} className="flex items-center gap-2 ms-auto">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input placeholder="National ID..." className="pl-9 w-52" value={searchId} onChange={(e) => setSearchId(e.target.value)} />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input placeholder={text("National ID...", "رقم الهوية...")} className="ps-9 w-52" value={searchId} onChange={(e) => setSearchId(e.target.value)} />
           </div>
-          <Button type="submit" size="md">Load Family Profile</Button>
+          <Button type="submit" size="md">{text("Load Family Profile", "تحميل ملف الأسرة")}</Button>
         </form>
       </div>
 
       <div className="flex items-start justify-between mb-5">
-        <PageHeader title="Family Health & Genetic Risk Portal" subtitle="Map familial disease inheritance, shared genetic risks, and coordinate family-wide preventive screening." />
+        <PageHeader title={text("Family Health & Genetic Risk Portal", "بوابة صحة الأسرة والمخاطر الوراثية")} subtitle={text("Map familial disease inheritance, shared genetic risks, and coordinate family-wide preventive screening.", "رسم وراثة الأمراض العائلية، والمخاطر الجينية المشتركة، وتنسيق الفحص الوقائي على مستوى الأسرة.")} />
         {data && (
-          <div className="flex gap-1.5 shrink-0 ml-6">
+          <div className="flex gap-1.5 shrink-0 ms-6">
             {tabs.map(t => (
               <button key={t.id} onClick={() => setActiveTab(t.id)}
                 className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full transition-all ${activeTab === t.id ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
@@ -146,25 +164,44 @@ export default function FamilyPortal() {
             <div className="w-16 h-16 rounded-3xl bg-pink-50 flex items-center justify-center mx-auto mb-4">
               <Users className="w-7 h-7 text-pink-500" />
             </div>
-            <p className="font-bold text-foreground mb-1">No Family Profile Selected</p>
-            <p className="text-sm text-muted-foreground mb-2">Enter a National ID to load genetic risk analysis, family tree, and hereditary condition mapping.</p>
-            <p className="text-xs text-muted-foreground font-mono bg-secondary inline-block px-3 py-1.5 rounded-xl">Demo: 1000000001 · 1000000003 · 1000000005</p>
+            <p className="font-bold text-foreground mb-1">{text("No Family Profile Selected", "لم يتم اختيار ملف أسرة")}</p>
+            <p className="text-sm text-muted-foreground mb-2">{text("Enter a National ID to load genetic risk analysis, family tree, and hereditary condition mapping.", "أدخل رقم الهوية لتحميل تحليل المخاطر الوراثية وشجرة العائلة وخريطة الأمراض الوراثية.")}</p>
+            <p className="text-xs text-muted-foreground font-mono bg-secondary inline-block px-3 py-1.5 rounded-xl" dir="ltr">{text("Demo:", "للتجربة:")} 1000000001 · 1000000002</p>
           </CardBody>
         </Card>
       )}
       {isLoading && (
         <div className="flex items-center gap-3 py-16 text-muted-foreground justify-center">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-500" />
-          <span className="text-sm">Loading family health data...</span>
+          <span className="text-sm">{text("Loading family health data...", "جارٍ تحميل بيانات صحة الأسرة...")}</span>
         </div>
       )}
       {isError && nationalId && (
-        <Card className="border-red-200 bg-red-50">
-          <CardBody className="flex items-center gap-3 p-4">
-            <X className="w-4 h-4 text-red-500" />
-            <p className="text-sm text-red-700">Patient not found for <span className="font-mono">{nationalId}</span></p>
-          </CardBody>
-        </Card>
+        consentRequired ? (
+          // The consent gate is a feature, not a failure: record access here is
+          // controlled by the patient's Family Health Linking consent.
+          <Card className="border-amber-200 bg-amber-50">
+            <CardBody className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                  <Shield className="w-4.5 h-4.5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-amber-900 mb-1">{text("Family Health Linking consent required", "مطلوبة موافقة الربط الصحي للأسرة")}</p>
+                  <p className="text-sm text-amber-800">{error instanceof Error ? error.message : text("This patient has not granted Family Health Linking consent.", "لم يمنح هذا المريض موافقة الربط الصحي للأسرة.")}</p>
+                  <p className="mt-2 text-xs text-amber-700">{text("The record holder controls this access from the Privacy tab of their SANAD citizen portal. Access attempts are recorded in the national audit chain.", "يتحكّم صاحب السجل بهذا الوصول من تبويب الخصوصية في بوابته بسند. وتُسجّل محاولات الوصول في سلسلة التدقيق الوطنية.")}</p>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+        ) : (
+          <Card className="border-red-200 bg-red-50">
+            <CardBody className="flex items-center gap-3 p-4">
+              <X className="w-4 h-4 text-red-500" />
+              <p className="text-sm text-red-700">{error instanceof Error ? error.message : text("Patient not found", "المريض غير موجود")} — <span className="font-mono" dir="ltr">{nationalId}</span></p>
+            </CardBody>
+          </Card>
+        )
       )}
 
       {data && (
@@ -176,14 +213,14 @@ export default function FamilyPortal() {
               <div>
                 <p className={`text-sm font-bold ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-800" : "text-amber-800"}`}>{data.familyRiskAlert}</p>
                 <div className="flex items-center gap-3 mt-1.5">
-                  <span className="text-[10px] font-semibold text-muted-foreground">{data.summary.totalMembers} family members mapped</span>
-                  <span className="text-[10px] font-semibold text-red-600">{data.summary.highRiskMembers} high-risk</span>
-                  <span className="text-[10px] font-semibold text-muted-foreground">{data.summary.sharedConditionsCount} shared conditions</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground">{text(`${data.summary.totalMembers} family members mapped`, `${data.summary.totalMembers} فرد مُسجّل`)}</span>
+                  <span className="text-[10px] font-semibold text-red-600">{text(`${data.summary.highRiskMembers} high-risk`, `${data.summary.highRiskMembers} مرتفع الخطورة`)}</span>
+                  <span className="text-[10px] font-semibold text-muted-foreground">{text(`${data.summary.sharedConditionsCount} shared conditions`, `${data.summary.sharedConditionsCount} حالة مشتركة`)}</span>
                 </div>
               </div>
-              <div className="ml-auto shrink-0 text-right">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Family Risk</p>
-                <p className={`text-2xl font-bold ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-600" : data.summary.overallFamilyRisk === "MODERATE" ? "text-amber-600" : "text-emerald-600"}`}>{data.summary.overallFamilyRisk}</p>
+              <div className="ms-auto shrink-0 text-end">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Family Risk", "خطورة الأسرة")}</p>
+                <p className={`text-2xl font-bold ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-600" : data.summary.overallFamilyRisk === "MODERATE" ? "text-amber-600" : "text-emerald-600"}`}>{data.summary.overallFamilyRisk === "HIGH" ? text("HIGH", "مرتفعة") : data.summary.overallFamilyRisk === "MODERATE" ? text("MODERATE", "متوسطة") : text("LOW", "منخفضة")}</p>
               </div>
             </div>
           )}
@@ -191,10 +228,10 @@ export default function FamilyPortal() {
           {/* Summary KPIs */}
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: "Heritability Score", value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-red-600" : data.heritabilityScore >= 40 ? "text-amber-600" : "text-emerald-600", bg: data.heritabilityScore >= 70 ? "bg-red-50" : "bg-secondary" },
-              { label: "Genetic Risk Factors", value: data.geneticRisks?.length, suffix: " identified", color: "text-violet-600", bg: "bg-violet-50" },
-              { label: "Family Members Linked", value: data.summary?.totalMembers, suffix: " members", color: "text-primary", bg: "bg-primary/5" },
-              { label: "Patient Risk Score", value: data.patient?.riskScore, suffix: "/100", color: data.patient?.riskScore >= 70 ? "text-red-600" : "text-amber-600", bg: "bg-amber-50" },
+              { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-red-600" : data.heritabilityScore >= 40 ? "text-amber-600" : "text-emerald-600", bg: data.heritabilityScore >= 70 ? "bg-red-50" : "bg-secondary" },
+              { label: text("Genetic Risk Factors", "عوامل الخطورة الوراثية"), value: data.geneticRisks?.length, suffix: text(" identified", " مُحدّد"), color: "text-violet-600", bg: "bg-violet-50" },
+              { label: text("Family Members Linked", "أفراد الأسرة المرتبطون"), value: data.summary?.totalMembers, suffix: text(" members", " فرد"), color: "text-primary", bg: "bg-primary/5" },
+              { label: text("Patient Risk Score", "درجة خطورة المريض"), value: data.patient?.riskScore, suffix: "/100", color: data.patient?.riskScore >= 70 ? "text-red-600" : "text-amber-600", bg: "bg-amber-50" },
             ].map((kpi, i) => (
               <div key={i} className={`p-5 rounded-3xl ${kpi.bg}`}>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{kpi.label}</p>
@@ -207,8 +244,8 @@ export default function FamilyPortal() {
           {activeTab === "tree" && (
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2"><Users className="w-4 h-4 text-pink-600" /><CardTitle>Family Tree — Risk Map</CardTitle></div>
-                <p className="text-xs text-muted-foreground ml-auto">Colors indicate AI Risk Score</p>
+                <div className="flex items-center gap-2"><Users className="w-4 h-4 text-pink-600" /><CardTitle>{text("Family Tree — Risk Map", "شجرة العائلة — خريطة الخطورة")}</CardTitle></div>
+                <p className="text-xs text-muted-foreground ms-auto">{text("Colors indicate AI Risk Score", "الألوان تشير إلى درجة الخطورة")}</p>
               </CardHeader>
               <CardBody>
                 <div className="space-y-6">
@@ -216,7 +253,7 @@ export default function FamilyPortal() {
                   {data.parents?.length > 0 && (
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                        <span className="w-4 h-0.5 bg-border inline-block" /> Parents (P1)
+                        <span className="w-4 h-0.5 bg-border inline-block" /> {text("Parents (P1)", "الوالدان (P1)")}
                       </p>
                       <div className={`grid gap-4 ${data.parents.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-2"}`}>
                         {data.parents.map((m: any) => <FamilyMemberCard key={m.id} member={m} />)}
@@ -236,10 +273,10 @@ export default function FamilyPortal() {
                   {/* INDEX PATIENT + Siblings */}
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                      <span className="w-4 h-0.5 bg-border inline-block" /> Index Patient + Siblings (P2)
+                      <span className="w-4 h-0.5 bg-border inline-block" /> {text("Index Patient + Siblings (P2)", "المريض الأساسي والأشقّاء (P2)")}
                     </p>
                     <div className={`grid gap-4 ${(data.siblings?.length + 1) <= 2 ? "grid-cols-2" : "grid-cols-3"}`}>
-                      <FamilyMemberCard member={{ ...data.patient, relationship: "Index Patient" }} isPatient />
+                      <FamilyMemberCard member={{ ...data.patient, relationship: text("Index Patient", "المريض الأساسي") }} isPatient />
                       {data.siblings?.map((m: any) => <FamilyMemberCard key={m.id} member={m} />)}
                     </div>
                   </div>
@@ -252,7 +289,7 @@ export default function FamilyPortal() {
                       </div>
                       <div>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                          <span className="w-4 h-0.5 bg-border inline-block" /> Children (P3)
+                          <span className="w-4 h-0.5 bg-border inline-block" /> {text("Children (P3)", "الأبناء (P3)")}
                         </p>
                         <div className={`grid gap-4 ${data.children.length <= 2 ? "grid-cols-2" : "grid-cols-3"}`}>
                           {data.children.map((m: any) => <FamilyMemberCard key={m.id} member={m} />)}
@@ -265,7 +302,7 @@ export default function FamilyPortal() {
                   {data.familyRiskTrend?.length > 0 && (
                     <div className="pt-4 border-t border-border">
                       <p className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5">
-                        <TrendingUp className="w-3.5 h-3.5 text-primary" /> 5-Year Family Risk Trajectory
+                        <TrendingUp className="w-3.5 h-3.5 text-primary" /> {text("5-Year Family Risk Trajectory", "مسار خطورة الأسرة لـ 5 سنوات")}
                       </p>
                       <div className="h-36">
                         <ResponsiveContainer width="100%" height="100%">
@@ -292,9 +329,9 @@ export default function FamilyPortal() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-1">
                 <Dna className="w-4 h-4 text-violet-600" />
-                <p className="text-sm font-bold text-foreground">{data.geneticRisks?.length} Hereditary Risk Factors Identified</p>
-                <Badge variant={data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length > 0 ? "destructive" : "success"} className="ml-auto">
-                  {data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length} high-penetrance
+                <p className="text-sm font-bold text-foreground">{text(`${data.geneticRisks?.length} Hereditary Risk Factors Identified`, `${data.geneticRisks?.length} عامل خطورة وراثي مُحدّد`)}</p>
+                <Badge variant={data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length > 0 ? "destructive" : "success"} className="ms-auto">
+                  {text(`${data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length} high-penetrance`, `${data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length} عالية النفاذية`)}
                 </Badge>
               </div>
               {data.geneticRisks?.map((risk: any, i: number) => {
@@ -309,17 +346,17 @@ export default function FamilyPortal() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className={`text-sm font-bold ${cfg.color}`}>{risk.condition}</p>
                             {risk.icdCode && <span className="font-mono text-[10px] bg-white/60 border border-current/20 px-1.5 py-0.5 rounded-lg text-muted-foreground">{risk.icdCode}</span>}
-                            <Badge variant={cfg.badge} className="text-[10px] ml-auto shrink-0">{risk.riskLevel} penetrance</Badge>
+                            <Badge variant={cfg.badge} className="text-[10px] ms-auto shrink-0">{text(`${risk.riskLevel} penetrance`, `نفاذية ${risk.riskLevel === "high" ? "عالية" : risk.riskLevel === "medium" ? "متوسطة" : "منخفضة"}`)}</Badge>
                           </div>
-                          {risk.gene && <p className="text-[11px] text-muted-foreground mt-0.5"><span className="font-semibold text-foreground">Genes:</span> {risk.gene}</p>}
+                          {risk.gene && <p className="text-[11px] text-muted-foreground mt-0.5"><span className="font-semibold text-foreground">{text("Genes:", "الجينات:")}</span> {risk.gene}</p>}
                           <div className="flex items-center gap-4 mt-1.5">
-                            <span className="text-[11px] text-muted-foreground"><span className="font-semibold text-foreground">Inheritance:</span> {risk.inheritanceType}</span>
-                            <span className="text-[11px] text-muted-foreground"><span className="font-semibold text-foreground">Transmission:</span> {Math.round(risk.transmissionProb * 100)}%</span>
+                            <span className="text-[11px] text-muted-foreground"><span className="font-semibold text-foreground">{text("Inheritance:", "الوراثة:")}</span> {risk.inheritanceType}</span>
+                            <span className="text-[11px] text-muted-foreground"><span className="font-semibold text-foreground">{text("Transmission:", "الانتقال:")}</span> {Math.round(risk.transmissionProb * 100)}%</span>
                           </div>
                         </div>
                         <button onClick={() => setExpandedRisk(isExpanded ? null : i)}
                           className="text-[10px] font-bold text-primary bg-white/60 px-2.5 py-1 rounded-xl hover:bg-white transition-colors shrink-0">
-                          {isExpanded ? "Less" : "Details"}
+                          {isExpanded ? text("Less", "أقل") : text("Details", "تفاصيل")}
                         </button>
                       </div>
                     </div>
@@ -328,16 +365,16 @@ export default function FamilyPortal() {
                       <CardBody className="space-y-3">
                         <div className="grid grid-cols-2 gap-3">
                           <div className="bg-secondary rounded-2xl p-3">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Inheritance Pattern</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Inheritance Pattern", "نمط الوراثة")}</p>
                             <p className="text-xs text-foreground">{risk.inheritancePattern}</p>
                           </div>
                           <div className="bg-secondary rounded-2xl p-3">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Penetrance</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Penetrance", "النفاذية")}</p>
                             <p className="text-xs text-foreground">{risk.penetrance}</p>
                           </div>
                         </div>
                         <div className="bg-secondary rounded-2xl p-3">
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Transmission Probability</p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Transmission Probability", "احتمال الانتقال")}</p>
                           <div className="flex items-center gap-3">
                             <div className="flex-1 h-3 bg-white rounded-full overflow-hidden">
                               <div className={`h-full rounded-full ${risk.riskLevel === "high" ? "bg-red-500" : risk.riskLevel === "medium" ? "bg-amber-500" : "bg-emerald-500"}`}
@@ -350,7 +387,7 @@ export default function FamilyPortal() {
                         </div>
                         {risk.affectedRelatives?.length > 0 && (
                           <div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">At-Risk Relatives</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{text("At-Risk Relatives", "الأقارب المعرّضون")}</p>
                             <div className="flex flex-wrap gap-1.5">
                               {risk.affectedRelatives.map((r: string, ri: number) => (
                                 <span key={ri} className="text-xs font-semibold bg-secondary border border-border px-2.5 py-1 rounded-xl">{r}</span>
@@ -361,7 +398,7 @@ export default function FamilyPortal() {
                         <div className={`flex items-start gap-2.5 p-3 rounded-2xl border ${cfg.bg} ${cfg.border}`}>
                           <ChevronRight className={`w-4 h-4 shrink-0 mt-0.5 ${cfg.color}`} />
                           <div>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Clinical Recommendation</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">{text("Clinical Recommendation", "التوصية السريرية")}</p>
                             <p className="text-xs font-semibold text-foreground">{risk.recommendation}</p>
                           </div>
                         </div>
@@ -388,8 +425,8 @@ export default function FamilyPortal() {
               <div className="grid grid-cols-12 gap-5">
                 <Card className="col-span-7">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>Condition Burden Across Family</CardTitle></div>
-                    <p className="text-xs text-muted-foreground">Family load = % of members affected</p>
+                    <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Condition Burden Across Family", "عبء الأمراض عبر الأسرة")}</CardTitle></div>
+                    <p className="text-xs text-muted-foreground">{text("Family load = % of members affected", "حِمل الأسرة = نسبة الأفراد المصابين")}</p>
                   </CardHeader>
                   <CardBody>
                     <div className="h-64">
@@ -411,7 +448,7 @@ export default function FamilyPortal() {
 
                 <Card className="col-span-5">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>Condition Details</CardTitle></div>
+                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("Condition Details", "تفاصيل الأمراض")}</CardTitle></div>
                   </CardHeader>
                   <CardBody className="space-y-2.5">
                     {data.conditionBurden?.slice(0, 6).map((c: any, i: number) => (
@@ -435,8 +472,8 @@ export default function FamilyPortal() {
               {data.familyRiskTrend?.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>5-Year Family Risk Trajectory</CardTitle></div>
-                    <Badge variant="outline">AI Projection · 2025–2029</Badge>
+                    <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>{text("5-Year Family Risk Trajectory", "مسار خطورة الأسرة لـ 5 سنوات")}</CardTitle></div>
+                    <Badge variant="outline">{text("AI Projection · 2025–2029", "توقّع ذكي · 2025–2029")}</Badge>
                   </CardHeader>
                   <CardBody>
                     <div className="h-52">
@@ -454,7 +491,7 @@ export default function FamilyPortal() {
                     </div>
                     <div className="mt-3 p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5">
                       <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      <p className="text-xs text-amber-800">AI projection based on current chronic condition trajectory, age-related risk accumulation, and hereditary penetrance rates. Assumes no major lifestyle or therapeutic intervention.</p>
+                      <p className="text-xs text-amber-800">{text("AI projection based on current chronic condition trajectory, age-related risk accumulation, and hereditary penetrance rates. Assumes no major lifestyle or therapeutic intervention.", "توقّع ذكي مبني على مسار الأمراض المزمنة الحالي، وتراكم الخطورة المرتبط بالعمر، ومعدّلات النفاذية الوراثية. يفترض عدم وجود تدخّل علاجي أو في نمط الحياة.")}</p>
                     </div>
                   </CardBody>
                 </Card>
@@ -467,8 +504,8 @@ export default function FamilyPortal() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-2">
                 <Shield className="w-4 h-4 text-emerald-600" />
-                <p className="text-sm font-bold text-foreground">Family-Wide Screening Protocol</p>
-                <Badge variant="success" className="ml-auto">{data.screeningRecommendations?.length} active recommendations</Badge>
+                <p className="text-sm font-bold text-foreground">{text("Family-Wide Screening Protocol", "بروتوكول الفحص على مستوى الأسرة")}</p>
+                <Badge variant="success" className="ms-auto">{text(`${data.screeningRecommendations?.length} active recommendations`, `${data.screeningRecommendations?.length} توصية نشطة`)}</Badge>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {data.screeningRecommendations?.map((rec: any, i: number) => {
@@ -482,16 +519,16 @@ export default function FamilyPortal() {
                           <p className="text-sm font-bold text-foreground">{rec.test}</p>
                           <p className="text-xs text-muted-foreground mt-0.5">{rec.for}</p>
                         </div>
-                        <Badge variant={rec.priority === "high" ? "destructive" : rec.priority === "medium" ? "info" : "success"} className="text-[10px] shrink-0">{rec.priority}</Badge>
+                        <Badge variant={rec.priority === "high" ? "destructive" : rec.priority === "medium" ? "info" : "success"} className="text-[10px] shrink-0">{rec.priority === "high" ? text("high", "مرتفعة") : rec.priority === "medium" ? text("medium", "متوسطة") : text("low", "منخفضة")}</Badge>
                       </div>
                       <div className="flex items-center gap-2 mb-3">
                         <CalendarDays className="w-3.5 h-3.5 text-muted-foreground" />
                         <span className="text-[11px] text-muted-foreground">{rec.frequency}</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 bg-white/60 border border-border rounded-full text-muted-foreground ml-auto">Due: {rec.dueIn}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-white/60 border border-border rounded-full text-muted-foreground ms-auto">{text("Due:", "الاستحقاق:")} {rec.dueIn}</span>
                       </div>
                       {rec.members?.length > 0 && (
                         <div>
-                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Applies to</p>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{text("Applies to", "ينطبق على")}</p>
                           <div className="flex flex-wrap gap-1">
                             {rec.members.slice(0, 3).map((m: string, mi: number) => (
                               <div key={mi} className="flex items-center gap-1 bg-white/60 border border-border px-2 py-0.5 rounded-xl">
@@ -511,11 +548,11 @@ export default function FamilyPortal() {
               {/* Family member conditions full list */}
               <Card>
                 <CardHeader>
-                  <div className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /><CardTitle>Family Members — Full Health Summary</CardTitle></div>
+                  <div className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /><CardTitle>{text("Family Members — Full Health Summary", "أفراد الأسرة — الملخّص الصحي الكامل")}</CardTitle></div>
                 </CardHeader>
                 <CardBody className="p-0">
                   <div className="divide-y divide-border">
-                    {[{ ...data.patient, relationship: "Index Patient (You)" }, ...(data.familyMembers ?? [])].map((m: any, i: number) => {
+                    {[{ ...data.patient, relationship: text("Index Patient (You)", "المريض الأساسي (أنت)") }, ...(data.familyMembers ?? [])].map((m: any, i: number) => {
                       const riskColor = m.riskScore >= 70 ? "text-red-600 bg-red-50" : m.riskScore >= 40 ? "text-amber-600 bg-amber-50" : "text-emerald-600 bg-emerald-50";
                       return (
                         <div key={i} className="flex items-center gap-4 px-5 py-3.5 hover:bg-secondary/30 transition-colors">
@@ -525,9 +562,9 @@ export default function FamilyPortal() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <p className="text-sm font-bold text-foreground">{m.fullName}</p>
-                              {i === 0 && <Badge variant="outline" className="text-[9px]">Index</Badge>}
+                              {i === 0 && <Badge variant="outline" className="text-[9px]">{text("Index", "أساسي")}</Badge>}
                             </div>
-                            <p className="text-xs text-muted-foreground">{m.relationship} · Age {m.age} · {m.gender} · {m.bloodType}</p>
+                            <p className="text-xs text-muted-foreground">{m.relationship} · {text("Age", "العمر")} {m.age} · {m.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")} · <span dir="ltr">{m.bloodType}</span></p>
                           </div>
                           <div className="flex flex-wrap gap-1 max-w-xs">
                             {m.chronicConditions?.slice(0, 3).map((c: string, ci: number) => (
