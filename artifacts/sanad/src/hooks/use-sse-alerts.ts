@@ -25,7 +25,10 @@ export function useSseAlerts(role: string) {
     if (!role) return;
 
     const connect = () => {
-      const es = new EventSource(`/api/events/stream?role=${encodeURIComponent(role)}`);
+      // EventSource cannot send an Authorization header, so the stream
+      // endpoint accepts the JWT as a query parameter instead.
+      const token = localStorage.getItem("sanad_jwt") ?? "";
+      const es = new EventSource(`/api/events/stream?role=${encodeURIComponent(role)}&token=${encodeURIComponent(token)}`);
       esRef.current = es;
 
       es.onopen = () => setConnected(true);

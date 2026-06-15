@@ -1,5 +1,2 @@
-import { redirect } from "next/navigation";
-
-export default function RootPage() {
-  redirect("/login");
-}
+"use client";
+export { default } from "@/screens/landing";

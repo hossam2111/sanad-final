@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 
 export interface WhyFactor {
   factor: string;
@@ -46,25 +47,25 @@ export interface AiDecisionResult {
 }
 
 async function fetchDecision(patientId: number): Promise<AiDecisionResult> {
-  const res = await fetch(`/api/ai/decision/${patientId}`);
+  const res = await apiFetch(`/api/ai/decision/${patientId}`);
   if (!res.ok) throw new Error("Failed to fetch AI decision");
   return res.json();
 }
 
 async function fetchEvents(patientId: number) {
-  const res = await fetch(`/api/ai/events/${patientId}`);
+  const res = await apiFetch(`/api/ai/events/${patientId}`);
   if (!res.ok) throw new Error("Failed to fetch events");
   return res.json();
 }
 
 async function fetchAudit(patientId: number) {
-  const res = await fetch(`/api/ai/audit/${patientId}`);
+  const res = await apiFetch(`/api/ai/audit/${patientId}`);
   if (!res.ok) throw new Error("Failed to fetch audit log");
   return res.json();
 }
 
 async function fetchIntelligence() {
-  const res = await fetch(`/api/admin/intelligence`);
+  const res = await apiFetch(`/api/admin/intelligence`);
   if (!res.ok) throw new Error("Failed to fetch intelligence");
   return res.json();
 }

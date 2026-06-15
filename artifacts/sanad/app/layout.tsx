@@ -3,8 +3,9 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "SANAD — National AI Health Intelligence Platform",
-  description: "منصة سناد للذكاء الاصطناعي الصحي الوطني",
+  title: "SANAD Health — Behind Every Decision",
+  description:
+    "Sovereign health intelligence: one layer connecting hospitals, labs, pharmacies and emergency response — where every clinical decision carries its evidence. لكل قرارٍ سند.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

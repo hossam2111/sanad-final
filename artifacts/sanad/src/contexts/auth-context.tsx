@@ -17,31 +17,21 @@ export interface AuthUser {
   nationalId?: string;
 }
 
-const ROLE_USERS: Record<UserRole, AuthUser> = {
-  emergency: { role: "emergency", name: "Unit 7 — Riyadh Central", jobTitle: "First Responder", organization: "SRCA Emergency Services", initial: "U" },
-  doctor: { role: "doctor", name: "Dr. Ahmed Al-Rashidi", jobTitle: "Consultant Physician", organization: "King Fahd Medical City", initial: "A" },
-  citizen: { role: "citizen", name: "Mohammed Al-Ghamdi", jobTitle: "Citizen", organization: "National Health Record", initial: "M", nationalId: "1000000001" },
-  admin: { role: "admin", name: "Eng. Saad Al-Otaibi", jobTitle: "National Health Operations Director", organization: "Ministry of Health — KSA", initial: "S" },
-  lab: { role: "lab", name: "Sara Al-Otaibi", jobTitle: "Senior Lab Technician", organization: "SANAD Lab Network", initial: "S" },
-  pharmacy: { role: "pharmacy", name: "Hassan Al-Ghamdi", jobTitle: "Clinical Pharmacist", organization: "Central Pharmacy — Riyadh", initial: "H" },
-  hospital: { role: "hospital", name: "Operations Manager", jobTitle: "Hospital Operations Director", organization: "King Fahd Medical City", initial: "O" },
-  insurance: { role: "insurance", name: "Nora Al-Qahtani", jobTitle: "Insurance Operations Lead", organization: "Tawuniya Insurance", initial: "N" },
-  "ai-control": { role: "ai-control", name: "Dr. Khalid Al-Mansouri", jobTitle: "AI Systems Lead", organization: "SANAD AI Division", initial: "K" },
-  research: { role: "research", name: "Dr. Reem Al-Zahrani", jobTitle: "Clinical Research Director", organization: "King Abdulaziz University", initial: "R" },
-  family: { role: "family", name: "Fatima Al-Harbi", jobTitle: "Family Health Coordinator", organization: "SANAD Family Health", initial: "F" },
-  "supply-chain": { role: "supply-chain", name: "Ibrahim Al-Dosari", jobTitle: "Supply Chain Manager", organization: "National Pharma Supply", initial: "I" },
+// Supplementary defaults for display fields not returned by the API.
+const ROLE_DEFAULTS: Partial<Record<UserRole, Partial<AuthUser>>> = {
+  citizen: { nationalId: "1000000001" },
 };
 
 interface AuthContextValue {
   user: AuthUser | null;
-  login: (role: UserRole) => Promise<void>;
+  login: (username: string, password: string) => Promise<AuthUser>;
   logout: () => void;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
-  login: async () => {},
+  login: async () => { throw new Error("AuthProvider not mounted"); },
   logout: () => {},
   isAuthenticated: false,
 });
@@ -54,6 +44,7 @@ type LoginResponse = {
   expiresIn: number;
   user: {
     role: UserRole;
+    userId: string;
     name: string;
     jobTitle: string;
     organization: string;
@@ -64,12 +55,13 @@ function isLoginResponse(value: unknown): value is LoginResponse {
   if (!value || typeof value !== "object") return false;
   const data = value as Record<string, unknown>;
   const user = data["user"];
+  if (!user || typeof user !== "object") return false;
+  const u = user as Record<string, unknown>;
   return (
     typeof data["token"] === "string" &&
     typeof data["expiresIn"] === "number" &&
-    Boolean(user) &&
-    typeof user === "object" &&
-    typeof (user as Record<string, unknown>)["role"] === "string"
+    typeof u["role"] === "string" &&
+    typeof u["name"] === "string"
   );
 }
 
@@ -94,40 +86,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   });
 
-  const login = async (role: UserRole) => {
+  const login = async (username: string, password: string): Promise<AuthUser> => {
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role }),
+        body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
-        const message = await response.text();
-        throw new Error(message || `Login failed with status ${response.status}`);
+        let message = `Login failed (${response.status})`;
+        try {
+          const err = await response.json() as { message?: string };
+          if (err.message) message = err.message;
+        } catch { /* ignore parse error */ }
+        throw new Error(message);
       }
 
       const data: unknown = await response.json();
-      if (!isLoginResponse(data) || data.user.role !== role) {
-        throw new Error("Login response was invalid");
-      }
+      if (!isLoginResponse(data)) throw new Error("Login response was invalid");
 
-      const localUser = ROLE_USERS[role];
+      const roleDefaults = ROLE_DEFAULTS[data.user.role] ?? {};
       const authenticatedUser: AuthUser = {
-        ...localUser,
+        role: data.user.role,
         name: data.user.name,
         jobTitle: data.user.jobTitle,
         organization: data.user.organization,
+        initial: data.user.name?.[0]?.toUpperCase() ?? "?",
+        ...roleDefaults,
       };
 
       localStorage.setItem(TOKEN_KEY, data.token);
       localStorage.setItem(SESSION_KEY, JSON.stringify(authenticatedUser));
       setAuthTokenGetter(() => localStorage.getItem(TOKEN_KEY));
       setUser(authenticatedUser);
+      return authenticatedUser;
     } catch (error) {
       localStorage.removeItem(TOKEN_KEY);
       setAuthTokenGetter(null);
-      console.error("SANAD login failed", error);
       throw error instanceof Error ? error : new Error("Login failed");
     }
   };
@@ -147,4 +143,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export const useAuth = () => useContext(AuthContext);
-export { ROLE_USERS };
+
+// Exported for portal display (icons, labels) — not used for authentication.
+export const ROLE_USERS: Record<UserRole, AuthUser> = {
+  emergency: { role: "emergency", name: "Unit 7 — Riyadh Central", jobTitle: "First Responder", organization: "SRCA Emergency Services", initial: "U" },
+  doctor: { role: "doctor", name: "Dr. Ahmed Al-Rashidi", jobTitle: "Consultant Physician", organization: "King Fahd Medical City", initial: "A" },
+  citizen: { role: "citizen", name: "Mohammed Al-Ghamdi", jobTitle: "Citizen", organization: "National Health Record", initial: "M", nationalId: "1000000001" },
+  admin: { role: "admin", name: "Eng. Saad Al-Otaibi", jobTitle: "National Health Operations Director", organization: "Ministry of Health — KSA", initial: "S" },
+  lab: { role: "lab", name: "Sara Al-Otaibi", jobTitle: "Senior Lab Technician", organization: "SANAD Lab Network", initial: "S" },
+  pharmacy: { role: "pharmacy", name: "Hassan Al-Ghamdi", jobTitle: "Clinical Pharmacist", organization: "Central Pharmacy — Riyadh", initial: "H" },
+  hospital: { role: "hospital", name: "Operations Manager", jobTitle: "Hospital Operations Director", organization: "King Fahd Medical City", initial: "O" },
+  insurance: { role: "insurance", name: "Nora Al-Qahtani", jobTitle: "Insurance Operations Lead", organization: "Tawuniya Insurance", initial: "N" },
+  "ai-control": { role: "ai-control", name: "Dr. Khalid Al-Mansouri", jobTitle: "AI Systems Lead", organization: "SANAD AI Division", initial: "K" },
+  research: { role: "research", name: "Dr. Reem Al-Zahrani", jobTitle: "Clinical Research Director", organization: "King Abdulaziz University", initial: "R" },
+  family: { role: "family", name: "Fatima Al-Harbi", jobTitle: "Family Health Coordinator", organization: "SANAD Family Health", initial: "F" },
+  "supply-chain": { role: "supply-chain", name: "Ibrahim Al-Dosari", jobTitle: "Supply Chain Manager", organization: "National Pharma Supply", initial: "I" },
+};
