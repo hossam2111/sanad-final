@@ -2,8 +2,20 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, labResultsTable, visitsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { getConsentState } from "../lib/ownership.js";
 
 const router = Router();
+
+// Family-portal access is consent-gated: the patient must have granted the
+// family_linking consent (default: NOT granted) before their record can be
+// linked. This is the production trust boundary for the family workspace.
+const FAMILY_LINKING_DEFAULT_GRANTED = false;
+
+/** Mask a 10-digit national id for display to relatives: ******7890. */
+function maskNationalId(nationalId: string): string {
+  return nationalId.length > 4 ? "•".repeat(nationalId.length - 4) + nationalId.slice(-4) : nationalId;
+}
 
 type RiskLevel = "low" | "medium" | "high";
 
@@ -130,6 +142,32 @@ router.get("/patient/:nationalId", async (req, res) => {
   if (!patients.length) { res.status(404).json({ error: "NOT_FOUND", message: "Patient not found" }); return; }
   const p = patients[0]!;
 
+  // Consent gate — without an active family_linking grant the record cannot
+  // be linked to the family workspace.
+  const consentState = await getConsentState(p.id, "family_linking");
+  const linkingGranted = consentState === null ? FAMILY_LINKING_DEFAULT_GRANTED : consentState;
+  if (!linkingGranted) {
+    res.status(403).json({
+      error: "CONSENT_REQUIRED",
+      message: "This patient has not granted Family Health Linking consent. Ask them to enable it from their SANAD privacy settings.",
+    });
+    return;
+  }
+
+  // Family access is consent-based, not break-glass, but it still reads a full
+  // clinical record — log it to the audit chain.
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "family",
+    action: "READ",
+    what: `Family portal record access — ${p.fullName} (${p.nationalId}) under family_linking consent`,
+    patientId: p.id,
+    ipAddress,
+    userAgent,
+  });
+
   const [medications, labResults, visits, allPatients] = await Promise.all([
     db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(20),
@@ -151,7 +189,8 @@ router.get("/patient/:nationalId", async (req, res) => {
   const mapMember = (fp: any, relationship: string) => ({
     id: fp.id,
     fullName: fp.fullName,
-    nationalId: fp.nationalId,
+    // Relatives have not consented to exposure here — mask their identifier.
+    nationalId: maskNationalId(fp.nationalId),
     relationship,
     age: new Date().getFullYear() - new Date(fp.dateOfBirth).getFullYear(),
     gender: fp.gender,

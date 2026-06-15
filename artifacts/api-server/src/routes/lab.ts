@@ -1,8 +1,22 @@
 import { Router } from "express";
+import { z } from "zod";
 import { db } from "@workspace/db";
-import { patientsTable, labResultsTable, eventsTable, auditLogTable } from "@workspace/db/schema";
+import { patientsTable, labResultsTable, eventsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { broadcastToRole } from "../lib/sse.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { validate } from "../middlewares/validate.js";
+
+const labResultSchema = z.object({
+  patientId: z.number({ coerce: true }).int().positive(),
+  testName: z.string().min(1).max(200),
+  result: z.string().min(1).max(500),
+  unit: z.string().max(50).optional(),
+  referenceRange: z.string().max(200).optional(),
+  status: z.enum(["normal", "abnormal", "critical"]),
+  hospital: z.string().max(200).optional(),
+  notes: z.string().max(2000).optional(),
+});
 
 const router = Router();
 
@@ -96,7 +110,8 @@ router.get("/patient/:nationalId", async (req, res) => {
     .select()
     .from(labResultsTable)
     .where(eq(labResultsTable.patientId, patient.id))
-    .orderBy(desc(labResultsTable.testDate));
+    .orderBy(desc(labResultsTable.testDate))
+    .limit(500);
 
   const labsWithInterpretation = labs.map(lab => ({
     ...lab,
@@ -124,12 +139,8 @@ router.get("/patient/:nationalId", async (req, res) => {
   });
 });
 
-router.post("/result", async (req, res) => {
-  const { patientId, testName, result, unit, referenceRange, status, hospital, notes } = req.body;
-
-  if (!patientId || !testName || !result || !status) {
-    return res.status(400).json({ error: "patientId, testName, result, and status are required" });
-  }
+router.post("/result", validate(labResultSchema), async (req, res) => {
+  const { patientId, testName, result, unit, referenceRange, status, hospital, notes } = req.body as z.infer<typeof labResultSchema>;
 
   const [newResult] = await db.insert(labResultsTable).values({
     patientId,
@@ -150,17 +161,16 @@ router.post("/result", async (req, res) => {
     patientId,
     payload: JSON.stringify({ testName, result, unit, status, interpretation }),
     source: "lab_portal",
-    processedBy: "AI Lab Interpreter v2.0",
   }).catch(() => {});
 
   if (status === "critical" || status === "abnormal") {
     const { alertsTable: alerts } = await import("@workspace/db/schema");
-    const severity = status === "critical" ? "critical" : "warning";
+    const severity = status === "critical" ? "critical" : "high";
     const title = status === "critical"
       ? `CRITICAL LAB: ${testName} requires immediate action`
       : `Abnormal Lab Result: ${testName} outside normal range`;
     const message = `${testName} = ${result} ${unit ?? ""}. ${interpretation.significance} Action: ${interpretation.action}`;
-    await db.insert(alerts).values({ patientId, alertType: "lab_critical", severity, title, message }).catch(() => {});
+    await db.insert(alerts).values({ patientId, alertType: "critical-lab", severity, title, message }).catch(() => {});
 
     const patients = await db.select({ fullName: patientsTable.fullName, nationalId: patientsTable.nationalId }).from(patientsTable).where(eq(patientsTable.id, patientId)).limit(1);
     const patientName = patients[0]?.fullName ?? "Unknown Patient";
@@ -173,7 +183,7 @@ router.post("/result", async (req, res) => {
       testName,
       result: `${result} ${unit ?? ""}`.trim(),
       status,
-      severity,
+      severity: status === "critical" ? "critical" : "warning",
       title,
       significance: interpretation.significance,
       action: interpretation.action,
@@ -196,13 +206,18 @@ router.post("/result", async (req, res) => {
     });
   }
 
-  await db.insert(auditLogTable).values({
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
     who: "Lab Technician (Lab Portal)",
     whoRole: "lab_technician",
-    what: `LAB_RESULT_UPLOADED: ${testName} = ${result} ${unit} (${status.toUpperCase()})`,
+    action: "CREATE",
+    what: `Lab result uploaded: ${testName} = ${result} ${unit ?? ""} (${status.toUpperCase()})`,
     patientId,
+    details: { testName, result, unit, status },
     confidence: interpretation.confidence,
-  }).catch(() => {});
+    ipAddress,
+    userAgent,
+  });
 
   res.json({
     result: newResult,

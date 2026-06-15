@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { consentTable, patientsTable, auditLogTable } from "@workspace/db/schema";
+import { consentTable, patientsTable } from "@workspace/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { requireOwnNationalId } from "../lib/ownership.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const router = Router();
 
@@ -77,6 +79,7 @@ const CONSENT_DEFINITIONS = [
 // GET /api/consent/patient/:nationalId — load consent profile
 router.get("/patient/:nationalId", async (req, res) => {
   const { nationalId } = req.params;
+  if (!requireOwnNationalId(req, res, nationalId)) return;
 
   const patients = await db.select().from(patientsTable)
     .where(eq(patientsTable.nationalId, nationalId)).limit(1);
@@ -149,6 +152,10 @@ router.post("/grant", async (req, res) => {
     return res.status(400).json({ error: "INVALID_PARAMS", message: "nationalId, consentType, and granted are required" });
   }
 
+  // Consent is a patient-only act — nobody may grant or revoke on behalf of
+  // another record, so the body's nationalId must match the token's.
+  if (!requireOwnNationalId(req, res, nationalId)) return;
+
   const patients = await db.select().from(patientsTable)
     .where(eq(patientsTable.nationalId, nationalId)).limit(1);
 
@@ -189,13 +196,18 @@ router.post("/grant", async (req, res) => {
     ipAddress: req.ip ?? null,
   }).returning();
 
-  // Log to audit trail
-  await db.insert(auditLogTable).values({
+  // Log through the hash-chained audit writer — direct inserts would break
+  // the tamper-evidence chain (Isnād).
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
     who: `Patient ${patient.fullName} (${patient.nationalId})`,
     whoRole: "citizen",
+    action: granted ? "CREATE" : "UPDATE",
     what: `CONSENT_${granted ? "GRANTED" : "REVOKED"}: ${consentType} → ${def.grantedTo}`,
     patientId: patient.id,
-  }).catch(() => {});
+    ipAddress,
+    userAgent,
+  });
 
   res.json({
     success: true,

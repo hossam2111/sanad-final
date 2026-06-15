@@ -1,11 +1,27 @@
 import { Router } from "express";
+import { z } from "zod";
 import { db } from "@workspace/db";
-import { patientsTable, medicationsTable, visitsTable, labResultsTable } from "@workspace/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { patientsTable, medicationsTable, visitsTable, labResultsTable, claimReviewsTable } from "@workspace/db/schema";
+import { eq, desc, count, sql } from "drizzle-orm";
+import { validate } from "../middlewares/validate.js";
+import { getConsentState } from "../lib/ownership.js";
+
+const claimReviewSchema = z.object({
+  action: z.enum(["approve", "reject", "flag"]),
+  notes: z.string().max(2000).optional(),
+  reviewedBy: z.string().max(200).optional(),
+});
 
 const router = Router();
 
-const claimOverrides: Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }> = {};
+async function getClaimOverrides(): Promise<Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }>> {
+  const reviews = await db.select().from(claimReviewsTable);
+  const map: Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }> = {};
+  for (const r of reviews) {
+    map[r.claimId] = { status: r.status, reviewedBy: r.reviewedBy, reviewedAt: r.reviewedAt.toISOString(), notes: r.notes ?? "", aiReason: r.aiReason ?? undefined };
+  }
+  return map;
+}
 
 function computeAnomalyScore(visits: any[], meds: any[], riskScore: number): { score: number; factors: Array<{ label: string; weight: number; value: string; flag: boolean }> } {
   const factors: Array<{ label: string; weight: number; value: string; flag: boolean }> = [];
@@ -56,12 +72,24 @@ router.get("/patient/:nationalId", async (req, res) => {
   const patients = await db.select().from(patientsTable).where(eq(patientsTable.nationalId, nationalId)).limit(1);
   if (!patients.length) { res.status(404).json({ error: "NOT_FOUND", message: "Patient not found" }); return; }
   const p = patients[0]!;
+
+  // Insurance access is consent-based (default granted, revocable). A patient
+  // who revoked the `insurance` consent disappears from the insurer's view.
+  const consentState = await getConsentState(p.id, "insurance");
+  if (consentState === false) {
+    res.status(403).json({
+      error: "CONSENT_REVOKED",
+      message: "This patient has revoked Insurance Data Access consent. Claims must be processed through manual MOH channels.",
+    });
+    return;
+  }
   const [medications, visits, labs] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)),
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(200),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(20),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(10),
   ]);
   const riskScore = p.riskScore ?? 0;
+  const age = new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear();
   const { score: anomalyScore, factors: anomalyFactors } = computeAnomalyScore(visits, medications, riskScore);
   const fraudRisk = anomalyScore >= 50 ? "high" : anomalyScore >= 25 ? "medium" : "low";
   const fraudFlags: string[] = anomalyFactors.filter(f => f.flag).map(f => f.label + " — " + f.value);
@@ -81,10 +109,11 @@ router.get("/patient/:nationalId", async (req, res) => {
     { factor: "Base Premium", amount: baseMonthly, color: "#007AFF" },
     { factor: "Clinical Risk Loading", amount: Math.round(baseMonthly * (riskMultiplier - 1) * 0.6), color: "#f59e0b" },
     { factor: "Chronic Condition Surcharge", amount: Math.round((p.chronicConditions?.length ?? 0) * 25), color: "#ef4444" },
-    { factor: "Age Adjustment", amount: Math.round(Math.max(0, ((p.age ?? 40) - 30) * 2)), color: "#a855f7" },
+    { factor: "Age Adjustment", amount: Math.round(Math.max(0, (age - 30) * 2)), color: "#a855f7" },
     { factor: "Behavioral Adjustment", amount: anomalyScore >= 30 ? 80 : 0, color: "#06b6d4" },
   ].filter(x => x.amount > 0);
 
+  const claimOverrides = await getClaimOverrides();
   const claims = visits.slice(0, 10).map((v, i) => {
     const overrideKey = `CLM-2025-${String(p.id).padStart(3, "0")}${String(i + 1).padStart(2, "0")}`;
     const override = claimOverrides[overrideKey];
@@ -108,7 +137,7 @@ router.get("/patient/:nationalId", async (req, res) => {
   });
 
   res.json({
-    patient: { id: p.id, fullName: p.fullName, nationalId: p.nationalId, dateOfBirth: p.dateOfBirth, gender: p.gender, age: p.age, bloodType: p.bloodType },
+    patient: { id: p.id, fullName: p.fullName, nationalId: p.nationalId, dateOfBirth: p.dateOfBirth, gender: p.gender, age, bloodType: p.bloodType },
     riskScore,
     anomalyScore,
     anomalyFactors,
@@ -128,10 +157,22 @@ router.get("/patient/:nationalId", async (req, res) => {
 });
 
 router.get("/dashboard", async (req, res) => {
-  const [allPatients, allVisits] = await Promise.all([
-    db.select().from(patientsTable),
+  const [allVisits, [riskAgg], [totalPatientsRow]] = await Promise.all([
     db.select().from(visitsTable).orderBy(desc(visitsTable.visitDate)).limit(200),
+    db.select({
+      total:    sql<number>`COUNT(*)`.mapWith(Number),
+      highRisk: sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 70)`.mapWith(Number),
+      critical: sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 85)`.mapWith(Number),
+      low:      sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} < 40)`.mapWith(Number),
+      medium:   sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 40 AND ${patientsTable.riskScore} < 70)`.mapWith(Number),
+    }).from(patientsTable),
+    db.select({ count: count() }).from(patientsTable),
   ]);
+
+  const totalPolicies = Number(totalPatientsRow?.count ?? 0);
+  const highRiskPatients = riskAgg?.highRisk ?? 0;
+  const criticalPatients = riskAgg?.critical ?? 0;
+
   const totalClaims = allVisits.length;
   const pendingClaims = Math.round(totalClaims * 0.12);
   const approvedClaims = Math.round(totalClaims * 0.76);
@@ -141,22 +182,20 @@ router.get("/dashboard", async (req, res) => {
   const inpatientVisits = allVisits.filter(v => v.visitType === "inpatient").length;
   const outpatientVisits = allVisits.filter(v => v.visitType === "outpatient").length;
   const totalPayout = emergencyVisits * 3200 + inpatientVisits * 8500 + outpatientVisits * 450;
-  const highRiskPatients = allPatients.filter(p => (p.riskScore ?? 0) >= 70).length;
-  const criticalPatients = allPatients.filter(p => (p.riskScore ?? 0) >= 85).length;
 
   const trendData = Array.from({ length: 12 }, (_, i) => {
     const month = new Date(2025, i, 1).toLocaleString("en", { month: "short" });
-    return {
-      month,
-      claims: Math.round(totalClaims / 12 * (0.7 + Math.random() * 0.6)),
-      fraud: Math.round(fraudSuspected / 12 * (0.5 + Math.random())),
-      payout: Math.round((totalPayout / 12) * (0.8 + Math.random() * 0.4)),
-    };
+    const monthVisits = allVisits.filter(v => new Date(v.visitDate).getMonth() === i);
+    const monthPayout = monthVisits.filter(v => v.visitType === "emergency").length * 3200
+      + monthVisits.filter(v => v.visitType === "inpatient").length * 8500
+      + monthVisits.filter(v => v.visitType === "outpatient").length * 450;
+    const monthFraud = monthVisits.filter(v => computeClaimAnomalyScore(v, allVisits).score >= 50).length;
+    return { month, claims: monthVisits.length, fraud: monthFraud, payout: monthPayout };
   });
 
   res.json({
-    totalPolicies: allPatients.length,
-    activePolicies: allPatients.length,
+    totalPolicies,
+    activePolicies: totalPolicies,
     totalClaims,
     pendingClaims,
     approvedClaims,
@@ -187,45 +226,48 @@ router.get("/dashboard", async (req, res) => {
       { type: "Multi-Provider Routing", count: Math.max(1, Math.round(fraudSuspected * 0.1)), severity: "medium", description: "5+ distinct facilities in 30-day window" },
     ],
     portfolioRisk: {
-      low: allPatients.filter(p => (p.riskScore ?? 0) < 40).length,
-      medium: allPatients.filter(p => (p.riskScore ?? 0) >= 40 && (p.riskScore ?? 0) < 70).length,
-      high: highRiskPatients - criticalPatients,
+      low:      riskAgg?.low      ?? 0,
+      medium:   riskAgg?.medium   ?? 0,
+      high:     highRiskPatients - criticalPatients,
       critical: criticalPatients,
     },
   });
 });
 
-router.post("/claim/:claimId/review", async (req, res) => {
-  const { claimId } = req.params;
-  const { action, notes, reviewedBy } = req.body as { action: string; notes?: string; reviewedBy?: string };
-  if (!action || !["approve", "reject", "flag"].includes(action)) {
-    res.status(400).json({ error: "action must be approve, reject, or flag" }); return;
-  }
-  const statusMap: Record<string, string> = { approve: "approved", reject: "rejected", flag: "under_review" };
+router.post("/claim/:claimId/review", validate(claimReviewSchema), async (req, res) => {
+  const claimId = String(req.params["claimId"]);
+  const { action, notes, reviewedBy } = req.body as z.infer<typeof claimReviewSchema>;
+  const statusMap: Record<string, "approved" | "rejected" | "under_review"> = { approve: "approved", reject: "rejected", flag: "under_review" };
   const aiReasonMap: Record<string, string> = {
     approve: "AI validation passed — clinical necessity confirmed, cost within expected range, no anomaly patterns detected.",
     reject: "AI fraud model flagged claim — anomaly score exceeds threshold, inconsistent with patient history.",
     flag: "AI requires additional documentation — unusual pattern detected, escalated for senior review.",
   };
-  claimOverrides[claimId!] = {
-    status: statusMap[action]!,
-    reviewedBy: reviewedBy ?? "Insurance Analyst",
-    reviewedAt: new Date().toISOString(),
-    notes: notes ?? "",
-    aiReason: aiReasonMap[action],
-  };
+  const reviewedAt = new Date();
+  const status = statusMap[action]!;
+  const aiReason = aiReasonMap[action]!;
+  const reviewer = reviewedBy ?? "Insurance Analyst";
+
+  await db.insert(claimReviewsTable)
+    .values({ claimId: claimId!, status, reviewedBy: reviewer, reviewedAt, notes: notes ?? "", aiReason })
+    .onConflictDoUpdate({
+      target: claimReviewsTable.claimId,
+      set: { status, reviewedBy: reviewer, reviewedAt, notes: notes ?? "", aiReason },
+    });
+
   res.json({
     claimId,
-    newStatus: statusMap[action],
-    reviewedBy: reviewedBy ?? "Insurance Analyst",
-    reviewedAt: claimOverrides[claimId!]!.reviewedAt,
-    aiReason: aiReasonMap[action],
-    message: `Claim ${claimId} has been ${statusMap[action]}.`,
+    newStatus: status,
+    reviewedBy: reviewer,
+    reviewedAt: reviewedAt.toISOString(),
+    aiReason,
+    message: `Claim ${claimId} has been ${status}.`,
   });
 });
 
 router.get("/claim-overrides", async (_req, res) => {
-  res.json({ overrides: claimOverrides });
+  const overrides = await getClaimOverrides();
+  res.json({ overrides });
 });
 
 export default router;

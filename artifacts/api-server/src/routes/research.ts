@@ -1,83 +1,76 @@
 import { Router } from "express";
+import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { patientsTable, labResultsTable, visitsTable, medicationsTable, aiDecisionsTable } from "@workspace/db/schema";
-import { desc } from "drizzle-orm";
+import { count, desc } from "drizzle-orm";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const router = Router();
 
 router.get("/insights", async (req, res) => {
-  const [allPatients, allLabs, allVisits, allMeds, allDecisions] = await Promise.all([
-    db.select().from(patientsTable),
-    db.select().from(labResultsTable).orderBy(desc(labResultsTable.testDate)).limit(500),
-    db.select().from(visitsTable).orderBy(desc(visitsTable.visitDate)).limit(500),
-    db.select().from(medicationsTable).limit(500),
+  // All queries use SQL aggregations — no patient PHI (names, IDs) is loaded into memory
+  const [
+    conditionRows,
+    ageRiskRows,
+    [totalRow],
+    labInsightRows,
+    drugRows,
+    allDecisions,
+    [labTotal],
+    [visitTotal],
+  ] = await Promise.all([
+    db.execute<{ condition: string; patient_count: number; avg_risk: number; total_risk: number }>(
+      sql`SELECT elem AS condition, COUNT(*)::int AS patient_count, ROUND(AVG(COALESCE(risk_score,0)))::int AS avg_risk, SUM(COALESCE(risk_score,0))::int AS total_risk FROM patients, unnest(chronic_conditions) AS elem GROUP BY elem ORDER BY patient_count DESC LIMIT 10`
+    ),
+    db.execute<{ age_group: string; patient_count: number; avg_risk: number }>(
+      sql`SELECT CASE WHEN EXTRACT(YEAR FROM AGE(date_of_birth)) < 18 THEN '0-17' WHEN EXTRACT(YEAR FROM AGE(date_of_birth)) < 35 THEN '18-34' WHEN EXTRACT(YEAR FROM AGE(date_of_birth)) < 50 THEN '35-49' WHEN EXTRACT(YEAR FROM AGE(date_of_birth)) < 65 THEN '50-64' ELSE '65+' END AS age_group, COUNT(*)::int AS patient_count, ROUND(AVG(COALESCE(risk_score,0)))::int AS avg_risk FROM patients GROUP BY age_group ORDER BY MIN(date_of_birth)`
+    ),
+    db.select({ count: count() }).from(patientsTable),
+    db.execute<{ test_name: string; total: number; abnormal: number; critical: number }>(
+      // ORDER BY repeats the full aggregates — Postgres does not allow SELECT
+      // aliases inside an ORDER BY expression.
+      sql`SELECT test_name, COUNT(*)::int AS total, COUNT(*) FILTER (WHERE status='abnormal')::int AS abnormal, COUNT(*) FILTER (WHERE status='critical')::int AS critical FROM lab_results GROUP BY test_name ORDER BY (COUNT(*) FILTER (WHERE status='abnormal') + COUNT(*) FILTER (WHERE status='critical') * 2) DESC LIMIT 8`
+    ),
+    db.execute<{ drug_name: string; prescriptions: number }>(
+      sql`SELECT drug_name, COUNT(*)::int AS prescriptions FROM medications GROUP BY drug_name ORDER BY prescriptions DESC LIMIT 10`
+    ),
     db.select().from(aiDecisionsTable).orderBy(desc(aiDecisionsTable.createdAt)).limit(200),
+    db.select({ count: count() }).from(labResultsTable),
+    db.select({ count: count() }).from(visitsTable),
   ]);
 
-  const total = allPatients.length || 1;
+  const conditions  = (Array.isArray(conditionRows)   ? conditionRows   : conditionRows.rows)   as typeof conditionRows extends { rows: infer R } ? R : typeof conditionRows;
+  const ageRows     = (Array.isArray(ageRiskRows)      ? ageRiskRows      : ageRiskRows.rows)     as typeof ageRiskRows extends { rows: infer R } ? R : typeof ageRiskRows;
+  const labRows     = (Array.isArray(labInsightRows)   ? labInsightRows   : labInsightRows.rows)  as typeof labInsightRows extends { rows: infer R } ? R : typeof labInsightRows;
+  const drugs       = (Array.isArray(drugRows)         ? drugRows         : drugRows.rows)        as typeof drugRows extends { rows: infer R } ? R : typeof drugRows;
 
-  const conditionMap: Record<string, { count: number; totalRisk: number }> = {};
-  for (const p of allPatients) {
-    for (const c of p.chronicConditions ?? []) {
-      if (!conditionMap[c]) conditionMap[c] = { count: 0, totalRisk: 0 };
-      conditionMap[c].count++;
-      conditionMap[c].totalRisk += (p.riskScore ?? 0);
-    }
-  }
+  const total = Number(totalRow?.count ?? 1);
 
-  const conditionInsights = Object.entries(conditionMap)
-    .sort(([, a], [, b]) => b.count - a.count)
-    .slice(0, 10)
-    .map(([condition, data]) => ({
-      condition,
-      prevalence: Math.round((data.count / total) * 100),
-      avgRiskScore: Math.round(data.totalRisk / data.count),
-      patientCount: data.count,
-      trend: data.count / total > 0.15 ? "rising" : data.count / total > 0.08 ? "stable" : "declining",
-    }));
+  const conditionInsights = (conditions as Array<{ condition: string; patient_count: number; avg_risk: number; total_risk: number }>).map(r => ({
+    condition: r.condition,
+    prevalence: Math.round((r.patient_count / total) * 100),
+    avgRiskScore: r.avg_risk,
+    patientCount: r.patient_count,
+    trend: r.patient_count / total > 0.15 ? "rising" : r.patient_count / total > 0.08 ? "stable" : "declining",
+  }));
 
-  const labTestMap: Record<string, { total: number; abnormal: number; critical: number }> = {};
-  for (const lab of allLabs) {
-    if (!labTestMap[lab.testName]) labTestMap[lab.testName] = { total: 0, abnormal: 0, critical: 0 };
-    labTestMap[lab.testName].total++;
-    if (lab.status === "abnormal") labTestMap[lab.testName].abnormal++;
-    if (lab.status === "critical") labTestMap[lab.testName].critical++;
-  }
+  const ageRiskData = (ageRows as Array<{ age_group: string; patient_count: number; avg_risk: number }>).map(r => ({
+    ageGroup: r.age_group,
+    count: r.patient_count,
+    avgRiskScore: r.avg_risk,
+  }));
 
-  const labInsights = Object.entries(labTestMap)
-    .sort(([, a], [, b]) => (b.abnormal + b.critical * 2) - (a.abnormal + a.critical * 2))
-    .slice(0, 8)
-    .map(([test, data]) => ({
-      test,
-      total: data.total,
-      abnormalRate: Math.round((data.abnormal / Math.max(data.total, 1)) * 100),
-      criticalRate: Math.round((data.critical / Math.max(data.total, 1)) * 100),
-    }));
+  const labInsights = (labRows as Array<{ test_name: string; total: number; abnormal: number; critical: number }>).map(r => ({
+    test: r.test_name,
+    total: r.total,
+    abnormalRate: Math.round((r.abnormal / Math.max(r.total, 1)) * 100),
+    criticalRate: Math.round((r.critical / Math.max(r.total, 1)) * 100),
+  }));
 
-  const drugMap: Record<string, number> = {};
-  for (const m of allMeds) {
-    drugMap[m.drugName] = (drugMap[m.drugName] || 0) + 1;
-  }
-
-  const drugPatterns = Object.entries(drugMap)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 10)
-    .map(([drug, count]) => ({ drug, prescriptions: count }));
-
-  const ageGroups = ["0-17", "18-34", "35-49", "50-64", "65+"];
-  const ageRiskData = ageGroups.map(group => {
-    const [minStr, maxStr] = group.split("-");
-    const min = parseInt(minStr ?? "0");
-    const max = maxStr === "+" ? 999 : parseInt(maxStr ?? "999");
-    const groupPatients = allPatients.filter(p => {
-      const age = new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear();
-      return age >= min && age <= max;
-    });
-    const avgRisk = groupPatients.length > 0
-      ? Math.round(groupPatients.reduce((s, p) => s + (p.riskScore ?? 0), 0) / groupPatients.length)
-      : 0;
-    return { ageGroup: group, count: groupPatients.length, avgRiskScore: avgRisk };
-  });
+  const drugPatterns = (drugs as Array<{ drug_name: string; prescriptions: number }>).map(r => ({
+    drug: r.drug_name,
+    prescriptions: r.prescriptions,
+  }));
 
   const avgConfidence = allDecisions.length > 0
     ? Math.round(allDecisions.reduce((s, d) => s + (d.confidence ?? 0), 0) / allDecisions.length * 100)
@@ -85,8 +78,8 @@ router.get("/insights", async (req, res) => {
 
   res.json({
     totalAnonymizedRecords: total,
-    totalLabResults: allLabs.length,
-    totalVisits: allVisits.length,
+    totalLabResults: Number(labTotal?.count ?? 0),
+    totalVisits: Number(visitTotal?.count ?? 0),
     conditionInsights,
     labInsights,
     drugPatterns,
@@ -106,36 +99,64 @@ router.get("/insights", async (req, res) => {
 
 router.get("/export", async (req, res) => {
   const format = req.query["format"] ?? "csv";
-  const [allPatients, allLabs, allConditions] = await Promise.all([
-    db.select().from(patientsTable),
-    db.select().from(labResultsTable).orderBy(desc(labResultsTable.testDate)).limit(200),
-    db.select().from(patientsTable),
+
+  // Audit the export — research data exports must be traceable per PDPL
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.role ?? "researcher",
+    whoRole: req.role ?? "researcher",
+    action: "EXPORT",
+    what: `Research data export requested (format: ${format})`,
+    // ipAddress/userAgent are merged into the stored details by writeAudit and
+    // excluded from the hash — do NOT duplicate ipAddress here or the record
+    // becomes unverifiable against the chain.
+    details: { format },
+    ipAddress,
+    userAgent,
+  });
+
+  // Select only de-identifying fields — no national ID, full name, phone, or contact info
+  const [patients, labCountRows] = await Promise.all([
+    db.select({
+      id: patientsTable.id,
+      dateOfBirth: patientsTable.dateOfBirth,
+      gender: patientsTable.gender,
+      riskScore: patientsTable.riskScore,
+      chronicConditions: patientsTable.chronicConditions,
+    }).from(patientsTable).limit(10_000),
+    db.execute<{ patient_id: number; lab_count: number }>(
+      sql`SELECT patient_id, COUNT(*)::int AS lab_count FROM lab_results GROUP BY patient_id`
+    ),
   ]);
+
+  const labCounts = new Map(
+    ((Array.isArray(labCountRows) ? labCountRows : labCountRows.rows) as Array<{ patient_id: number; lab_count: number }>)
+      .map(r => [r.patient_id, r.lab_count])
+  );
 
   if (format === "csv") {
     const header = "AnonymizedID,AgeGroup,Gender,RiskScore,ChronicConditions,LabCount\n";
-    const rows = allPatients.map((p, i) => {
+    const rows = patients.map((p, i) => {
       const age = new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear();
       const ageGroup = age < 18 ? "0-17" : age < 35 ? "18-34" : age < 50 ? "35-49" : age < 65 ? "50-64" : "65+";
-      const labCount = allLabs.filter(l => l.patientId === p.id).length;
-      return `ANON-${String(i + 1).padStart(4, "0")},${ageGroup},${p.gender},${p.riskScore ?? 0},"${(p.chronicConditions ?? []).join(";")}",${labCount}`;
+      const labCount = labCounts.get(p.id) ?? 0;
+      return `ANON-${String(i + 1).padStart(6, "0")},${ageGroup},${p.gender},${p.riskScore ?? 0},"${(p.chronicConditions ?? []).join(";")}",${labCount}`;
     });
     res.setHeader("Content-Type", "text/csv");
     res.setHeader("Content-Disposition", "attachment; filename=\"sanad-research-export.csv\"");
     return res.send(header + rows.join("\n"));
   }
 
-  const anonymized = allPatients.map((p, i) => {
+  const anonymized = patients.map((p, i) => {
     const age = new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear();
     const ageGroup = age < 18 ? "0-17" : age < 35 ? "18-34" : age < 50 ? "35-49" : age < 65 ? "50-64" : "65+";
     return {
-      anonymizedId: `ANON-${String(i + 1).padStart(4, "0")}`,
+      anonymizedId: `ANON-${String(i + 1).padStart(6, "0")}`,
       ageGroup,
       gender: p.gender,
       riskScore: p.riskScore,
       conditionCount: (p.chronicConditions ?? []).length,
-      conditions: p.chronicConditions,
-      labResults: allLabs.filter(l => l.patientId === p.id).map(l => ({ test: l.testName, status: l.status })),
+      labCount: labCounts.get(p.id) ?? 0,
     };
   });
 

@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { medicationsTable, patientsTable, alertsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { checkDrugInteractions } from "../lib/ai-engine.js";
+import { requireOwnPatient } from "../lib/ownership.js";
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.get("/", async (req, res) => {
     res.status(400).json({ error: "INVALID_PARAM", message: "patientId is required" });
     return;
   }
+  if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const medications = await db
     .select()
@@ -23,6 +25,11 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  // Prescribing is a clinical act — citizens cannot write medications.
+  if (req.role === "citizen") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may prescribe medications" });
+    return;
+  }
   const body = req.body;
   const patientId = parseInt(body.patientId);
 

@@ -1,16 +1,17 @@
 import { Router } from "express";
+import os from "os";
 import { db } from "@workspace/db";
-import { aiDecisionsTable, eventsTable, auditLogTable, patientsTable } from "@workspace/db/schema";
-import { desc, count, gte } from "drizzle-orm";
+import { aiDecisionsTable, eventsTable, auditLogTable, aiRetrainJobsTable } from "@workspace/db/schema";
+import { desc, count, eq, sql } from "drizzle-orm";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const router = Router();
 
 router.get("/metrics", async (req, res) => {
-  const [allDecisions, recentEvents, auditCount, allPatients] = await Promise.all([
+  const [allDecisions, recentEvents, [auditCount]] = await Promise.all([
     db.select().from(aiDecisionsTable).orderBy(desc(aiDecisionsTable.createdAt)).limit(500),
     db.select().from(eventsTable).orderBy(desc(eventsTable.processedAt)).limit(200),
     db.select({ count: count() }).from(auditLogTable),
-    db.select({ id: patientsTable.id, riskScore: patientsTable.riskScore }).from(patientsTable),
   ]);
 
   const avgConfidence = allDecisions.length > 0
@@ -40,7 +41,7 @@ router.get("/metrics", async (req, res) => {
   const driftRisk = lowConfidenceDecisions.length / Math.max(allDecisions.length, 1);
 
   const last24h = new Date(); last24h.setHours(last24h.getHours() - 24);
-  const recentDecisions = allDecisions.filter(d => new Date(d.createdAt) >= last24h);
+  const recentDecisions = allDecisions.filter(d => d.createdAt !== null && new Date(d.createdAt) >= last24h);
 
   const modelStatus = avgConfidence >= 0.85 ? "optimal" : avgConfidence >= 0.75 ? "good" : avgConfidence >= 0.65 ? "degraded" : "needs_retraining";
 
@@ -54,7 +55,7 @@ router.get("/metrics", async (req, res) => {
     urgencyBreakdown,
     riskBreakdown,
     eventTypes: Object.entries(eventTypes).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count),
-    auditRecords: Number(auditCount[0]?.count ?? 0),
+    auditRecords: Number(auditCount?.count ?? 0),
     totalEvents: recentEvents.length,
     engines: [
       { name: "Risk Scoring Engine", version: "v4.2", status: "operational", accuracy: 91, requests: allDecisions.length, avgLatencyMs: 38 },
@@ -65,69 +66,150 @@ router.get("/metrics", async (req, res) => {
       { name: "Recommendation Engine", version: "v2.3", status: "operational", accuracy: 85, requests: allDecisions.length, avgLatencyMs: 28 },
       { name: "Explainability Layer", version: "v1.5", status: "operational", accuracy: 99, requests: allDecisions.length, avgLatencyMs: 8 },
       { name: "Policy AI", version: "v1.2", status: "operational", accuracy: 82, requests: 47, avgLatencyMs: 210 },
-      { name: "Audit Engine", version: "v2.0", status: "operational", accuracy: 100, requests: Number(auditCount[0]?.count ?? 0), avgLatencyMs: 5 },
+      { name: "Audit Engine", version: "v2.0", status: "operational", accuracy: 100, requests: Number(auditCount?.count ?? 0), avgLatencyMs: 5 },
     ],
     systemHealth: {
-      cpu: 34,
-      memory: 61,
-      eventBusLag: 0,
-      dbConnections: 12,
-      uptime: "99.98%",
-      lastRetraining: "2025-12-14",
-      nextScheduledReview: "2026-03-15",
+      cpuLoadAvg1m: os.loadavg()[0] > 0 ? Math.round((os.loadavg()[0]! / os.cpus().length) * 100) : null,
+      memoryUsedPct: Math.round((1 - os.freemem() / os.totalmem()) * 100),
+      memoryFreeMb: Math.round(os.freemem() / 1024 / 1024),
+      memoryTotalMb: Math.round(os.totalmem() / 1024 / 1024),
+      processUptimeSeconds: Math.floor(process.uptime()),
+      processHeapUsedMb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+      platform: process.platform,
     },
-    confidenceHistory: Array.from({ length: 12 }, (_, i) => ({
-      month: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i],
-      confidence: Math.round((0.78 + Math.random() * 0.12) * 100),
-      decisions: Math.round(allDecisions.length / 12 + Math.random() * 10),
-    })),
+    confidenceHistory: Array.from({ length: 12 }, (_, i) => {
+      const monthDecisions = allDecisions.filter(d => d.createdAt !== null && new Date(d.createdAt).getMonth() === i);
+      const avgConf = monthDecisions.length > 0
+        ? monthDecisions.reduce((s, d) => s + (d.confidence ?? 0), 0) / monthDecisions.length
+        : null;
+      return {
+        month: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i],
+        confidence: avgConf !== null ? Math.round(avgConf * 100) : null,
+        decisions: monthDecisions.length,
+      };
+    }),
   });
 });
 
-const retrainingJobs: Record<string, { engine: string; startedAt: string; status: string; progress: number; triggeredBy: string }> = {};
-
 router.post("/engines/:engineName/retrain", async (req, res) => {
   const { engineName } = req.params;
-  const { triggeredBy } = req.body;
+  const { triggeredBy } = req.body as { triggeredBy?: string };
   const jobId = `RETRAIN-${engineName}-${Date.now()}`;
-  retrainingJobs[jobId] = {
+  const triggeredByName = triggeredBy ?? "AI Control Center";
+
+  const [job] = await db.insert(aiRetrainJobsTable).values({
+    id: jobId,
     engine: engineName!,
-    startedAt: new Date().toISOString(),
     status: "queued",
     progress: 0,
-    triggeredBy: triggeredBy ?? "AI Control Center",
+    triggeredBy: triggeredByName,
+  }).returning();
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: triggeredByName,
+    whoRole: "ai_engineer",
+    action: "CREATE",
+    what: `Engine "${engineName}" retraining initiated`,
+    details: { engineName, jobId },
+    confidence: 1.0,
+    ipAddress,
+    userAgent,
+  });
+
+  setTimeout(async () => {
+    await db.update(aiRetrainJobsTable).set({ status: "running", progress: 40 })
+      .where(eq(aiRetrainJobsTable.id, jobId)).catch(() => {});
+  }, 3000);
+
+  setTimeout(async () => {
+    await db.update(aiRetrainJobsTable).set({ status: "completed", progress: 100, completedAt: new Date() })
+      .where(eq(aiRetrainJobsTable.id, jobId)).catch(() => {});
+  }, 8000);
+
+  res.json({ jobId, engine: engineName, status: "queued", message: `Retraining job queued for ${engineName}. Monitor progress via job ID.`, startedAt: job?.startedAt });
+});
+
+router.get("/retraining/jobs", async (_req, res) => {
+  const jobs = await db.select().from(aiRetrainJobsTable)
+    .orderBy(desc(aiRetrainJobsTable.createdAt))
+    .limit(50);
+  res.json({ jobs });
+});
+
+router.get("/drift-analysis", async (_req, res) => {
+  const THRESHOLD = 5.0;
+
+  // Compare last 30 days (recent) vs 31-90 days prior (baseline) per urgency category.
+  // Each urgency category proxies a subset of engines since decisions lack per-engine attribution.
+  const [recentRows, baselineRows, [totalRow]] = await Promise.all([
+    db.execute<{ urgency: string; cnt: number; avg_conf: number }>(
+      sql`SELECT urgency, COUNT(*)::int AS cnt,
+          ROUND(AVG(COALESCE(confidence, 0))::numeric, 4)::float AS avg_conf
+          FROM ai_decisions
+          WHERE created_at >= NOW() - INTERVAL '30 days'
+          GROUP BY urgency`
+    ),
+    db.execute<{ urgency: string; cnt: number; avg_conf: number }>(
+      sql`SELECT urgency, COUNT(*)::int AS cnt,
+          ROUND(AVG(COALESCE(confidence, 0))::numeric, 4)::float AS avg_conf
+          FROM ai_decisions
+          WHERE created_at >= NOW() - INTERVAL '90 days'
+            AND created_at < NOW() - INTERVAL '30 days'
+          GROUP BY urgency`
+    ),
+    db.select({ count: count() }).from(aiDecisionsTable),
+  ]);
+
+  type ConfRow = { urgency: string; cnt: number; avg_conf: number };
+  const recent = new Map(
+    ((Array.isArray(recentRows) ? recentRows : recentRows.rows) as ConfRow[]).map(r => [r.urgency, r])
+  );
+  const baseline = new Map(
+    ((Array.isArray(baselineRows) ? baselineRows : baselineRows.rows) as ConfRow[]).map(r => [r.urgency, r])
+  );
+
+  // Returns 0 if insufficient baseline data (< 5 decisions) — avoids fabricating drift for new deployments.
+  const confDrift = (urgency: string): number => {
+    const r = recent.get(urgency);
+    const b = baseline.get(urgency);
+    if (!r || !b || b.cnt < 5) return 0;
+    return parseFloat(Math.abs((b.avg_conf - r.avg_conf) * 100).toFixed(1));
   };
 
-  await db.insert(auditLogTable).values({
-    who: triggeredBy ?? "AI Control Center",
-    whoRole: "ai_engineer",
-    what: `RETRAINING_TRIGGERED: Engine "${engineName}" retraining initiated`,
-    confidence: 1.0,
-  }).catch(() => {});
+  // Weighted global drift across all urgency categories
+  const allRecent = [...recent.values()];
+  const allBaseline = [...baseline.values()];
+  const totalRecentCnt  = allRecent.reduce((s, r) => s + r.cnt, 0);
+  const totalBaselineCnt = allBaseline.reduce((s, r) => s + r.cnt, 0);
+  const globalRecentConf   = totalRecentCnt  > 0 ? allRecent.reduce((s, r)   => s + r.avg_conf * r.cnt, 0) / totalRecentCnt  : 0;
+  const globalBaselineConf = totalBaselineCnt > 0 ? allBaseline.reduce((s, r) => s + r.avg_conf * r.cnt, 0) / totalBaselineCnt : 0;
+  const globalDrift = totalBaselineCnt >= 5
+    ? parseFloat(Math.abs((globalBaselineConf - globalRecentConf) * 100).toFixed(1))
+    : 0;
 
-  setTimeout(() => { if (retrainingJobs[jobId]) retrainingJobs[jobId]!.status = "running"; retrainingJobs[jobId]!.progress = 40; }, 3000);
-  setTimeout(() => { if (retrainingJobs[jobId]) retrainingJobs[jobId]!.status = "completed"; retrainingJobs[jobId]!.progress = 100; }, 8000);
+  const classify = (score: number): "stable" | "monitoring" | "drift_detected" =>
+    score >= THRESHOLD ? "drift_detected" : score >= THRESHOLD * 0.7 ? "monitoring" : "stable";
 
-  res.json({ jobId, engine: engineName, status: "queued", message: `Retraining job queued for ${engineName}. Monitor progress via job ID.`, startedAt: retrainingJobs[jobId]!.startedAt });
-});
-
-router.get("/retraining/jobs", async (req, res) => {
-  res.json({ jobs: Object.entries(retrainingJobs).map(([id, job]) => ({ id, ...job })) });
-});
-
-router.get("/drift-analysis", async (req, res) => {
-  const allDecisions = await db.select().from(aiDecisionsTable).orderBy(desc(aiDecisionsTable.createdAt)).limit(500);
+  // Engine-to-urgency proxy mapping:
+  //   immediate → Risk Scoring Engine, Policy AI (critical flags)
+  //   urgent    → Decision Engine, Digital Twin Simulator (time-sensitive predictions)
+  //   soon      → Behavioral AI, Recommendation Engine (follow-up care)
+  //   routine   → Drug Interaction AI (maintenance/scheduled medications)
+  //   global    → overall model health
+  //   0         → deterministic engines (Explainability Layer, Audit Engine)
   const engines = [
-    { engine: "Risk Scoring Engine", driftScore: 2.1, threshold: 5.0, status: "stable" },
-    { engine: "Decision Engine", driftScore: 3.4, threshold: 5.0, status: "stable" },
-    { engine: "Digital Twin Simulator", driftScore: 6.8, threshold: 5.0, status: "drift_detected" },
-    { engine: "Drug Interaction AI", driftScore: 0.9, threshold: 5.0, status: "stable" },
-    { engine: "Behavioral AI", driftScore: 7.2, threshold: 5.0, status: "drift_detected" },
-    { engine: "Recommendation Engine", driftScore: 2.8, threshold: 5.0, status: "stable" },
-    { engine: "Explainability Layer", driftScore: 0.4, threshold: 5.0, status: "stable" },
-    { engine: "Policy AI", driftScore: 4.1, threshold: 5.0, status: "monitoring" },
-    { engine: "Audit Engine", driftScore: 0.1, threshold: 5.0, status: "stable" },
-  ];
+    { engine: "Risk Scoring Engine",    driftScore: confDrift("immediate") },
+    { engine: "Decision Engine",        driftScore: globalDrift },
+    { engine: "Digital Twin Simulator", driftScore: confDrift("urgent") },
+    { engine: "Drug Interaction AI",    driftScore: confDrift("routine") },
+    { engine: "Behavioral AI",          driftScore: confDrift("soon") },
+    { engine: "Recommendation Engine",  driftScore: confDrift("soon") },
+    { engine: "Explainability Layer",   driftScore: 0 },
+    { engine: "Policy AI",             driftScore: confDrift("immediate") },
+    { engine: "Audit Engine",           driftScore: 0 },
+  ].map(e => ({ ...e, threshold: THRESHOLD, status: classify(e.driftScore) }));
+
   res.json({
     engines,
     summary: {
@@ -135,8 +217,9 @@ router.get("/drift-analysis", async (req, res) => {
       driftDetected: engines.filter(e => e.status === "drift_detected").length,
       monitoring: engines.filter(e => e.status === "monitoring").length,
     },
+    methodology: "Drift score = |baseline_avg_confidence − recent_avg_confidence| × 100. Baseline window: 31–90 days prior. Recent window: last 30 days. Minimum 5 baseline decisions required per category; returns 0 when insufficient data. Engines are mapped to decision urgency categories as proxies for per-engine confidence measurement.",
     lastAnalyzed: new Date().toISOString(),
-    totalDecisions: allDecisions.length,
+    totalDecisions: Number(totalRow?.count ?? 0),
   });
 });
 

@@ -1,13 +1,21 @@
 import { Router } from "express";
+import { z } from "zod";
 import { db } from "@workspace/db";
-import { patientsTable, medicationsTable, eventsTable, auditLogTable } from "@workspace/db/schema";
+import { patientsTable, medicationsTable, eventsTable } from "@workspace/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { validate } from "../middlewares/validate.js";
+
+const dispenseSchema = z.object({
+  pharmacistName: z.string().max(200).optional(),
+  notes: z.string().max(2000).optional(),
+});
 
 const router = Router();
 
 const INSURANCE_PROVIDERS = ["Tawuniya", "Bupa Arabia", "MedGulf", "AXA Cooperative", "Al-Rajhi Takaful"];
 
-function checkInsuranceEligibility(drugName: string, conditions: string[]): {
+function checkInsuranceEligibility(drugName: string, conditions: string[], patientId?: number): {
   eligible: boolean;
   provider: string;
   copay: number;
@@ -16,7 +24,8 @@ function checkInsuranceEligibility(drugName: string, conditions: string[]): {
   notes: string;
 } {
   const drug = drugName.toLowerCase();
-  const provider = INSURANCE_PROVIDERS[Math.floor(Math.random() * INSURANCE_PROVIDERS.length)]!;
+  const providerIndex = patientId != null ? patientId % INSURANCE_PROVIDERS.length : 0;
+  const provider = INSURANCE_PROVIDERS[providerIndex]!;
 
   const isChronicRelated = conditions.some(c =>
     c.toLowerCase().includes("diabetes") ||
@@ -58,7 +67,7 @@ interface DrugWarning {
   recommendation: string;
 }
 
-function aiDispenseCheck(drugName: string, patient: { allergies: string[] | null; medications: { drugName: string; isActive: boolean }[] }): {
+function aiDispenseCheck(drugName: string, patient: { allergies: string[] | null; medications: { drugName: string; isActive: boolean | null }[] }): {
   safe: boolean;
   warnings: string[];
   detailedWarnings: DrugWarning[];
@@ -244,7 +253,7 @@ router.get("/patient/:nationalId", async (req, res) => {
         allergies: patient.allergies,
         medications,
       }),
-      insurance: checkInsuranceEligibility(med.drugName, patient.chronicConditions ?? []),
+      insurance: checkInsuranceEligibility(med.drugName, patient.chronicConditions ?? [], patient.id),
       stockAvailability: stockInfo,
     };
   });
@@ -272,9 +281,9 @@ router.get("/patient/:nationalId", async (req, res) => {
   });
 });
 
-router.post("/dispense/:medicationId", async (req, res) => {
-  const { medicationId } = req.params;
-  const { pharmacistName, notes } = req.body;
+router.post("/dispense/:medicationId", validate(dispenseSchema), async (req, res) => {
+  const medicationId = String(req.params["medicationId"]);
+  const { pharmacistName, notes } = req.body as z.infer<typeof dispenseSchema>;
 
   const meds = await db.select().from(medicationsTable).where(eq(medicationsTable.id, parseInt(medicationId))).limit(1);
   if (!meds.length) return res.status(404).json({ error: "Prescription not found" });
@@ -287,23 +296,27 @@ router.post("/dispense/:medicationId", async (req, res) => {
   const patient = patients[0]!;
   const allMeds = await db.select().from(medicationsTable).where(eq(medicationsTable.patientId, med.patientId));
   const dispenseCheck = aiDispenseCheck(med.drugName, { allergies: patient.allergies, medications: allMeds });
-  const insurance = checkInsuranceEligibility(med.drugName, patient.chronicConditions ?? []);
+  const insurance = checkInsuranceEligibility(med.drugName, patient.chronicConditions ?? [], patient.id);
 
   await db.insert(eventsTable).values({
     eventType: "DRUG_DISPENSED",
     patientId: med.patientId,
     payload: JSON.stringify({ drugName: med.drugName, dosage: med.dosage, frequency: med.frequency, pharmacist: pharmacistName }),
     source: "pharmacy_portal",
-    processedBy: "AI Pharmacy Guard v1.5",
   }).catch(() => {});
 
-  await db.insert(auditLogTable).values({
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
     who: pharmacistName ?? "Pharmacist (Pharmacy Portal)",
     whoRole: "pharmacist",
-    what: `DRUG_DISPENSED: ${med.drugName} ${med.dosage} — ${dispenseCheck.safe ? "CLEARED" : "WARNING OVERRIDDEN"}`,
+    action: "CREATE",
+    what: `Drug dispensed: ${med.drugName} ${med.dosage} — ${dispenseCheck.safe ? "CLEARED" : "WARNING OVERRIDDEN"}`,
     patientId: med.patientId,
+    details: { drugName: med.drugName, dosage: med.dosage, safe: dispenseCheck.safe },
     confidence: dispenseCheck.confidenceScore,
-  }).catch(() => {});
+    ipAddress,
+    userAgent,
+  });
 
   const DRUG_INVENTORY_KEY: Record<string, { stock: number; unit: string; status: string }> = {
     "warfarin": { stock: 1200, unit: "tablets", status: "critical" },
@@ -322,13 +335,19 @@ router.post("/dispense/:medicationId", async (req, res) => {
   const drugKey = med.drugName.toLowerCase().split(" ")[0] ?? "";
   const supplyStatus = DRUG_INVENTORY_KEY[drugKey] ?? null;
 
+  // Server-issued dispense reference — the receipt the pharmacist prints must
+  // carry an identifier the system generated, not one the browser invented.
+  const dispensedAt = new Date();
+  const referenceNo = `RX-${dispensedAt.getFullYear()}-${String(med.id).padStart(5, "0")}-${dispensedAt.getTime().toString(36).slice(-4).toUpperCase()}`;
+
   res.json({
     dispensed: true,
+    referenceNo,
+    dispensedAt: dispensedAt.toISOString(),
     medication: med,
     dispenseCheck,
     insurance,
     event: "DRUG_DISPENSED",
-    auditId: Date.now(),
     supplyChainStatus: supplyStatus
       ? {
           stock: supplyStatus.stock,

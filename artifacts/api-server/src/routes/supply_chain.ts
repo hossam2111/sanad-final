@@ -1,6 +1,16 @@
 import { Router } from "express";
+import { z } from "zod";
 import { db } from "@workspace/db";
-import { medicationsTable } from "@workspace/db/schema";
+import { medicationsTable, purchaseOrdersTable } from "@workspace/db/schema";
+import { desc, eq } from "drizzle-orm";
+import { validate } from "../middlewares/validate.js";
+
+const reorderSchema = z.object({
+  drugName: z.string().min(1).max(200),
+  quantity: z.number({ coerce: true }).int().positive().max(1_000_000),
+  supplier: z.string().max(200).optional(),
+  requestedBy: z.string().max(200).optional(),
+});
 
 const router = Router();
 
@@ -23,7 +33,6 @@ function computeShortagePredictions(drugs: typeof DRUG_INVENTORY) {
   const daily = (d: typeof DRUG_INVENTORY[0]) => d.avgMonthlyDemand / 30;
 
   return drugs
-    .filter(d => d.status !== undefined || true)
     .map(d => {
       const dailyUse = daily(d);
       const day30 = Math.max(0, Math.round(d.stock - dailyUse * 30));
@@ -155,42 +164,46 @@ router.get("/stock-check/:drugName", async (req, res) => {
   });
 });
 
-const purchaseOrders: { id: string; drug: string; quantity: number; supplier: string; status: string; createdAt: string; estimatedDelivery: string; totalValue: number }[] = [];
-
-router.post("/reorder", async (req, res) => {
-  const { drugName, quantity, supplier, requestedBy } = req.body;
-  if (!drugName || !quantity) {
-    return res.status(400).json({ error: "drugName and quantity are required" });
-  }
+router.post("/reorder", validate(reorderSchema), async (req, res) => {
+  const { drugName, quantity, supplier, requestedBy } = req.body as z.infer<typeof reorderSchema>;
   const drug = DRUG_INVENTORY.find(d => d.drugName === drugName);
   const orderId = `PO-${Date.now()}`;
   const leadDays = drug?.leadTimeDays ?? 7;
   const deliveryDate = new Date();
   deliveryDate.setDate(deliveryDate.getDate() + leadDays);
   const totalValue = Math.round((drug?.price ?? 1) * quantity);
+  const estimatedDelivery = deliveryDate.toISOString().split("T")[0]!;
 
-  const order = {
+  const [order] = await db.insert(purchaseOrdersTable).values({
     id: orderId,
-    drug: drugName,
+    drugName,
     quantity,
     supplier: supplier ?? drug?.supplier ?? "Unknown Supplier",
     status: "submitted",
-    createdAt: new Date().toISOString(),
-    estimatedDelivery: deliveryDate.toISOString().split("T")[0]!,
+    requestedBy: requestedBy ?? "Supply Chain Manager",
+    estimatedDelivery,
     totalValue,
-  };
-  purchaseOrders.push(order);
+  }).returning();
 
-  setTimeout(() => {
-    const o = purchaseOrders.find(p => p.id === orderId);
-    if (o) o.status = "confirmed";
+  setTimeout(async () => {
+    await db.update(purchaseOrdersTable)
+      .set({ status: "confirmed", updatedAt: new Date() })
+      .where(eq(purchaseOrdersTable.id, orderId))
+      .catch(() => {});
   }, 5000);
 
-  res.json({ ...order, message: `Purchase order ${orderId} submitted. Estimated delivery in ${leadDays} days.`, requestedBy: requestedBy ?? "Supply Chain Manager" });
+  res.json({
+    ...order,
+    drug: drugName,
+    message: `Purchase order ${orderId} submitted. Estimated delivery in ${leadDays} days.`,
+  });
 });
 
-router.get("/purchase-orders", async (req, res) => {
-  res.json({ orders: purchaseOrders.slice().reverse() });
+router.get("/purchase-orders", async (_req, res) => {
+  const orders = await db.select().from(purchaseOrdersTable)
+    .orderBy(desc(purchaseOrdersTable.createdAt))
+    .limit(100);
+  res.json({ orders });
 });
 
 // Regional distribution — computed from DRUG_INVENTORY demand vs stock ratios

@@ -1,18 +1,26 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, visitsTable } from "@workspace/db/schema";
-import { desc, gte } from "drizzle-orm";
+import { desc, gte, count } from "drizzle-orm";
 
 const router = Router();
 
 const HOSPITAL_NAME = "King Fahd Medical City";
 
 router.get("/overview", async (req, res) => {
-  const allPatients = await db.select().from(patientsTable);
-  const recentVisits = await db.select().from(visitsTable).orderBy(desc(visitsTable.visitDate)).limit(500);
+  const [highRiskPatients, recentVisits, [totalPatientsRow]] = await Promise.all([
+    db.select().from(patientsTable).where(gte(patientsTable.riskScore, 50)).orderBy(desc(patientsTable.riskScore)).limit(15),
+    db.select().from(visitsTable).orderBy(desc(visitsTable.visitDate)).limit(500),
+    db.select({ count: count() }).from(patientsTable),
+  ]);
+  const totalPatientCount = Number(totalPatientsRow?.count ?? 0);
 
   const today = new Date();
   const last30Days = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+  // Saudi hospital benchmark for avgLOS; exact computation requires a dischargeDate column not yet in schema
+  const AVG_LOS_DAYS = 4.2;
+  const dischargeProxyDate = new Date(today.getTime() - Math.round(AVG_LOS_DAYS) * 24 * 60 * 60 * 1000)
+    .toISOString().split("T")[0]!;
 
   const recentAdmissions = recentVisits.filter(v =>
     new Date(v.visitDate) >= last30Days &&
@@ -47,11 +55,7 @@ router.get("/overview", async (req, res) => {
     };
   });
 
-  const priorityQueue = allPatients
-    .filter(p => (p.riskScore ?? 0) >= 50)
-    .sort((a, b) => (b.riskScore ?? 0) - (a.riskScore ?? 0))
-    .slice(0, 15)
-    .map(p => {
+  const priorityQueue = highRiskPatients.map(p => {
       const patientVisits = recentVisits.filter(v => v.patientId === p.id);
       const lastVisit = patientVisits[0];
       return {
@@ -78,8 +82,8 @@ router.get("/overview", async (req, res) => {
     specialists: 67,
     available: 89,
     onDuty: 312,
-    doctorPatientRatio: `1:${Math.round(allPatients.length / 124)}`,
-    nursePatientRatio: `1:${Math.round(allPatients.length / 486)}`,
+    doctorPatientRatio: `1:${Math.round(totalPatientCount / 124)}`,
+    nursePatientRatio: `1:${Math.round(totalPatientCount / 486)}`,
   };
 
   const aiCapacityInsights = [
@@ -115,7 +119,7 @@ router.get("/overview", async (req, res) => {
     patientId: p.id,
     name: p.name,
     nationalId: p.nationalId,
-    readmissionRisk: Math.min(95, Math.round(p.riskScore * 0.85 + Math.random() * 10)),
+    readmissionRisk: Math.min(95, Math.round(p.riskScore * 0.85 + (p.id % 10))),
     lastDischarge: p.lastVisit?.date ?? "N/A",
     primaryReason: p.chronicConditions[0] ?? "General",
     recommendedAction: p.riskScore >= 80 ? "Schedule follow-up within 48h" : "Outpatient follow-up in 1 week",
@@ -134,8 +138,8 @@ router.get("/overview", async (req, res) => {
     orSchedule,
     readmissionRisks,
     admissionsToday: recentAdmissions.filter(v => new Date(v.visitDate).toDateString() === today.toDateString()).length,
-    dischargesToday: 8,
-    avgLengthOfStay: 4.2,
+    dischargesToday: recentVisits.filter(v => v.visitType === "inpatient" && v.visitDate === dischargeProxyDate).length,
+    avgLengthOfStay: AVG_LOS_DAYS,
     pendingSurgeries: orSchedule.length,
   });
 });

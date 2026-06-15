@@ -3,6 +3,8 @@ import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, alertsTable, labResultsTable, visitsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { calculateRiskScore, generateClinicalActions } from "../lib/ai-engine.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { getConsentState } from "../lib/ownership.js";
 
 const router = Router();
 
@@ -56,6 +58,27 @@ router.get("/:nationalId", async (req, res) => {
   );
 
   const age = new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear();
+
+  // Break-glass access: every emergency lookup is written to the tamper-evident
+  // audit chain, including whether the patient's emergency_access consent was
+  // active (access proceeds either way in a declared emergency, but a revoked
+  // consent is flagged for post-incident review).
+  const consentState = await getConsentState(p.id, "emergency_access");
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "emergency",
+    action: "READ",
+    what: `BREAK-GLASS: Emergency record access — ${p.fullName} (${p.nationalId})`,
+    patientId: p.id,
+    details: {
+      riskLevel: riskData.riskLevel,
+      emergencyAccessConsent: consentState === null ? "default-granted" : consentState ? "granted" : "REVOKED — flagged for review",
+    },
+    ipAddress,
+    userAgent,
+  });
 
   res.json({
     id: p.id,

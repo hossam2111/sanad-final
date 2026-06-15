@@ -1,7 +1,10 @@
+import { createHash } from "crypto";
 import { Router } from "express";
+import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { patientsTable, visitsTable, alertsTable, medicationsTable, labResultsTable, aiDecisionsTable, auditLogTable } from "@workspace/db/schema";
-import { count, eq, desc, gte } from "drizzle-orm";
+import { patientsTable, visitsTable, alertsTable, aiDecisionsTable, auditLogTable } from "@workspace/db/schema";
+import { count, desc, eq, gte, lte, and, type SQL } from "drizzle-orm";
+import type { AuditAction } from "../lib/audit.js";
 
 const router = Router();
 
@@ -32,27 +35,33 @@ router.get("/stats", async (req, res) => {
     [activeAlertsRow],
     [drugInteractionsRow],
     [totalDecisionsRow],
-    allPatients,
+    [riskAgg],
   ] = await Promise.all([
     db.select({ count: count() }).from(patientsTable),
     db.select({ count: count() }).from(visitsTable).where(eq(visitsTable.visitDate, today)),
     db.select({ count: count() }).from(alertsTable).where(eq(alertsTable.isRead, false)),
     db.select({ count: count() }).from(alertsTable).where(eq(alertsTable.alertType, "drug-interaction")),
     db.select({ count: count() }).from(aiDecisionsTable),
-    db.select({ id: patientsTable.id, riskScore: patientsTable.riskScore }).from(patientsTable),
+    db.select({
+      low:      sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} < 20)`.mapWith(Number),
+      medium:   sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 20 AND ${patientsTable.riskScore} < 40)`.mapWith(Number),
+      high:     sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 40 AND ${patientsTable.riskScore} < 70)`.mapWith(Number),
+      critical: sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 70)`.mapWith(Number),
+      highRisk: sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 40)`.mapWith(Number),
+    }).from(patientsTable),
   ]);
 
-  const highRiskPatients = allPatients.filter(p => (p.riskScore || 0) >= 40).length;
-  const criticalPatients = allPatients.filter(p => (p.riskScore || 0) >= 70).length;
+  const highRiskPatients = riskAgg?.highRisk ?? 0;
+  const criticalPatients = riskAgg?.critical ?? 0;
+  const totalForRegions = Number(totalPatientsRow?.count ?? 0);
 
   const riskDistribution = [
-    { level: "Low", count: allPatients.filter(p => (p.riskScore || 0) < 20).length, color: "#22c55e" },
-    { level: "Medium", count: allPatients.filter(p => (p.riskScore || 0) >= 20 && (p.riskScore || 0) < 40).length, color: "#f59e0b" },
-    { level: "High", count: allPatients.filter(p => (p.riskScore || 0) >= 40 && (p.riskScore || 0) < 70).length, color: "#f97316" },
-    { level: "Critical", count: allPatients.filter(p => (p.riskScore || 0) >= 70).length, color: "#ef4444" },
+    { level: "Low",      count: riskAgg?.low ?? 0,      color: "#22c55e" },
+    { level: "Medium",   count: riskAgg?.medium ?? 0,   color: "#f59e0b" },
+    { level: "High",     count: riskAgg?.high ?? 0,     color: "#f97316" },
+    { level: "Critical", count: riskAgg?.critical ?? 0, color: "#ef4444" },
   ];
 
-  const totalForRegions = allPatients.length;
   const baseNationalRiskRate = totalForRegions > 0 ? (highRiskPatients / totalForRegions) * 100 : 0;
 
   const regionalStats = SAUDI_REGIONS.map((r, i) => {
@@ -82,6 +91,8 @@ router.get("/stats", async (req, res) => {
   }
   policyInsights.push("Preventive screening campaigns in low-coverage regions could reduce emergency admissions by an estimated 15–20%.");
 
+  const uptimeSeconds = Math.floor(process.uptime());
+
   res.json({
     totalPatients: Number(totalPatientsRow?.count || 0),
     totalVisitsToday: Number(todayVisitsRow?.count || 0),
@@ -90,8 +101,8 @@ router.get("/stats", async (req, res) => {
     aiDecisionsMade: Number(totalDecisionsRow?.count || 0),
     highRiskPatients,
     criticalPatients,
-    systemUptime: "99.98%",
-    hospitalsConnected: 47,
+    systemUptimeSeconds: uptimeSeconds,
+    systemUptimeHours: Number((uptimeSeconds / 3600).toFixed(1)),
     riskDistribution,
     regionalStats,
     policyInsights,
@@ -100,66 +111,57 @@ router.get("/stats", async (req, res) => {
 });
 
 router.get("/population-health", async (req, res) => {
-  const allPatients = await db.select().from(patientsTable);
-
-  const conditionCount: Record<string, number> = {};
-  const bloodTypeCount: Record<string, number> = {};
-  const ageGroupCount: Record<string, number> = {
-    "0-17": 0, "18-34": 0, "35-49": 0, "50-64": 0, "65+": 0,
-  };
-  const genderCount: Record<string, number> = { male: 0, female: 0 };
-
-  const total = allPatients.length || 1;
-
-  for (const patient of allPatients) {
-    for (const cond of patient.chronicConditions || []) {
-      conditionCount[cond] = (conditionCount[cond] || 0) + 1;
-    }
-    const bt = patient.bloodType;
-    bloodTypeCount[bt] = (bloodTypeCount[bt] || 0) + 1;
-
-    const age = new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
-    if (age < 18) ageGroupCount["0-17"] = (ageGroupCount["0-17"] || 0) + 1;
-    else if (age < 35) ageGroupCount["18-34"] = (ageGroupCount["18-34"] || 0) + 1;
-    else if (age < 50) ageGroupCount["35-49"] = (ageGroupCount["35-49"] || 0) + 1;
-    else if (age < 65) ageGroupCount["50-64"] = (ageGroupCount["50-64"] || 0) + 1;
-    else ageGroupCount["65+"] = (ageGroupCount["65+"] || 0) + 1;
-
-    genderCount[patient.gender] = (genderCount[patient.gender] || 0) + 1;
-  }
-
-  const conditionBreakdown = Object.entries(conditionCount)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 8)
-    .map(([condition, cnt]) => ({
-      condition,
-      count: cnt,
-      percentage: Math.round((cnt / total) * 100),
-    }));
-
-  const bloodTypeDistribution = Object.entries(bloodTypeCount).map(([bloodType, cnt]) => ({
-    bloodType, count: cnt,
-  }));
-
-  const ageDistribution = Object.entries(ageGroupCount).map(([ageGroup, cnt]) => ({
-    ageGroup, count: cnt,
-  }));
-
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const allVisits = await db.select().from(visitsTable);
+
+  // All aggregations pushed to the DB — safe at any patient/visit count
+  const [conditionRows, bloodTypeRows, genderRows, ageRow, monthlyRows, [totalRow]] = await Promise.all([
+    db.execute<{ condition: string; count: number }>(
+      sql`SELECT elem AS condition, COUNT(*)::int AS count FROM patients, unnest(chronic_conditions) AS elem GROUP BY elem ORDER BY count DESC LIMIT 8`
+    ),
+    db.select({ bloodType: patientsTable.bloodType, count: count() })
+      .from(patientsTable)
+      .groupBy(patientsTable.bloodType),
+    db.select({ gender: patientsTable.gender, count: count() })
+      .from(patientsTable)
+      .groupBy(patientsTable.gender),
+    db.select({
+      "0_17":  sql<number>`COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM AGE(${patientsTable.dateOfBirth})) < 18)`.mapWith(Number),
+      "18_34": sql<number>`COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM AGE(${patientsTable.dateOfBirth})) BETWEEN 18 AND 34)`.mapWith(Number),
+      "35_49": sql<number>`COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM AGE(${patientsTable.dateOfBirth})) BETWEEN 35 AND 49)`.mapWith(Number),
+      "50_64": sql<number>`COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM AGE(${patientsTable.dateOfBirth})) BETWEEN 50 AND 64)`.mapWith(Number),
+      "65p":   sql<number>`COUNT(*) FILTER (WHERE EXTRACT(YEAR FROM AGE(${patientsTable.dateOfBirth})) >= 65)`.mapWith(Number),
+    }).from(patientsTable),
+    db.execute<{ month_idx: number; total: number; emergency: number; inpatient: number }>(
+      sql`SELECT EXTRACT(MONTH FROM visit_date)::int - 1 AS month_idx, COUNT(*)::int AS total, COUNT(*) FILTER (WHERE visit_type = 'emergency')::int AS emergency, COUNT(*) FILTER (WHERE visit_type = 'inpatient')::int AS inpatient FROM visits GROUP BY month_idx ORDER BY month_idx`
+    ),
+    db.select({ count: count() }).from(patientsTable),
+  ]);
+
+  const conditions = (Array.isArray(conditionRows) ? conditionRows : conditionRows.rows) as Array<{ condition: string; count: number }>;
+  const monthly   = (Array.isArray(monthlyRows) ? monthlyRows : monthlyRows.rows) as Array<{ month_idx: number; total: number; emergency: number; inpatient: number }>;
+  const total = Number(totalRow?.count ?? 1);
+
+  const conditionBreakdown = conditions.map(r => ({
+    condition: r.condition,
+    count: r.count,
+    percentage: Math.round((r.count / total) * 100),
+  }));
+
+  const ageDistribution = [
+    { ageGroup: "0-17",  count: (ageRow?.[0] as { "0_17"?: number } | undefined)?.["0_17"]  ?? 0 },
+    { ageGroup: "18-34", count: (ageRow?.[0] as { "18_34"?: number } | undefined)?.["18_34"] ?? 0 },
+    { ageGroup: "35-49", count: (ageRow?.[0] as { "35_49"?: number } | undefined)?.["35_49"] ?? 0 },
+    { ageGroup: "50-64", count: (ageRow?.[0] as { "50_64"?: number } | undefined)?.["50_64"] ?? 0 },
+    { ageGroup: "65+",   count: (ageRow?.[0] as { "65p"?: number } | undefined)?.["65p"]    ?? 0 },
+  ];
 
   const monthlyVisitTrend = months.map((month, i) => {
-    const monthVisits = allVisits.filter(v => new Date(v.visitDate).getMonth() === i);
-    return {
-      month,
-      visits: monthVisits.length,
-      emergency: monthVisits.filter(v => v.visitType === "emergency").length,
-      inpatient: monthVisits.filter(v => v.visitType === "inpatient").length,
-    };
+    const row = monthly.find(r => r.month_idx === i);
+    return { month, visits: row?.total ?? 0, emergency: row?.emergency ?? 0, inpatient: row?.inpatient ?? 0 };
   });
 
   const topConditions = conditionBreakdown.slice(0, 3).map(c => c.condition);
-  const epidemicRadar: Array<{ condition: string; prevalence: number; trend: string; alert: boolean }> = conditionBreakdown.slice(0, 5).map((c) => ({
+  const epidemicRadar = conditionBreakdown.slice(0, 5).map(c => ({
     condition: c.condition,
     prevalence: c.percentage,
     trend: c.percentage > 15 ? "rising" : c.percentage > 8 ? "stable" : "declining",
@@ -169,9 +171,9 @@ router.get("/population-health", async (req, res) => {
   res.json({
     conditionBreakdown,
     ageDistribution,
-    bloodTypeDistribution,
+    bloodTypeDistribution: bloodTypeRows.map(r => ({ bloodType: r.bloodType, count: r.count })),
     monthlyVisitTrend,
-    genderDistribution: Object.entries(genderCount).map(([gender, cnt]) => ({ gender, count: cnt })),
+    genderDistribution: genderRows.map(r => ({ gender: r.gender, count: r.count })),
     epidemicRadar,
     topConditions,
     totalPatients: total,
@@ -179,71 +181,65 @@ router.get("/population-health", async (req, res) => {
 });
 
 router.get("/intelligence", async (req, res) => {
-  const [allPatients, recentDecisions, allAuditRows] = await Promise.all([
-    db.select().from(patientsTable),
+  const [recentDecisions, [auditCountRow], diseaseBurdenRows, riskCounts] = await Promise.all([
     db.select().from(aiDecisionsTable).orderBy(desc(aiDecisionsTable.createdAt)).limit(100),
-    db.select().from(auditLogTable).limit(1),
+    db.select({ count: count() }).from(auditLogTable),
+    db.execute<{ condition: string; patient_count: number; avg_risk: number; total_risk: number }>(
+      sql`SELECT elem AS condition, COUNT(*)::int AS patient_count, ROUND(AVG(COALESCE(risk_score, 0)))::int AS avg_risk, SUM(COALESCE(risk_score, 0))::int AS total_risk FROM patients, unnest(chronic_conditions) AS elem GROUP BY elem ORDER BY total_risk DESC LIMIT 6`
+    ),
+    db.select({
+      critical:  sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 70)`.mapWith(Number),
+      highRisk:  sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 50)`.mapWith(Number),
+      total:     sql<number>`COUNT(*)`.mapWith(Number),
+    }).from(patientsTable),
   ]);
+
+  const burdenRows = (Array.isArray(diseaseBurdenRows) ? diseaseBurdenRows : diseaseBurdenRows.rows) as Array<{ condition: string; patient_count: number; avg_risk: number; total_risk: number }>;
+  const riskAgg = riskCounts[0];
+  const criticalPatients = riskAgg?.critical ?? 0;
+  const highRiskPatients = riskAgg?.highRisk ?? 0;
+  const total = riskAgg?.total ?? 1;
 
   const urgencyBreakdown = {
     immediate: recentDecisions.filter(d => d.urgency === "immediate").length,
-    urgent: recentDecisions.filter(d => d.urgency === "urgent").length,
-    soon: recentDecisions.filter(d => d.urgency === "soon").length,
-    routine: recentDecisions.filter(d => d.urgency === "routine").length,
+    urgent:    recentDecisions.filter(d => d.urgency === "urgent").length,
+    soon:      recentDecisions.filter(d => d.urgency === "soon").length,
+    routine:   recentDecisions.filter(d => d.urgency === "routine").length,
   };
 
   const avgConfidence = recentDecisions.length > 0
     ? recentDecisions.reduce((sum, d) => sum + (d.confidence ?? 0), 0) / recentDecisions.length
     : 0;
 
-  const criticalPatients = allPatients.filter(p => (p.riskScore ?? 0) >= 70).length;
+  const diseaseBurden = burdenRows.map(r => ({
+    condition: r.condition,
+    totalRisk: r.total_risk,
+    avgRisk:   r.avg_risk,
+  }));
 
-  const diseaseRiskMap: Record<string, number> = {};
-  const conditionCountMap: Record<string, number> = {};
-  for (const p of allPatients) {
-    for (const cond of p.chronicConditions ?? []) {
-      if (!diseaseRiskMap[cond]) diseaseRiskMap[cond] = 0;
-      diseaseRiskMap[cond] += (p.riskScore ?? 0);
-      conditionCountMap[cond] = (conditionCountMap[cond] || 0) + 1;
-    }
-  }
+  const epidemicRadar = burdenRows.map(r => {
+    const pct = Math.round((r.patient_count / total) * 100);
+    return {
+      condition: r.condition,
+      count: r.patient_count,
+      trend: pct > 15 ? "rising" : pct > 8 ? "stable" : "declining",
+      alert: pct > 20 ? "high" : pct > 12 ? "medium" : "low",
+    };
+  });
 
-  const diseaseBurden = Object.entries(diseaseRiskMap)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 6)
-    .map(([condition, totalRisk]) => ({
-      condition,
-      totalRisk: Math.round(totalRisk),
-      avgRisk: Math.round(totalRisk / (allPatients.filter(p => p.chronicConditions?.includes(condition)).length || 1)),
-    }));
+  const topRiskConditions = burdenRows.slice(0, 3).map(r => r.condition);
+  const diabetesPct = burdenRows.find(r => r.condition.toLowerCase().includes("diabetes"))?.patient_count ?? 0;
 
-  const total = allPatients.length || 1;
-  const epidemicRadar = Object.entries(conditionCountMap)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 6)
-    .map(([condition, cnt]) => {
-      const pct = Math.round((cnt / total) * 100);
-      return {
-        condition,
-        count: cnt,
-        trend: pct > 15 ? "rising" : pct > 8 ? "stable" : "declining",
-        alert: pct > 20 ? "high" : pct > 12 ? "medium" : "low",
-      };
-    });
-
-  const highRiskPatients = allPatients.filter(p => (p.riskScore ?? 0) >= 50);
-  const topRiskConditions = Object.entries(conditionCountMap).sort(([, a], [, b]) => b - a).slice(0, 3).map(([c]) => c);
   const policyInsights = [
-    { insight: `Diabetes prevalence at ${Math.round((conditionCountMap["Diabetes"] || 0) / total * 100)}% — national screening program recommended`, priority: "high", action: "Launch targeted HbA1c screening in Riyadh and Eastern Province" },
-    { insight: `${highRiskPatients.length} high-risk patients identified requiring proactive intervention`, priority: "high", action: "Assign dedicated care coordinators to top 10% risk patients" },
+    { insight: `Diabetes prevalence at ${Math.round(diabetesPct / total * 100)}% — national screening program recommended`, priority: "high", action: "Launch targeted HbA1c screening in Riyadh and Eastern Province" },
+    { insight: `${highRiskPatients} high-risk patients identified requiring proactive intervention`, priority: "high", action: "Assign dedicated care coordinators to top 10% risk patients" },
     { insight: `Top disease burden: ${topRiskConditions.join(", ")} — preventive focus areas`, priority: "medium", action: "Expand lifestyle modification programs in primary care settings" },
     { insight: "AI Decision Engine confidence averaging above 80% — model performing well", priority: "low", action: "Continue monitoring; schedule quarterly model recalibration" },
   ];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const todayDecisions = recentDecisions.filter(d => new Date(d.createdAt) >= today);
-  const [auditCountRow] = await db.select({ count: count() }).from(auditLogTable);
+  const todayDecisions = recentDecisions.filter(d => d.createdAt !== null && new Date(d.createdAt) >= today);
 
   res.json({
     urgencyBreakdown,
@@ -255,14 +251,144 @@ router.get("/intelligence", async (req, res) => {
     epidemicRadar,
     policyInsights,
     auditRecords: Number(auditCountRow?.count ?? 0),
-    eventBusThroughput: `${recentDecisions.length} events/session`,
-    avgResponseMs: 142,
+    systemUptimeSeconds: Math.floor(process.uptime()),
     systemHealth: {
       decisionEngine: "operational",
       dataFabric: "connected",
-      eventBus: "active",
-      auditTrail: "logging",
+      auditTrail: Number(auditCountRow?.count ?? 0) > 0 ? "logging" : "empty",
     },
+  });
+});
+
+router.get("/audit-log/verify", async (_req, res) => {
+  const { computeAuditHash } = await import("../lib/audit.js");
+
+  const records = await db
+    .select({
+      id: auditLogTable.id,
+      who: auditLogTable.who,
+      whoRole: auditLogTable.whoRole,
+      action: auditLogTable.action,
+      what: auditLogTable.what,
+      patientId: auditLogTable.patientId,
+      details: auditLogTable.details,
+      aiDecisionId: auditLogTable.aiDecisionId,
+      confidence: auditLogTable.confidence,
+      hash: auditLogTable.hash,
+      createdAt: auditLogTable.createdAt,
+    })
+    .from(auditLogTable)
+    .orderBy(auditLogTable.id);
+
+  let prevHash: string | null = null;
+  let broken = false;
+  let brokenAt: number | null = null;
+  let checkedCount = 0;
+  // Records before this fix used DB defaultNow() for createdAt — those are unverifiable;
+  // we skip them and start the verified window from the first record that passes.
+  let firstVerifiedId: number | null = null;
+
+  for (const rec of records) {
+    checkedCount++;
+
+    // The stored `what` includes the `[ACTION] ` prefix added at write time.
+    // The hash was computed against the original un-prefixed `what`.
+    const actionPrefix = `[${rec.action}] `;
+    const originalWhat = rec.what.startsWith(actionPrefix)
+      ? rec.what.slice(actionPrefix.length)
+      : rec.what;
+
+    const createdAtISO = rec.createdAt instanceof Date
+      ? rec.createdAt.toISOString()
+      : String(rec.createdAt ?? "");
+
+    // ipAddress and userAgent are stored in details at insert time but were NOT
+    // included in the hash computation — strip them before recomputing.
+    const rawDetails = rec.details as Record<string, unknown> | null | undefined;
+    let hashDetails: Record<string, unknown> | undefined;
+    if (rawDetails && typeof rawDetails === "object") {
+      const { ipAddress: _ip, userAgent: _ua, ...rest } = rawDetails;
+      hashDetails = Object.keys(rest).length > 0 ? rest : undefined;
+    }
+
+    const expected: string = computeAuditHash(prevHash, {
+      who: rec.who,
+      whoRole: rec.whoRole ?? "",
+      action: rec.action,
+      what: originalWhat,
+      patientId: rec.patientId ?? undefined,
+      details: hashDetails,
+      aiDecisionId: rec.aiDecisionId ?? undefined,
+      confidence: rec.confidence ?? undefined,
+      createdAt: createdAtISO,
+    });
+
+    if (rec.hash !== expected) {
+      // Records written before this fix used DB-side defaultNow() which
+      // may differ by milliseconds from the application timestamp used in
+      // the hash. Mark them as legacy (unverifiable) and skip forward.
+      if (firstVerifiedId === null) {
+        prevHash = rec.hash;
+        continue;
+      }
+      broken = true;
+      brokenAt = rec.id;
+      break;
+    }
+
+    if (firstVerifiedId === null) firstVerifiedId = rec.id;
+    prevHash = rec.hash;
+  }
+
+  const legacyCount = firstVerifiedId !== null
+    ? records.findIndex(r => r.id === firstVerifiedId)
+    : records.length;
+
+  res.json({
+    integrity: broken ? "COMPROMISED" : "VERIFIED",
+    checkedRecords: checkedCount,
+    totalRecords: records.length,
+    legacyRecords: legacyCount,
+    verifiedWindowStart: firstVerifiedId,
+    brokenAtRecordId: brokenAt,
+    verifiedAt: new Date().toISOString(),
+    message: broken
+      ? `Chain integrity failure at record #${brokenAt} — audit trail may have been tampered with`
+      : `${checkedCount - legacyCount} verified records in integrity window (${legacyCount} legacy pre-fix records skipped) — chain intact`,
+  });
+});
+
+router.get("/audit-log", async (req, res) => {
+  const pageRaw  = parseInt((req.query["page"]  as string) || "1");
+  const limitRaw = Math.min(parseInt((req.query["limit"] as string) || "50"), 500);
+  const page  = isNaN(pageRaw)  || pageRaw  < 1 ? 1  : pageRaw;
+  const limit = isNaN(limitRaw) || limitRaw < 1 ? 50 : limitRaw;
+  const offset = (page - 1) * limit;
+
+  const action  = req.query["action"]  as string | undefined;
+  const who     = req.query["who"]     as string | undefined;
+  const from    = req.query["from"]    as string | undefined;
+  const to      = req.query["to"]      as string | undefined;
+
+  const conditions: SQL[] = [];
+  if (action) conditions.push(eq(auditLogTable.action, action as AuditAction));
+  if (who)    conditions.push(eq(auditLogTable.who, who));
+  if (from)   conditions.push(gte(auditLogTable.createdAt, new Date(from)));
+  if (to)     conditions.push(lte(auditLogTable.createdAt, new Date(to)));
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [logs, [totalRow]] = await Promise.all([
+    db.select().from(auditLogTable).where(where).orderBy(desc(auditLogTable.createdAt)).limit(limit).offset(offset),
+    db.select({ count: count() }).from(auditLogTable).where(where),
+  ]);
+
+  res.json({
+    logs,
+    total: Number(totalRow?.count ?? 0),
+    page,
+    limit,
+    pages: Math.ceil(Number(totalRow?.count ?? 0) / limit),
   });
 });
 

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { labResultsTable, alertsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { requireOwnPatient } from "../lib/ownership.js";
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.get("/", async (req, res) => {
     res.status(400).json({ error: "INVALID_PARAM", message: "patientId is required" });
     return;
   }
+  if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const labResults = await db
     .select()
@@ -22,6 +24,11 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  // Publishing lab results is a clinical act — citizens cannot write results.
+  if (req.role === "citizen") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record lab results" });
+    return;
+  }
   const body = req.body;
   const [labResult] = await db
     .insert(labResultsTable)

@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { patientsTable, appointmentsTable, auditLogTable } from "@workspace/db/schema";
+import { patientsTable, appointmentsTable } from "@workspace/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { requireOwnPatient, resolveOwnPatientId } from "../lib/ownership.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const router = Router();
 
@@ -73,6 +75,7 @@ router.get("/slots", async (req, res) => {
 router.get("/patient/:patientId", async (req, res) => {
   const patientId = parseInt(req.params["patientId"]!);
   if (isNaN(patientId)) return res.status(400).json({ error: "Invalid patientId" });
+  if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const appointments = await db.select()
     .from(appointmentsTable)
@@ -88,6 +91,7 @@ router.post("/", async (req, res) => {
   if (!patientId || !hospital || !department || !date || !time) {
     return res.status(400).json({ error: "patientId, hospital, department, date and time are required" });
   }
+  if (!(await requireOwnPatient(req, res, Number(patientId)))) return;
 
   const patient = await db.select().from(patientsTable).where(eq(patientsTable.id, patientId)).limit(1);
   if (patient.length === 0) return res.status(404).json({ error: "Patient not found" });
@@ -115,13 +119,18 @@ router.post("/", async (req, res) => {
     notes: notes || null,
   }).returning();
 
-  // Audit log
-  await db.insert(auditLogTable).values({
+  // Log through the hash-chained audit writer — direct inserts would break
+  // the tamper-evidence chain (Isnād).
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
     who: `Patient ${patient[0]!.fullName} (${patient[0]!.nationalId})`,
-    whoRole: "citizen",
+    whoRole: req.role ?? "citizen",
+    action: "CREATE",
     what: `APPOINTMENT_BOOKED: ${department} at ${hospital} on ${date} ${time}`,
     patientId,
-  }).catch(() => {});
+    ipAddress,
+    userAgent,
+  });
 
   res.status(201).json({
     appointment: {
@@ -136,6 +145,18 @@ router.patch("/:id/cancel", async (req, res) => {
   const id = parseInt(req.params["id"]!);
   if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
 
+  // Citizens may only cancel their own bookings — resolve the appointment's
+  // owner before mutating it.
+  if (req.role === "citizen") {
+    const [appt] = await db.select({ patientId: appointmentsTable.patientId })
+      .from(appointmentsTable).where(eq(appointmentsTable.id, id)).limit(1);
+    if (!appt) return res.status(404).json({ error: "Appointment not found" });
+    const ownId = await resolveOwnPatientId(req);
+    if (ownId === null || appt.patientId !== ownId) {
+      return res.status(403).json({ error: "FORBIDDEN", message: "You may only cancel your own appointments" });
+    }
+  }
+
   const [updated] = await db.update(appointmentsTable)
     .set({ status: "cancelled", cancelledAt: new Date(), updatedAt: new Date() })
     .where(eq(appointmentsTable.id, id))
@@ -146,6 +167,10 @@ router.patch("/:id/cancel", async (req, res) => {
 });
 
 router.patch("/:id/complete", async (req, res) => {
+  // Marking an appointment completed is a clinical/operational act.
+  if (req.role === "citizen") {
+    return res.status(403).json({ error: "FORBIDDEN", message: "Only clinical staff may complete appointments" });
+  }
   const id = parseInt(req.params["id"]!);
   const [updated] = await db.update(appointmentsTable)
     .set({ status: "completed", completedAt: new Date(), updatedAt: new Date() })
@@ -163,8 +188,12 @@ router.get("/departments", (_req, res) => {
   res.json({ departments: Object.keys(DEPARTMENTS), services: DEPARTMENTS });
 });
 
-// Admin — all upcoming appointments
+// Admin — all upcoming appointments. The list carries every patient's name and
+// national id, so it is restricted to operational roles.
 router.get("/all", async (req, res) => {
+  if (req.role !== "admin" && req.role !== "hospital") {
+    return res.status(403).json({ error: "FORBIDDEN", message: "Only admin and hospital roles may list all appointments" });
+  }
   const limit = Math.min(parseInt(req.query["limit"] as string || "50"), 200);
   const appts = await db.select().from(appointmentsTable)
     .orderBy(desc(appointmentsTable.appointmentDate))

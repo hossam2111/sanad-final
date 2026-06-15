@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { visitsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { requireOwnPatient } from "../lib/ownership.js";
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.get("/", async (req, res) => {
     res.status(400).json({ error: "INVALID_PARAM", message: "patientId is required" });
     return;
   }
+  if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const visits = await db
     .select()
@@ -22,6 +24,11 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
+  // Recording a visit is a clinical act — citizens cannot write visits.
+  if (req.role === "citizen") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record visits" });
+    return;
+  }
   const body = req.body;
   const [visit] = await db
     .insert(visitsTable)
