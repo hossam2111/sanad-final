@@ -147,7 +147,7 @@ if ($allPassed) {
 
   Write-Host "  Run these two commands to publish:" -ForegroundColor White
   Write-Host ""
-  Write-Host "    git push -u sanad-final hardening/backend" -ForegroundColor Cyan
+  Write-Host "    git push -u sanad-final main" -ForegroundColor Cyan
   Write-Host "    git push sanad-final demo-ready-v1" -ForegroundColor Cyan
   Write-Host ""
 } else {
