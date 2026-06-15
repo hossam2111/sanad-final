@@ -2,10 +2,11 @@ import { Router } from "express";
 import { z } from "zod";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, visitsTable, labResultsTable, alertsTable } from "@workspace/db/schema";
-import { eq, ilike, or, desc, count } from "drizzle-orm";
+import { eq, ilike, or, and, desc, count, isNull } from "drizzle-orm";
 import { calculateRiskScore } from "../lib/ai-engine.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { validate } from "../middlewares/validate.js";
+import { CLINICAL_ROLES, getStaffHospitalId } from "../lib/ownership.js";
 
 const createPatientSchema = z.object({
   nationalId: z.string().min(10).max(10).regex(/^\d{10}$/, "National ID must be exactly 10 digits"),
@@ -46,9 +47,30 @@ router.get("/", async (req, res) => {
     ? or(ilike(patientsTable.fullName, `%${search}%`), ilike(patientsTable.nationalId, `%${search}%`))
     : undefined;
 
+  let hospitalFilter;
+  if (req.role && CLINICAL_ROLES.has(req.role) && req.role !== "admin" && req.role !== "emergency") {
+    if (!req.username) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
+      return;
+    }
+    const hospitalId = await getStaffHospitalId(req.username);
+    if (!hospitalId) {
+      res.json({ patients: [], total: 0, page: 1, limit: 1, pages: 1 });
+      return;
+    }
+    hospitalFilter = or(
+      eq(patientsTable.hospitalId, hospitalId),
+      isNull(patientsTable.hospitalId),
+    );
+  }
+
+  const finalFilter = hospitalFilter
+    ? (searchFilter ? and(hospitalFilter, searchFilter) : hospitalFilter)
+    : searchFilter;
+
   const [patients, [totalRow]] = await Promise.all([
-    db.select().from(patientsTable).where(searchFilter).orderBy(desc(patientsTable.createdAt)).limit(limit).offset(offset),
-    db.select({ count: count() }).from(patientsTable).where(searchFilter),
+    db.select().from(patientsTable).where(finalFilter).orderBy(desc(patientsTable.createdAt)).limit(limit).offset(offset),
+    db.select({ count: count() }).from(patientsTable).where(finalFilter),
   ]);
 
   res.json({ patients, total: Number(totalRow?.count ?? 0), page, limit, pages: Math.ceil(Number(totalRow?.count ?? 0) / limit) });

@@ -98,6 +98,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   req.userId = typeof decoded.userId === "string" ? decoded.userId : undefined;
   req.userName = typeof decoded.userName === "string" ? decoded.userName : undefined;
   req.userNationalId = typeof decoded.nationalId === "string" ? decoded.nationalId : undefined;
+  req.username = typeof decoded.username === "string" ? decoded.username : undefined;
 
   next();
 }

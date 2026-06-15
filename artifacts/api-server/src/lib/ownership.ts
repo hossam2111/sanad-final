@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { db } from "@workspace/db";
-import { patientsTable, consentTable } from "@workspace/db/schema";
+import { patientsTable, consentTable, staffAssignmentsTable } from "@workspace/db/schema";
 import { eq, and, desc, isNull } from "drizzle-orm";
 
 // Roles that act on patients institutionally (treatment / operations).
@@ -81,4 +81,12 @@ export async function getConsentState(patientId: number, consentType: string): P
     .orderBy(desc(consentTable.updatedAt))
     .limit(1);
   return row ? row.granted : null;
+}
+
+export async function getStaffHospitalId(username: string): Promise<string | null> {
+  const [row] = await db.select({ hospitalId: staffAssignmentsTable.hospitalId })
+    .from(staffAssignmentsTable)
+    .where(eq(staffAssignmentsTable.username, username))
+    .limit(1);
+  return row?.hospitalId ?? null;
 }

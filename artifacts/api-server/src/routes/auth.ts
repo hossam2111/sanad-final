@@ -103,6 +103,7 @@ router.post("/login", validate(loginSchema), async (req, res) => {
     role: user.role,
     userId: user.userId,
     userName: user.name,
+    username: username,
   };
   if (user.nationalId) payload["nationalId"] = user.nationalId;
 
