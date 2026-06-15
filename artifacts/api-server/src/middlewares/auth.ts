@@ -19,20 +19,28 @@ const VALID_ROLES = new Set([
 const ROLE_PERMISSIONS: Record<string, string[]> = {
   emergency: ["/api/emergency", "/api/patients", "/api/ai", "/api/alerts"],
   doctor: ["/api/patients", "/api/ai", "/api/lab", "/api/lab-results", "/api/medications", "/api/visits", "/api/alerts", "/api/appointments"],
-  citizen: ["/api/patients", "/api/lab-results", "/api/medications", "/api/visits", "/api/appointments", "/api/consent"],
-  admin: ["/api/admin", "/api/patients", "/api/ai", "/api/ai-control", "/api/alerts", "/api/lab", "/api/medications", "/api/visits"],
-  lab: ["/api/lab", "/api/patients", "/api/lab-results"],
-  pharmacy: ["/api/pharmacy", "/api/patients", "/api/medications", "/api/supply-chain"],
-  hospital: ["/api/hospital", "/api/patients", "/api/visits", "/api/appointments"],
-  insurance: ["/api/insurance", "/api/patients", "/api/medications"],
-  "ai-control": ["/api/ai-control", "/api/ai", "/api/admin"],
-  research: ["/api/research", "/api/admin"],
-  family: ["/api/family", "/api/patients"],
-  "supply-chain": ["/api/supply-chain", "/api/medications"],
+  // /api/ai gives the citizen the same risk engine clinicians see, but every
+  // patient-scoped endpoint enforces ownership (lib/ownership.ts): a citizen
+  // token only resolves its own record, on /api/ai and everywhere else.
+  citizen: ["/api/patients", "/api/lab-results", "/api/medications", "/api/visits", "/api/appointments", "/api/consent", "/api/ai", "/api/alerts"],
+  admin: ["/api/admin", "/api/patients", "/api/ai", "/api/ai-control", "/api/alerts", "/api/lab", "/api/medications", "/api/visits", "/api/appointments"],
+  // Every portal renders the system-alerts bell in the shared layout, so every
+  // role gets read access to /api/alerts (writes are still role-checked in the
+  // route handlers).
+  lab: ["/api/lab", "/api/patients", "/api/lab-results", "/api/alerts"],
+  pharmacy: ["/api/pharmacy", "/api/patients", "/api/medications", "/api/supply-chain", "/api/alerts"],
+  hospital: ["/api/hospital", "/api/patients", "/api/visits", "/api/appointments", "/api/alerts"],
+  insurance: ["/api/insurance", "/api/patients", "/api/medications", "/api/alerts"],
+  "ai-control": ["/api/ai-control", "/api/ai", "/api/admin", "/api/alerts"],
+  research: ["/api/research", "/api/alerts"],
+  // Family reaches patient data only through /api/family, which is gated on
+  // the patient's family_linking consent — no direct /api/patients access.
+  family: ["/api/family", "/api/alerts"],
+  "supply-chain": ["/api/supply-chain", "/api/medications", "/api/alerts"],
 };
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  if (req.path === "/health" || req.path === "/" || req.path.startsWith("/events/stream") || req.path === "/auth/login") {
+  if (req.path === "/healthz" || req.path === "/livez" || req.path === "/readyz" || req.path === "/" || req.path.startsWith("/events/stream") || req.path === "/auth/login") {
     return next();
   }
 
@@ -54,10 +62,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
     });
   }
 
-  let role: string | undefined;
+  let decoded: JwtPayload;
   try {
-    const decoded = jwt.verify(token, secret) as JwtPayload | string;
-    role = typeof decoded === "object" && typeof decoded.role === "string" ? decoded.role : undefined;
+    const result = jwt.verify(token, secret);
+    if (typeof result === "string" || !result) throw new Error("invalid payload");
+    decoded = result;
   } catch {
     return res.status(401).json({
       error: "Unauthorized",
@@ -65,6 +74,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
     });
   }
 
+  const role = typeof decoded.role === "string" ? decoded.role : undefined;
   if (!role || !VALID_ROLES.has(role)) {
     return res.status(401).json({
       error: "Unauthorized",
@@ -83,6 +93,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
       message: `Role '${role}' is not authorized to access this resource`,
     });
   }
+
+  req.role = role;
+  req.userId = typeof decoded.userId === "string" ? decoded.userId : undefined;
+  req.userName = typeof decoded.userName === "string" ? decoded.userName : undefined;
+  req.userNationalId = typeof decoded.nationalId === "string" ? decoded.nationalId : undefined;
 
   next();
 }
