@@ -58,7 +58,7 @@ const CONSUMPTION_TREND = [
 type ViewTab = "inventory" | "predictions" | "distribution" | "reorder";
 
 export default function SupplyChainPortal() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeTab, setActiveTab] = useState<ViewTab>("inventory");
   const [reorderResults, setReorderResults] = useState<Record<string, any>>({});
 
@@ -177,7 +177,7 @@ export default function SupplyChainPortal() {
         <div className="space-y-4">
           <div className="grid grid-cols-12 gap-5">
             <Card className="col-span-8">
-              <CardHeader><Package className="w-4 h-4 text-lime-700" /><CardTitle>Drug Inventory — All Lines</CardTitle></CardHeader>
+              <CardHeader><Package className="w-4 h-4 text-lime-700" /><CardTitle>{text("Drug Inventory — All Lines", "Drug Inventory — All Lines")}</CardTitle></CardHeader>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -211,7 +211,7 @@ export default function SupplyChainPortal() {
                               <div className="w-16 bg-secondary rounded-full h-1.5">
                                 <div className={`h-full rounded-full ${item.daysOfStock < 14 ? "bg-red-500" : item.daysOfStock < 30 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${Math.min((item.daysOfStock / 90) * 100, 100)}%` }} />
                               </div>
-                              <span className={`text-xs font-bold ${item.daysOfStock < 14 ? "text-red-600" : item.daysOfStock < 30 ? "text-amber-600" : "text-foreground"}`}>{item.daysOfStock}d</span>
+                              <span className={`text-xs font-bold ${item.daysOfStock < 14 ? "text-red-600" : item.daysOfStock < 30 ? "text-amber-600" : "text-foreground"}`}>{item.daysOfStock}{text("d", "d")}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3">
@@ -228,7 +228,7 @@ export default function SupplyChainPortal() {
             <div className="col-span-4 space-y-4">
               {/* Distribution Centers */}
               <Card>
-                <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>Distribution Centers</CardTitle></CardHeader>
+                <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>{text("Distribution Centers", "Distribution Centers")}</CardTitle></CardHeader>
                 <CardBody className="space-y-2.5">
                   {data?.distributionCenters?.map((dc: any, i: number) => {
                     const cfg = STATUS_CFG[dc.stock] ?? STATUS_CFG.adequate;
@@ -239,9 +239,9 @@ export default function SupplyChainPortal() {
                           <Badge variant={cfg.badge} className="text-[9px]">{dc.stock}</Badge>
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                          <span>Capacity: <span className="font-bold text-foreground">{dc.capacity}</span></span>
+                          <span>{text("Capacity:", "Capacity:")} <span className="font-bold text-foreground">{dc.capacity}</span></span>
                           <span>·</span>
-                          <span>Next delivery: <span className="font-bold text-foreground">{dc.nextDelivery}</span></span>
+                          <span>{text("Next delivery:", "Next delivery:")} <span className="font-bold text-foreground">{dc.nextDelivery}</span></span>
                         </div>
                       </div>
                     );
@@ -251,7 +251,7 @@ export default function SupplyChainPortal() {
 
               {/* Consumption Trend */}
               <Card>
-                <CardHeader><TrendingUp className="w-4 h-4 text-lime-700" /><CardTitle>6-Month Consumption</CardTitle></CardHeader>
+                <CardHeader><TrendingUp className="w-4 h-4 text-lime-700" /><CardTitle>{text("6-Month Consumption", "6-Month Consumption")}</CardTitle></CardHeader>
                 <CardBody>
                   <div className="h-48">
                     <ResponsiveContainer width="100%" height="100%">
@@ -280,18 +280,17 @@ export default function SupplyChainPortal() {
           <div className="flex items-start gap-4 px-5 py-4 bg-violet-50 border border-violet-200 rounded-2xl">
             <Brain className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm font-bold text-violet-800">AI Supply Forecasting Engine v2.1</p>
+              <p className="text-sm font-bold text-violet-800">{text("AI Supply Forecasting Engine v2.1", "AI Supply Forecasting Engine v2.1")}</p>
               <p className="text-xs text-violet-600 mt-0.5">
-                Machine learning demand prediction using 24-month historical consumption, prescription trends, disease prevalence, and seasonal patterns.
-                Predictions recalculated daily at 02:00 AST.
+                {text("Machine learning demand prediction using 24-month historical consumption, prescription trends, disease prevalence, and seasonal patterns. Predictions recalculated daily at 02:00 AST.", "Machine learning demand prediction using 24-month historical consumption, prescription trends, disease prevalence, and seasonal patterns. Predictions recalculated daily at 02:00 AST.")}
               </p>
             </div>
-            <Badge variant="info">Updated Today</Badge>
+            <Badge variant="info">{text("Updated Today", "Updated Today")}</Badge>
           </div>
 
           {/* AI Predictions from backend */}
           <Card>
-            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>AI Demand Predictions</CardTitle></CardHeader>
+            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Demand Predictions", "AI Demand Predictions")}</CardTitle></CardHeader>
             <CardBody className="space-y-3">
               {data?.aiPredictions?.map((pred: any, i: number) => (
                 <div key={i} className="flex items-start gap-4 px-4 py-3.5 bg-violet-50 border border-violet-100 rounded-2xl">
@@ -307,7 +306,7 @@ export default function SupplyChainPortal() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold text-violet-700">{pred.confidence}%</p>
-                    <p className="text-[10px] text-muted-foreground">confidence</p>
+                    <p className="text-[10px] text-muted-foreground">{text("confidence", "confidence")}</p>
                   </div>
                 </div>
               ))}
@@ -316,7 +315,7 @@ export default function SupplyChainPortal() {
 
           {/* 30/60/90 Day Forecast */}
           <Card>
-            <CardHeader><Calendar className="w-4 h-4 text-primary" /><CardTitle>30/60/90-Day Stock Forecast</CardTitle><span className="ml-auto text-[11px] text-muted-foreground">Units remaining</span></CardHeader>
+            <CardHeader><Calendar className="w-4 h-4 text-primary" /><CardTitle>{text("30/60/90-Day Stock Forecast", "30/60/90-Day Stock Forecast")}</CardTitle><span className="ml-auto text-[11px] text-muted-foreground">{text("Units remaining", "Units remaining")}</span></CardHeader>
             <CardBody>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
@@ -349,12 +348,12 @@ export default function SupplyChainPortal() {
                         <p className="text-xs font-bold text-foreground">{item.drugName}</p>
                         <Badge variant={cfg.badge} className="text-[9px]">{item.status}</Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">Stock: {item.stock.toLocaleString()} {item.unit} · Min: {item.minStock.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Supplier: {item.supplier} · Lead time: {item.leadTimeDays}d</p>
+                      <p className="text-xs text-muted-foreground">{text("Stock:", "Stock:")} {item.stock.toLocaleString()} {item.unit} {text("· Min:", "· Min:")} {item.minStock.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{text("Supplier:", "Supplier:")} {item.supplier} {text("· Lead time:", "· Lead time:")} {item.leadTimeDays}{text("d", "d")}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={`text-2xl font-bold ${item.daysOfStock < 14 ? "text-red-600" : "text-amber-600"}`}>{item.daysOfStock}d</p>
-                      <p className="text-[10px] text-muted-foreground">stock left</p>
+                      <p className={`text-2xl font-bold ${item.daysOfStock < 14 ? "text-red-600" : "text-amber-600"}`}>{item.daysOfStock}{text("d", "d")}</p>
+                      <p className="text-[10px] text-muted-foreground">{text("stock left", "stock left")}</p>
                     </div>
                   </div>
                   <button
@@ -377,17 +376,17 @@ export default function SupplyChainPortal() {
           <div className="flex items-center gap-3 px-4 py-3 bg-sky-50 border border-sky-200 rounded-2xl">
             <Globe className="w-4 h-4 text-sky-600 shrink-0" />
             <div>
-              <p className="text-xs font-bold text-foreground">National Drug Distribution Optimization</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">AI redistribution model identifies supply-demand gaps per region — redistribution recommendations updated every 6 hours</p>
+              <p className="text-xs font-bold text-foreground">{text("National Drug Distribution Optimization", "National Drug Distribution Optimization")}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{text("AI redistribution model identifies supply-demand gaps per region — redistribution recommendations updated every 6 hours", "AI redistribution model identifies supply-demand gaps per region — redistribution recommendations updated every 6 hours")}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-12 gap-5">
             <Card className="col-span-7">
-              <CardHeader><Globe className="w-4 h-4 text-primary" /><CardTitle>Regional Stock vs. Demand</CardTitle>
+              <CardHeader><Globe className="w-4 h-4 text-primary" /><CardTitle>{text("Regional Stock vs. Demand", "Regional Stock vs. Demand")}</CardTitle>
                 {regionalSummary && (
                   <Badge variant={regionalSummary.shortageRegions > 3 ? "destructive" : "warning"} className="ml-auto text-[10px]">
-                    {regionalSummary.shortageRegions} shortage regions
+                    {regionalSummary.shortageRegions} {text("shortage regions", "shortage regions")}
                   </Badge>
                 )}
               </CardHeader>
@@ -395,7 +394,7 @@ export default function SupplyChainPortal() {
                 <div className="h-72">
                   {loadingRegional ? (
                     <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2" /> Loading regional data...
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2" /> {text("Loading regional data...", "Loading regional data...")}
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
@@ -415,10 +414,10 @@ export default function SupplyChainPortal() {
                 </div>
                 {regionalSummary && (
                   <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
-                    <div className="text-xs"><span className="font-bold text-foreground">{regionalSummary.totalStock.toLocaleString()}</span><span className="text-muted-foreground ml-1">total stock units</span></div>
-                    <div className="text-xs"><span className="font-bold text-foreground">{regionalSummary.totalDemand.toLocaleString()}</span><span className="text-muted-foreground ml-1">monthly demand</span></div>
+                    <div className="text-xs"><span className="font-bold text-foreground">{regionalSummary.totalStock.toLocaleString()}</span><span className="text-muted-foreground ml-1">{text("total stock units", "total stock units")}</span></div>
+                    <div className="text-xs"><span className="font-bold text-foreground">{regionalSummary.totalDemand.toLocaleString()}</span><span className="text-muted-foreground ml-1">{text("monthly demand", "monthly demand")}</span></div>
                     <Badge variant={regionalSummary.nationalGapPct > 0 ? "destructive" : "success"} className="ml-auto text-[10px]">
-                      National gap: {regionalSummary.nationalGapPct > 0 ? "+" : ""}{regionalSummary.nationalGapPct}%
+                      {text("National gap:", "National gap:")} {regionalSummary.nationalGapPct > 0 ? "+" : ""}{regionalSummary.nationalGapPct}%
                     </Badge>
                   </div>
                 )}
@@ -426,11 +425,11 @@ export default function SupplyChainPortal() {
             </Card>
 
             <Card className="col-span-5">
-              <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>Gap Analysis by Region</CardTitle></CardHeader>
+              <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>{text("Gap Analysis by Region", "Gap Analysis by Region")}</CardTitle></CardHeader>
               <CardBody className="space-y-2.5">
                 {loadingRegional ? (
                   <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2" /> Loading...
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2" /> {text("Loading...", "Loading...")}
                   </div>
                 ) : regionalDistribution.map((r: any, i: number) => (
                   <div key={i} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border ${r.gap < 0 ? "bg-red-50 border-red-100" : "bg-emerald-50 border-emerald-100"}`}>
@@ -438,8 +437,8 @@ export default function SupplyChainPortal() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-foreground">{r.region}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        Stock {r.stock.toLocaleString()} · Demand {r.demand.toLocaleString()}
-                        {r.criticalDrugs > 0 && <span className="text-red-500 font-bold"> · {r.criticalDrugs} critical drugs</span>}
+                        {text("Stock", "Stock")} {r.stock.toLocaleString()} {text("· Demand", "· Demand")} {r.demand.toLocaleString()}
+                        {r.criticalDrugs > 0 && <span className="text-red-500 font-bold"> · {r.criticalDrugs} {text("critical drugs", "critical drugs")}</span>}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
@@ -458,11 +457,11 @@ export default function SupplyChainPortal() {
 
           {/* AI Redistribution Recommendations */}
           <Card>
-            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>AI Redistribution Recommendations</CardTitle><Badge variant="info">Live · computed from inventory</Badge></CardHeader>
+            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Redistribution Recommendations", "AI Redistribution Recommendations")}</CardTitle><Badge variant="info">{text("Live · computed from inventory", "Live · computed from inventory")}</Badge></CardHeader>
             <CardBody className="space-y-3">
               {loadingRegional ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600" /> Computing recommendations...
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600" /> {text("Computing recommendations...", "Computing recommendations...")}
                 </div>
               ) : regionalRecs.length > 0 ? regionalRecs.map((rec: any, i: number) => (
                 <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-red-50 border-red-200" : "bg-amber-50 border-amber-200"}`}>
@@ -470,19 +469,19 @@ export default function SupplyChainPortal() {
                   <div className="flex-1">
                     <p className="text-sm font-bold text-foreground">{rec.region} — {rec.action}</p>
                     {rec.criticalDrugs > 0 && (
-                      <p className="text-xs text-red-700 font-semibold mt-0.5">{rec.criticalDrugs} critical drug(s) below minimum threshold in this region</p>
+                      <p className="text-xs text-red-700 font-semibold mt-0.5">{rec.criticalDrugs} {text("critical drug(s) below minimum threshold in this region", "critical drug(s) below minimum threshold in this region")}</p>
                     )}
                     <Badge variant={rec.urgency === "critical" ? "destructive" : "warning"} className="text-[9px] mt-1">{rec.urgency.toUpperCase()}</Badge>
                   </div>
                 </div>
               )) : (
                 <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 px-4 py-3 rounded-2xl border border-emerald-200">
-                  <CheckCircle2 className="w-4 h-4" /> All regions within acceptable supply thresholds — no redistribution needed.
+                  <CheckCircle2 className="w-4 h-4" /> {text("All regions within acceptable supply thresholds — no redistribution needed.", "All regions within acceptable supply thresholds — no redistribution needed.")}
                 </div>
               )}
               {/* Static historical recs if API has none yet */}
               {!loadingRegional && regionalRecs.length === 0 && (
-                <div className="text-[11px] text-muted-foreground mt-1">Last computed: {new Date().toLocaleString()}</div>
+                <div className="text-[11px] text-muted-foreground mt-1">{text("Last computed:", "Last computed:")} {new Date().toLocaleString()}</div>
               )}
             </CardBody>
           </Card>
@@ -495,7 +494,7 @@ export default function SupplyChainPortal() {
           {/* Critical alerts */}
           {data?.criticalAlerts?.length > 0 && (
             <Card>
-              <CardHeader><AlertTriangle className="w-4 h-4 text-red-600" /><CardTitle>Emergency Purchase Orders Required</CardTitle><Badge variant="destructive">{data.criticalAlerts.length} critical</Badge></CardHeader>
+              <CardHeader><AlertTriangle className="w-4 h-4 text-red-600" /><CardTitle>{text("Emergency Purchase Orders Required", "Emergency Purchase Orders Required")}</CardTitle><Badge variant="destructive">{data.criticalAlerts.length} {text("critical", "critical")}</Badge></CardHeader>
               <div className="divide-y divide-border">
                 {data.criticalAlerts.map((alert: any, i: number) => {
                   const result = reorderResults[alert.drug];
@@ -505,13 +504,13 @@ export default function SupplyChainPortal() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-foreground">{alert.drug}</p>
                         <p className="text-xs text-muted-foreground">
-                          Current: {alert.currentStock.toLocaleString()} · Required: {alert.minRequired.toLocaleString()} · Deficit: <span className="font-bold text-red-600">{alert.deficit.toLocaleString()}</span>
+                          {text("Current:", "Current:")} {alert.currentStock.toLocaleString()} {text("· Required:", "· Required:")} {alert.minRequired.toLocaleString()} {text("· Deficit:", "· Deficit:")} <span className="font-bold text-red-600">{alert.deficit.toLocaleString()}</span>
                         </p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">Supplier: {alert.supplier} · Lead time: {alert.leadTimeDays} days</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{text("Supplier:", "Supplier:")} {alert.supplier} {text("· Lead time:", "· Lead time:")} {alert.leadTimeDays} {text("days", "days")}</p>
                       </div>
                       {result ? (
                         <div className="text-right shrink-0">
-                          <p className="text-xs font-bold text-emerald-600 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> Order Placed</p>
+                          <p className="text-xs font-bold text-emerald-600 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> {text("Order Placed", "Order Placed")}</p>
                           <p className="font-mono text-[10px] text-muted-foreground">{result.orderId}</p>
                         </div>
                       ) : (
@@ -524,7 +523,7 @@ export default function SupplyChainPortal() {
                           className="flex items-center gap-1.5 text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl transition-colors shrink-0"
                         >
                           <ShoppingCart className="w-3 h-3" />
-                          Issue Order
+                          {text("Issue Order", "Issue Order")}
                         </button>
                       )}
                     </div>
@@ -536,7 +535,7 @@ export default function SupplyChainPortal() {
 
           {/* All reorder alerts */}
           <Card>
-            <CardHeader><ShoppingCart className="w-4 h-4 text-primary" /><CardTitle>All Reorder Recommendations</CardTitle><Badge variant="warning">{data?.summary?.reorderAlerts} items</Badge></CardHeader>
+            <CardHeader><ShoppingCart className="w-4 h-4 text-primary" /><CardTitle>{text("All Reorder Recommendations", "All Reorder Recommendations")}</CardTitle><Badge variant="warning">{data?.summary?.reorderAlerts} {text("items", "items")}</Badge></CardHeader>
             <div className="divide-y divide-border">
               {data?.inventory?.filter((i: any) => i.reorderNeeded).map((item: any, idx: number) => {
                 const cfg = STATUS_CFG[item.status] ?? STATUS_CFG.low;
@@ -546,12 +545,12 @@ export default function SupplyChainPortal() {
                     <div className={`w-2 h-2 rounded-full ${cfg.dot} shrink-0`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground">{item.drugName}</p>
-                      <p className="text-xs text-muted-foreground">{item.category} · {item.daysOfStock} days stock · SAR {(item.avgMonthlyDemand * item.price * 3).toFixed(0)} estimated order value</p>
+                      <p className="text-xs text-muted-foreground">{item.category} · {item.daysOfStock} {text("days stock · SAR", "days stock · SAR")} {(item.avgMonthlyDemand * item.price * 3).toFixed(0)} {text("estimated order value", "estimated order value")}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <div className="text-right">
                         <p className="text-xs font-bold text-foreground">{item.stock.toLocaleString()} / {item.minStock.toLocaleString()}</p>
-                        <p className="text-[10px] text-muted-foreground">Current / Min</p>
+                        <p className="text-[10px] text-muted-foreground">{text("Current / Min", "Current / Min")}</p>
                       </div>
                       <Badge variant={cfg.badge} className="text-[9px]">{item.status}</Badge>
                       {result ? (
@@ -563,7 +562,7 @@ export default function SupplyChainPortal() {
                           className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${item.status === "critical" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-amber-100 hover:bg-amber-200 text-amber-800"}`}
                         >
                           <ShoppingCart className="w-3 h-3" />
-                          Order
+                          {text("Order", "Order")}
                         </button>
                       )}
                     </div>

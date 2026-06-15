@@ -306,7 +306,7 @@ function generateRecommendations(patient: {
 }
 
 function AppointmentBooking({ patientId }: { patientId: number }) {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const today = new Date().toISOString().split("T")[0]!;
   const [hospital, setHospital] = useState("");
   const [department, setDepartment] = useState("");
@@ -530,7 +530,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
 
 export default function CitizenPortal() {
   const { user: authUser } = useAuth();
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [loginId, setLoginId] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -555,7 +555,7 @@ export default function CitizenPortal() {
   );
 
   const { data: aiDecision } = useAiDecision(
-    (patient as any)?.id || 0,
+    (patient as { id?: number })?.id || 0,
     { enabled: !!patient }
   );
 
@@ -1060,7 +1060,7 @@ export default function CitizenPortal() {
         )}
 
         {activeTab === "appointments" && (
-          <AppointmentBooking patientId={(patient as any).id} />
+          <AppointmentBooking patientId={(patient as { id?: number }).id || 0} />
         )}
 
         {activeTab === "overview" && (
@@ -1132,7 +1132,7 @@ export default function CitizenPortal() {
                   <td className="text-muted-foreground font-mono text-xs" dir="ltr">{format(new Date(lab.testDate), "dd MMM yyyy")}</td>
                   <td>
                     <div className="flex items-center gap-2">
-                      <StatusDot status={lab.status as any} />
+                      <StatusDot status={lab.status as "critical" | "abnormal" | "normal"} />
                       <Badge variant={lab.status === "normal" ? "success" : lab.status === "abnormal" ? "warning" : "destructive"}>{lab.status === "normal" ? text("normal", "طبيعي") : lab.status === "abnormal" ? text("abnormal", "غير طبيعي") : text("critical", "حرج")}</Badge>
                     </div>
                   </td>
@@ -1206,7 +1206,7 @@ async function updateConsent(payload: { nationalId: string; consentType: string;
 }
 
 function ConsentTab({ nationalId, patientName }: { nationalId: string; patientName: string }) {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const qc = useQueryClient();
   const [toggling, setToggling] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<{ msg: string; ok: boolean } | null>(null);

@@ -60,7 +60,7 @@ function SanadMark({ size = 30 }: { size?: number }) {
 
 export default function PortalAccess() {
   const { login } = useAuth();
-  const { locale, text, toggleLocale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const router = useRouter();
   const reduce = useReducedMotion();
   const isAr = locale === "ar";
@@ -159,7 +159,7 @@ export default function PortalAccess() {
               "تستند كل مساحة عمل إلى طبقة الذكاء السيادية نفسها — ضمن حدود دورك بدقة.",
             )}
           </p>
-          <div className={`flex items-center gap-5 text-[11px] text-white/45 ${isAr ? "font-semibold" : "font-mono"}`} dir="ltr">
+          <div className={`flex items-center gap-5 text-[11px] text-white/45 ${isAr ? "font-semibold" : "font-mono"}`} dir={dir}>
             <span className="flex items-center gap-1.5 text-emerald-400/90">
               <span className="beacon h-1.5 w-1.5 rounded-full bg-emerald-400" />
               {text("OPERATIONAL", "تعمل")}

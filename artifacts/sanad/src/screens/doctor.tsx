@@ -43,7 +43,7 @@ type PredictionWarning = {
   confidence: "low" | "moderate" | "high";
 };
 
-const predictionSeverityStyle: Record<string, { bg: string; border: string; icon: string; badge: string }> = {
+const predictionSeverityStyle: Record<string, { bg: string; border: string; icon: string; badge: "destructive" | "warning" | "info" | "outline" | "success" | "default"  }> = {
   critical: { bg: "bg-red-50", border: "border-red-200", icon: "text-red-600", badge: "destructive" },
   high: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", badge: "warning" },
   moderate: { bg: "bg-sky-50", border: "border-sky-200", icon: "text-sky-600", badge: "info" },
@@ -51,6 +51,8 @@ const predictionSeverityStyle: Record<string, { bg: string; border: string; icon
 };
 
 function safeDate(dateStr: string) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   const d = new Date(dateStr);
   return isValid(d) ? d : new Date();
 }
@@ -129,6 +131,9 @@ function medicationBadgeVariant(isActive: boolean): NonNullable<TimelineEvent["b
 }
 
 export default function DoctorDashboard() {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
   const [searchId, setSearchId] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
@@ -145,7 +150,6 @@ export default function DoctorDashboard() {
   const narrativeRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
-  const { text } = useLanguage();
   const { alerts: sseAlerts, connected: sseConnected, unreadCount: sseUnread, markRead: markSseRead, clearAll: clearSseAlerts } = useSseAlerts(user?.role ?? "");
 
   const { data: nameSearchResults } = useQuery({
@@ -162,6 +166,8 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
       }
@@ -262,11 +268,15 @@ export default function DoctorDashboard() {
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
     e.preventDefault();
     if (searchId.trim()) { setPatientId(searchId.trim()); setActiveTab("overview"); setShowDropdown(false); setNarrativeText(""); setNarrativeProvider(""); setChatAnswer(""); setChatQuestion(""); }
   };
 
   const handleSelectPatient = (nationalId: string, name: string) => {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
     setSearchId(nationalId);
     setSearchQuery(name);
     setPatientId(nationalId);
@@ -286,7 +296,7 @@ export default function DoctorDashboard() {
   const alerts = alertsData?.alerts ?? [];
   const unreadAlerts = alerts.filter(a => !a.isRead).length;
 
-  const predictions: PredictionWarning[] = (predictionsData as any)?.predictions ?? [];
+  const predictions: PredictionWarning[] = (predictionsData as { predictions?: PredictionWarning[] })?.predictions ?? [];
   const criticalPredictions = predictions.filter(p => p.severity === "critical" || p.severity === "high").length;
 
   const handleMarkRead = async (alertId: number) => {
@@ -340,6 +350,8 @@ export default function DoctorDashboard() {
   }
 
   const getTrend = (labGroup: typeof labResults) => {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
     if (labGroup.length < 2) return "stable";
     const vals = labGroup.slice(0, 3).map(l => parseFloat(l.result)).filter(v => !isNaN(v));
     if (vals.length < 2) return "stable";
@@ -966,7 +978,7 @@ export default function DoctorDashboard() {
                         <div className="w-44 shrink-0">
                           <p className="font-bold text-sm text-foreground truncate">{testName}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <StatusDot status={latest.status as any} />
+                            <StatusDot status={latest.status as "critical" | "abnormal" | "normal"} />
                             <Badge variant={latest.status === "normal" ? "success" : latest.status === "abnormal" ? "warning" : "destructive"} className="text-[10px]">{latest.status === "normal" ? text("normal", "طبيعي") : latest.status === "abnormal" ? text("abnormal", "غير طبيعي") : text("critical", "حرج")}</Badge>
                           </div>
                         </div>
@@ -1362,7 +1374,7 @@ export default function DoctorDashboard() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <Badge variant={style.badge as any} className="text-[10px]">{severityLabel(p.severity, text)}</Badge>
+                                <Badge variant={style.badge} className="text-[10px]">{severityLabel(p.severity, text)}</Badge>
                                 <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide">{p.type.replace("_", " ")}</span>
                                 <span className="ms-auto text-[10px] text-muted-foreground">{text("Confidence:", "مستوى الثقة:")} {severityLabel(p.confidence, text)}</span>
                               </div>
@@ -1386,7 +1398,7 @@ export default function DoctorDashboard() {
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
                   <Shield className="w-3.5 h-3.5 text-primary" /> {text("Immutable Audit Trail — WHO · WHAT · WHEN · WHY", "سجل تدقيق غير قابل للتعديل — مَن · ماذا · متى · لماذا")}
                 </p>
-                {(!auditData || (auditData as any)?.auditLog?.length === 0) ? (
+                {(!auditData || (auditData as { auditLog?: any[] })?.auditLog?.length === 0) ? (
                   <div className="py-12 text-center">
                     <Shield className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                     <p className="font-bold text-foreground">{text("No audit records yet", "لا توجد سجلات تدقيق بعد")}</p>
@@ -1394,7 +1406,7 @@ export default function DoctorDashboard() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {((auditData as any)?.auditLog ?? []).map((log: any, i: number) => (
+                    {((auditData as { auditLog?: any[] })?.auditLog ?? []).map((log: any, i: number) => (
                       <div key={i} className="flex items-start gap-3 px-4 py-3 bg-secondary rounded-2xl border border-border">
                         <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
                         <div className="flex-1 min-w-0">
@@ -1618,7 +1630,9 @@ export default function DoctorDashboard() {
 }
 
 function PrescribeModal({ patientId }: { patientId: number }) {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
   const [isOpen, setIsOpen] = useState(false);
   const [drugName, setDrugName] = useState("");
   const [dosage, setDosage] = useState("");
@@ -1648,7 +1662,9 @@ function PrescribeModal({ patientId }: { patientId: number }) {
     window.location.reload();
   };
 
-  const close = () => { setIsOpen(false); checkMutation.reset(); };
+  const close = () => {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+ setIsOpen(false); checkMutation.reset(); };
 
   return (
     <>

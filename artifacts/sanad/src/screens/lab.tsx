@@ -39,7 +39,7 @@ const TEST_NAMES = [
 ];
 
 export default function LabPortal() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -418,7 +418,7 @@ export default function LabPortal() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Button
-                    onClick={() => submitMutation.mutate(form as any)}
+                    onClick={() => submitMutation.mutate(form as Record<string, string>)}
                     disabled={!form.testName || !form.result || !form.status || submitMutation.isPending}
                     className="flex-1"
                   >

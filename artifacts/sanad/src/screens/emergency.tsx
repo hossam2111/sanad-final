@@ -43,6 +43,15 @@ type ClinicalAction = {
   reason: string;
 };
 
+interface EmergencyPatient {
+  id?: number;
+  nationalId?: string;
+  riskLevel?: "critical" | "high" | "medium" | "low" | "unknown";
+  riskScore?: number;
+  clinicalActions?: ClinicalAction[];
+  [key: string]: unknown;
+}
+
 const actionConfig: Record<ClinicalAction["action"], { icon: React.ElementType; color: string; bg: string; border: string; label: string }> = {
   DO_NOT_GIVE: { icon: Ban, color: "text-red-700", bg: "bg-red-50", border: "border-red-200", label: "DO NOT GIVE" },
   HOLD_MEDICATION: { icon: PauseCircle, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200", label: "HOLD" },
@@ -59,7 +68,7 @@ const priorityBadge: Record<ClinicalAction["priority"], string> = {
 };
 
 export default function EmergencyPage() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [nationalId, setNationalId] = useState("");
   const [submittedId, setSubmittedId] = useState<string | null>(null);
 
@@ -86,7 +95,7 @@ export default function EmergencyPage() {
     setSubmittedId(patientNationalId);
   };
 
-  const clinicalActions = (patient as any)?.clinicalActions as ClinicalAction[] | undefined;
+  const clinicalActions = (patient as unknown as EmergencyPatient)?.clinicalActions as ClinicalAction[] | undefined;
   const immediateActions = clinicalActions?.filter(a => a.priority === "immediate") ?? [];
   const urgentActions = clinicalActions?.filter(a => a.priority !== "immediate") ?? [];
 
@@ -184,13 +193,13 @@ export default function EmergencyPage() {
         <div className="space-y-4">
           {/* TRIAGE LEVEL STRIP */}
           <div className={`rounded-3xl overflow-hidden border-2 ${
-            (patient as any).riskLevel === "critical" ? "border-red-500" :
-            (patient as any).riskLevel === "high" ? "border-amber-400" :
+            (patient as unknown as EmergencyPatient).riskLevel === "critical" ? "border-red-500" :
+            (patient as unknown as EmergencyPatient).riskLevel === "high" ? "border-amber-400" :
             "border-sky-400"
           }`}>
             <div className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:gap-5 ${
-              (patient as any).riskLevel === "critical" ? "bg-red-600" :
-              (patient as any).riskLevel === "high" ? "bg-amber-500" :
+              (patient as unknown as EmergencyPatient).riskLevel === "critical" ? "bg-red-600" :
+              (patient as unknown as EmergencyPatient).riskLevel === "high" ? "bg-amber-500" :
               "bg-sky-500"
             } text-white`}>
               <div className="hidden shrink-0 sm:block">
@@ -198,19 +207,19 @@ export default function EmergencyPage() {
               </div>
               <div className="flex-1">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Triage Level", "مستوى الفرز")}</p>
-                <p className="text-2xl font-bold uppercase tracking-wide">{text(`${((patient as any).riskLevel ?? "unknown").toUpperCase()} RISK`, `خطورة ${riskLabel((patient as any).riskLevel ?? "unknown", text)}`)}</p>
+                <p className="text-2xl font-bold uppercase tracking-wide">{text(`${((patient as unknown as EmergencyPatient).riskLevel ?? "unknown").toUpperCase()} RISK`, `خطورة ${riskLabel((patient as unknown as EmergencyPatient).riskLevel ?? "unknown", text)}`)}</p>
               </div>
               <div className="flex shrink-0 items-center gap-8">
                 <div className="text-center">
                   <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">{text("Risk Score", "درجة الخطورة")}</p>
-                  <p className="text-4xl font-bold tabular-nums" dir="ltr">{(patient as any).riskScore ?? "—"}</p>
+                  <p className="text-4xl font-bold tabular-nums" dir="ltr">{(patient as unknown as EmergencyPatient).riskScore ?? "—"}</p>
                   <p className="text-[10px] text-white/60">/ 100</p>
                 </div>
                 <div className="text-center">
                   <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">{text("Response Window", "نافذة الاستجابة")}</p>
                   <p className="text-lg font-bold">
-                    {(patient as any).riskLevel === "critical" ? text("≤ 3 min", "≤ 3 دقائق") :
-                     (patient as any).riskLevel === "high" ? text("≤ 30 min", "≤ 30 دقيقة") : text("≤ 2 hrs", "≤ ساعتين")}
+                    {(patient as unknown as EmergencyPatient).riskLevel === "critical" ? text("≤ 3 min", "≤ 3 دقائق") :
+                     (patient as unknown as EmergencyPatient).riskLevel === "high" ? text("≤ 30 min", "≤ 30 دقيقة") : text("≤ 2 hrs", "≤ ساعتين")}
                   </p>
                   <div className="flex items-center justify-center gap-1 mt-1">
                     <Timer className="w-3 h-3 text-white/60" />
@@ -302,9 +311,9 @@ export default function EmergencyPage() {
                   >
                     {text(`${patient.riskLevel?.toUpperCase()} RISK`, `خطورة ${riskLabel(patient.riskLevel ?? "unknown", text)}`)}
                   </Badge>
-                  {(patient as any).riskScore !== undefined && (
+                  {(patient as unknown as EmergencyPatient).riskScore !== undefined && (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-2xl font-bold text-foreground" dir="ltr">{(patient as any).riskScore}</span>
+                      <span className="text-2xl font-bold text-foreground" dir="ltr">{(patient as unknown as EmergencyPatient).riskScore}</span>
                       <span className="text-xs text-muted-foreground">/100</span>
                     </div>
                   )}

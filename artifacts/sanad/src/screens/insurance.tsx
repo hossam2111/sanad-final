@@ -15,16 +15,22 @@ import {
 } from "recharts";
 
 async function fetchInsurancePatient(nationalId: string) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   const res = await apiFetch(`/api/insurance/patient/${nationalId}`);
   if (!res.ok) throw new Error("Patient not found");
   return res.json();
 }
 async function fetchInsuranceDashboard() {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   const res = await apiFetch("/api/insurance/dashboard");
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
 async function reviewClaim(claimId: string, action: string, notes: string) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   const res = await apiFetch(`/api/insurance/claim/${claimId}/review`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -44,6 +50,8 @@ const PORTFOLIO_COLORS = ["#22c55e", "#f59e0b", "#ef4444", "#7c3aed"];
 type TabId = "dashboard" | "patient" | "portfolio";
 
 function AnomalyGauge({ score }: { score: number }) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   const color = score >= 60 ? "#ef4444" : score >= 30 ? "#f59e0b" : "#22c55e";
   const label = score >= 60 ? "HIGH RISK" : score >= 30 ? "MODERATE" : "LOW RISK";
   const sweepAngle = (score / 100) * 180;
@@ -69,13 +77,13 @@ function AnomalyGauge({ score }: { score: number }) {
         <text x={cx} y={cy - 4} textAnchor="middle" fill={color} fontSize="20" fontWeight="bold">{score}</text>
         <text x={cx} y={cy + 14} textAnchor="middle" fill="#64748b" fontSize="8" fontWeight="600">{label}</text>
       </svg>
-      <p className="text-[10px] text-muted-foreground font-semibold -mt-1">Neural Fraud Score</p>
+      <p className="text-[10px] text-muted-foreground font-semibold -mt-1">{text("Neural Fraud Score", "Neural Fraud Score")}</p>
     </div>
   );
 }
 
 export default function InsurancePortal() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
@@ -152,8 +160,8 @@ export default function InsurancePortal() {
                 {/* Claims Trend */}
                 <Card className="col-span-8">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>Claims & Fraud Trend — 2025</CardTitle></div>
-                    <Badge variant="outline">{dashboard.approvalRate}% approval rate</Badge>
+                    <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>{text("Claims & Fraud Trend — 2025", "Claims & Fraud Trend — 2025")}</CardTitle></div>
+                    <Badge variant="outline">{dashboard.approvalRate}{text("% approval rate", "% approval rate")}</Badge>
                   </CardHeader>
                   <CardBody>
                     <div className="h-56">
@@ -185,8 +193,8 @@ export default function InsurancePortal() {
                 {/* Fraud Alerts Panel */}
                 <Card className="col-span-4">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-red-500" /><CardTitle>AI Fraud Intelligence</CardTitle></div>
-                    <Badge variant="destructive">{dashboard.fraudSuspected} active</Badge>
+                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-red-500" /><CardTitle>{text("AI Fraud Intelligence", "AI Fraud Intelligence")}</CardTitle></div>
+                    <Badge variant="destructive">{dashboard.fraudSuspected} {text("active", "active")}</Badge>
                   </CardHeader>
                   <CardBody className="space-y-2.5">
                     {dashboard.fraudAlerts?.map((alert: any, i: number) => (
@@ -196,13 +204,13 @@ export default function InsurancePortal() {
                             <ShieldAlert className={`w-3.5 h-3.5 shrink-0 ${alert.severity === "high" ? "text-red-500" : "text-amber-500"}`} />
                             <p className="text-xs font-bold text-foreground">{alert.type}</p>
                           </div>
-                          <Badge variant={alert.severity === "high" ? "destructive" : "warning"} className="text-[9px] shrink-0">{alert.count} cases</Badge>
+                          <Badge variant={alert.severity === "high" ? "destructive" : "warning"} className="text-[9px] shrink-0">{alert.count} {text("cases", "cases")}</Badge>
                         </div>
                         <p className="text-[10px] text-muted-foreground">{alert.description}</p>
                       </div>
                     ))}
                     <div className="pt-2 border-t border-border">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5"><Zap className="w-3 h-3 text-amber-500" /> Regional Pricing Alerts</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5"><Zap className="w-3 h-3 text-amber-500" /> {text("Regional Pricing Alerts", "Regional Pricing Alerts")}</p>
                       {dashboard.riskPricingAlerts?.map((a: any, i: number) => (
                         <div key={i} className="flex items-center gap-2 py-1.5">
                           <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.trend === "rising" ? "bg-red-500" : a.trend === "declining" ? "bg-emerald-500" : "bg-amber-500"}`} />
@@ -224,7 +232,7 @@ export default function InsurancePortal() {
               <div className="grid grid-cols-12 gap-5">
                 <Card className="col-span-5">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>Claims by Type</CardTitle></div>
+                    <div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Claims by Type", "Claims by Type")}</CardTitle></div>
                   </CardHeader>
                   <CardBody>
                     <div className="h-44">
@@ -247,7 +255,7 @@ export default function InsurancePortal() {
 
                 <Card className="col-span-4">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /><CardTitle>Claim Status</CardTitle></div>
+                    <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /><CardTitle>{text("Claim Status", "Claim Status")}</CardTitle></div>
                   </CardHeader>
                   <CardBody className="flex items-center justify-center">
                     <div className="h-44 w-full">
@@ -271,7 +279,7 @@ export default function InsurancePortal() {
 
                 <Card className="col-span-3">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>Quick Stats</CardTitle></div>
+                    <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Quick Stats", "Quick Stats")}</CardTitle></div>
                   </CardHeader>
                   <CardBody className="space-y-3">
                     {[
@@ -324,14 +332,14 @@ export default function InsurancePortal() {
           {loadingPatient && (
             <div className="flex items-center gap-3 py-16 justify-center text-muted-foreground">
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600" />
-              <span className="text-sm">Loading policy data...</span>
+              <span className="text-sm">{text("Loading policy data...", "Loading policy data...")}</span>
             </div>
           )}
           {patientError && nationalId && (
             <Card className="border-red-200 bg-red-50">
               <CardBody className="flex items-center gap-3 p-4">
                 <X className="w-4 h-4 text-red-500" />
-                <p className="text-sm text-red-700">No policy found for <span className="font-mono">{nationalId}</span></p>
+                <p className="text-sm text-red-700">{text("No policy found for", "No policy found for")} <span className="font-mono">{nationalId}</span></p>
               </CardBody>
             </Card>
           )}
@@ -343,15 +351,15 @@ export default function InsurancePortal() {
                 <CardBody className="p-0">
                   <div className="flex items-stretch divide-x divide-border">
                     <div className="flex-1 p-5">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Policy Holder</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("Policy Holder", "Policy Holder")}</p>
                       <h2 className="text-xl font-bold text-foreground mb-1">{patient.patient?.fullName}</h2>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="font-mono text-xs bg-secondary px-2.5 py-1 rounded-xl">{patient.patient?.nationalId}</span>
-                        <span className="text-xs text-muted-foreground">Age {patient.patient?.age} · {patient.patient?.gender}</span>
+                        <span className="text-xs text-muted-foreground">{text("Age", "Age")} {patient.patient?.age} · {patient.patient?.gender}</span>
                         <span className="text-xs font-bold text-red-600">{patient.patient?.bloodType}</span>
                       </div>
                       <div className="flex items-center gap-2 mt-2">
-                        <Badge variant="success">Active Policy</Badge>
+                        <Badge variant="success">{text("Active Policy", "Active Policy")}</Badge>
                         <span className="text-xs font-semibold text-muted-foreground">{patient.insurancePlan}</span>
                       </div>
                     </div>
@@ -359,21 +367,21 @@ export default function InsurancePortal() {
                       <AnomalyGauge score={patient.anomalyScore ?? 0} />
                     </div>
                     <div className={`px-6 py-4 flex flex-col items-center justify-center min-w-[130px] ${patient.fraudRisk === "high" ? "bg-red-50" : patient.fraudRisk === "medium" ? "bg-amber-50" : "bg-emerald-50/50"}`}>
-                      <DataLabel label="Fraud Risk">
+                      <DataLabel label={text("Fraud Risk", "Fraud Risk")}>
                         <p className={`text-2xl font-bold ${patient.fraudRisk === "high" ? "text-red-600" : patient.fraudRisk === "medium" ? "text-amber-600" : "text-emerald-600"}`}>{patient.fraudRisk?.toUpperCase()}</p>
                       </DataLabel>
                     </div>
                     <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[150px] bg-violet-50">
-                      <DataLabel label="Monthly Premium">
-                        <p className="text-2xl font-bold text-violet-700">SAR {patient.monthlyPremium?.toLocaleString()}</p>
+                      <DataLabel label={text("Monthly Premium", "Monthly Premium")}>
+                        <p className="text-2xl font-bold text-violet-700">{text("SAR", "SAR")} {patient.monthlyPremium?.toLocaleString()}</p>
                       </DataLabel>
-                      <p className="text-xs text-muted-foreground mt-1">{patient.riskMultiplier}× risk factor</p>
+                      <p className="text-xs text-muted-foreground mt-1">{patient.riskMultiplier}{text("× risk factor", "× risk factor")}</p>
                     </div>
                     <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px]">
-                      <DataLabel label="Total Claims">
+                      <DataLabel label={text("Total Claims", "Total Claims")}>
                         <p className="text-2xl font-bold text-foreground">{patient.totalClaims}</p>
                       </DataLabel>
-                      <p className="text-xs text-muted-foreground mt-1">SAR {patient.totalClaimValue?.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{text("SAR", "SAR")} {patient.totalClaimValue?.toLocaleString()}</p>
                     </div>
                   </div>
                 </CardBody>
@@ -383,9 +391,9 @@ export default function InsurancePortal() {
                 {/* Anomaly Breakdown */}
                 <Card className="col-span-5">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>Neural Fraud Analysis</CardTitle></div>
+                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("Neural Fraud Analysis", "Neural Fraud Analysis")}</CardTitle></div>
                     <Badge variant={patient.anomalyScore >= 50 ? "destructive" : patient.anomalyScore >= 25 ? "warning" : "success"}>
-                      Score: {patient.anomalyScore}/100
+                      {text("Score:", "Score:")} {patient.anomalyScore}/100
                     </Badge>
                   </CardHeader>
                   <CardBody className="space-y-2.5">
@@ -393,7 +401,7 @@ export default function InsurancePortal() {
                       <div key={i} className={`p-3 rounded-2xl border ${factor.flag ? "bg-red-50 border-red-200" : "bg-secondary border-transparent"}`}>
                         <div className="flex items-center justify-between gap-2 mb-1">
                           <p className={`text-xs font-bold ${factor.flag ? "text-red-700" : "text-foreground"}`}>{factor.label}</p>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${factor.flag ? "bg-red-100 text-red-700" : "bg-secondary text-muted-foreground"}`}>+{factor.weight}pts</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${factor.flag ? "bg-red-100 text-red-700" : "bg-secondary text-muted-foreground"}`}>+{factor.weight}{text("pts", "pts")}</span>
                         </div>
                         <p className={`text-[11px] ${factor.flag ? "text-red-600" : "text-muted-foreground"}`}>{factor.value}</p>
                         <div className="mt-1.5 h-1 bg-white rounded-full overflow-hidden">
@@ -408,7 +416,7 @@ export default function InsurancePortal() {
                 <div className="col-span-7 space-y-4">
                   <Card>
                     <CardHeader>
-                      <div className="flex items-center gap-2"><Eye className="w-4 h-4 text-primary" /><CardTitle>Behavioral Profile</CardTitle></div>
+                      <div className="flex items-center gap-2"><Eye className="w-4 h-4 text-primary" /><CardTitle>{text("Behavioral Profile", "Behavioral Profile")}</CardTitle></div>
                     </CardHeader>
                     <CardBody>
                       <div className="grid grid-cols-2 gap-3">
@@ -429,8 +437,8 @@ export default function InsurancePortal() {
 
                   <Card>
                     <CardHeader>
-                      <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-violet-600" /><CardTitle>Premium Breakdown</CardTitle></div>
-                      <p className="text-sm font-bold text-violet-700 ml-auto">SAR {patient.monthlyPremium}/mo</p>
+                      <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-violet-600" /><CardTitle>{text("Premium Breakdown", "Premium Breakdown")}</CardTitle></div>
+                      <p className="text-sm font-bold text-violet-700 ml-auto">{text("SAR", "SAR")} {patient.monthlyPremium}{text("/mo", "/mo")}</p>
                     </CardHeader>
                     <CardBody>
                       <div className="h-36">
@@ -455,7 +463,7 @@ export default function InsurancePortal() {
                 <div className="flex items-start gap-3 p-4 bg-amber-50 border-2 border-amber-300 rounded-3xl">
                   <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-bold text-amber-800 mb-2">AI Fraud Detection Flags ({patient.fraudFlags.length})</p>
+                    <p className="text-sm font-bold text-amber-800 mb-2">{text("AI Fraud Detection Flags (", "AI Fraud Detection Flags (")}{patient.fraudFlags.length})</p>
                     <div className="grid grid-cols-2 gap-2">
                       {patient.fraudFlags.map((flag: string, i: number) => (
                         <div key={i} className="flex items-center gap-2 text-sm text-amber-700">
@@ -470,8 +478,8 @@ export default function InsurancePortal() {
               {/* Claims Table with Review Workflow */}
               <Card>
                 <CardHeader>
-                  <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /><CardTitle>Claims — AI Review Workflow</CardTitle></div>
-                  <Badge variant="default">{patient.totalClaims} claims</Badge>
+                  <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /><CardTitle>{text("Claims — AI Review Workflow", "Claims — AI Review Workflow")}</CardTitle></div>
+                  <Badge variant="default">{patient.totalClaims} {text("claims", "claims")}</Badge>
                 </CardHeader>
                 <CardBody className="p-0">
                   <div className="divide-y divide-border">
@@ -491,12 +499,12 @@ export default function InsurancePortal() {
                                 <Badge variant={claim.type === "Emergency" ? "destructive" : claim.type === "Inpatient" ? "warning" : "outline"} className="text-[10px]">{claim.type}</Badge>
                                 {(reviewResult?.newStatus ?? claim.aiVerified) && (
                                   <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
-                                    <CheckCircle2 className="w-3 h-3" />AI Verified
+                                    <CheckCircle2 className="w-3 h-3" />{text("AI Verified", "AI Verified")}
                                   </span>
                                 )}
                                 {claim.anomalyScore > 0 && (
                                   <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${claim.anomalyScore >= 30 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
-                                    Anomaly: {claim.anomalyScore}
+                                    {text("Anomaly:", "Anomaly:")} {claim.anomalyScore}
                                   </span>
                                 )}
                               </div>
@@ -504,20 +512,20 @@ export default function InsurancePortal() {
                               <p className="text-xs text-muted-foreground">{claim.hospital} · {claim.date}</p>
                             </div>
                             <div className="text-right shrink-0 mr-2">
-                              <p className="text-base font-bold text-foreground">SAR {claim.estimatedCost?.toLocaleString()}</p>
+                              <p className="text-base font-bold text-foreground">{text("SAR", "SAR")} {claim.estimatedCost?.toLocaleString()}</p>
                               <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color} border ${cfg.border}`}>{cfg.label}</span>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
                               {canReview && !isReviewing && (
                                 <button onClick={() => setExpandedClaim(expandedClaim === claim.claimId ? null : claim.claimId)}
                                   className="text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-xl hover:bg-primary/20 transition-colors flex items-center gap-1">
-                                  <FileCheck className="w-3 h-3" /> Review
+                                  <FileCheck className="w-3 h-3" /> {text("Review", "Review")}
                                 </button>
                               )}
                               {claim.anomalyReasons?.length > 0 && (
                                 <button onClick={() => setExpandedClaim(expandedClaim === claim.claimId ? null : claim.claimId)}
                                   className="text-[11px] font-bold text-amber-700 bg-amber-100 px-2.5 py-1 rounded-xl hover:bg-amber-200 transition-colors flex items-center gap-1">
-                                  <Eye className="w-3 h-3" /> Details
+                                  <Eye className="w-3 h-3" /> {text("Details", "Details")}
                                 </button>
                               )}
                             </div>
@@ -529,7 +537,7 @@ export default function InsurancePortal() {
                               {claim.anomalyReasons?.length > 0 && (
                                 <div>
                                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                                    <AlertTriangle className="w-3 h-3 text-amber-500" /> Anomaly Reasons
+                                    <AlertTriangle className="w-3 h-3 text-amber-500" /> {text("Anomaly Reasons", "Anomaly Reasons")}
                                   </p>
                                   {claim.anomalyReasons.map((r: string, i: number) => (
                                     <div key={i} className="flex items-center gap-2 text-xs text-amber-700 mb-1">
@@ -540,32 +548,32 @@ export default function InsurancePortal() {
                               )}
                               {reviewResult && (
                                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                                  <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1">Review Complete</p>
+                                  <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1">{text("Review Complete", "Review Complete")}</p>
                                   <p className="text-xs text-foreground">{reviewResult.aiReason}</p>
-                                  <p className="text-[10px] text-muted-foreground mt-1">By {reviewResult.reviewedBy} · {new Date(reviewResult.reviewedAt).toLocaleString()}</p>
+                                  <p className="text-[10px] text-muted-foreground mt-1">{text("By", "By")} {reviewResult.reviewedBy} · {new Date(reviewResult.reviewedAt).toLocaleString()}</p>
                                 </div>
                               )}
                               {canReview && (
                                 <div>
                                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                                    <MessageSquare className="w-3 h-3" /> Review Notes (optional)
+                                    <MessageSquare className="w-3 h-3" /> {text("Review Notes (optional)", "Review Notes (optional)")}
                                   </p>
-                                  <Input placeholder="Add review notes..." value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} className="mb-3 text-xs" />
+                                  <Input placeholder={text("Add review notes...", "Add review notes...")} value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} className="mb-3 text-xs" />
                                   <div className="flex gap-2">
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "approve" })}
                                       disabled={reviewMutation.isPending}
                                       className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors disabled:opacity-50">
-                                      <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                                      <CheckCircle2 className="w-3.5 h-3.5" /> {text("Approve", "Approve")}
                                     </button>
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "flag" })}
                                       disabled={reviewMutation.isPending}
                                       className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-amber-500 text-white rounded-xl hover:bg-amber-600 transition-colors disabled:opacity-50">
-                                      <Clock className="w-3.5 h-3.5" /> Flag for Review
+                                      <Clock className="w-3.5 h-3.5" /> {text("Flag for Review", "Flag for Review")}
                                     </button>
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "reject" })}
                                       disabled={reviewMutation.isPending}
                                       className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">
-                                      <X className="w-3.5 h-3.5" /> Reject
+                                      <X className="w-3.5 h-3.5" /> {text("Reject", "Reject")}
                                     </button>
                                   </div>
                                 </div>
@@ -599,11 +607,11 @@ export default function InsurancePortal() {
                   <div key={i} className={`p-5 rounded-3xl border ${band.bg} ${band.border}`}>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{band.label}</p>
                     <p className={`text-4xl font-bold ${band.color}`}>{band.value}</p>
-                    <p className="text-xs text-muted-foreground mt-1">policyholders</p>
+                    <p className="text-xs text-muted-foreground mt-1">{text("policyholders", "policyholders")}</p>
                     <div className="mt-3 h-1.5 bg-white/60 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full ${band.bg.replace("50", "500")}`} style={{ width: `${Math.round((band.value / dashboard.totalPolicies) * 100)}%` }} />
                     </div>
-                    <p className="text-[10px] font-semibold text-muted-foreground mt-1">{Math.round((band.value / dashboard.totalPolicies) * 100)}% of portfolio</p>
+                    <p className="text-[10px] font-semibold text-muted-foreground mt-1">{Math.round((band.value / dashboard.totalPolicies) * 100)}{text("% of portfolio", "% of portfolio")}</p>
                   </div>
                 ))}
               </div>
@@ -611,7 +619,7 @@ export default function InsurancePortal() {
               <div className="grid grid-cols-12 gap-5">
                 <Card className="col-span-6">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><PieChart className="w-4 h-4 text-primary" /><CardTitle>Portfolio Risk Distribution</CardTitle></div>
+                    <div className="flex items-center gap-2"><PieChart className="w-4 h-4 text-primary" /><CardTitle>{text("Portfolio Risk Distribution", "Portfolio Risk Distribution")}</CardTitle></div>
                   </CardHeader>
                   <CardBody>
                     <div className="h-56">
@@ -635,7 +643,7 @@ export default function InsurancePortal() {
 
                 <Card className="col-span-6">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>Regional Risk Pricing</CardTitle></div>
+                    <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>{text("Regional Risk Pricing", "Regional Risk Pricing")}</CardTitle></div>
                   </CardHeader>
                   <CardBody>
                     <div className="space-y-4">
@@ -647,7 +655,7 @@ export default function InsurancePortal() {
                               <p className="text-sm font-semibold text-foreground">{a.region}</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted-foreground">Risk: {a.avgRisk}</span>
+                              <span className="text-xs text-muted-foreground">{text("Risk:", "Risk:")} {a.avgRisk}</span>
                               <span className={`text-xs font-bold ${a.trend === "rising" ? "text-red-600" : "text-emerald-600"}`}>{a.change}</span>
                             </div>
                           </div>

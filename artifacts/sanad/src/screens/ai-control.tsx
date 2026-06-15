@@ -42,7 +42,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string; 
 type ViewTab = "overview" | "engines" | "drift" | "retraining" | "decisions";
 
 export default function AIControlCenter() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeTab, setActiveTab] = useState<ViewTab>("overview");
   const [retrainingTarget, setRetrainingTarget] = useState<string | null>(null);
   const [retrainResult, setRetrainResult] = useState<Record<string, any>>({});
@@ -122,7 +122,7 @@ export default function AIControlCenter() {
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
           {text(`${metrics?.engines?.filter((e: any) => e.status === "operational").length} / ${metrics?.engines?.length} engines operational`, `${metrics?.engines?.filter((e: any) => e.status === "operational").length} / ${metrics?.engines?.length} محرك يعمل`)}
         </div>
-        <div className="ms-auto font-mono text-[11px] text-muted-foreground bg-secondary border border-border px-3 py-1.5 rounded-full" dir="ltr">
+        <div className="ms-auto font-mono text-[11px] text-muted-foreground bg-secondary border border-border px-3 py-1.5 rounded-full" dir={dir}>
           {text("Uptime", "التشغيل")} {metrics?.systemHealth?.uptime} · {text("Last retrain:", "آخر تدريب:")} {metrics?.systemHealth?.lastRetraining}
         </div>
       </div>

@@ -105,7 +105,7 @@ function FamilyMemberCard({ member, isPatient = false }: { member: any; isPatien
 type TabId = "tree" | "genetics" | "burden" | "screening";
 
 export default function FamilyPortal() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("tree");

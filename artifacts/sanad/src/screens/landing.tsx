@@ -25,6 +25,8 @@ const FOCUS =
 function Reveal({
   children, delay = 0, className,
 }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   const reduce = useReducedMotion();
   return (
     <motion.div
@@ -40,7 +42,7 @@ function Reveal({
 }
 
 function Eyebrow({ en, ar }: { en: string; ar: string }) {
-  const { locale, text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   return (
     <p
       className={`text-[#4D9FFF] mb-6 flex items-center gap-3 ${
@@ -56,6 +58,8 @@ function Eyebrow({ en, ar }: { en: string; ar: string }) {
 function Section({
   id, children, className = "",
 }: { id?: string; children: React.ReactNode; className?: string }) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   return (
     <section id={id} className={`scroll-mt-20 ${className}`}>
       <div className="mx-auto w-full max-w-[1120px] px-6 lg:px-8">{children}</div>
@@ -64,6 +68,8 @@ function Section({
 }
 
 function SanadMark({ size = 30 }: { size?: number }) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   return (
     <div
       className="flex shrink-0 items-center justify-center rounded-[9px]"
@@ -75,7 +81,7 @@ function SanadMark({ size = 30 }: { size?: number }) {
 }
 
 function Wordmark() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   return (
     <Link href="/" className={`flex items-center gap-3 rounded-md ${FOCUS}`}>
       <SanadMark />
@@ -139,6 +145,8 @@ const TRACE_CASES: TraceCase[] = [
 ];
 
 function TraceRows({ rows, animate }: { rows: TraceRow[]; animate: boolean }) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   return (
     <div aria-hidden className="px-5 py-4">
       {rows.map((r, i) => (
@@ -164,7 +172,7 @@ function TraceRows({ rows, animate }: { rows: TraceRow[]; animate: boolean }) {
 }
 
 function DecisionTrace() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const reduce = useReducedMotion();
   const [caseIdx, setCaseIdx] = useState(0);
 
@@ -178,7 +186,7 @@ function DecisionTrace() {
   return (
     <div className="mx-auto w-full max-w-[760px]">
       <div
-        dir="ltr"
+        dir={dir}
         role="img"
         aria-label={text(c.en, c.ar)}
         className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#070B12] text-left shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
@@ -233,7 +241,7 @@ function DecisionTrace() {
 /* ─── Navigation ─── */
 
 function Nav() {
-  const { text, locale, toggleLocale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const links = [
     { href: "#why", en: "Why SANAD", ar: "لماذا سند" },
     { href: "#intelligence", en: "Intelligence", ar: "الذكاء" },
@@ -283,7 +291,7 @@ function Nav() {
 /* ─── Hero ─── */
 
 function Hero() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
   return (
     <div className="relative overflow-hidden pt-16">
@@ -368,7 +376,7 @@ function Hero() {
 
 /* One quiet line of deployment fact — proof of scale, honestly attributed. */
 function DeploymentStrip() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
   return (
     <div className="mt-16 border-y border-white/[0.06] lg:mt-20">
@@ -391,7 +399,7 @@ function DeploymentStrip() {
 /* ─── Thesis: why SANAD exists ─── */
 
 function Thesis() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
   const gaps = [
     {
@@ -462,7 +470,7 @@ function Thesis() {
 /* The same potassium signal as the hero — in a system without memory.
    One syntax, two worlds. */
 function BrokenTrace() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const rows = [
     { tag: "SIGNAL", main: "lab.result — K⁺ 6.1 mmol/L", note: "printed · placed in a queue", time: "day 0", dead: false },
     { tag: "HANDOVER", main: "patient transferred — context lost", note: "history unavailable at receiving ward", time: "day 2", dead: true },
@@ -472,7 +480,7 @@ function BrokenTrace() {
   return (
     <div className="lg:sticky lg:top-28">
       <div
-        dir="ltr"
+        dir={dir}
         role="img"
         aria-label={text(
           "The same potassium signal in a system without memory: context lost at handover, interaction unseen, outcome never learned.",
@@ -515,7 +523,7 @@ function BrokenTrace() {
 /* ─── The intelligence layer ─── */
 
 function Intelligence() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
   // Each engine demonstrates itself: a real output line in the trace syntax,
   // not a marketing description. Outputs stay Latin mono, like all telemetry.
@@ -584,7 +592,7 @@ function Intelligence() {
 /* ─── National scale ─── */
 
 function Scale() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
   const stats = [
     { value: "34.2M", en: "Citizen health records", ar: "سجل صحي للمواطنين" },
@@ -633,7 +641,7 @@ function Scale() {
 /* ─── Trust & governance — the Isnād ─── */
 
 function Trust() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
   const items = [
     {
@@ -723,7 +731,7 @@ function Trust() {
 /* The hero's case, sealed. The chain of trust is shown, not described —
    and the page's opening story finds its ending here. */
 function IsnadChain() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const links = [
     { n: "01", main: "engine output · risk 0.94 — reasoning archived", hash: "sha256 9f2c…41a1" },
     { n: "02", main: "physician decision · diuretic held", hash: "sha256 41bb…0c7e" },
@@ -733,7 +741,7 @@ function IsnadChain() {
   return (
     <div className="mx-auto w-full max-w-[760px]">
       <div
-        dir="ltr"
+        dir={dir}
         role="img"
         aria-label={text(
           "The Isnād of the case traced above: four attestations — engine output, physician decision, pharmacy dispense, citizen visibility — hashed and sealed into one immutable chain.",
@@ -773,7 +781,7 @@ function IsnadChain() {
 /* ─── Ecosystem: twelve doors into one system ─── */
 
 function Ecosystem() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
   const groups: {
     en: string; ar: string;
@@ -875,7 +883,7 @@ function Ecosystem() {
 /* ─── Final call & footer ─── */
 
 function FinalCall() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
   return (
     <div className="relative overflow-hidden border-t border-white/[0.06]">
@@ -921,7 +929,7 @@ function FinalCall() {
 }
 
 function Footer() {
-  const { text, locale } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   return (
     <footer className="border-t border-white/[0.06]">
       <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-6 py-10 lg:px-8">
@@ -956,6 +964,7 @@ function Footer() {
 /* ─── Page ─── */
 
 export default function Landing() {
+  const { text, dir, locale, toggleLocale } = useLanguage();
   return (
     <div className="min-h-screen bg-[#05070C] text-[#F4F6FA] antialiased selection:bg-[#0A84FF]/30">
       <Nav />

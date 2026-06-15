@@ -136,7 +136,7 @@ const STATUS_CONFIG: Record<string, { bg: string; border: string; badge: any; do
 type ViewTab = "overview" | "studies" | "trends" | "correlations" | "cohorts";
 
 export default function ResearchPortal() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeView, setActiveView] = useState<ViewTab>("overview");
   const [selectedConditions, setSelectedConditions] = useState<"conditions" | "labs" | "drugs" | "age">("conditions");
   const { data, isLoading } = useQuery({ queryKey: ["research-insights"], queryFn: fetchResearchInsights });
@@ -239,8 +239,8 @@ export default function ResearchPortal() {
           {/* AI Clinical Findings */}
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2"><Lightbulb className="w-4 h-4 text-amber-500" /><CardTitle>AI Clinical Findings — Population Level</CardTitle></div>
-              <Badge variant="warning">{data?.clinicalFindings?.length} insights</Badge>
+              <div className="flex items-center gap-2"><Lightbulb className="w-4 h-4 text-amber-500" /><CardTitle>{text("AI Clinical Findings — Population Level", "AI Clinical Findings — Population Level")}</CardTitle></div>
+              <Badge variant="warning">{data?.clinicalFindings?.length} {text("insights", "insights")}</Badge>
             </CardHeader>
             <CardBody className="space-y-3">
               {data?.clinicalFindings?.map((f: any, i: number) => (
@@ -261,13 +261,13 @@ export default function ResearchPortal() {
 
           {/* Data Charts */}
           <div className="flex items-center gap-2 mb-3">
-            {[
+            {([
               { id: "conditions", label: "Disease Prevalence" },
               { id: "labs", label: "Lab Abnormality Rates" },
               { id: "drugs", label: "Drug Utilization" },
               { id: "age", label: "Age × Risk" },
-            ].map(tab => (
-              <button key={tab.id} onClick={() => setSelectedConditions(tab.id as any)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${selectedConditions === tab.id ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
+            ] as const).map(tab => (
+              <button key={tab.id} onClick={() => setSelectedConditions(tab.id)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${selectedConditions === tab.id ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
                 {tab.label}
               </button>
             ))}
@@ -277,7 +277,7 @@ export default function ResearchPortal() {
             {selectedConditions === "conditions" && (
               <>
                 <Card className="col-span-7">
-                  <CardHeader><div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>Disease Prevalence by Condition</CardTitle></div></CardHeader>
+                  <CardHeader><div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Disease Prevalence by Condition", "Disease Prevalence by Condition")}</CardTitle></div></CardHeader>
                   <CardBody>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
@@ -293,7 +293,7 @@ export default function ResearchPortal() {
                   </CardBody>
                 </Card>
                 <Card className="col-span-5">
-                  <CardHeader><CardTitle>Condition Trend Analysis</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>{text("Condition Trend Analysis", "Condition Trend Analysis")}</CardTitle></CardHeader>
                   <CardBody className="space-y-2 max-h-72 overflow-y-auto">
                     {data?.conditionInsights?.map((c: any, i: number) => {
                       const cfg = TREND_CONFIG[c.trend as keyof typeof TREND_CONFIG] ?? TREND_CONFIG.stable;
@@ -302,7 +302,7 @@ export default function ResearchPortal() {
                           <div className={`w-2 h-2 rounded-full ${cfg.dot} shrink-0`} />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-foreground truncate">{c.condition}</p>
-                            <p className="text-xs text-muted-foreground">{c.patientCount} patients · Risk: {c.avgRiskScore}</p>
+                            <p className="text-xs text-muted-foreground">{c.patientCount} {text("patients · Risk:", "patients · Risk:")} {c.avgRiskScore}</p>
                           </div>
                           <div className="text-right shrink-0">
                             <p className={`text-xs font-bold ${cfg.color}`}>{c.prevalence}%</p>
@@ -317,7 +317,7 @@ export default function ResearchPortal() {
             )}
             {selectedConditions === "labs" && (
               <Card className="col-span-12">
-                <CardHeader><div className="flex items-center gap-2"><FlaskConical className="w-4 h-4 text-violet-600" /><CardTitle>Lab Test Abnormality Rates</CardTitle></div></CardHeader>
+                <CardHeader><div className="flex items-center gap-2"><FlaskConical className="w-4 h-4 text-violet-600" /><CardTitle>{text("Lab Test Abnormality Rates", "Lab Test Abnormality Rates")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -337,7 +337,7 @@ export default function ResearchPortal() {
             )}
             {selectedConditions === "drugs" && (
               <Card className="col-span-12">
-                <CardHeader><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>Top Drug Utilization Patterns</CardTitle></div></CardHeader>
+                <CardHeader><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Top Drug Utilization Patterns", "Top Drug Utilization Patterns")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -355,7 +355,7 @@ export default function ResearchPortal() {
             )}
             {selectedConditions === "age" && (
               <Card className="col-span-12">
-                <CardHeader><div className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /><CardTitle>Age Group × Average Risk Score</CardTitle></div></CardHeader>
+                <CardHeader><div className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /><CardTitle>{text("Age Group × Average Risk Score", "Age Group × Average Risk Score")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -381,12 +381,12 @@ export default function ResearchPortal() {
           <div className="flex items-center gap-3 p-4 bg-violet-50 border border-violet-200 rounded-2xl">
             <BookOpen className="w-5 h-5 text-violet-600 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-violet-800">SANAD Clinical Research Registry</p>
+              <p className="text-sm font-bold text-violet-800">{text("SANAD Clinical Research Registry", "SANAD Clinical Research Registry")}</p>
               <p className="text-xs text-violet-600 mt-0.5">
-                {CLINICAL_STUDIES.filter(s => s.status === "active").length} active ·{" "}
-                {CLINICAL_STUDIES.filter(s => s.status === "recruiting").length} recruiting ·{" "}
-                {CLINICAL_STUDIES.filter(s => s.status === "completed").length} completed ·{" "}
-                {CLINICAL_STUDIES.reduce((sum, s) => sum + s.enrolled, 0).toLocaleString()} total participants
+                {CLINICAL_STUDIES.filter(s => s.status === "active").length} {text("active ·", "active ·")}{" "}
+                {CLINICAL_STUDIES.filter(s => s.status === "recruiting").length} {text("recruiting ·", "recruiting ·")}{" "}
+                {CLINICAL_STUDIES.filter(s => s.status === "completed").length} {text("completed ·", "completed ·")}{" "}
+                {CLINICAL_STUDIES.reduce((sum, s) => sum + s.enrolled, 0).toLocaleString()} {text("total participants", "total participants")}
               </p>
             </div>
           </div>
@@ -408,19 +408,19 @@ export default function ResearchPortal() {
                         </div>
                         <h3 className="text-sm font-bold text-foreground leading-snug">{study.title}</h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Lead: <span className="font-semibold text-foreground">{study.lead}</span> · {study.sponsor}
+                          {text("Lead:", "Lead:")} <span className="font-semibold text-foreground">{study.lead}</span> · {study.sponsor}
                         </p>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="text-2xl font-bold text-foreground">{enrollPct}%</p>
-                        <p className="text-[10px] text-muted-foreground">Enrolled</p>
+                        <p className="text-[10px] text-muted-foreground">{text("Enrolled", "Enrolled")}</p>
                       </div>
                     </div>
                     <div className="mt-3 w-full bg-white/60 rounded-full h-1.5">
                       <div className="h-full rounded-full bg-teal-500 transition-all" style={{ width: `${enrollPct}%` }} />
                     </div>
                     <div className="flex items-center gap-4 mt-1.5 text-[10px] text-muted-foreground">
-                      <span>{study.enrolled.toLocaleString()} / {study.cohortSize.toLocaleString()} participants</span>
+                      <span>{study.enrolled.toLocaleString()} / {study.cohortSize.toLocaleString()} {text("participants", "participants")}</span>
                       <span>·</span>
                       <span>{study.startDate} → {study.expectedEnd}</span>
                     </div>
@@ -429,13 +429,13 @@ export default function ResearchPortal() {
                   <div className="px-5 py-4 grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                        <Target className="w-3 h-3" /> Primary Endpoint
+                        <Target className="w-3 h-3" /> {text("Primary Endpoint", "Primary Endpoint")}
                       </p>
                       <p className="text-xs text-foreground font-medium leading-relaxed">{study.primaryEndpoint}</p>
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                        <Star className="w-3 h-3 text-amber-500" /> Key Finding
+                        <Star className="w-3 h-3 text-amber-500" /> {text("Key Finding", "Key Finding")}
                       </p>
                       <p className="text-xs font-semibold text-foreground leading-relaxed">{study.keyFinding}</p>
                     </div>
@@ -445,7 +445,7 @@ export default function ResearchPortal() {
                     <div className="flex items-start gap-2">
                       <Brain className="w-3.5 h-3.5 text-violet-600 shrink-0 mt-0.5" />
                       <p className="text-[11px] text-violet-800">
-                        <span className="font-bold">AI Insight:</span> {study.aiInsight}
+                        <span className="font-bold">{text("AI Insight:", "AI Insight:")}</span> {study.aiInsight}
                       </p>
                     </div>
                   </div>
@@ -462,16 +462,16 @@ export default function ResearchPortal() {
           <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl">
             <TrendingUp className="w-5 h-5 text-red-600 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-red-800">National Disease Trend Radar — 12-Month View</p>
-              <p className="text-xs text-red-600 mt-0.5">All 4 major chronic diseases showing upward trend — immediate national response required</p>
+              <p className="text-sm font-bold text-red-800">{text("National Disease Trend Radar — 12-Month View", "National Disease Trend Radar — 12-Month View")}</p>
+              <p className="text-xs text-red-600 mt-0.5">{text("All 4 major chronic diseases showing upward trend — immediate national response required", "All 4 major chronic diseases showing upward trend — immediate national response required")}</p>
             </div>
-            <Badge variant="destructive" className="ml-auto shrink-0">RISING</Badge>
+            <Badge variant="destructive" className="ml-auto shrink-0">{text("RISING", "RISING")}</Badge>
           </div>
 
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-red-500" /><CardTitle>Disease Prevalence Trends — 12-Month Progression</CardTitle></div>
-              <span className="text-[11px] text-muted-foreground font-mono ml-auto">% of total patient population</span>
+              <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-red-500" /><CardTitle>{text("Disease Prevalence Trends — 12-Month Progression", "Disease Prevalence Trends — 12-Month Progression")}</CardTitle></div>
+              <span className="text-[11px] text-muted-foreground font-mono ml-auto">{text("% of total patient population", "% of total patient population")}</span>
             </CardHeader>
             <CardBody>
               <div className="h-72">
@@ -519,22 +519,22 @@ export default function ResearchPortal() {
           <div className="flex items-center gap-3 p-4 bg-teal-50 border border-teal-200 rounded-2xl">
             <GitBranch className="w-5 h-5 text-teal-600 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-teal-800">Disease Co-Occurrence Correlation Matrix</p>
-              <p className="text-xs text-teal-600 mt-0.5">AI-detected co-occurrence patterns across chronic conditions — values represent % of patients with Condition A who also have Condition B</p>
+              <p className="text-sm font-bold text-teal-800">{text("Disease Co-Occurrence Correlation Matrix", "Disease Co-Occurrence Correlation Matrix")}</p>
+              <p className="text-xs text-teal-600 mt-0.5">{text("AI-detected co-occurrence patterns across chronic conditions — values represent % of patients with Condition A who also have Condition B", "AI-detected co-occurrence patterns across chronic conditions — values represent % of patients with Condition A who also have Condition B")}</p>
             </div>
           </div>
 
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2"><GitBranch className="w-4 h-4 text-teal-600" /><CardTitle>Chronic Disease Co-Occurrence Matrix</CardTitle></div>
-              <Badge variant="info">AI-Detected Patterns</Badge>
+              <div className="flex items-center gap-2"><GitBranch className="w-4 h-4 text-teal-600" /><CardTitle>{text("Chronic Disease Co-Occurrence Matrix", "Chronic Disease Co-Occurrence Matrix")}</CardTitle></div>
+              <Badge variant="info">{text("AI-Detected Patterns", "AI-Detected Patterns")}</Badge>
             </CardHeader>
             <CardBody className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-secondary/50">
-                      <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Condition A →</th>
+                      <th className="px-4 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Condition A →", "Condition A →")}</th>
                       {["Hypertension", "CKD", "Heart Disease", "Obesity", "Dyslipidemia"].map(h => (
                         <th key={h} className="px-4 py-3 text-center text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{h}</th>
                       ))}
@@ -559,10 +559,10 @@ export default function ResearchPortal() {
               </div>
               <div className="px-5 py-3 border-t border-border bg-secondary/30">
                 <div className="flex items-center gap-4 text-[10px]">
-                  <span className="font-bold text-muted-foreground uppercase tracking-wide">Legend:</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-100" /> ≥60% Strong</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-100" /> 40–59% Moderate</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-100" /> 20–39% Weak</span>
+                  <span className="font-bold text-muted-foreground uppercase tracking-wide">{text("Legend:", "Legend:")}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-100" /> {text("≥60% Strong", "≥60% Strong")}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-100" /> {text("40–59% Moderate", "40–59% Moderate")}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-100" /> {text("20–39% Weak", "20–39% Weak")}</span>
                 </div>
               </div>
             </CardBody>
@@ -570,7 +570,7 @@ export default function ResearchPortal() {
 
           <div className="grid grid-cols-12 gap-5">
             <Card className="col-span-6">
-              <CardHeader><div className="flex items-center gap-2"><Zap className="w-4 h-4 text-amber-500" /><CardTitle>Top Clinical Associations</CardTitle></div></CardHeader>
+              <CardHeader><div className="flex items-center gap-2"><Zap className="w-4 h-4 text-amber-500" /><CardTitle>{text("Top Clinical Associations", "Top Clinical Associations")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-3">
                 {[
                   { a: "Hypertension", b: "Heart Disease", r: 64, p: "<0.001", note: "Most critical dyad — shared vascular pathology" },
@@ -586,7 +586,7 @@ export default function ResearchPortal() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-bold text-primary">{item.r}%</p>
-                      <p className="text-[9px] font-mono text-muted-foreground">p{item.p}</p>
+                      <p className="text-[9px] font-mono text-muted-foreground">{text("p", "p")}{item.p}</p>
                     </div>
                   </div>
                 ))}
@@ -594,7 +594,7 @@ export default function ResearchPortal() {
             </Card>
 
             <Card className="col-span-6">
-              <CardHeader><div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>AI Policy Recommendations</CardTitle></div></CardHeader>
+              <CardHeader><div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Policy Recommendations", "AI Policy Recommendations")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-3">
                 {[
                   { priority: "P1", rec: "Launch integrated DM+HTN screening program — high co-occurrence (72%) demands co-management protocol", impact: "High" },
@@ -622,16 +622,16 @@ export default function ResearchPortal() {
           <div className="flex items-center gap-3 p-4 bg-sky-50 border border-sky-200 rounded-2xl">
             <Users className="w-5 h-5 text-sky-600 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-sky-800">Population Cohort Analysis — AI Treatment Group vs. Standard Care</p>
-              <p className="text-xs text-sky-600 mt-0.5">Comparing health outcomes across AI-managed cohort (n=12,480) vs. standard care cohort (n=11,200)</p>
+              <p className="text-sm font-bold text-sky-800">{text("Population Cohort Analysis — AI Treatment Group vs. Standard Care", "Population Cohort Analysis — AI Treatment Group vs. Standard Care")}</p>
+              <p className="text-xs text-sky-600 mt-0.5">{text("Comparing health outcomes across AI-managed cohort (n=12,480) vs. standard care cohort (n=11,200)", "Comparing health outcomes across AI-managed cohort (n=12,480) vs. standard care cohort (n=11,200)")}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-12 gap-5">
             <Card className="col-span-5">
               <CardHeader>
-                <div className="flex items-center gap-2"><Microscope className="w-4 h-4 text-primary" /><CardTitle>Condition Burden Comparison</CardTitle></div>
-                <span className="text-[10px] text-muted-foreground ml-auto">% prevalence</span>
+                <div className="flex items-center gap-2"><Microscope className="w-4 h-4 text-primary" /><CardTitle>{text("Condition Burden Comparison", "Condition Burden Comparison")}</CardTitle></div>
+                <span className="text-[10px] text-muted-foreground ml-auto">{text("% prevalence", "% prevalence")}</span>
               </CardHeader>
               <CardBody>
                 <div className="h-72">
@@ -651,7 +651,7 @@ export default function ResearchPortal() {
             </Card>
 
             <Card className="col-span-7">
-              <CardHeader><div className="flex items-center gap-2"><Target className="w-4 h-4 text-emerald-600" /><CardTitle>Outcome Metrics — AI vs. Standard Care</CardTitle></div></CardHeader>
+              <CardHeader><div className="flex items-center gap-2"><Target className="w-4 h-4 text-emerald-600" /><CardTitle>{text("Outcome Metrics — AI vs. Standard Care", "Outcome Metrics — AI vs. Standard Care")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-4">
                 {[
                   { metric: "HbA1c Control (<7.0%)", ai: 68, std: 41, unit: "%" },
@@ -668,19 +668,19 @@ export default function ResearchPortal() {
                       <div className="flex items-center justify-between">
                         <p className="text-xs font-semibold text-foreground">{item.metric}</p>
                         <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-                          AI: +{diff}{item.unit} better
+                          {text("AI: +", "AI: +")}{diff}{item.unit} {text("better", "better")}
                         </span>
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] w-24 text-red-600 font-semibold">AI Cohort</span>
+                          <span className="text-[10px] w-24 text-red-600 font-semibold">{text("AI Cohort", "AI Cohort")}</span>
                           <div className="flex-1 bg-secondary rounded-full h-2">
                             <div className="h-full rounded-full bg-red-500 transition-all" style={{ width: `${item.ai}%` }} />
                           </div>
                           <span className="text-[10px] font-bold w-10 text-right text-foreground">{item.ai}{item.unit}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] w-24 text-blue-600 font-semibold">Standard Care</span>
+                          <span className="text-[10px] w-24 text-blue-600 font-semibold">{text("Standard Care", "Standard Care")}</span>
                           <div className="flex-1 bg-secondary rounded-full h-2">
                             <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${item.std}%` }} />
                           </div>
@@ -695,8 +695,8 @@ export default function ResearchPortal() {
 
             <Card className="col-span-12">
               <CardHeader>
-                <div className="flex items-center gap-2"><FileText className="w-4 h-4 text-teal-600" /><CardTitle>Research Data Export</CardTitle></div>
-                <Badge variant="success">PDPL Compliant</Badge>
+                <div className="flex items-center gap-2"><FileText className="w-4 h-4 text-teal-600" /><CardTitle>{text("Research Data Export", "Research Data Export")}</CardTitle></div>
+                <Badge variant="success">{text("PDPL Compliant", "PDPL Compliant")}</Badge>
               </CardHeader>
               <CardBody>
                 <div className="grid grid-cols-3 gap-4">
@@ -721,7 +721,7 @@ export default function ResearchPortal() {
                           className="flex items-center gap-1.5 text-[11px] font-semibold text-teal-700 hover:text-teal-800 transition-colors"
                         >
                           <Download className="w-3 h-3" />
-                          Export
+                          {text("Export", "Export")}
                         </button>
                       </div>
                     </div>

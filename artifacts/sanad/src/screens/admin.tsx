@@ -40,7 +40,7 @@ const RISK_FILL: Record<string, string> = {
 };
 
 function KSAHeatmap({ regions }: { regions: any[] }) {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const [hovered, setHovered] = useState<string | null>(null);
   const regionMap = Object.fromEntries(regions.map(r => [r.region, r]));
 
@@ -163,13 +163,13 @@ async function fetchAppointmentsSummary() {
 }
 
 export default function AdminDashboard() {
-  const { text } = useLanguage();
+  const { text, dir, locale, toggleLocale } = useLanguage();
   const { data: statsRaw, isLoading: statsLoading } = useGetAdminStats();
   const { data: popHealth, isLoading: healthLoading } = useGetPopulationHealth();
   const { data: intelligence } = useNationalIntelligence();
   const { data: apptData } = useQuery({ queryKey: ["admin-appointments"], queryFn: fetchAppointmentsSummary, refetchInterval: 60000 });
 
-  const stats = statsRaw as any;
+  const stats = statsRaw as Record<string, any>;
 
   if (statsLoading || healthLoading) {
     return (
@@ -441,13 +441,13 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Epidemic Radar */}
-                {(intelligence as any)?.epidemicRadar && (intelligence as any).epidemicRadar.length > 0 && (
+                {((intelligence as Record<string, any>))?.epidemicRadar && ((intelligence as Record<string, any>)).epidemicRadar.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Radio className="w-3.5 h-3.5 text-red-500" /> {text("Epidemic Radar — Disease Surveillance", "رادار الأوبئة — ترصّد الأمراض")}
                     </p>
                     <div className="grid grid-cols-2 gap-2.5">
-                      {(intelligence as any).epidemicRadar.map((item: any, i: number) => (
+                      {((intelligence as Record<string, any>)).epidemicRadar.map((item: any, i: number) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${
                           item.alert === "high" ? "bg-red-50 border-red-200" : item.alert === "medium" ? "bg-amber-50 border-amber-200" : "bg-secondary border-border"
                         }`}>
@@ -466,13 +466,13 @@ export default function AdminDashboard() {
                 )}
 
                 {/* Policy Insights */}
-                {(intelligence as any)?.policyInsights && (intelligence as any).policyInsights.length > 0 && (
+                {((intelligence as Record<string, any>))?.policyInsights && ((intelligence as Record<string, any>)).policyInsights.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Lightbulb className="w-3.5 h-3.5 text-violet-500" /> {text("AI Policy Intelligence Recommendations", "توصيات ذكاء السياسات الصحية")}
                     </p>
                     <div className="space-y-2">
-                      {(intelligence as any).policyInsights.map((insight: any, i: number) => (
+                      {((intelligence as Record<string, any>)).policyInsights.map((insight: any, i: number) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${insight.priority === "high" ? "bg-violet-50 border-violet-200" : "bg-secondary border-border"}`}>
                           <Target className="w-4 h-4 shrink-0 mt-0.5 text-violet-600" />
                           <div className="flex-1 min-w-0">
@@ -491,10 +491,10 @@ export default function AdminDashboard() {
                 {/* National Metrics Footer */}
                 <div className="grid grid-cols-4 gap-3">
                   {[
-                    { label: text("AI Decisions Today", "قرارات اليوم"), value: (intelligence as any)?.aiDecisionsToday ?? "0", icon: Brain },
-                    { label: text("Event Bus Throughput", "إنتاجية ناقل الأحداث"), value: (intelligence as any)?.eventBusThroughput ?? "—", icon: Zap },
-                    { label: text("Audit Records", "سجلات التدقيق"), value: (intelligence as any)?.auditRecords ?? "0", icon: Target },
-                    { label: text("Avg Response Time", "متوسط زمن الاستجابة"), value: (intelligence as any)?.avgResponseMs ? `${(intelligence as any).avgResponseMs}ms` : "—", icon: Activity },
+                    { label: text("AI Decisions Today", "قرارات اليوم"), value: ((intelligence as Record<string, any>))?.aiDecisionsToday ?? "0", icon: Brain },
+                    { label: text("Event Bus Throughput", "إنتاجية ناقل الأحداث"), value: ((intelligence as Record<string, any>))?.eventBusThroughput ?? "—", icon: Zap },
+                    { label: text("Audit Records", "سجلات التدقيق"), value: ((intelligence as Record<string, any>))?.auditRecords ?? "0", icon: Target },
+                    { label: text("Avg Response Time", "متوسط زمن الاستجابة"), value: ((intelligence as Record<string, any>))?.avgResponseMs ? `${((intelligence as Record<string, any>)).avgResponseMs}ms` : "—", icon: Activity },
                   ].map((m, i) => (
                     <div key={i} className="px-4 py-3.5 bg-secondary rounded-2xl border border-border">
                       <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">

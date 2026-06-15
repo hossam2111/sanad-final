@@ -18,12 +18,20 @@ import { format } from "date-fns";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
 
 async function fetchPharmacyPatient(nationalId: string) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
+
   const res = await apiFetch(`/api/pharmacy/patient/${nationalId}`);
   if (!res.ok) throw new Error("Patient not found");
   return res.json();
 }
 
 async function dispenseMed(medicationId: number, pharmacistName: string) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
+
   const res = await apiFetch(`/api/pharmacy/dispense/${medicationId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -70,6 +78,10 @@ const SEVERITY_ORDER: Record<string, number> = {
 };
 
 function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
+
   const drugs = prescriptions.map((p) => p.drugName);
   const [selected, setSelected] = useState<{ a: string; b: string; warnings: any[] } | null>(null);
 
@@ -93,8 +105,8 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
     return (
       <div className="py-12 text-center">
         <Grid3X3 className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-        <p className="font-bold text-foreground mb-1">2+ Active Medications Required</p>
-        <p className="text-sm text-muted-foreground">The interaction matrix compares all active drugs simultaneously.</p>
+        <p className="font-bold text-foreground mb-1">{text("2+ Active Medications Required", "2+ Active Medications Required")}</p>
+        <p className="text-sm text-muted-foreground">{text("The interaction matrix compares all active drugs simultaneously.", "The interaction matrix compares all active drugs simultaneously.")}</p>
       </div>
     );
   }
@@ -103,13 +115,13 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
     <div className="p-5">
       <div className="flex items-center gap-2 mb-4 px-4 py-3 bg-violet-50 border border-violet-100 rounded-2xl text-xs text-violet-700">
         <Grid3X3 className="w-3.5 h-3.5 shrink-0" />
-        <span className="font-semibold">Full Drug-Drug Interaction Matrix</span>
-        <span className="text-violet-500 ml-1">— Click any cell for clinical details</span>
+        <span className="font-semibold">{text("Full Drug-Drug Interaction Matrix", "Full Drug-Drug Interaction Matrix")}</span>
+        <span className="text-violet-500 ml-1">{text("— Click any cell for clinical details", "— Click any cell for clinical details")}</span>
         <div className="ml-auto flex items-center gap-2 flex-wrap">
           {(["CONTRAINDICATED", "MAJOR", "MODERATE"] as const).map((s) => (
             <span key={s} className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[s]}`}>{s}</span>
           ))}
-          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">SAFE</span>
+          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{text("SAFE", "SAFE")}</span>
         </div>
       </div>
 
@@ -117,7 +129,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
         <table className="w-full text-xs">
           <thead>
             <tr>
-              <th className="bg-secondary text-muted-foreground font-bold px-3 py-2.5 text-left border-r border-border min-w-[140px]">Drug ↓ vs →</th>
+              <th className="bg-secondary text-muted-foreground font-bold px-3 py-2.5 text-left border-r border-border min-w-[140px]">{text("Drug ↓ vs →", "Drug ↓ vs →")}</th>
               {drugs.map((d) => (
                 <th key={d} className="bg-secondary text-muted-foreground font-semibold px-2 py-2.5 text-center border-r border-border min-w-[110px]">
                   {d.split(" ")[0]}
@@ -175,8 +187,8 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[w.severity] ?? "bg-gray-100"}`}>{w.severity}</span>
                 <p className="text-xs font-bold text-foreground">{w.text ?? `${w.drugA} ↔ ${w.drugB}`}</p>
               </div>
-              <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">Mechanism: </span>{w.mechanism}</p>
-              <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">Clinical basis: </span>{w.clinicalBasis}</p>
+              <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "Mechanism:")} </span>{w.mechanism}</p>
+              <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "Clinical basis:")} </span>{w.clinicalBasis}</p>
               <p className="text-[11px] font-semibold text-red-700 mb-2">{w.recommendation}</p>
               <div className="flex flex-wrap gap-1">
                 {(w.sources ?? [w.source]).filter(Boolean).map((src: string, si: number) => (
@@ -192,7 +204,13 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
 }
 
 function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose: () => void }) {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
   const handlePrint = () => {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
+
     const win = window.open("", "_blank");
     if (!win) return;
     win.document.write(`
@@ -256,23 +274,23 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
         <div className="bg-emerald-600 text-white p-5 text-center">
           <CheckCircle2 className="w-10 h-10 mx-auto mb-2" />
-          <p className="font-bold text-lg">Medication Dispensed</p>
+          <p className="font-bold text-lg">{text("Medication Dispensed", "Medication Dispensed")}</p>
           <p className="text-emerald-100 text-sm font-mono mt-1">{receipt.refNo}</p>
         </div>
         <div className="p-5 space-y-3">
           <div className="bg-secondary rounded-2xl p-4 space-y-2">
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Patient</span><span className="font-bold">{receipt.patient}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">National ID</span><span className="font-mono font-bold">{receipt.nationalId}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Patient", "Patient")}</span><span className="font-bold">{receipt.patient}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("National ID", "National ID")}</span><span className="font-mono font-bold">{receipt.nationalId}</span></div>
             <div className="h-px bg-border" />
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Medication</span><span className="font-bold">{receipt.drugName}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Dosage</span><span className="font-mono">{receipt.dosage} · {receipt.frequency}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Medication", "Medication")}</span><span className="font-bold">{receipt.drugName}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Dosage", "Dosage")}</span><span className="font-mono">{receipt.dosage} · {receipt.frequency}</span></div>
             <div className="h-px bg-border" />
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">AI Safety</span>
+              <span className="text-muted-foreground">{text("AI Safety", "AI Safety")}</span>
               <Badge variant={receipt.safe ? "success" : "warning"} className="text-[10px]">{receipt.safe ? "✓ Cleared" : "⚠ Override"}</Badge>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Insurance</span>
+              <span className="text-muted-foreground">{text("Insurance", "Insurance")}</span>
               <span className="font-bold text-sm">{receipt.insurance.eligible ? `${receipt.insurance.coveragePercent}% · SAR ${receipt.insurance.copay} copay` : "Not covered"}</span>
             </div>
             {receipt.supplyChainStatus?.warning && (
@@ -283,9 +301,9 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
             )}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} className="flex-1">Close</Button>
+            <Button variant="outline" onClick={onClose} className="flex-1">{text("Close", "Close")}</Button>
             <Button onClick={handlePrint} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white">
-              <Printer className="w-3.5 h-3.5 mr-1.5" /> Print Receipt
+              <Printer className="w-3.5 h-3.5 mr-1.5" /> {text("Print Receipt", "Print Receipt")}
             </Button>
           </div>
         </div>
@@ -295,8 +313,12 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
 }
 
 export default function PharmacyPortal() {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
+
   const { user } = useAuth();
-  const { text } = useLanguage();
+  
   const pharmacistName = user?.name ?? "Pharmacist";
   const { alerts: sseAlerts, connected: sseConnected } = useSseAlerts("pharmacy");
 
@@ -348,6 +370,10 @@ export default function PharmacyPortal() {
   });
 
   const handleSearch = (e: React.FormEvent) => {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
+
     e.preventDefault();
     const id = searchId.trim();
     if (!id) return;
@@ -360,6 +386,10 @@ export default function PharmacyPortal() {
   };
 
   const handlePrintRx = () => {
+  const { text, dir, locale, toggleLocale } = useLanguage();
+
+  
+
     if (!data) return;
     const win = window.open("", "_blank");
     if (!win) return;
@@ -526,7 +556,7 @@ export default function PharmacyPortal() {
           {/* Queue strip */}
           {queue.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-border">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Queue:</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Queue:", "Queue:")}</span>
               {queue.map((q) => (
                 <div
                   key={q.id}
@@ -564,7 +594,7 @@ export default function PharmacyPortal() {
       {isLoading && (
         <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600" />
-          <span className="text-sm font-medium">Loading prescriptions...</span>
+          <span className="text-sm font-medium">{text("Loading prescriptions...", "Loading prescriptions...")}</span>
         </div>
       )}
 
@@ -572,8 +602,8 @@ export default function PharmacyPortal() {
         <Card>
           <CardBody className="py-10 text-center">
             <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
-            <p className="font-bold text-foreground">Patient Not Found</p>
-            <p className="text-sm text-muted-foreground mt-1">No records for National ID: {nationalId}</p>
+            <p className="font-bold text-foreground">{text("Patient Not Found", "Patient Not Found")}</p>
+            <p className="text-sm text-muted-foreground mt-1">{text("No records for National ID:", "No records for National ID:")} {nationalId}</p>
           </CardBody>
         </Card>
       )}
@@ -583,8 +613,8 @@ export default function PharmacyPortal() {
           <div className="w-16 h-16 rounded-3xl bg-purple-100 flex items-center justify-center mx-auto mb-5">
             <Pill className="w-8 h-8 text-purple-600" />
           </div>
-          <p className="text-xl font-bold text-foreground mb-2">Pharmacy Portal</p>
-          <p className="text-sm text-muted-foreground max-w-sm">Enter a patient National ID to retrieve active prescriptions and begin the AI-verified dispensing workflow.</p>
+          <p className="text-xl font-bold text-foreground mb-2">{text("Pharmacy Portal", "Pharmacy Portal")}</p>
+          <p className="text-sm text-muted-foreground max-w-sm">{text("Enter a patient National ID to retrieve active prescriptions and begin the AI-verified dispensing workflow.", "Enter a patient National ID to retrieve active prescriptions and begin the AI-verified dispensing workflow.")}</p>
         </div>
       )}
 
@@ -595,16 +625,16 @@ export default function PharmacyPortal() {
             data.summary.interactions > 0 ? "bg-red-600" : "bg-gradient-to-br from-violet-600 to-purple-700"
           } text-white`}>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">Patient Record</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Patient Record", "Patient Record")}</p>
               <p className="text-xl font-bold">{data.patient.name}</p>
               <div className="flex items-center gap-4 mt-1.5 text-sm text-white/80">
                 <span className="font-mono">{data.patient.nationalId}</span>
                 <span>·</span>
-                <span>{data.patient.age}y</span>
+                <span>{data.patient.age}{text("y", "y")}</span>
                 <span>·</span>
                 <span>{data.patient.bloodType}</span>
                 <span>·</span>
-                <span>Risk {data.patient.riskScore ?? "—"}/100</span>
+                <span>{text("Risk", "Risk")} {data.patient.riskScore ?? "—"}/100</span>
               </div>
               {data.patient.chronicConditions?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
@@ -616,21 +646,21 @@ export default function PharmacyPortal() {
               {data.patient.allergies?.length > 0 && (
                 <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-xl w-fit">
                   <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                  <p className="text-xs font-bold">ALLERGIES: {data.patient.allergies.join(", ")}</p>
+                  <p className="text-xs font-bold">{text("ALLERGIES:", "ALLERGIES:")} {data.patient.allergies.join(", ")}</p>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-5 shrink-0">
               <div className="text-center">
-                <p className="text-[10px] text-white/70">Active Rx</p>
+                <p className="text-[10px] text-white/70">{text("Active Rx", "Active Rx")}</p>
                 <p className="text-3xl font-bold">{data.summary.active}</p>
               </div>
               <div className="text-center">
-                <p className="text-[10px] text-white/70">Conflicts</p>
+                <p className="text-[10px] text-white/70">{text("Conflicts", "Conflicts")}</p>
                 <p className={`text-3xl font-bold ${data.summary.interactions > 0 ? "text-yellow-300" : ""}`}>{data.summary.interactions}</p>
               </div>
               <div className="text-center">
-                <p className="text-[10px] text-white/70">Insured</p>
+                <p className="text-[10px] text-white/70">{text("Insured", "Insured")}</p>
                 <p className="text-3xl font-bold">{data.summary.insuranceCovered}</p>
               </div>
               <Button
@@ -639,7 +669,7 @@ export default function PharmacyPortal() {
                 onClick={handlePrintRx}
                 className="bg-white/20 text-white border-white/30 hover:bg-white/30 text-xs"
               >
-                <Printer className="w-3.5 h-3.5 mr-1.5" /> Print Rx
+                <Printer className="w-3.5 h-3.5 mr-1.5" /> {text("Print Rx", "Print Rx")}
               </Button>
             </div>
           </div>
@@ -675,7 +705,7 @@ export default function PharmacyPortal() {
                 {data.prescriptions.length === 0 ? (
                   <div className="py-12 text-center">
                     <Pill className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-                    <p className="font-bold text-foreground">No active prescriptions</p>
+                    <p className="font-bold text-foreground">{text("No active prescriptions", "No active prescriptions")}</p>
                   </div>
                 ) : (
                   data.prescriptions.map((presc: any) => {
@@ -688,16 +718,16 @@ export default function PharmacyPortal() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-bold text-base text-foreground">{presc.drugName}</p>
-                              {!check.safe && <Badge variant="destructive" className="text-[9px]">⚠ CONFLICT</Badge>}
-                              {check.safe && <Badge variant="success" className="text-[9px]">✓ SAFE</Badge>}
-                              {isDispensed && <Badge variant="info" className="text-[9px]">DISPENSED</Badge>}
+                              {!check.safe && <Badge variant="destructive" className="text-[9px]">{text("⚠ CONFLICT", "⚠ CONFLICT")}</Badge>}
+                              {check.safe && <Badge variant="success" className="text-[9px]">{text("✓ SAFE", "✓ SAFE")}</Badge>}
+                              {isDispensed && <Badge variant="info" className="text-[9px]">{text("DISPENSED", "DISPENSED")}</Badge>}
                             </div>
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                               <span className="font-mono font-bold text-foreground">{presc.dosage}</span>
                               <span>·</span>
                               <span>{presc.frequency}</span>
-                              {presc.prescribedBy && <><span>·</span><span>Rx: {presc.prescribedBy}</span></>}
-                              {presc.startDate && <><span>·</span><span>Since {presc.startDate}</span></>}
+                              {presc.prescribedBy && <><span>·</span><span>{text("Rx:", "Rx:")} {presc.prescribedBy}</span></>}
+                              {presc.startDate && <><span>·</span><span>{text("Since", "Since")} {presc.startDate}</span></>}
                             </div>
                           </div>
                           {!isDispensed ? (
@@ -713,7 +743,7 @@ export default function PharmacyPortal() {
                           ) : (
                             <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 shrink-0">
                               <CheckCircle2 className="w-4 h-4" />
-                              Dispensed
+                              {text("Dispensed", "Dispensed")}
                             </div>
                           )}
                         </div>
@@ -722,8 +752,8 @@ export default function PharmacyPortal() {
                         <div className={`px-3.5 py-3 rounded-2xl border mb-2 ${!check.safe ? "bg-red-50 border-red-200" : "bg-emerald-50 border-emerald-200"}`}>
                           <div className="flex items-center gap-2 mb-1.5">
                             <Brain className="w-3.5 h-3.5 text-violet-600" />
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">AI Dispense Safety Check</p>
-                            <span className="text-[10px] font-mono text-muted-foreground ml-auto">Confidence: {Math.round(check.confidenceScore * 100)}%</span>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("AI Dispense Safety Check", "AI Dispense Safety Check")}</p>
+                            <span className="text-[10px] font-mono text-muted-foreground ml-auto">{text("Confidence:", "Confidence:")} {Math.round(check.confidenceScore * 100)}%</span>
                           </div>
                           {check.warnings.map((w: string, i: number) => (
                             <p key={i} className="text-xs font-semibold text-foreground mb-1">{w}</p>
@@ -735,7 +765,7 @@ export default function PharmacyPortal() {
                                 className="flex items-center gap-1.5 text-[10px] font-bold text-violet-700 hover:text-violet-900 transition-colors"
                               >
                                 <BookOpen className="w-3 h-3" />
-                                {expandedWarnings[presc.id] ? "Hide" : "Show"} Clinical References ({check.detailedWarnings.length})
+                                {expandedWarnings[presc.id] ? "Hide" : "Show"} {text("Clinical References (", "Clinical References (")}{check.detailedWarnings.length})
                                 {expandedWarnings[presc.id] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                               </button>
                               {expandedWarnings[presc.id] && (
@@ -749,8 +779,8 @@ export default function PharmacyPortal() {
                                         </div>
                                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${SEVERITY_COLOR[dw.severity] ?? "bg-gray-100"}`}>{dw.severity}</span>
                                       </div>
-                                      <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">Mechanism: </span>{dw.mechanism}</p>
-                                      <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">Clinical basis: </span>{dw.clinicalBasis}</p>
+                                      <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "Mechanism:")} </span>{dw.mechanism}</p>
+                                      <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "Clinical basis:")} </span>{dw.clinicalBasis}</p>
                                       <p className="text-[11px] font-semibold text-red-700 mb-2">{dw.recommendation}</p>
                                       <div className="flex flex-wrap gap-1">
                                         {(dw.sources ?? [dw.source]).filter(Boolean).map((src: string, si: number) => (
@@ -769,19 +799,19 @@ export default function PharmacyPortal() {
                         <div className="flex items-center gap-4 px-3.5 py-2.5 bg-secondary rounded-2xl border border-border">
                           <CreditCard className="w-3.5 h-3.5 text-primary shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Insurance · {ins.provider}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">{text("Insurance ·", "Insurance ·")} {ins.provider}</p>
                             <p className="text-xs text-foreground truncate">{ins.notes}</p>
                           </div>
                           <div className="flex items-center gap-3 shrink-0 text-xs">
                             <div className="text-center">
-                              <p className="text-[10px] text-muted-foreground">Coverage</p>
+                              <p className="text-[10px] text-muted-foreground">{text("Coverage", "Coverage")}</p>
                               <p className="font-bold text-foreground">{ins.eligible ? `${ins.coveragePercent}%` : "None"}</p>
                             </div>
                             <div className="text-center">
-                              <p className="text-[10px] text-muted-foreground">Copay</p>
-                              <p className="font-bold text-foreground">SAR {ins.copay}</p>
+                              <p className="text-[10px] text-muted-foreground">{text("Copay", "Copay")}</p>
+                              <p className="font-bold text-foreground">{text("SAR", "SAR")} {ins.copay}</p>
                             </div>
-                            {ins.preAuthRequired && <Badge variant="warning" className="text-[9px]">Pre-Auth</Badge>}
+                            {ins.preAuthRequired && <Badge variant="warning" className="text-[9px]">{text("Pre-Auth", "Pre-Auth")}</Badge>}
                             <Badge variant={ins.eligible ? "success" : "destructive"} className="text-[9px]">{ins.eligible ? "Eligible" : "Not Eligible"}</Badge>
                           </div>
                         </div>
@@ -800,8 +830,8 @@ export default function PharmacyPortal() {
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-4 px-4 py-3 bg-secondary rounded-2xl text-xs text-muted-foreground">
                   <History className="w-3.5 h-3.5" />
-                  Full medication history — active and discontinued for {data.patient.name}
-                  <span className="ml-auto font-bold text-foreground">{(data.allMedications ?? data.prescriptions)?.length ?? 0} total</span>
+                  {text("Full medication history — active and discontinued for", "Full medication history — active and discontinued for")} {data.patient.name}
+                  <span className="ml-auto font-bold text-foreground">{(data.allMedications ?? data.prescriptions)?.length ?? 0} {text("total", "total")}</span>
                 </div>
                 <div className="space-y-2">
                   {(data.allMedications ?? data.prescriptions ?? []).map((med: any, i: number) => (
@@ -815,7 +845,7 @@ export default function PharmacyPortal() {
                       </div>
                       <div className="text-right shrink-0">
                         <Badge variant={med.isActive ? "success" : "outline"} className="text-[10px] mb-1">{med.isActive ? "Active" : "Discontinued"}</Badge>
-                        {med.startDate && <p className="text-[10px] text-muted-foreground font-mono mt-0.5">Since {med.startDate}</p>}
+                        {med.startDate && <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{text("Since", "Since")} {med.startDate}</p>}
                       </div>
                     </div>
                   ))}
@@ -828,7 +858,7 @@ export default function PharmacyPortal() {
               <div className="p-5 space-y-3">
                 <div className="flex items-center gap-2 mb-1 px-4 py-3 bg-secondary rounded-2xl text-xs text-muted-foreground">
                   <Package className="w-3.5 h-3.5" />
-                  Real-time inventory check for this patient's medications
+                  {text("Real-time inventory check for this patient's medications", "Real-time inventory check for this patient's medications")}
                 </div>
                 {(data.prescriptions ?? []).map((presc: any, i: number) => {
                   const avail = presc.stockAvailability;
@@ -852,14 +882,14 @@ export default function PharmacyPortal() {
                             <p className="text-xs font-bold text-foreground">{avail.stock?.toLocaleString()} {avail.unit}</p>
                           </div>
                         ) : (
-                          <Badge variant="outline" className="text-[10px]">Not tracked</Badge>
+                          <Badge variant="outline" className="text-[10px]">{text("Not tracked", "Not tracked")}</Badge>
                         )}
                       </div>
                       {avail && (
                         <>
                           <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                            <span>Stock level</span>
-                            <span>{avail.daysOfStock} days of supply</span>
+                            <span>{text("Stock level", "Stock level")}</span>
+                            <span>{avail.daysOfStock} {text("days of supply", "days of supply")}</span>
                           </div>
                           <div className="h-2 bg-secondary rounded-full overflow-hidden">
                             <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
