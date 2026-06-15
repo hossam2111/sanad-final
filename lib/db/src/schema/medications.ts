@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, date, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, date, boolean, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { patientsTable } from "./patients";
@@ -16,7 +16,11 @@ export const medicationsTable = pgTable("medications", {
   isActive: boolean("is_active").default(true),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [
+  index("idx_medications_patient_id").on(t.patientId),
+  index("idx_medications_patient_active").on(t.patientId, t.isActive),
+  index("idx_medications_drug_name").on(t.drugName),
+]);
 
 export const insertMedicationSchema = createInsertSchema(medicationsTable).omit({ id: true, createdAt: true });
 export type InsertMedication = z.infer<typeof insertMedicationSchema>;

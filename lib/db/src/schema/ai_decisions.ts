@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, real, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, real, timestamp, jsonb, index } from "drizzle-orm/pg-core";
 import { patientsTable } from "./patients";
 
 export const aiDecisionsTable = pgTable("ai_decisions", {
@@ -16,6 +16,10 @@ export const aiDecisionsTable = pgTable("ai_decisions", {
   digitalTwinProjection: jsonb("digital_twin_projection"),
   behavioralFlags: jsonb("behavioral_flags"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [
+  index("idx_ai_decisions_patient_id").on(t.patientId),
+  index("idx_ai_decisions_patient_created").on(t.patientId, t.createdAt),
+  index("idx_ai_decisions_urgency").on(t.urgency),
+]);
 
 export type AiDecision = typeof aiDecisionsTable.$inferSelect;

@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, date, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, date, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { patientsTable } from "./patients";
@@ -14,7 +14,11 @@ export const visitsTable = pgTable("visits", {
   notes: text("notes"),
   visitType: text("visit_type", { enum: ["emergency", "outpatient", "inpatient", "follow-up"] }).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [
+  index("idx_visits_patient_id").on(t.patientId),
+  index("idx_visits_patient_date").on(t.patientId, t.visitDate),
+  index("idx_visits_date").on(t.visitDate),
+]);
 
 export const insertVisitSchema = createInsertSchema(visitsTable).omit({ id: true, createdAt: true });
 export type InsertVisit = z.infer<typeof insertVisitSchema>;

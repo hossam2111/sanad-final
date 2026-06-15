@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, timestamp, jsonb, index } from "drizzle-orm/pg-core";
 import { patientsTable } from "./patients";
 
 export const eventsTable = pgTable("events", {
@@ -9,6 +9,10 @@ export const eventsTable = pgTable("events", {
   processedAt: timestamp("processed_at").defaultNow(),
   aiDecisionId: integer("ai_decision_id"),
   source: text("source").default("system"),
-});
+}, (t) => [
+  index("idx_events_patient_id").on(t.patientId),
+  index("idx_events_event_type").on(t.eventType),
+  index("idx_events_processed_at").on(t.processedAt),
+]);
 
 export type Event = typeof eventsTable.$inferSelect;

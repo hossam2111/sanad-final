@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1781520152195,
+      "tag": "0000_clear_invaders",
+      "breakpoints": true
+    }
+  ]
+}

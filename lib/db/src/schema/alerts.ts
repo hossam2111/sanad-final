@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, boolean, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { patientsTable } from "./patients";
@@ -14,7 +14,11 @@ export const alertsTable = pgTable("alerts", {
   message: text("message").notNull(),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (t) => [
+  index("idx_alerts_patient_id").on(t.patientId),
+  index("idx_alerts_unread").on(t.isRead, t.createdAt),
+  index("idx_alerts_severity").on(t.severity),
+]);
 
 export const insertAlertSchema = createInsertSchema(alertsTable).omit({ id: true, createdAt: true });
 export type InsertAlert = z.infer<typeof insertAlertSchema>;

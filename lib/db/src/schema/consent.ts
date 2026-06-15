@@ -1,8 +1,9 @@
-import { pgTable, serial, integer, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { patientsTable } from "./patients";
 
 export const consentTable = pgTable("consent_records", {
   id: serial("id").primaryKey(),
-  patientId: integer("patient_id").notNull(),
+  patientId: integer("patient_id").notNull().references(() => patientsTable.id, { onDelete: "cascade" }),
   consentType: text("consent_type").notNull(), // data_sharing | research | emergency_access | insurance | family_linking
   purpose: text("purpose").notNull(),
   grantedTo: text("granted_to").notNull(), // role or org name
@@ -14,6 +15,9 @@ export const consentTable = pgTable("consent_records", {
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   notes: text("notes"),
-});
+}, (t) => [
+  index("idx_consent_patient_id").on(t.patientId),
+  index("idx_consent_type").on(t.consentType),
+]);
 
 export type ConsentRecord = typeof consentTable.$inferSelect;
