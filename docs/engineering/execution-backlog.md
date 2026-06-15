@@ -4,6 +4,33 @@
 
 ---
 
+## ⚠️ Known Demo-Build Limitations
+
+These are intentional simplifications made for the demo build. They are not bugs in the current context, but must be addressed before any real clinical use.
+
+### L1. Inter-Clinician BOLA Not Enforced (No Institutional Scoping)
+* **What it means:** Clinical roles (`doctor`, `emergency`) have read access to any patient record regardless of hospital affiliation. A doctor credentialed at Hospital A can retrieve records for a patient registered at Hospital B.
+* **Root cause:** The `patients` table has no `hospitalId` or `assignedDoctor` foreign key. No staff-assignment table exists.
+* **Risk:** Violates PDPL data minimization. Would be caught by a real Ministry pen-test.
+* **Fix:** Add `hospital_id` to patients + a `patient_assignments` table; scope `requireOwnPatient` to clinical roles via assignment lookup.
+* **Recommended owner:** Codex / Backend
+
+### L2. 30 `as any` Casts in Frontend Screens
+* **What it means:** API response shapes in `src/screens/*.tsx` are typed as `any`, bypassing TypeScript's type checker at the data boundary.
+* **Root cause:** Screens were written against an evolving API without shared response types.
+* **Risk:** Silent type mismatches will only surface at runtime; refactors will not produce compile errors.
+* **Fix:** Generate a shared `@workspace/api-types` package from route handlers (or use `zod` schemas with `z.infer<>`); replace `as any` with inferred types.
+* **Recommended owner:** Codex / Frontend
+
+### L3. Family Portal Uses Numeric ID-Adjacency, Not a Relationship Model
+* **What it means:** `family.ts:182` determines household membership by checking `fp.id >= p.id - 3 && fp.id <= p.id + 5` — patients with nearby numeric IDs are treated as relatives.
+* **Root cause:** The seed inserts the Al-Ghamdi household as IDs 1–5, making adjacency work for the demo. No `family_relationships` table exists.
+* **Risk:** For any real patient population, this logic will return random unrelated patients as "family members."
+* **Fix:** Create a `family_relationships(patient_id, relative_id, relationship_type, verified_at)` table; enforce mutual consent before linking.
+* **Recommended owner:** Codex / Backend
+
+---
+
 ## 🚨 Top 10 Highest-Risk Items if Ignored
 
 1. **In-Memory SSE Map:** Prevents horizontal scaling; clients will disconnect or miss events if multiple API replicas exist.
