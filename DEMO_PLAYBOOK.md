@@ -231,6 +231,35 @@ untrustworthy data silo. SANAD scores claim patterns on the real clinical record
 **The point:** fraud detection that reasons about behavior patterns, and is
 honest enough to clear a sick patient instead of flagging everyone expensive.
 
+## New Scenarios Added in Sprints 2-8
+
+**S-FAM-DB (Sprint 2):** Family portal uses explicit relationships
+> "محمد الغامدي's family list shows خالد and نورة with their correct relationship types (Sibling, Child) — not random patients from nearby IDs. Patient يوسف, who has no family links, returns an empty family list."
+
+**S-HOSP (Sprint 3):** Hospital scoping
+> "Dr. Rashidi logs in and sees only KAMC-RYD patients in the patient list. Individual lookup by nationalId is still available for cross-hospital referrals. Admin sees all patients — unaffected."
+
+**S-DARK (Sprint 4):** Dark mode
+> "Click the Moon icon in the top-right — all screens flip to dark mode including Arabic RTL. Risk badges remain readable. Click Sun to return to light mode."
+
+**S-AUDIT (Sprint 5):** Isnād audit trail
+> "In the Admin portal, click the 'Audit Trail' tab. Filter by role='doctor' to see only Dr. Rashidi's accesses. Every access shows: who, role, action, what, timestamp, IP."
+
+**S-CONSENT (Sprint 5):** Consent revoke confirmation
+> "In the Citizen portal, revoke insurance consent. A confirmation dialog appears in Arabic asking 'هل أنت متأكد؟'. Accepting shows a green toast for 3 seconds."
+
+**S-ERROR (Sprint 6):** Graceful error state
+> "Stop the API server. Refresh the Doctor portal. Skeleton cards pulse for 2 seconds then show an error banner with a Retry button. Restarting the server and clicking Retry restores normal view."
+
+**S-PO (Sprint 7):** Purchase order flow
+> "In the Supply Chain portal, create a new PO for 'Warfarin 5mg Tablets — 500 units — Urgent'. It appears as pending. Click Approve — status changes to approved."
+
+**S-INS (Sprint 8):** Insurance claim with AI recommendation
+> "Open claim from لطيفة الحربي. Click 'AI Recommendation'. Badge shows 'Manual Review' with flag 'Multiple visits — possible overutilization'. Click Deny."
+
+**S-AI (Sprint 8):** AI control toggles
+> "In the AI Control panel, toggle 'drug_interaction' off. Return to Doctor portal and attempt a drug interaction check — it should fail or return a disabled message. Toggle back on."
+
 ---
 
 ## If something looks off mid-demo
