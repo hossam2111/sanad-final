@@ -1232,13 +1232,24 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
     },
   });
 
-  const handleToggle = (consentType: string, currentGranted: boolean, canRevoke: boolean) => {
+  const handleToggle = (consentType: string, currentGranted: boolean, canRevoke: boolean, title: string) => {
     const nextGranted = !currentGranted;
     if (!canRevoke && !nextGranted) {
       setToast({ msg: text("This consent is required for platform operation and cannot be revoked.", "هذه الموافقة ضرورية لتشغيل المنصّة ولا يمكن سحبها."), ok: false });
       setTimeout(() => setToast(null), 4000);
       return;
     }
+
+    if (!nextGranted) {
+      const msg = text(
+        `Revoking consent for '${title}' will immediately block access. Are you sure?`,
+        `إلغاء الموافقة على '${title}' سيوقف الوصول فوراً. هل أنت متأكد؟`
+      );
+      if (!window.confirm(msg)) {
+        return;
+      }
+    }
+
     setToggling(consentType);
     mutation.mutate({ nationalId, consentType, granted: nextGranted });
   };
@@ -1345,7 +1356,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
                 </div>
 
                 <button
-                  onClick={() => handleToggle(consent.type, consent.granted, consent.canRevoke)}
+                  onClick={() => handleToggle(consent.type, consent.granted, consent.canRevoke, consent.title)}
                   disabled={isToggling || !consent.canRevoke}
                   className={`ml-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all disabled:opacity-50 ${
                     consent.granted

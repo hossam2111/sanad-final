@@ -392,4 +392,18 @@ router.get("/audit-log", async (req, res) => {
   });
 });
 
+router.get("/audit-feed", async (req, res) => {
+  const limit = Math.min(parseInt((req.query["limit"] as string) || "50"), 200);
+  const roleFilter = req.query["role"] as string | undefined;
+
+  const rows = await db
+    .select()
+    .from(auditLogTable)
+    .where(roleFilter ? eq(auditLogTable.whoRole, roleFilter) : undefined)
+    .orderBy(desc(auditLogTable.createdAt))
+    .limit(limit);
+
+  res.json({ entries: rows, total: rows.length });
+});
+
 export default router;

@@ -156,6 +156,75 @@ function KSAHeatmap({ regions }: { regions: any[] }) {
   );
 }
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+function AuditFeed() {
+  const { text, dir } = useLanguage();
+  const [entries, setEntries] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [roleFilter, setRoleFilter] = React.useState<string>("");
+
+  React.useEffect(() => {
+    const params = roleFilter ? `?role=${roleFilter}` : "";
+    apiFetch(`/api/admin/audit-feed${params}`)
+      .then(r => r.json())
+      .then(data => { setEntries(data.entries ?? []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [roleFilter]);
+
+  const ROLES = ["", "doctor", "citizen", "admin", "emergency", "lab", "pharmacy", "hospital", "insurance", "family"];
+
+  return (
+    <Card dir={dir}>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>{text("Isnād Audit Trail", "سجل إسناد التدقيق")}</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            {text("Tamper-evident chain of every access and AI decision", "سلسلة غير قابلة للتلاعب لكل وصول وقرار ذكاء اصطناعي")}
+          </p>
+        </div>
+        <select
+          value={roleFilter}
+          onChange={e => { setRoleFilter(e.target.value); setLoading(true); }}
+          className="rounded-md border border-border bg-background text-foreground text-sm px-2 py-1"
+        >
+          {ROLES.map(r => (
+            <option key={r} value={r}>{r || text("All roles", "كل الأدوار")}</option>
+          ))}
+        </select>
+      </CardHeader>
+      <CardBody>
+        {loading ? (
+          <p className="text-muted-foreground text-sm">{text("Loading...", "جاري التحميل...")}</p>
+        ) : entries.length === 0 ? (
+          <p className="text-muted-foreground text-sm">{text("No audit entries found", "لا توجد سجلات تدقيق")}</p>
+        ) : (
+          <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
+            {entries.map(entry => (
+              <div key={entry.id} dir={dir}
+                className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border border-border text-sm">
+                <div className="flex-shrink-0 w-2 h-2 rounded-full mt-1.5 bg-primary" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-foreground">{entry.whoName ?? entry.who}</span>
+                    <Badge variant="outline" className="text-[10px]">{entry.whoRole}</Badge>
+                    <Badge variant="default" className="text-[10px]">{entry.action}</Badge>
+                  </div>
+                  <p className="text-muted-foreground mt-0.5 truncate">{entry.what}</p>
+                  <p className="text-xs text-muted-foreground/70 mt-0.5" dir="ltr">
+                    {new Date(entry.createdAt).toLocaleString("en-SA")}
+                    {entry.ipAddress && ` · ${entry.ipAddress}`}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardBody>
+    </Card>
+  );
+}
+
 async function fetchAppointmentsSummary() {
   const res = await apiFetch("/api/appointments/all?limit=100");
   if (!res.ok) return { appointments: [] };
@@ -206,6 +275,16 @@ export default function AdminDashboard() {
           {new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" })}
         </span>
       </div>
+
+      <Tabs defaultValue="dashboard" dir={dir}>
+        <div className="mb-6">
+          <TabsList>
+            <TabsTrigger value="dashboard">{text("Dashboard", "لوحة القيادة")}</TabsTrigger>
+            <TabsTrigger value="audit">{text("Audit Trail", "سجل التدقيق")}</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="dashboard">
 
       {/* KPI Row */}
       {stats && (
@@ -556,6 +635,12 @@ export default function AdminDashboard() {
           )}
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="audit">
+          <AuditFeed />
+        </TabsContent>
+      </Tabs>
     </Layout>
   );
 }
