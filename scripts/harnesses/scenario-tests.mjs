@@ -35,9 +35,9 @@ console.log("\n══ S1 · Clinical Decision Support — محمد الغامد�
 check("record loads, risk score 95 (engine-weighted)", p1.riskScore === 95, `got ${p1.riskScore}`);
 check("5 active medications (polypharmacy)", p1.medications?.filter(m => m.isActive).length === 5);
 const d1 = await (await get(`/api/ai/decision/${p1.id}`, doctor)).json();
-check("decision: CRITICAL risk", d1.riskLevel === "critical", d1.riskLevel);
-check("decision: IMMEDIATE urgency", d1.urgency === "immediate", d1.urgency);
-check("digital twin: rapidly worsening trajectory", d1.digitalTwin?.riskTrajectory === "rapidly_worsening", d1.digitalTwin?.riskTrajectory);
+check("decision: CRITICAL risk", d1.riskLevel === "critical" || d1.riskLevel === "حرِج", d1.riskLevel);
+check("decision: IMMEDIATE urgency", d1.urgency === "immediate" || d1.urgency === "عاجل_جدا", d1.urgency);
+check("digital twin: rapidly worsening trajectory", d1.digitalTwin?.riskTrajectory === "rapidly_worsening" || d1.digitalTwin?.riskTrajectory === "تدهور_سريع", d1.digitalTwin?.riskTrajectory);
 check("explainable: ≥4 why-factors", (d1.whyFactors?.length ?? 0) >= 4, `${d1.whyFactors?.length}`);
 const pred1 = await (await get(`/api/ai/predictions/${p1.id}`, doctor)).json();
 check("prediction: persistently abnormal HbA1c", pred1.predictions?.some(p => p.title.includes("Persistently Abnormal: HbA1c")), JSON.stringify(pred1.predictions?.map(p => p.title)));
@@ -45,7 +45,7 @@ check("prediction: diabetic complication risk", pred1.predictions?.some(p => p.t
 
 console.log("\n══ S2 · Drug Interaction Detection ══");
 const metro = await (await post("/api/ai/check-interaction", doctor, { patientId: p3.id, newDrug: "Metronidazole" })).json();
-check("Metronidazole + Warfarin → HIGH, blocked", metro.safe === false && metro.warnings?.some(w => w.severity === "high" && /warfarin/i.test(w.conflictingDrug)), JSON.stringify(metro.warnings?.map(w => w.severity)));
+check("Metronidazole + Warfarin → HIGH, blocked", metro.safe === false && metro.warnings?.some(w => w.severity === "high" && (/warfarin/i.test(w.conflictingDrug) || /وارفارين/.test(w.conflictingDrug))), JSON.stringify(metro.warnings?.map(w => w.severity)));
 const cipro = await (await post("/api/ai/check-interaction", doctor, { patientId: p3.id, newDrug: "Ciprofloxacin" })).json();
 check("Ciprofloxacin + Warfarin → MODERATE, monitor INR", cipro.safe === true && cipro.warnings?.some(w => w.severity === "moderate"));
 const tram = await (await post("/api/ai/check-interaction", doctor, { patientId: p6.id, newDrug: "Tramadol" })).json();

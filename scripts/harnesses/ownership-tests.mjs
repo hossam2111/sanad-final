@@ -116,5 +116,12 @@ const audit = await (await get("/api/admin/audit-log?limit=15", admin)).json();
 const rows = JSON.stringify(audit);
 check("audit chain contains BREAK-GLASS entry", rows.includes("BREAK-GLASS"), "not found in last 15 entries");
 
+console.log("\n══ HOSPITAL SCOPING ══");
+const pts2 = await (await get("/api/patients", doctor)).json();
+check("Dr. Rashidi sees KAMC-RYD scoped patients (18 patients)", pts2.total === 18, `got ${pts2.total}`);
+
+const emPts = await (await get("/api/patients", emergency)).json();
+check("Emergency Unit sees ALL 50 patients (Break-glass)", emPts.total === 50, `got ${emPts.total}`);
+
 console.log(`\n══ ${pass} passed, ${fail} failed ══`);
 process.exitCode = fail ? 1 : 0;

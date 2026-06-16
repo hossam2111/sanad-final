@@ -1,4 +1,4 @@
-# SANAD Publication Readiness Verifier
+﻿# SANAD Publication Readiness Verifier
 # Run from the project root AFTER rotating credentials and updating .env
 # Usage: .\verify-and-publish.ps1
 
@@ -110,20 +110,20 @@ if ($s.ExitCode -ne 0) {
   Pass "scenario-tests  43/43"
 }
 
-# ── Step 5: ownership-tests (41 assertions) ────────────────────────────────────
-Step "5/5" "ownership-tests.mjs  (41 assertions — BOLA trust boundaries)"
+# ── Step 5: ownership-tests (42 assertions) ────────────────────────────────────
+Step "5/5" "ownership-tests.mjs  (42 assertions — BOLA trust boundaries + hospital scoping)"
 
 $ownershipScript = Join-Path $harnesses "ownership-tests.mjs"
 $o = Start-Process -FilePath "node" `
   -ArgumentList $ownershipScript `
   -WorkingDirectory $root `
   -Wait -PassThru -NoNewWindow
-if ($o.ExitCode -ne 0) {
-  Fail "ownership-tests had failures (exit $($o.ExitCode))"
-  $allPassed = $false
-} else {
-  Pass "ownership-tests  41/41"
-}
+  if ($o.ExitCode -ne 0) {
+    Fail "ownership-tests had failures (exit $($o.ExitCode))"
+    $allPassed = $false
+  } else {
+    Pass "ownership-tests  42/42"
+  }
 
 # ── Browser flows (manual — require pnpm dev on :3001) ────────────────────────
 Write-Host ""
