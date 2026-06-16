@@ -7,6 +7,30 @@ import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const router = Router();
 
+// In-memory toggle store
+const featureToggles: Record<string, boolean> = {
+  risk_scoring: true,
+  drug_interaction: true,
+  digital_twin: true,
+  ai_recommendations: true,
+  retrain_jobs: false,
+};
+
+router.get("/features", (req, res) => {
+  res.json({ features: featureToggles });
+});
+
+router.patch("/features/:feature", (req, res) => {
+  const { feature } = req.params;
+  if (!(feature in featureToggles)) {
+    res.status(404).json({ error: "UNKNOWN_FEATURE" });
+    return;
+  }
+  const { enabled } = req.body as { enabled: boolean };
+  featureToggles[feature as keyof typeof featureToggles] = enabled;
+  res.json({ feature, enabled });
+});
+
 router.get("/metrics", async (req, res) => {
   const [allDecisions, recentEvents, [auditCount]] = await Promise.all([
     db.select().from(aiDecisionsTable).orderBy(desc(aiDecisionsTable.createdAt)).limit(500),
@@ -89,6 +113,24 @@ router.get("/metrics", async (req, res) => {
       };
     }),
   });
+});
+
+// GET /api/ai-control/retrain-jobs
+router.get("/retrain-jobs", async (req, res) => {
+  const jobs = await db.select().from(aiRetrainJobsTable).orderBy(desc(aiRetrainJobsTable.createdAt)).limit(20);
+  res.json({ jobs });
+});
+
+// POST /api/ai-control/retrain-jobs — queue a new retrain
+router.post("/retrain-jobs", async (req, res) => {
+  const { model, reason } = req.body as { model: string; reason: string };
+  const [job] = await db.insert(aiRetrainJobsTable).values({
+    id: `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    engine: model,
+    status: "queued",
+    triggeredBy: (req as any).userId ?? "ai.khalid",
+  }).returning();
+  res.status(201).json(job);
 });
 
 router.post("/engines/:engineName/retrain", async (req, res) => {

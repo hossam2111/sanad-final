@@ -39,19 +39,25 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string; 
   needs_retraining: { bg: "bg-destructive/10", text: "text-red-700", border: "border-red-200", badge: "destructive" as const, dot: "bg-red-500 animate-pulse" },
 };
 
-type ViewTab = "overview" | "engines" | "drift" | "retraining" | "decisions";
+type ViewTab = "overview" | "engines" | "drift" | "retraining" | "decisions" | "settings";
 
 export default function AIControlCenter() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeTab, setActiveTab] = useState<ViewTab>("overview");
   const [retrainingTarget, setRetrainingTarget] = useState<string | null>(null);
   const [retrainResult, setRetrainResult] = useState<Record<string, any>>({});
+  const [newJobForm, setNewJobForm] = useState(false);
+  const [newJobModel, setNewJobModel] = useState("");
+  const [newJobReason, setNewJobReason] = useState("");
 
   const qc = useQueryClient();
 
   const { data: metrics, isLoading: loadingMetrics } = useQuery({ queryKey: ["ai-metrics"], queryFn: fetchMetrics, refetchInterval: 30000 });
   const { data: drift, isLoading: loadingDrift } = useQuery({ queryKey: ["ai-drift"], queryFn: fetchDrift, refetchInterval: 30000 });
-  const { data: jobs } = useQuery({ queryKey: ["retraining-jobs"], queryFn: fetchRetrainingJobs, refetchInterval: 5000 });
+  const { data: jobs } = useQuery({ queryKey: ["retraining-jobs-new"], queryFn: async () => apiFetch("/api/ai-control/retrain-jobs").then(r => r.json()), refetchInterval: 5000 });
+  const { data: featureData } = useQuery({ queryKey: ["ai-features"], queryFn: async () => apiFetch("/api/ai-control/features").then(r => r.json()), refetchInterval: 5000 });
+
+  const featureToggles = featureData?.features ?? {};
 
   const retrainMutation = useMutation({
     mutationFn: async (engineName: string) => {
@@ -66,7 +72,39 @@ export default function AIControlCenter() {
     onSuccess: (result, engineName) => {
       setRetrainResult(prev => ({ ...prev, [engineName]: result }));
       setRetrainingTarget(null);
-      qc.invalidateQueries({ queryKey: ["retraining-jobs"] });
+      qc.invalidateQueries({ queryKey: ["retraining-jobs-new"] });
+    },
+  });
+
+  const queueRetrainMutation = useMutation({
+    mutationFn: async ({ model, reason }: { model: string; reason: string }) => {
+      const res = await apiFetch("/api/ai-control/retrain-jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model, reason }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    onSuccess: () => {
+      setNewJobForm(false);
+      setNewJobModel("");
+      setNewJobReason("");
+      qc.invalidateQueries({ queryKey: ["retraining-jobs-new"] });
+    },
+  });
+
+  const toggleFeatureMutation = useMutation({
+    mutationFn: async ({ feature, enabled }: { feature: string; enabled: boolean }) => {
+      const res = await apiFetch(`/api/ai-control/features/${feature}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled }),
+      });
+      if (!res.ok) throw new Error("Failed");
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["ai-features"] });
     },
   });
 
@@ -89,6 +127,7 @@ export default function AIControlCenter() {
     { id: "drift", label: text("Drift Detection", "كشف الانحراف"), icon: GitBranch },
     { id: "retraining", label: text("Retraining Panel", "إعادة التدريب"), icon: RotateCcw },
     { id: "decisions", label: text("Decision Analysis", "تحليل القرارات"), icon: BarChart2 },
+    { id: "settings", label: text("Control Panel", "لوحة التحكم"), icon: Settings },
   ];
 
   const driftEngines = drift?.engines ?? [];
@@ -528,14 +567,65 @@ export default function AIControlCenter() {
 
           {jobs?.jobs?.length > 0 && (
             <Card>
-              <CardHeader><Clock className="w-4 h-4 text-primary" /><CardTitle>{text("Retraining Job History", "سجل مهام إعادة التدريب")}</CardTitle><Badge variant="outline">{text(`${jobs.jobs.length} jobs`, `${jobs.jobs.length} مهمة`)}</Badge></CardHeader>
+              <CardHeader>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-primary" />
+                    <CardTitle>{text("Retraining Job History", "سجل مهام إعادة التدريب")}</CardTitle>
+                    <Badge variant="outline">{text(`${jobs.jobs.length} jobs`, `${jobs.jobs.length} مهمة`)}</Badge>
+                  </div>
+                  <button
+                    onClick={() => setNewJobForm(prev => !prev)}
+                    className="text-xs font-semibold px-3 py-1.5 bg-primary text-white rounded-xl transition-colors hover:bg-primary/90"
+                  >
+                    {text("Queue Retrain", "إدراج للتدريب")}
+                  </button>
+                </div>
+              </CardHeader>
+
+              {newJobForm && (
+                <div className="p-4 bg-muted/30 border-b border-border space-y-3">
+                  <div className="flex gap-3">
+                    <input
+                      type="text"
+                      placeholder={text("Model Name (e.g., risk-scoring-v3)", "اسم النموذج")}
+                      value={newJobModel}
+                      onChange={e => setNewJobModel(e.target.value)}
+                      className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm"
+                    />
+                    <input
+                      type="text"
+                      placeholder={text("Reason for retraining", "سبب إعادة التدريب")}
+                      value={newJobReason}
+                      onChange={e => setNewJobReason(e.target.value)}
+                      className="flex-2 rounded-md border border-input bg-background px-3 py-1.5 text-sm w-1/2"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => setNewJobForm(false)}
+                      className="text-xs font-semibold px-3 py-1.5 border border-border bg-secondary rounded-xl transition-colors hover:bg-secondary/80"
+                    >
+                      {text("Cancel", "إلغاء")}
+                    </button>
+                    <button
+                      disabled={!newJobModel || queueRetrainMutation.isPending}
+                      onClick={() => queueRetrainMutation.mutate({ model: newJobModel, reason: newJobReason })}
+                      className="text-xs font-semibold px-3 py-1.5 bg-primary text-white rounded-xl transition-colors hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      {queueRetrainMutation.isPending ? text("Queuing...", "جارٍ الإدراج...") : text("Submit", "تأكيد")}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="divide-y divide-border">
                 {jobs.jobs.map((job: any, i: number) => (
                   <div key={i} className="flex items-center gap-4 px-5 py-3.5">
                     <div className={`w-2 h-2 rounded-full ${job.status === "completed" ? "bg-emerald-500" : job.status === "running" ? "bg-blue-500 animate-pulse" : "bg-amber-500"} shrink-0`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground font-mono">{job.id}</p>
-                      <p className="text-xs text-muted-foreground">{job.engine} · {text("Started:", "بدأ:")} {new Date(job.startedAt).toLocaleTimeString()} · {text("By:", "بواسطة:")} {job.triggeredBy}</p>
+                      <p className="text-xs text-muted-foreground">{job.engine} · {text("Started:", "بدأ:")} {new Date(job.createdAt || job.startedAt).toLocaleTimeString()} · {text("By:", "بواسطة:")} {job.triggeredBy}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       {job.status === "running" && (
@@ -618,16 +708,52 @@ export default function AIControlCenter() {
               </CardBody>
             </Card>
           </div>
-
-          <div className="px-5 py-3.5 bg-secondary border border-border rounded-2xl flex items-center gap-4">
-            <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
-            <p className="flex-1 text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground">{text("Audit Status:", "حالة التدقيق:")}</span> {text(`All AI decisions fully traceable · ${metrics?.auditRecords?.toLocaleString()} audit records · Aligned with MOH AI Governance Framework 1445 · ISO/IEC 42001 AI Management compliance target 2026`, `جميع قرارات الذكاء قابلة للتتبّع · ${metrics?.auditRecords?.toLocaleString()} سجل تدقيق · متوافقة مع إطار حوكمة الذكاء الاصطناعي لوزارة الصحة 1445 · مستهدف الامتثال لمعيار ISO/IEC 42001 لعام 2026`)}
-            </p>
-            <Badge variant="success">{text("Audit Active", "التدقيق نشط")}</Badge>
-          </div>
         </div>
       )}
+
+      {/* ─── SETTINGS / CONTROL PANEL ─── */}
+      {activeTab === "settings" && (
+        <div className="space-y-5">
+          <Card>
+            <CardHeader>
+              <Settings className="w-4 h-4 text-primary" />
+              <CardTitle>{text("AI Feature Toggles", "تفعيل ميزات الذكاء الاصطناعي")}</CardTitle>
+            </CardHeader>
+            <CardBody className="space-y-4">
+              {Object.entries(featureToggles).map(([featureKey, enabled]) => (
+                <div key={featureKey} dir={dir} className="flex items-center justify-between p-3 rounded-lg bg-muted/40 border border-border">
+                  <span className="text-sm font-medium text-foreground capitalize">{featureKey.replace(/_/g, " ")}</span>
+                  <button
+                    onClick={() => toggleFeatureMutation.mutate({ feature: featureKey, enabled: !(enabled as boolean) })}
+                    disabled={toggleFeatureMutation.isPending}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      enabled ? "bg-primary" : "bg-muted"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        enabled ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </div>
+              ))}
+            </CardBody>
+          </Card>
+        </div>
+      )}
+
+      {/* ─── FOOTER ─── */}
+
+      {/* ─── FOOTER ─── */}
+
+      <div className="px-5 py-3.5 bg-secondary border border-border rounded-2xl flex items-center gap-4 mt-5">
+        <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
+        <p className="flex-1 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">{text("Audit Status:", "حالة التدقيق:")}</span> {text(`All AI decisions fully traceable · ${metrics?.auditRecords?.toLocaleString()} audit records · Aligned with MOH AI Governance Framework 1445 · ISO/IEC 42001 AI Management compliance target 2026`, `جميع قرارات الذكاء قابلة للتتبّع · ${metrics?.auditRecords?.toLocaleString()} سجل تدقيق · متوافقة مع إطار حوكمة الذكاء الاصطناعي لوزارة الصحة 1445 · مستهدف الامتثال لمعيار ISO/IEC 42001 لعام 2026`)}
+        </p>
+        <Badge variant="success">{text("Audit Active", "التدقيق نشط")}</Badge>
+      </div>
     </Layout>
   );
 }

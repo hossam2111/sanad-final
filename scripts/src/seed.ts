@@ -37,7 +37,7 @@ import {
   db, pool,
   patientsTable, medicationsTable, visitsTable, labResultsTable,
   alertsTable, consentTable, appointmentsTable, aiDecisionsTable,
-  staffAssignmentsTable, purchaseOrdersTable
+  staffAssignmentsTable, purchaseOrdersTable, aiRetrainJobsTable
 } from "@workspace/db";
 
 // ── Deterministic PRNG ────────────────────────────────────────────────────────
@@ -598,6 +598,17 @@ async function seed() {
     { patientId: id(3), patientName: "خالد الغامدي", patientNationalId: "1000000003", hospital: KKUH, department: "Cardiology", service: "Heart Failure Clinic", appointmentDate: daysAhead(2), appointmentTime: "08:30", status: "confirmed", referenceNo: `APT-${year}-10510`, notes: "INR recheck before clinic." },
   ]);
   console.log("Inserted 4 appointments");
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // RETRAIN JOBS
+  // ════════════════════════════════════════════════════════════════════════════
+  const retrainJobs = [
+    { id: "job_001", engine: "risk-scoring-v3",      status: "completed" as const, triggeredBy: "ai.khalid", progress: 100 },
+    { id: "job_002", engine: "drug-interaction-v2",  status: "completed" as const, triggeredBy: "ai.khalid", progress: 100 },
+    { id: "job_003", engine: "digital-twin-v1",      status: "running"   as const, triggeredBy: "ai.khalid", progress: 45 },
+  ];
+  await db.insert(aiRetrainJobsTable).values(retrainJobs).onConflictDoNothing();
+  console.log("Inserted 3 retrain jobs");
 
   // ai_decisions / events / audit_log start EMPTY — they accumulate from real
   // engine runs during the demo (no fabricated decision history).

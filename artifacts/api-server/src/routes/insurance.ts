@@ -265,9 +265,39 @@ router.post("/claim/:claimId/review", validate(claimReviewSchema), async (req, r
   });
 });
 
-router.get("/claim-overrides", async (_req, res) => {
-  const overrides = await getClaimOverrides();
-  res.json({ overrides });
+router.patch("/claims/:claimId", async (req, res) => {
+  const claimId = req.params["claimId"]!;
+  const { decision, reason } = req.body as { decision: "approved" | "denied"; reason?: string };
+
+  if (!["approved", "denied"].includes(decision)) {
+    res.status(400).json({ error: "BAD_REQUEST", message: "decision must be approved or denied" });
+    return;
+  }
+
+  const [claim] = await db.update(claimReviewsTable)
+    .set({
+      status: decision === "approved" ? "approved" : "rejected",
+      reviewedBy: req.userId ?? "unknown",
+      reviewedAt: new Date(),
+      notes: reason ?? null,
+    })
+    .where(eq(claimReviewsTable.claimId, claimId))
+    .returning();
+
+  if (!claim) { res.status(404).json({ error: "NOT_FOUND" }); return; }
+  res.json(claim);
+});
+
+router.get("/claims/:claimId/ai-recommendation", async (req, res) => {
+  const claimId = req.params["claimId"]!;
+  
+  // Deterministic mock based on claimId
+  const flags: string[] = [];
+  if (claimId.endsWith("1")) flags.push("High-value claim — manual review recommended");
+  if (claimId.endsWith("3")) flags.push("Multiple visits — possible overutilization");
+
+  const recommendation = flags.length > 0 ? "manual_review" : "auto_approve";
+  res.json({ recommendation, flags, claimId });
 });
 
 export default router;

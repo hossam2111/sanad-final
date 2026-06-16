@@ -82,6 +82,8 @@ function AnomalyGauge({ score }: { score: number }) {
   );
 }
 
+type AiRec = { recommendation: string; flags: string[] } | null;
+
 export default function InsurancePortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [searchId, setSearchId] = useState("");
@@ -91,7 +93,13 @@ export default function InsurancePortal() {
   const [reviewNotes, setReviewNotes] = useState("");
   const [reviewResults, setReviewResults] = useState<Record<string, any>>({});
   const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
+  const [aiRecs, setAiRecs] = useState<Record<string, AiRec>>({});
   const qc = useQueryClient();
+
+  async function fetchAiRec(claimId: string) {
+    const rec = await apiFetch(`/api/insurance/claims/${claimId}/ai-recommendation`).then(r => r.json());
+    setAiRecs(prev => ({ ...prev, [claimId]: rec }));
+  }
 
   const { data: dashboard, isLoading: loadingDash } = useQuery({ queryKey: ["insurance-dashboard"], queryFn: fetchInsuranceDashboard });
   const { data: patient, isLoading: loadingPatient, isError: patientError } = useQuery({
@@ -555,6 +563,23 @@ export default function InsurancePortal() {
                               )}
                               {canReview && (
                                 <div>
+                                  <div className="flex items-center gap-2 mb-4 p-3 bg-secondary/50 rounded-xl border border-border">
+                                    <button onClick={() => fetchAiRec(claim.claimId)}
+                                      className="text-xs rounded-full bg-violet-100 text-violet-700 px-3 py-1.5 font-bold hover:bg-violet-200 transition-colors">
+                                      {text("AI Recommendation", "توصية الذكاء الاصطناعي")}
+                                    </button>
+                                    {aiRecs[claim.claimId] && (
+                                      <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${
+                                        aiRecs[claim.claimId]!.recommendation === "auto_approve"
+                                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                          : "bg-amber-100 text-amber-700 border border-amber-200"
+                                      }`}>
+                                        {aiRecs[claim.claimId]!.recommendation === "auto_approve"
+                                          ? text("Recommend: Approve", "التوصية: اعتماد")
+                                          : text("Recommend: Manual Review", "التوصية: مراجعة يدوية")}
+                                      </span>
+                                    )}
+                                  </div>
                                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
                                     <MessageSquare className="w-3 h-3" /> {text("Review Notes (optional)", "Review Notes (optional)")}
                                   </p>
