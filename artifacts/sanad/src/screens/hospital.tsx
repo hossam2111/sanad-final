@@ -29,15 +29,15 @@ const UNIT_COLORS: Record<string, string> = {
 };
 
 const PRIORITY_COLORS = {
-  immediate: { bg: "bg-red-50", border: "border-red-300", badge: "destructive" as const, text: "text-red-600" },
+  immediate: { bg: "bg-destructive/10", border: "border-red-300", badge: "destructive" as const, text: "text-red-600" },
   urgent: { bg: "bg-amber-50", border: "border-amber-200", badge: "warning" as const, text: "text-amber-600" },
   soon: { bg: "bg-sky-50", border: "border-sky-200", badge: "info" as const, text: "text-sky-600" },
 };
 
 const OR_STATUS = {
-  in_progress: { bg: "bg-green-50", border: "border-green-200", badge: "success" as const, label: "In Progress", dot: "bg-green-500 animate-pulse" },
+  in_progress: { bg: "bg-[hsl(var(--risk-low)/0.1)]", border: "border-green-200", badge: "success" as const, label: "In Progress", dot: "bg-green-500 animate-pulse" },
   scheduled: { bg: "bg-sky-50", border: "border-sky-200", badge: "info" as const, label: "Scheduled", dot: "bg-sky-500" },
-  emergency: { bg: "bg-red-50", border: "border-red-300", badge: "destructive" as const, label: "Emergency", dot: "bg-red-500 animate-pulse" },
+  emergency: { bg: "bg-destructive/10", border: "border-red-300", badge: "destructive" as const, label: "Emergency", dot: "bg-red-500 animate-pulse" },
 };
 
 type TabId = "overview" | "icu" | "or" | "readmission";
@@ -72,14 +72,14 @@ export default function HospitalPortal() {
           {text("Hospital Operations Center", "مركز عمليات المستشفى")}
         </div>
         {icuCritical > 0 && (
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-600 bg-red-50 border border-red-200 px-3 py-1.5 rounded-full ms-2 animate-pulse">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-600 bg-destructive/10 border border-red-200 px-3 py-1.5 rounded-full ms-2 animate-pulse">
             <AlertTriangle className="w-3 h-3" />
             {text(`${icuCritical} ICU Critical Alert${icuCritical > 1 ? "s" : ""}`, `${icuCritical} تنبيه حرج بالعناية المركّزة`)}
           </div>
         )}
         <button
           onClick={() => refetch()}
-          className="ms-auto flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground bg-white border border-black/[0.08] px-3 py-1.5 rounded-full hover:text-foreground transition-colors"
+          className="ms-auto flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground bg-card border border-black/[0.08] px-3 py-1.5 rounded-full hover:text-foreground transition-colors"
         >
           <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} />
           {text("Refresh", "تحديث")}
@@ -149,7 +149,7 @@ export default function HospitalPortal() {
         <div className="grid grid-cols-12 gap-4">
           <Card className="col-span-8">
             <CardHeader>
-              <BedDouble className="w-4 h-4 text-blue-600" />
+              <BedDouble className="w-4 h-4 text-primary" />
               <CardTitle>{text("Bed Occupancy by Unit", "Bed Occupancy by Unit")}</CardTitle>
               <span className="ml-auto text-[10px] font-mono text-muted-foreground">{text("Live data", "Live data")}</span>
             </CardHeader>
@@ -159,7 +159,7 @@ export default function HospitalPortal() {
                   const color = UNIT_COLORS[unit.unit] ?? "#007AFF";
                   return (
                     <div key={unit.unitKey} className={`p-4 rounded-2xl border ${
-                      unit.status === "critical" ? "bg-red-50 border-red-200" :
+                      unit.status === "critical" ? "bg-destructive/10 border-red-200" :
                       unit.status === "high" ? "bg-amber-50 border-amber-200" :
                       "bg-secondary border-border"
                     }`}>
@@ -198,7 +198,7 @@ export default function HospitalPortal() {
 
           <Card className="col-span-4">
             <CardHeader>
-              <Users className="w-4 h-4 text-blue-600" />
+              <Users className="w-4 h-4 text-primary" />
               <CardTitle>{text("Staff Allocation", "Staff Allocation")}</CardTitle>
             </CardHeader>
             <CardBody>
@@ -272,7 +272,7 @@ export default function HospitalPortal() {
                 {data?.priorityQueue?.map((p: any, i: number) => {
                   const style = PRIORITY_COLORS[p.priority as keyof typeof PRIORITY_COLORS] ?? PRIORITY_COLORS.soon;
                   return (
-                    <tr key={p.id} className={i < 3 ? "bg-red-50/20" : ""}>
+                    <tr key={p.id} className={i < 3 ? "bg-destructive/10/20" : ""}>
                       <td><Badge variant={style.badge} className="text-[9px]">{p.priority}</Badge></td>
                       <td>
                         <p className="font-bold text-foreground">{p.name}</p>
@@ -312,7 +312,7 @@ export default function HospitalPortal() {
 
       {activeTab === "icu" && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-red-50 border-2 border-red-300 rounded-2xl">
+          <div className="flex items-center gap-3 p-4 bg-destructive/10 border-2 border-red-300 rounded-2xl">
             <HeartPulse className="w-5 h-5 text-red-600 shrink-0" />
             <div>
               <p className="text-sm font-bold text-red-800">{text("ICU Alert System — Real-time Patient Monitoring", "ICU Alert System — Real-time Patient Monitoring")}</p>
@@ -322,7 +322,7 @@ export default function HospitalPortal() {
 
           <div className="grid grid-cols-2 gap-4">
             {(data?.icuAlerts ?? []).map((alert: any, i: number) => (
-              <div key={i} className={`p-5 rounded-2xl border-2 ${alert.severity === "critical" ? "bg-red-50 border-red-300" : "bg-amber-50 border-amber-200"}`}>
+              <div key={i} className={`p-5 rounded-2xl border-2 ${alert.severity === "critical" ? "bg-destructive/10 border-red-300" : "bg-amber-50 border-amber-200"}`}>
                 <div className="flex items-start gap-3 mb-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${alert.severity === "critical" ? "bg-red-100" : "bg-amber-100"}`}>
                     <AlertTriangle className={`w-5 h-5 ${alert.severity === "critical" ? "text-red-600" : "text-amber-600"}`} />
@@ -350,7 +350,7 @@ export default function HospitalPortal() {
 
                 <div className="flex flex-wrap gap-1">
                   {alert.conditions.map((c: string, ci: number) => (
-                    <span key={ci} className="text-[10px] font-semibold bg-white/80 border border-red-100 text-red-700 px-2 py-0.5 rounded-full">{c}</span>
+                    <span key={ci} className="text-[10px] font-semibold bg-card/80 border border-red-100 text-red-700 px-2 py-0.5 rounded-full">{c}</span>
                   ))}
                 </div>
               </div>
@@ -379,7 +379,7 @@ export default function HospitalPortal() {
               {(data?.orSchedule ?? []).map((op: any, i: number) => {
                 const cfg = OR_STATUS[op.status as keyof typeof OR_STATUS] ?? OR_STATUS.scheduled;
                 return (
-                  <div key={i} className={`p-5 ${op.status === "emergency" ? "bg-red-50/30" : op.status === "in_progress" ? "bg-green-50/30" : ""}`}>
+                  <div key={i} className={`p-5 ${op.status === "emergency" ? "bg-destructive/10/30" : op.status === "in_progress" ? "bg-[hsl(var(--risk-low)/0.1)]/30" : ""}`}>
                     <div className="flex items-center gap-4">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg} border ${cfg.border}`}>
                         <span className={`w-2.5 h-2.5 rounded-full ${cfg.dot}`} />
@@ -425,7 +425,7 @@ export default function HospitalPortal() {
             </CardHeader>
             <div className="divide-y divide-border">
               {(data?.readmissionRisks ?? []).map((p: any, i: number) => (
-                <div key={i} className={`p-5 ${p.readmissionRisk >= 80 ? "bg-red-50/30" : p.readmissionRisk >= 60 ? "bg-amber-50/20" : ""}`}>
+                <div key={i} className={`p-5 ${p.readmissionRisk >= 80 ? "bg-destructive/10/30" : p.readmissionRisk >= 60 ? "bg-amber-50/20" : ""}`}>
                   <div className="flex items-center gap-4">
                     <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shrink-0 ${p.readmissionRisk >= 80 ? "bg-red-100" : p.readmissionRisk >= 60 ? "bg-amber-100" : "bg-secondary"}`}>
                       <p className={`text-lg font-bold tabular-nums ${p.readmissionRisk >= 80 ? "text-red-700" : p.readmissionRisk >= 60 ? "text-amber-700" : "text-foreground"}`}>{p.readmissionRisk}%</p>
@@ -440,7 +440,7 @@ export default function HospitalPortal() {
                       </div>
                     </div>
                     <div className="shrink-0 max-w-[200px] text-right">
-                      <div className={`flex items-start gap-1.5 px-3 py-2 rounded-xl ${p.readmissionRisk >= 80 ? "bg-red-50 border border-red-200" : "bg-secondary border border-border"}`}>
+                      <div className={`flex items-start gap-1.5 px-3 py-2 rounded-xl ${p.readmissionRisk >= 80 ? "bg-destructive/10 border border-red-200" : "bg-secondary border border-border"}`}>
                         <ChevronRight className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${p.readmissionRisk >= 80 ? "text-red-500" : "text-primary"}`} />
                         <p className={`text-[11px] font-semibold ${p.readmissionRisk >= 80 ? "text-red-700" : "text-foreground"}`}>{p.recommendedAction}</p>
                       </div>

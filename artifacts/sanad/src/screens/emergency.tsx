@@ -53,10 +53,10 @@ interface EmergencyPatient {
 }
 
 const actionConfig: Record<ClinicalAction["action"], { icon: React.ElementType; color: string; bg: string; border: string; label: string }> = {
-  DO_NOT_GIVE: { icon: Ban, color: "text-red-700", bg: "bg-red-50", border: "border-red-200", label: "DO NOT GIVE" },
+  DO_NOT_GIVE: { icon: Ban, color: "text-red-700", bg: "bg-destructive/10", border: "border-red-200", label: "DO NOT GIVE" },
   HOLD_MEDICATION: { icon: PauseCircle, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200", label: "HOLD" },
   URGENT_REVIEW: { icon: Brain, color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-200", label: "URGENT REVIEW" },
-  ALERT_FAMILY: { icon: PhoneCall, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200", label: "ALERT FAMILY" },
+  ALERT_FAMILY: { icon: PhoneCall, color: "text-blue-700", bg: "bg-primary/10", border: "border-blue-200", label: "ALERT FAMILY" },
   MONITOR: { icon: Eye, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200", label: "MONITOR" },
   PREPARE_EQUIPMENT: { icon: Wrench, color: "text-sky-700", bg: "bg-sky-50", border: "border-sky-200", label: "PREPARE" },
 };
@@ -176,7 +176,7 @@ export default function EmergencyPage() {
       )}
 
       {isError && !isLoading && (
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 bg-destructive/10">
           <CardBody className="flex items-center gap-4 p-5">
             <div className="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -239,21 +239,21 @@ export default function EmergencyPage() {
                   {text("⚠ IMMEDIATE CLINICAL ACTIONS REQUIRED", "⚠ إجراءات سريرية فورية مطلوبة")}
                 </span>
                 <div className="ms-auto flex items-center gap-2">
-                  <span className="bg-white/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                  <span className="bg-card/20 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5">
                     <Clock className="w-3 h-3" /> {text("Act within 3 min", "تصرّف خلال 3 دقائق")}
                   </span>
-                  <span className="bg-white/20 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
+                  <span className="bg-card/20 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">
                     {text(`${immediateActions.length} Action${immediateActions.length > 1 ? "s" : ""}`, `${immediateActions.length} إجراء`)}
                   </span>
                 </div>
               </div>
-              <div className="p-3 space-y-2 bg-red-50">
+              <div className="p-3 space-y-2 bg-destructive/10">
                 {immediateActions.map((action, i) => {
                   const cfg = actionConfig[action.action];
                   const Icon = cfg.icon;
                   return (
                     <div key={i} className={`flex items-start gap-3 p-4 ${cfg.bg} border ${cfg.border} rounded-2xl`}>
-                      <div className={`w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0`}>
+                      <div className={`w-9 h-9 rounded-xl bg-card flex items-center justify-center shrink-0`}>
                         <Icon className={`w-4.5 h-4.5 ${cfg.color}`} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -277,7 +277,7 @@ export default function EmergencyPage() {
           {patient.criticalAlerts.length > 0 && (
             <Card className="bg-red-600 border-red-600 text-white">
               <CardBody className="flex items-start gap-4 p-5">
-                <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 rounded-2xl bg-card/15 flex items-center justify-center shrink-0 mt-0.5">
                   <AlertTriangle className="w-5 h-5" />
                 </div>
                 <div>
@@ -346,7 +346,7 @@ export default function EmergencyPage() {
               </div>
             </Card>
 
-            <Card className="bg-red-50 border-red-100 md:col-span-3">
+            <Card className="bg-destructive/10 border-red-100 md:col-span-3">
               <CardBody className="flex h-full flex-col items-center justify-center py-8">
                 <Droplet className="mb-2 h-7 w-7 text-red-400" />
                 <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-red-400">{text("Blood Type", "فصيلة الدم")}</p>
@@ -372,7 +372,7 @@ export default function EmergencyPage() {
                     const Icon = cfg.icon;
                     return (
                       <div key={i} className={`flex items-start gap-3 p-3.5 ${cfg.bg} border ${cfg.border} rounded-2xl`}>
-                        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-card flex items-center justify-center shrink-0">
                           <Icon className={`w-4 h-4 ${cfg.color}`} />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -405,7 +405,7 @@ export default function EmergencyPage() {
                 {patient.allergies.length > 0 ? (
                   <div className="space-y-2">
                     {patient.allergies.map((a, i) => (
-                      <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-red-50 border border-red-100 rounded-2xl">
+                      <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-destructive/10 border border-red-100 rounded-2xl">
                         <StatusDot status="critical" />
                         <span className="text-sm font-bold text-red-700">{a}</span>
                       </div>

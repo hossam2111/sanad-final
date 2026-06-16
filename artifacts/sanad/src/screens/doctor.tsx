@@ -44,7 +44,7 @@ type PredictionWarning = {
 };
 
 const predictionSeverityStyle: Record<string, { bg: string; border: string; icon: string; badge: "destructive" | "warning" | "info" | "outline" | "success" | "default"  }> = {
-  critical: { bg: "bg-red-50", border: "border-red-200", icon: "text-red-600", badge: "destructive" },
+  critical: { bg: "bg-destructive/10", border: "border-red-200", icon: "text-red-600", badge: "destructive" },
   high: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", badge: "warning" },
   moderate: { bg: "bg-sky-50", border: "border-sky-200", icon: "text-sky-600", badge: "info" },
   low: { bg: "bg-secondary", border: "border-border", icon: "text-muted-foreground", badge: "outline" },
@@ -394,7 +394,7 @@ export default function DoctorDashboard() {
 
       {/* SSE Real-time Lab Alerts Panel */}
       {showSsePanel && sseAlerts.length > 0 && (
-        <div className="mx-0 mb-4 rounded-2xl border border-red-200 bg-red-50 shadow-sm overflow-hidden">
+        <div className="mx-0 mb-4 rounded-2xl border border-red-200 bg-destructive/10 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-4 py-2 border-b border-red-200 bg-red-100/60">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -449,7 +449,7 @@ export default function DoctorDashboard() {
             <button
               onClick={() => setShowSsePanel(p => !p)}
               className={`relative flex items-center justify-center w-10 h-10 rounded-full border transition-colors ${
-                sseUnread > 0 ? "bg-red-50 border-red-200 hover:bg-red-100" : "bg-white border-border hover:bg-secondary"
+                sseUnread > 0 ? "bg-destructive/10 border-red-200 hover:bg-red-100" : "bg-card border-border hover:bg-secondary"
               }`}
               title={sseConnected ? text("Live alerts connected", "التنبيهات الحيّة متصلة") : text("Connecting to live alerts...", "جارٍ الاتصال بالتنبيهات الحيّة...")}
             >
@@ -482,7 +482,7 @@ export default function DoctorDashboard() {
               onFocus={() => setShowDropdown(true)}
             />
             {showDropdown && searchPatients.length > 0 && (
-              <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-2xl shadow-xl border border-black/[0.07] z-50 overflow-hidden">
+              <div className="absolute top-full left-0 mt-1 w-full bg-card rounded-2xl shadow-xl border border-black/[0.07] z-50 overflow-hidden">
                 {searchPatients.map((p: any) => (
                   <button
                     key={p.id}
@@ -557,7 +557,7 @@ export default function DoctorDashboard() {
                   </div>
                 </div>
 
-                <div className="px-6 py-4 flex flex-col items-center justify-center bg-red-50 min-w-[90px]">
+                <div className="px-6 py-4 flex flex-col items-center justify-center bg-destructive/10 min-w-[90px]">
                   <DataLabel label={text("Blood Type", "فصيلة الدم")}>
                     <p className="text-3xl font-bold text-red-600" dir="ltr">{patient.bloodType}</p>
                   </DataLabel>
@@ -713,7 +713,7 @@ export default function DoctorDashboard() {
                         </p>
                         <div className="space-y-1.5">
                           {riskScore.factors.slice(0, 4).map((f: any, i: number) => (
-                            <div key={i} className="flex items-center gap-2.5 px-3 py-2 bg-white/70 border border-white rounded-xl">
+                            <div key={i} className="flex items-center gap-2.5 px-3 py-2 bg-card/70 border border-white rounded-xl">
                               <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                                 f.impact === "high" ? "bg-red-500" :
                                 f.impact === "moderate" ? "bg-amber-500" : "bg-primary"
@@ -735,7 +735,7 @@ export default function DoctorDashboard() {
                         </p>
                         <div className="space-y-1.5">
                           {riskScore.recommendations.slice(0, 3).map((rec: string, i: number) => (
-                            <div key={i} className="flex items-start gap-2 px-3 py-2 bg-white/70 border border-white rounded-xl">
+                            <div key={i} className="flex items-start gap-2 px-3 py-2 bg-card/70 border border-white rounded-xl">
                               <Lightbulb className="w-3 h-3 text-primary shrink-0 mt-0.5" />
                               <p className="text-xs text-foreground leading-snug">{rec}</p>
                             </div>
@@ -776,7 +776,7 @@ export default function DoctorDashboard() {
                     {(patient.allergies?.length ?? 0) > 0 ? (
                       <div className="space-y-2">
                         {patient.allergies?.map((a, i) => (
-                          <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-red-50 border border-red-100 rounded-2xl">
+                          <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-destructive/10 border border-red-100 rounded-2xl">
                             <StatusDot status="critical" />
                             <span className="text-sm font-bold text-red-700">{a}</span>
                           </div>
@@ -895,7 +895,7 @@ export default function DoctorDashboard() {
                   const trend = isWorsening ? "↑ WORSENING" : isImproving ? "↓ IMPROVING" : "→ STABLE";
 
                   return (
-                    <div className={`mx-5 my-4 rounded-2xl border p-4 ${isWorsening ? "border-red-200 bg-red-50" : isImproving ? "border-emerald-200 bg-emerald-50" : "border-violet-200 bg-violet-50/40"}`}>
+                    <div className={`mx-5 my-4 rounded-2xl border p-4 ${isWorsening ? "border-red-200 bg-destructive/10" : isImproving ? "border-emerald-200 bg-emerald-50" : "border-violet-200 bg-violet-50/40"}`}>
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2">
@@ -932,7 +932,7 @@ export default function DoctorDashboard() {
                               if (active && payload?.length) {
                                 const d = payload[0]?.payload;
                                 return (
-                                  <div className="bg-white rounded-xl px-3 py-2 shadow-lg border border-border text-xs">
+                                  <div className="bg-card rounded-xl px-3 py-2 shadow-lg border border-border text-xs">
                                     <p className="font-bold text-foreground">{d?.val}% HbA1c</p>
                                     <p className="text-muted-foreground">{d?.date}</p>
                                     <p className={`font-medium mt-0.5 ${d?.val >= 7.0 ? "text-red-600" : d?.val >= 5.7 ? "text-amber-600" : "text-emerald-600"}`}>
@@ -971,7 +971,7 @@ export default function DoctorDashboard() {
 
                     return (
                       <div key={latest.id} className={`px-5 py-3.5 flex items-center gap-4 hover:bg-secondary/20 transition-colors ${
-                        latest.status === "critical" ? "border-l-2 border-red-500 bg-red-50/30" :
+                        latest.status === "critical" ? "border-l-2 border-red-500 bg-destructive/10/30" :
                         latest.status === "abnormal" ? "border-l-2 border-amber-400 bg-amber-50/20" : ""
                       }`}>
                         {/* Lab Name + Status */}
@@ -993,7 +993,7 @@ export default function DoctorDashboard() {
                                     if (active && payload?.length) {
                                       const d = payload[0]?.payload;
                                       return (
-                                        <div className="bg-white border border-border rounded-lg px-2 py-1 text-[10px] shadow-sm">
+                                        <div className="bg-card border border-border rounded-lg px-2 py-1 text-[10px] shadow-sm">
                                           <p className="font-bold">{d?.val} {latest.unit}</p>
                                           <p className="text-muted-foreground">{d?.date}</p>
                                         </div>
@@ -1181,7 +1181,7 @@ export default function DoctorDashboard() {
                         <div>
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-[10px] font-bold uppercase tracking-widest text-white/70">{text("Urgency Level", "درجة الاستعجال")}</span>
-                            <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+                            <span className="bg-card/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
                               {urgencyLabel(aiDecision.urgency, text)}
                             </span>
                           </div>
@@ -1202,7 +1202,7 @@ export default function DoctorDashboard() {
                         </div>
                       </div>
                       {aiDecision.explainability.uncertaintyNote && (
-                        <div className="mt-3 px-3 py-2 bg-white/20 rounded-xl text-xs font-semibold text-white">
+                        <div className="mt-3 px-3 py-2 bg-card/20 rounded-xl text-xs font-semibold text-white">
                           ⚠ {aiDecision.explainability.uncertaintyNote}
                         </div>
                       )}
@@ -1217,7 +1217,7 @@ export default function DoctorDashboard() {
                         <div className="space-y-2">
                           {aiDecision.whyFactors.map((f, i) => (
                             <div key={i} className={`flex items-start gap-3 px-3.5 py-3 rounded-2xl border ${
-                              f.impact === "critical" ? "bg-red-50 border-red-200" :
+                              f.impact === "critical" ? "bg-destructive/10 border-red-200" :
                               f.impact === "high" ? "bg-amber-50 border-amber-200" :
                               f.impact === "moderate" ? "bg-sky-50 border-sky-200" :
                               "bg-secondary border-border"
@@ -1276,7 +1276,7 @@ export default function DoctorDashboard() {
                     {/* Digital Twin */}
                     {aiDecision.digitalTwin && (
                       <div className={`p-5 rounded-2xl border-2 ${
-                        aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "bg-red-50 border-red-300" :
+                        aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "bg-destructive/10 border-red-300" :
                         aiDecision.digitalTwin.riskTrajectory === "worsening" ? "bg-amber-50 border-amber-200" :
                         aiDecision.digitalTwin.riskTrajectory === "improving" ? "bg-emerald-50 border-emerald-200" :
                         "bg-secondary border-border"
@@ -1311,7 +1311,7 @@ export default function DoctorDashboard() {
                             ))}
                           </div>
                         )}
-                        <div className="px-3 py-2 bg-white/60 rounded-xl">
+                        <div className="px-3 py-2 bg-card/60 rounded-xl">
                           <p className="text-xs font-semibold text-foreground">{aiDecision.digitalTwin.interventionWindow}</p>
                         </div>
                       </div>
@@ -1365,7 +1365,7 @@ export default function DoctorDashboard() {
                       return (
                         <div key={i} className={`p-4 ${style.bg} border ${style.border} rounded-2xl`}>
                           <div className="flex items-start gap-3">
-                            <div className={`w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0`}>
+                            <div className={`w-8 h-8 rounded-xl bg-card flex items-center justify-center shrink-0`}>
                               {p.severity === "critical" || p.severity === "high" ? (
                                 <TriangleAlert className={`w-4 h-4 ${style.icon}`} />
                               ) : (
@@ -1380,7 +1380,7 @@ export default function DoctorDashboard() {
                               </div>
                               <p className="font-bold text-sm text-foreground">{p.title}</p>
                               <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>
-                              <div className="mt-2 p-2.5 bg-white/60 border border-white rounded-xl">
+                              <div className="mt-2 p-2.5 bg-card/60 border border-white rounded-xl">
                                 <p className="text-xs font-semibold text-foreground">{text("Recommendation:", "التوصية:")} {p.recommendation}</p>
                               </div>
                             </div>
@@ -1738,14 +1738,14 @@ function PrescribeModal({ patientId }: { patientId: number }) {
                   ) : (
                     <div className="space-y-2.5">
                       {checkMutation.data.warnings.map((w: any, i: number) => (
-                        <div key={i} className="p-4 bg-red-50 border border-red-200 rounded-2xl">
+                        <div key={i} className="p-4 bg-destructive/10 border border-red-200 rounded-2xl">
                           <div className="flex items-center gap-2 mb-2">
                             <AlertCircle className="w-4 h-4 text-red-600" />
                             <span className="text-sm font-bold text-red-700">{text("Interaction:", "تداخل:")} {w.conflictingDrug}</span>
                             <Badge variant={w.severity === "critical" ? "destructive" : "warning"} className="ms-auto text-[10px]">{severityLabel(w.severity, text)}</Badge>
                           </div>
                           <p className="text-xs text-foreground/80 mb-2 ms-6">{w.description}</p>
-                          <p className="text-xs font-semibold bg-white border border-red-100 rounded-xl p-2 ms-6">{w.recommendation}</p>
+                          <p className="text-xs font-semibold bg-card border border-red-100 rounded-xl p-2 ms-6">{w.recommendation}</p>
                         </div>
                       ))}
                     </div>

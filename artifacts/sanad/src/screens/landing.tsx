@@ -203,7 +203,7 @@ function DecisionTrace() {
                   onClick={() => setCaseIdx(i)}
                   aria-label={`${text("Show trace", "عرض الحالة")} ${i + 1}`}
                   className={`h-1.5 rounded-full transition-all ${FOCUS} ${
-                    i === caseIdx ? "w-4 bg-[#7CB9FF]" : "w-1.5 bg-white/20 hover:bg-white/40"
+                    i === caseIdx ? "w-4 bg-[#7CB9FF]" : "w-1.5 bg-card/20 hover:bg-card/40"
                   }`}
                 />
               ))}
@@ -277,7 +277,7 @@ function Nav() {
           </button>
           <Link
             href="/login"
-            className={`flex h-8 items-center gap-1.5 rounded-full bg-white px-4 text-[12px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}
+            className={`flex h-8 items-center gap-1.5 rounded-full bg-card px-4 text-[12px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}
           >
             {text("Sign in", "تسجيل الدخول")}
             <ArrowRight className="h-3.5 w-3.5 rtl:-scale-x-100" />
@@ -317,7 +317,7 @@ function Hero() {
         <div className="mx-auto max-w-[860px] text-center">
           <Reveal>
             <p
-              className={`mb-7 inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-white/60 ${
+              className={`mb-7 inline-flex items-center rounded-full border border-white/10 bg-card/[0.04] px-4 py-2 text-white/60 ${
                 isAr ? "text-[11.5px] font-semibold" : "text-[11px] font-mono uppercase tracking-[0.18em]"
               }`}
             >
@@ -350,7 +350,7 @@ function Hero() {
           <Reveal delay={0.24} className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/login"
-              className={`flex h-11 items-center gap-2 rounded-full bg-white px-6 text-[14px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}
+              className={`flex h-11 items-center gap-2 rounded-full bg-card px-6 text-[14px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}
             >
               {text("Enter your workspace", "ادخل إلى مساحة عملك")}
               <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
@@ -569,14 +569,14 @@ function Intelligence() {
       </div>
 
       <Reveal delay={0.1}>
-        <div className="grid overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.07] gap-px sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid overflow-hidden rounded-2xl border border-white/[0.07] bg-card/[0.07] gap-px sm:grid-cols-2 lg:grid-cols-3">
           {engines.map((e, i) => (
             <div key={e.en} className="group min-w-0 bg-[#070B12] p-6 transition-colors duration-300 hover:bg-[#0A101B]">
               <p className="mb-4 font-mono text-[12px] text-[#4D9FFF]">{String(i + 1).padStart(2, "0")}</p>
               <h3 className="mb-3 text-[15px] font-semibold text-white">{text(e.en, e.ar)}</h3>
               <p
                 dir="ltr"
-                className="truncate rounded-lg border border-white/[0.06] bg-white/[0.03] px-3 py-2 text-left font-mono text-[11px] leading-relaxed text-white/65"
+                className="truncate rounded-lg border border-white/[0.06] bg-card/[0.03] px-3 py-2 text-left font-mono text-[11px] leading-relaxed text-white/65"
               >
                 <span aria-hidden className="me-1.5 text-[#4D9FFF]">›</span>
                 {e.out}
@@ -713,7 +713,7 @@ function Trust() {
           const Icon = it.icon;
           return (
             <Reveal key={it.en} delay={0.06 * i} className="flex gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-card/[0.03]">
                 <Icon className="h-[18px] w-[18px] text-[#7CB9FF]" strokeWidth={1.8} />
               </div>
               <div>
@@ -861,7 +861,7 @@ function Ecosystem() {
                 <Link
                   key={r.role}
                   href={`/login?role=${r.role}`}
-                  className={`group -mx-3 flex items-center justify-between gap-4 rounded-xl px-3 py-4 transition-colors hover:bg-white/[0.04] ${FOCUS}`}
+                  className={`group -mx-3 flex items-center justify-between gap-4 rounded-xl px-3 py-4 transition-colors hover:bg-card/[0.04] ${FOCUS}`}
                 >
                   <span>
                     <span className="block text-[14.5px] font-semibold text-white">{text(r.en, r.ar)}</span>
@@ -911,7 +911,7 @@ function FinalCall() {
         <Reveal delay={0.1} className="flex flex-col items-center gap-5">
           <Link
             href="/login"
-            className={`flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[15px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}
+            className={`flex h-12 items-center gap-2 rounded-full bg-card px-7 text-[15px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}
           >
             {text("Enter your workspace", "ادخل إلى مساحة عملك")}
             <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />

@@ -122,7 +122,7 @@ function gradeLadder(score: number, text: TextFn): { grade: "A" | "B" | "C" | "D
     return { grade: "D", label: text("Needs Attention", "تحتاج إلى عناية"), color: "text-orange-600", bg: "bg-orange-50",
       summary: text("Multiple health concerns detected. Regular medical follow-up is important.", "رُصدت عدة مخاوف صحية. المتابعة الطبية المنتظمة مهمة.") };
   } else {
-    return { grade: "F", label: text("High Risk", "خطورة مرتفعة"), color: "text-red-600", bg: "bg-red-50",
+    return { grade: "F", label: text("High Risk", "خطورة مرتفعة"), color: "text-red-600", bg: "bg-destructive/10",
       summary: text("Significant health risks identified. Please see your doctor as soon as possible.", "رُصدت مخاطر صحية كبيرة. يُرجى مراجعة طبيبك في أقرب وقت ممكن.") };
   }
 }
@@ -364,7 +364,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
           <div className="space-y-2">
             {myAppointments.map((apt: any) => (
               <div key={apt.id} className={`flex items-start gap-4 p-4 rounded-2xl border ${apt.status === "confirmed" ? "bg-emerald-50 border-emerald-200" : "bg-secondary border-border"}`}>
-                <div className="w-10 h-10 rounded-xl bg-white flex flex-col items-center justify-center shrink-0 border border-border">
+                <div className="w-10 h-10 rounded-xl bg-card flex flex-col items-center justify-center shrink-0 border border-border">
                   <p className="text-[9px] font-bold text-muted-foreground uppercase">{new Date(apt.date).toLocaleString("en", { month: "short" })}</p>
                   <p className="text-lg font-bold text-foreground leading-none">{new Date(apt.date).getDate()}</p>
                 </div>
@@ -396,15 +396,15 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
             </button>
           </div>
           <div className="grid grid-cols-3 gap-2 mb-3">
-            <div className="bg-white/70 rounded-xl p-2.5 text-center">
+            <div className="bg-card/70 rounded-xl p-2.5 text-center">
               <p className="text-[9px] text-muted-foreground">Date</p>
               <p className="text-xs font-bold text-foreground">{booked.date}</p>
             </div>
-            <div className="bg-white/70 rounded-xl p-2.5 text-center">
+            <div className="bg-card/70 rounded-xl p-2.5 text-center">
               <p className="text-[9px] text-muted-foreground">Time</p>
               <p className="text-xs font-bold text-foreground">{booked.time}</p>
             </div>
-            <div className="bg-white/70 rounded-xl p-2.5 text-center">
+            <div className="bg-card/70 rounded-xl p-2.5 text-center">
               <p className="text-[9px] text-muted-foreground">Department</p>
               <p className="text-xs font-bold text-foreground">{booked.department}</p>
             </div>
@@ -412,7 +412,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
           {booked.aiReminders && (
             <div className="space-y-1.5">
               {booked.aiReminders.map((r: string, i: number) => (
-                <div key={i} className="flex items-start gap-2 px-3 py-1.5 bg-white/50 rounded-xl">
+                <div key={i} className="flex items-start gap-2 px-3 py-1.5 bg-card/50 rounded-xl">
                   <Sparkles className="w-3 h-3 text-emerald-600 shrink-0 mt-0.5" />
                   <p className="text-[11px] text-emerald-800">{r}</p>
                 </div>
@@ -510,7 +510,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
         </div>
 
         {bookingError && (
-          <div className="mb-3 px-4 py-2.5 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+          <div className="mb-3 px-4 py-2.5 bg-destructive/10 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
             {bookingError}
           </div>
         )}
@@ -656,7 +656,7 @@ export default function CitizenPortal() {
   const highPriorityRecs = recommendations.filter(r => r.priority === "high").length;
 
   const priorityColors = {
-    high: { bg: "bg-red-50", border: "border-red-100", badge: "destructive" as const, dot: "bg-red-500" },
+    high: { bg: "bg-destructive/10", border: "border-red-100", badge: "destructive" as const, dot: "bg-red-500" },
     medium: { bg: "bg-amber-50", border: "border-amber-100", badge: "warning" as const, dot: "bg-amber-500" },
     low: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground" },
   };
@@ -673,7 +673,7 @@ export default function CitizenPortal() {
               <button
                 onClick={() => setShowSsePanel(p => !p)}
                 className={`relative flex items-center justify-center w-9 h-9 rounded-xl border transition-all ${
-                  sseUnread > 0 ? "bg-red-50 border-red-200 hover:bg-red-100" : "bg-white border-border hover:bg-secondary"
+                  sseUnread > 0 ? "bg-destructive/10 border-red-200 hover:bg-red-100" : "bg-card border-border hover:bg-secondary"
                 }`}
                 title={sseConnected ? text("Live health alerts", "تنبيهات صحية حيّة") : text("Connecting...", "جارٍ الاتصال...")}
               >
@@ -695,7 +695,7 @@ export default function CitizenPortal() {
 
       {/* SSE Real-time Lab Alert Panel */}
       {showSsePanel && sseAlerts.length > 0 && (
-        <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 overflow-hidden">
+        <div className="mb-4 rounded-2xl border border-red-200 bg-destructive/10 overflow-hidden">
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-red-200 bg-red-100/60">
             <Bell className="w-4 h-4 text-red-600" />
             <span className="font-bold text-sm text-red-800">{text("Live Health Alerts", "تنبيهات صحية حيّة")}</span>
@@ -709,7 +709,7 @@ export default function CitizenPortal() {
               <div
                 key={alert.id}
                 onClick={() => markSseRead(alert.id)}
-                className={`px-4 py-3 flex gap-3 cursor-pointer hover:bg-red-100/40 transition-colors ${!alert.read ? "bg-red-50" : "bg-white/50"}`}
+                className={`px-4 py-3 flex gap-3 cursor-pointer hover:bg-red-100/40 transition-colors ${!alert.read ? "bg-destructive/10" : "bg-card/50"}`}
               >
                 <ShieldAlert className={`w-4 h-4 mt-0.5 shrink-0 ${alert.severity === "critical" ? "text-red-600" : "text-amber-500"}`} />
                 <div className="flex-1 min-w-0">
@@ -725,7 +725,7 @@ export default function CitizenPortal() {
       )}
 
       {criticalCount > 0 && (
-        <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl">
+        <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-destructive/10 border border-red-200 rounded-2xl">
           <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
           <p className="text-sm font-semibold text-red-700">
             <strong>{text(`${criticalCount} critical lab result${criticalCount > 1 ? "s" : ""}`, `${criticalCount} نتيجة مخبرية حرجة`)}</strong> — {text("please contact your doctor as soon as possible.", "يُرجى التواصل مع طبيبك في أقرب وقت ممكن.")}
@@ -747,7 +747,7 @@ export default function CitizenPortal() {
                 <span className="font-mono bg-secondary text-xs px-2.5 py-1 rounded-xl" dir="ltr">{patient.nationalId}</span>
                 <span className="text-xs text-muted-foreground">{text("DOB:", "تاريخ الميلاد:")} {format(new Date(patient.dateOfBirth), "dd MMM yyyy")}</span>
                 <span className="text-xs text-muted-foreground">· {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}</span>
-                <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-0.5 rounded-full">{text("Blood:", "فصيلة الدم:")} <span dir="ltr">{patient.bloodType}</span></span>
+                <span className="text-xs font-bold text-red-600 bg-destructive/10 px-2.5 py-0.5 rounded-full">{text("Blood:", "فصيلة الدم:")} <span dir="ltr">{patient.bloodType}</span></span>
               </div>
             </div>
             {(patient.allergies?.length ?? 0) > 0 && (
@@ -880,7 +880,7 @@ export default function CitizenPortal() {
                     </div>
                   </div>
                   {aiDecision.digitalTwin?.interventionWindow && (
-                    <div className="mt-3 px-3 py-2 bg-white/20 rounded-xl">
+                    <div className="mt-3 px-3 py-2 bg-card/20 rounded-xl">
                       <p className="text-xs font-semibold text-white">{aiDecision.digitalTwin.interventionWindow}</p>
                     </div>
                   )}
@@ -1032,7 +1032,7 @@ export default function CitizenPortal() {
                   const Icon = rec.icon;
                   return (
                     <div key={i} className={`flex items-start gap-3.5 p-4 ${cfg.bg} border ${cfg.border} rounded-2xl`}>
-                      <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-card flex items-center justify-center shrink-0">
                         <Icon className="w-4 h-4 text-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -1087,7 +1087,7 @@ export default function CitizenPortal() {
               {(patient.allergies?.length ?? 0) > 0 ? (
                 <div className="space-y-2">
                   {patient.allergies?.map((a, i) => (
-                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-red-50 border border-red-100 rounded-2xl">
+                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-destructive/10 border border-red-100 rounded-2xl">
                       <StatusDot status="critical" />
                       <span className="text-sm font-bold text-red-700">{a}</span>
                     </div>
@@ -1181,7 +1181,7 @@ const CONSENT_ICONS: Record<string, React.ElementType> = {
 };
 
 const SEVERITY_CFG = {
-  high:   { bg: "bg-red-50",     border: "border-red-200",    text: "text-red-700",    badge: "destructive" as const },
+  high:   { bg: "bg-destructive/10",     border: "border-red-200",    text: "text-red-700",    badge: "destructive" as const },
   medium: { bg: "bg-amber-50",   border: "border-amber-200",  text: "text-amber-700",  badge: "warning" as const },
   low:    { bg: "bg-emerald-50", border: "border-emerald-200",text: "text-emerald-700",badge: "success" as const },
 };
@@ -1261,7 +1261,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       {/* Toast */}
       {toast && (
         <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-medium transition-all ${
-          toast.ok ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-red-50 border-red-200 text-red-800"
+          toast.ok ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-destructive/10 border-red-200 text-red-800"
         }`}>
           {toast.ok ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertOctagon className="w-4 h-4 shrink-0" />}
           {toast.msg}
@@ -1271,7 +1271,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       {/* Header */}
       <div className="flex items-start gap-4 px-5 py-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
         <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center shrink-0">
-          <Lock className="w-5 h-5 text-blue-600" />
+          <Lock className="w-5 h-5 text-primary" />
         </div>
         <div className="flex-1">
           <p className="font-bold text-foreground text-sm">{text("Your Data. Your Control.", "بياناتك. تحت سيطرتك.")}</p>
@@ -1309,8 +1309,8 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
               key={consent.type}
               className={`relative p-4 rounded-2xl border-2 transition-all ${
                 consent.granted
-                  ? "bg-white border-emerald-200 shadow-sm"
-                  : "bg-gray-50/80 border-gray-200"
+                  ? "bg-card border-emerald-200 shadow-sm"
+                  : "bg-muted/50/80 border-border"
               }`}
             >
               {/* Status dot */}
@@ -1320,7 +1320,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
 
               <div className="flex items-start gap-3 mb-3">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                  consent.granted ? sev.bg : "bg-gray-100"
+                  consent.granted ? sev.bg : "bg-muted"
                 }`}>
                   <Icon className={`w-4 h-4 ${consent.granted ? sev.text : "text-gray-400"}`} />
                 </div>
@@ -1350,7 +1350,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
                   className={`ml-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all disabled:opacity-50 ${
                     consent.granted
                       ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
-                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                      : "bg-muted text-muted-foreground hover:bg-gray-200"
                   } ${!consent.canRevoke ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   {isToggling ? (

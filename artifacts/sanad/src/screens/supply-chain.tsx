@@ -30,12 +30,12 @@ async function submitReorder(body: Record<string, any>) {
 }
 
 const STATUS_CFG: Record<string, { bg: string; border: string; text: string; badge: any; dot: string }> = {
-  critical: { bg: "bg-red-50", border: "border-red-200", text: "text-red-700", badge: "destructive" as const, dot: "bg-red-500 animate-pulse" },
+  critical: { bg: "bg-destructive/10", border: "border-red-200", text: "text-red-700", badge: "destructive" as const, dot: "bg-red-500 animate-pulse" },
   low: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", badge: "warning" as const, dot: "bg-amber-500" },
   adequate: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", badge: "success" as const, dot: "bg-emerald-500" },
   High: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", badge: "success" as const, dot: "bg-emerald-500" },
   Medium: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", badge: "warning" as const, dot: "bg-amber-500" },
-  Low: { bg: "bg-red-50", border: "border-red-200", text: "text-red-700", badge: "destructive" as const, dot: "bg-red-500" },
+  Low: { bg: "bg-destructive/10", border: "border-red-200", text: "text-red-700", badge: "destructive" as const, dot: "bg-red-500" },
 };
 
 type ShortagePrediction = { drug: string; day30: number; day60: number; day90: number; current: number; min: number };
@@ -111,7 +111,7 @@ export default function SupplyChainPortal() {
             {text(`${criticals} CRITICAL SHORTAGE${criticals > 1 ? "S" : ""} —`, `${criticals} نقص حرج —`)}{" "}
             {data?.criticalAlerts?.map((a: any) => a.drug).join(" · ")}
           </p>
-          <button onClick={() => setActiveTab("reorder")} className="ms-auto text-[11px] font-bold bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full transition-colors">
+          <button onClick={() => setActiveTab("reorder")} className="ms-auto text-[11px] font-bold bg-card/20 hover:bg-card/30 px-3 py-1 rounded-full transition-colors">
             {text("Issue Purchase Orders →", "إصدار أوامر شراء ←")}
           </button>
         </div>
@@ -122,7 +122,7 @@ export default function SupplyChainPortal() {
           <Package className="w-3 h-3" />
           {text("Supply Chain", "سلسلة الإمداد")}
         </div>
-        <div className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full ${criticals > 0 ? "text-red-600 bg-red-50" : "text-emerald-600 bg-emerald-50"}`}>
+        <div className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full ${criticals > 0 ? "text-red-600 bg-destructive/10" : "text-emerald-600 bg-emerald-50"}`}>
           <span className={`w-1.5 h-1.5 rounded-full ${criticals > 0 ? "bg-red-500 animate-pulse" : "bg-emerald-500"}`} />
           {criticals > 0 ? text(`${criticals} Critical Shortages`, `${criticals} نقص حرج`) : text("No Critical Shortages", "لا يوجد نقص حرج")}
         </div>
@@ -191,7 +191,7 @@ export default function SupplyChainPortal() {
                     {data?.inventory?.map((item: any, i: number) => {
                       const cfg = STATUS_CFG[item.status] ?? STATUS_CFG.adequate;
                       return (
-                        <tr key={i} className={`${item.status === "critical" ? "bg-red-50/30" : ""} hover:bg-secondary/20`}>
+                        <tr key={i} className={`${item.status === "critical" ? "bg-destructive/10/30" : ""} hover:bg-secondary/20`}>
                           <td className="px-4 py-3">
                             <p className="text-sm font-semibold text-foreground">{item.drugName}</p>
                             <p className="text-[10px] text-muted-foreground">{item.supplier}</p>
@@ -432,7 +432,7 @@ export default function SupplyChainPortal() {
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2" /> {text("Loading...", "Loading...")}
                   </div>
                 ) : regionalDistribution.map((r: any, i: number) => (
-                  <div key={i} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border ${r.gap < 0 ? "bg-red-50 border-red-100" : "bg-emerald-50 border-emerald-100"}`}>
+                  <div key={i} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border ${r.gap < 0 ? "bg-destructive/10 border-red-100" : "bg-emerald-50 border-emerald-100"}`}>
                     <MapPin className={`w-3.5 h-3.5 shrink-0 ${r.gap < 0 ? "text-red-500" : "text-emerald-500"}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-foreground">{r.region}</p>
@@ -464,7 +464,7 @@ export default function SupplyChainPortal() {
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600" /> {text("Computing recommendations...", "Computing recommendations...")}
                 </div>
               ) : regionalRecs.length > 0 ? regionalRecs.map((rec: any, i: number) => (
-                <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-red-50 border-red-200" : "bg-amber-50 border-amber-200"}`}>
+                <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-destructive/10 border-red-200" : "bg-amber-50 border-amber-200"}`}>
                   <Truck className={`w-4 h-4 shrink-0 mt-0.5 ${rec.urgency === "critical" ? "text-red-600" : "text-amber-600"}`} />
                   <div className="flex-1">
                     <p className="text-sm font-bold text-foreground">{rec.region} — {rec.action}</p>
@@ -499,7 +499,7 @@ export default function SupplyChainPortal() {
                 {data.criticalAlerts.map((alert: any, i: number) => {
                   const result = reorderResults[alert.drug];
                   return (
-                    <div key={i} className="flex items-center gap-4 px-5 py-4 bg-red-50/30">
+                    <div key={i} className="flex items-center gap-4 px-5 py-4 bg-destructive/10/30">
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-foreground">{alert.drug}</p>

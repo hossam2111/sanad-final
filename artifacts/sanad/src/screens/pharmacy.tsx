@@ -144,7 +144,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
                 {drugs.map((colDrug) => {
                   if (rowDrug === colDrug) {
                     return (
-                      <td key={colDrug} className="bg-gray-100 text-center px-2 py-2.5 border-r border-border text-muted-foreground">
+                      <td key={colDrug} className="bg-muted text-center px-2 py-2.5 border-r border-border text-muted-foreground">
                         <Minus className="w-3 h-3 mx-auto" />
                       </td>
                     );
@@ -173,7 +173,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
       </div>
 
       {selected && (
-        <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4">
+        <div className="mt-4 rounded-2xl border border-red-200 bg-destructive/10 p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <FlaskConical className="w-4 h-4 text-red-600" />
@@ -182,9 +182,9 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
             <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
           </div>
           {selected.warnings.map((w: any, i: number) => (
-            <div key={i} className="bg-white rounded-xl border border-red-100 p-3 mb-2 last:mb-0">
+            <div key={i} className="bg-card rounded-xl border border-red-100 p-3 mb-2 last:mb-0">
               <div className="flex items-center gap-2 mb-2">
-                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[w.severity] ?? "bg-gray-100"}`}>{w.severity}</span>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[w.severity] ?? "bg-muted"}`}>{w.severity}</span>
                 <p className="text-xs font-bold text-foreground">{w.text ?? `${w.drugA} ↔ ${w.drugB}`}</p>
               </div>
               <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "Mechanism:")} </span>{w.mechanism}</p>
@@ -271,7 +271,7 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-card rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
         <div className="bg-emerald-600 text-white p-5 text-center">
           <CheckCircle2 className="w-10 h-10 mx-auto mb-2" />
           <p className="font-bold text-lg">{text("Medication Dispensed", "Medication Dispensed")}</p>
@@ -456,7 +456,7 @@ export default function PharmacyPortal() {
         <div className="flex items-center gap-2 shrink-0 ms-4">
           <button
             onClick={() => setShowLog((v) => !v)}
-            className="relative flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-white hover:bg-secondary transition-colors"
+            className="relative flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-card hover:bg-secondary transition-colors"
           >
             <Receipt className="w-3.5 h-3.5 text-violet-600" />
             {text("Today's Log", "سجل اليوم")}
@@ -466,7 +466,7 @@ export default function PharmacyPortal() {
               </span>
             )}
           </button>
-          <div className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-white">
+          <div className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-card">
             <Bell className={`w-3.5 h-3.5 ${sseConnected ? "text-emerald-500" : "text-gray-400"}`} />
             <div className={`w-1.5 h-1.5 rounded-full ${sseConnected ? "bg-emerald-500 animate-pulse" : "bg-gray-300"}`} />
             <span className="text-muted-foreground">{sseConnected ? text("Live", "مباشر") : text("Connecting...", "جارٍ الاتصال...")}</span>
@@ -476,7 +476,7 @@ export default function PharmacyPortal() {
 
       {/* SSE Critical Alerts */}
       {sseAlerts.filter((a) => a.severity === "critical").length > 0 && (
-        <div className="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3">
+        <div className="mb-5 px-4 py-3 bg-destructive/10 border border-red-200 rounded-2xl flex items-start gap-3">
           <ShieldAlert className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="text-xs font-bold text-red-700 mb-0.5">{text("Critical Pharmacy Alert", "تنبيه صيدلية حرج")}</p>
@@ -523,7 +523,7 @@ export default function PharmacyPortal() {
       {/* KPI Row */}
       <div className="grid grid-cols-4 gap-4 mb-5">
         <KpiCard title={text("Dispensed Today", "صُرف اليوم")} value={String(todayLog.length)} sub={text("Medications issued", "أدوية مصروفة")} icon={Receipt} iconBg="bg-violet-100" iconColor="text-violet-600" />
-        <KpiCard title={text("Queue", "قائمة الانتظار")} value={String(queue.length)} sub={text("Patients waiting", "مرضى منتظرون")} icon={Users} iconBg="bg-blue-100" iconColor="text-blue-600" />
+        <KpiCard title={text("Queue", "قائمة الانتظار")} value={String(queue.length)} sub={text("Patients waiting", "مرضى منتظرون")} icon={Users} iconBg="bg-blue-100" iconColor="text-primary" />
         <KpiCard
           title={text("Interactions", "التداخلات")}
           value={String(data?.summary?.interactions ?? 0)}
@@ -564,7 +564,7 @@ export default function PharmacyPortal() {
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold cursor-pointer transition-all ${
                     q.id === nationalId
                       ? "bg-violet-600 text-white border-violet-600"
-                      : "bg-white text-foreground border-border hover:border-violet-300"
+                      : "bg-card text-foreground border-border hover:border-violet-300"
                   }`}
                 >
                   {q.id}
@@ -639,12 +639,12 @@ export default function PharmacyPortal() {
               {data.patient.chronicConditions?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {data.patient.chronicConditions.map((c: string) => (
-                    <span key={c} className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full">{c}</span>
+                    <span key={c} className="text-[10px] font-bold bg-card/20 px-2 py-0.5 rounded-full">{c}</span>
                   ))}
                 </div>
               )}
               {data.patient.allergies?.length > 0 && (
-                <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-xl w-fit">
+                <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-card/20 rounded-xl w-fit">
                   <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                   <p className="text-xs font-bold">{text("ALLERGIES:", "ALLERGIES:")} {data.patient.allergies.join(", ")}</p>
                 </div>
@@ -667,7 +667,7 @@ export default function PharmacyPortal() {
                 variant="outline"
                 size="sm"
                 onClick={handlePrintRx}
-                className="bg-white/20 text-white border-white/30 hover:bg-white/30 text-xs"
+                className="bg-card/20 text-white border-white/30 hover:bg-card/30 text-xs"
               >
                 <Printer className="w-3.5 h-3.5 mr-1.5" /> {text("Print Rx", "Print Rx")}
               </Button>
@@ -713,7 +713,7 @@ export default function PharmacyPortal() {
                     const check = presc.dispenseCheck;
                     const ins = presc.insurance;
                     return (
-                      <div key={presc.id} className={`p-5 ${!check.safe ? "bg-red-50/40" : ""}`}>
+                      <div key={presc.id} className={`p-5 ${!check.safe ? "bg-destructive/10/40" : ""}`}>
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
@@ -735,7 +735,7 @@ export default function PharmacyPortal() {
                               onClick={() => { setDispensingId(presc.id); dispenseMutation.mutate({ id: presc.id }); }}
                               disabled={dispenseMutation.isPending && dispensingId === presc.id}
                               variant={check.safe ? "primary" : "outline"}
-                              className={`shrink-0 ${check.safe ? "bg-violet-600 hover:bg-violet-700 text-white" : "border-red-300 text-red-600 hover:bg-red-50"}`}
+                              className={`shrink-0 ${check.safe ? "bg-violet-600 hover:bg-violet-700 text-white" : "border-red-300 text-red-600 hover:bg-destructive/10"}`}
                             >
                               <Zap className="w-3.5 h-3.5" />
                               {dispensingId === presc.id && dispenseMutation.isPending ? "Dispensing..." : check.safe ? "Dispense" : "Override & Dispense"}
@@ -749,7 +749,7 @@ export default function PharmacyPortal() {
                         </div>
 
                         {/* AI Safety Block */}
-                        <div className={`px-3.5 py-3 rounded-2xl border mb-2 ${!check.safe ? "bg-red-50 border-red-200" : "bg-emerald-50 border-emerald-200"}`}>
+                        <div className={`px-3.5 py-3 rounded-2xl border mb-2 ${!check.safe ? "bg-destructive/10 border-red-200" : "bg-emerald-50 border-emerald-200"}`}>
                           <div className="flex items-center gap-2 mb-1.5">
                             <Brain className="w-3.5 h-3.5 text-violet-600" />
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("AI Dispense Safety Check", "AI Dispense Safety Check")}</p>
@@ -771,13 +771,13 @@ export default function PharmacyPortal() {
                               {expandedWarnings[presc.id] && (
                                 <div className="mt-2 space-y-2">
                                   {check.detailedWarnings.map((dw: any, wi: number) => (
-                                    <div key={wi} className="rounded-xl bg-white/80 border border-red-100 p-3">
+                                    <div key={wi} className="rounded-xl bg-card/80 border border-red-100 p-3">
                                       <div className="flex items-start justify-between gap-2 mb-1.5">
                                         <div className="flex items-center gap-1.5">
                                           <FlaskConical className="w-3 h-3 text-red-500 shrink-0" />
                                           <p className="text-[11px] font-bold text-foreground">{dw.drugA} ↔ {dw.drugB}</p>
                                         </div>
-                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${SEVERITY_COLOR[dw.severity] ?? "bg-gray-100"}`}>{dw.severity}</span>
+                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${SEVERITY_COLOR[dw.severity] ?? "bg-muted"}`}>{dw.severity}</span>
                                       </div>
                                       <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "Mechanism:")} </span>{dw.mechanism}</p>
                                       <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "Clinical basis:")} </span>{dw.clinicalBasis}</p>
@@ -835,8 +835,8 @@ export default function PharmacyPortal() {
                 </div>
                 <div className="space-y-2">
                   {(data.allMedications ?? data.prescriptions ?? []).map((med: any, i: number) => (
-                    <div key={i} className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl border ${med.isActive ? "bg-white border-emerald-200" : "bg-gray-50 border-gray-200 opacity-70"}`}>
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${med.isActive ? "bg-purple-100" : "bg-gray-100"}`}>
+                    <div key={i} className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl border ${med.isActive ? "bg-card border-emerald-200" : "bg-muted/50 border-border opacity-70"}`}>
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${med.isActive ? "bg-purple-100" : "bg-muted"}`}>
                         <Pill className={`w-4 h-4 ${med.isActive ? "text-purple-600" : "text-gray-400"}`} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -865,7 +865,7 @@ export default function PharmacyPortal() {
                   const pct = avail ? Math.min(100, Math.round((avail.daysOfStock / 45) * 100)) : 0;
                   const barColor = !avail ? "bg-gray-300" : avail.status === "critical" ? "bg-red-500" : avail.status === "low" ? "bg-amber-500" : "bg-emerald-500";
                   return (
-                    <div key={i} className={`px-4 py-4 rounded-2xl border ${avail?.status === "critical" ? "border-red-300 bg-red-50" : avail?.status === "low" ? "border-amber-200 bg-amber-50" : "border-border bg-white"}`}>
+                    <div key={i} className={`px-4 py-4 rounded-2xl border ${avail?.status === "critical" ? "border-red-300 bg-destructive/10" : avail?.status === "low" ? "border-amber-200 bg-amber-50" : "border-border bg-card"}`}>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
                           <Package className={`w-4 h-4 shrink-0 ${avail?.status === "critical" ? "text-red-600" : avail?.status === "low" ? "text-amber-600" : "text-muted-foreground"}`} />

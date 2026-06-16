@@ -449,7 +449,7 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-2 gap-2.5">
                       {((intelligence as Record<string, any>)).epidemicRadar.map((item: any, i: number) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${
-                          item.alert === "high" ? "bg-red-50 border-red-200" : item.alert === "medium" ? "bg-amber-50 border-amber-200" : "bg-secondary border-border"
+                          item.alert === "high" ? "bg-destructive/10 border-red-200" : item.alert === "medium" ? "bg-amber-50 border-amber-200" : "bg-secondary border-border"
                         }`}>
                           <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${item.alert === "high" ? "bg-red-500" : item.alert === "medium" ? "bg-amber-500" : "bg-muted-foreground"}`} />
                           <div className="flex-1 min-w-0">

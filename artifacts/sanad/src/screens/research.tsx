@@ -23,7 +23,7 @@ async function fetchResearchInsights() {
 }
 
 const TREND_CONFIG = {
-  rising: { color: "text-red-600", bg: "bg-red-50", border: "border-red-100", label: "Rising ↑", dot: "bg-red-500" },
+  rising: { color: "text-red-600", bg: "bg-destructive/10", border: "border-red-100", label: "Rising ↑", dot: "bg-red-500" },
   stable: { color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100", label: "Stable →", dot: "bg-amber-500" },
   declining: { color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100", label: "Declining ↓", dot: "bg-emerald-500" },
 };
@@ -404,7 +404,7 @@ export default function ResearchPortal() {
                           <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} shrink-0`} />
                           <span className="font-mono text-[10px] text-muted-foreground">{study.id}</span>
                           <Badge variant={cfg.badge} className="text-[10px]">{cfg.label}</Badge>
-                          <span className="text-[10px] font-semibold text-muted-foreground bg-white/60 border border-border px-2 py-0.5 rounded-full">{study.phase}</span>
+                          <span className="text-[10px] font-semibold text-muted-foreground bg-card/60 border border-border px-2 py-0.5 rounded-full">{study.phase}</span>
                         </div>
                         <h3 className="text-sm font-bold text-foreground leading-snug">{study.title}</h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -416,7 +416,7 @@ export default function ResearchPortal() {
                         <p className="text-[10px] text-muted-foreground">{text("Enrolled", "Enrolled")}</p>
                       </div>
                     </div>
-                    <div className="mt-3 w-full bg-white/60 rounded-full h-1.5">
+                    <div className="mt-3 w-full bg-card/60 rounded-full h-1.5">
                       <div className="h-full rounded-full bg-teal-500 transition-all" style={{ width: `${enrollPct}%` }} />
                     </div>
                     <div className="flex items-center gap-4 mt-1.5 text-[10px] text-muted-foreground">
@@ -459,7 +459,7 @@ export default function ResearchPortal() {
       {/* ─── DISEASE TRENDS ─── */}
       {activeView === "trends" && (
         <div className="space-y-5">
-          <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-2xl">
+          <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-red-200 rounded-2xl">
             <TrendingUp className="w-5 h-5 text-red-600 shrink-0" />
             <div>
               <p className="text-sm font-bold text-red-800">{text("National Disease Trend Radar — 12-Month View", "National Disease Trend Radar — 12-Month View")}</p>
@@ -680,7 +680,7 @@ export default function ResearchPortal() {
                           <span className="text-[10px] font-bold w-10 text-right text-foreground">{item.ai}{item.unit}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] w-24 text-blue-600 font-semibold">{text("Standard Care", "Standard Care")}</span>
+                          <span className="text-[10px] w-24 text-primary font-semibold">{text("Standard Care", "Standard Care")}</span>
                           <div className="flex-1 bg-secondary rounded-full h-2">
                             <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${item.std}%` }} />
                           </div>

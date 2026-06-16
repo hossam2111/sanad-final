@@ -34,7 +34,7 @@ async function fetchFamilyData(nationalId: string) {
 }
 
 const RISK_CONFIG = {
-  high: { color: "text-red-700", bg: "bg-red-50", border: "border-red-200", badge: "destructive" as const, dot: "bg-red-500", bar: "#ef4444" },
+  high: { color: "text-red-700", bg: "bg-destructive/10", border: "border-red-200", badge: "destructive" as const, dot: "bg-red-500", bar: "#ef4444" },
   medium: { color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200", badge: "warning" as const, dot: "bg-amber-500", bar: "#f59e0b" },
   low: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200", badge: "success" as const, dot: "bg-emerald-500", bar: "#22c55e" },
 };
@@ -48,7 +48,7 @@ const STATUS_CONFIG = {
 function FamilyMemberCard({ member, isPatient = false }: { member: any; isPatient?: boolean }) {
   const statusCfg = STATUS_CONFIG[member.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG["healthy"];
   const riskColor = member.riskScore >= 70 ? "text-red-600" : member.riskScore >= 40 ? "text-amber-600" : "text-emerald-600";
-  const riskBg = member.riskScore >= 70 ? "bg-red-50" : member.riskScore >= 40 ? "bg-amber-50" : "bg-emerald-50";
+  const riskBg = member.riskScore >= 70 ? "bg-destructive/10" : member.riskScore >= 40 ? "bg-amber-50" : "bg-emerald-50";
 
   return (
     <div className={`relative p-4 rounded-2xl border-2 transition-all ${isPatient ? "border-primary bg-primary/5 ring-2 ring-primary/20" : `${statusCfg.border} ${statusCfg.bg} ring-1 ${statusCfg.ringColor}/20`}`}>
@@ -195,7 +195,7 @@ export default function FamilyPortal() {
             </CardBody>
           </Card>
         ) : (
-          <Card className="border-red-200 bg-red-50">
+          <Card className="border-red-200 bg-destructive/10">
             <CardBody className="flex items-center gap-3 p-4">
               <X className="w-4 h-4 text-red-500" />
               <p className="text-sm text-red-700">{error instanceof Error ? error.message : text("Patient not found", "المريض غير موجود")} — <span className="font-mono" dir="ltr">{nationalId}</span></p>
@@ -208,7 +208,7 @@ export default function FamilyPortal() {
         <div className="space-y-5">
           {/* Alert Banner */}
           {data.familyRiskAlert && (
-            <div className={`flex items-start gap-3 p-4 border-2 rounded-3xl ${data.summary.overallFamilyRisk === "HIGH" ? "bg-red-50 border-red-300" : "bg-amber-50 border-amber-300"}`}>
+            <div className={`flex items-start gap-3 p-4 border-2 rounded-3xl ${data.summary.overallFamilyRisk === "HIGH" ? "bg-destructive/10 border-red-300" : "bg-amber-50 border-amber-300"}`}>
               <AlertTriangle className={`w-5 h-5 shrink-0 mt-0.5 ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-600" : "text-amber-600"}`} />
               <div>
                 <p className={`text-sm font-bold ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-800" : "text-amber-800"}`}>{data.familyRiskAlert}</p>
@@ -228,7 +228,7 @@ export default function FamilyPortal() {
           {/* Summary KPIs */}
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-red-600" : data.heritabilityScore >= 40 ? "text-amber-600" : "text-emerald-600", bg: data.heritabilityScore >= 70 ? "bg-red-50" : "bg-secondary" },
+              { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-red-600" : data.heritabilityScore >= 40 ? "text-amber-600" : "text-emerald-600", bg: data.heritabilityScore >= 70 ? "bg-destructive/10" : "bg-secondary" },
               { label: text("Genetic Risk Factors", "عوامل الخطورة الوراثية"), value: data.geneticRisks?.length, suffix: text(" identified", " مُحدّد"), color: "text-violet-600", bg: "bg-violet-50" },
               { label: text("Family Members Linked", "أفراد الأسرة المرتبطون"), value: data.summary?.totalMembers, suffix: text(" members", " فرد"), color: "text-primary", bg: "bg-primary/5" },
               { label: text("Patient Risk Score", "درجة خطورة المريض"), value: data.patient?.riskScore, suffix: "/100", color: data.patient?.riskScore >= 70 ? "text-red-600" : "text-amber-600", bg: "bg-amber-50" },
@@ -345,7 +345,7 @@ export default function FamilyPortal() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className={`text-sm font-bold ${cfg.color}`}>{risk.condition}</p>
-                            {risk.icdCode && <span className="font-mono text-[10px] bg-white/60 border border-current/20 px-1.5 py-0.5 rounded-lg text-muted-foreground">{risk.icdCode}</span>}
+                            {risk.icdCode && <span className="font-mono text-[10px] bg-card/60 border border-current/20 px-1.5 py-0.5 rounded-lg text-muted-foreground">{risk.icdCode}</span>}
                             <Badge variant={cfg.badge} className="text-[10px] ms-auto shrink-0">{text(`${risk.riskLevel} penetrance`, `نفاذية ${risk.riskLevel === "high" ? "عالية" : risk.riskLevel === "medium" ? "متوسطة" : "منخفضة"}`)}</Badge>
                           </div>
                           {risk.gene && <p className="text-[11px] text-muted-foreground mt-0.5"><span className="font-semibold text-foreground">{text("Genes:", "الجينات:")}</span> {risk.gene}</p>}
@@ -355,7 +355,7 @@ export default function FamilyPortal() {
                           </div>
                         </div>
                         <button onClick={() => setExpandedRisk(isExpanded ? null : i)}
-                          className="text-[10px] font-bold text-primary bg-white/60 px-2.5 py-1 rounded-xl hover:bg-white transition-colors shrink-0">
+                          className="text-[10px] font-bold text-primary bg-card/60 px-2.5 py-1 rounded-xl hover:bg-card transition-colors shrink-0">
                           {isExpanded ? text("Less", "أقل") : text("Details", "تفاصيل")}
                         </button>
                       </div>
@@ -376,7 +376,7 @@ export default function FamilyPortal() {
                         <div className="bg-secondary rounded-2xl p-3">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Transmission Probability", "احتمال الانتقال")}</p>
                           <div className="flex items-center gap-3">
-                            <div className="flex-1 h-3 bg-white rounded-full overflow-hidden">
+                            <div className="flex-1 h-3 bg-card rounded-full overflow-hidden">
                               <div className={`h-full rounded-full ${risk.riskLevel === "high" ? "bg-red-500" : risk.riskLevel === "medium" ? "bg-amber-500" : "bg-emerald-500"}`}
                                 style={{ width: `${risk.transmissionProb * 100}%` }} />
                             </div>
@@ -509,7 +509,7 @@ export default function FamilyPortal() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 {data.screeningRecommendations?.map((rec: any, i: number) => {
-                  const priBg = rec.priority === "high" ? "bg-red-50 border-red-200" : rec.priority === "medium" ? "bg-sky-50 border-sky-200" : "bg-secondary border-border";
+                  const priBg = rec.priority === "high" ? "bg-destructive/10 border-red-200" : rec.priority === "medium" ? "bg-sky-50 border-sky-200" : "bg-secondary border-border";
                   const priIcon = rec.priority === "high" ? <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" /> : rec.priority === "medium" ? <Clock className="w-4 h-4 text-sky-500 shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />;
                   return (
                     <div key={i} className={`p-4 rounded-3xl border ${priBg}`}>
@@ -524,14 +524,14 @@ export default function FamilyPortal() {
                       <div className="flex items-center gap-2 mb-3">
                         <CalendarDays className="w-3.5 h-3.5 text-muted-foreground" />
                         <span className="text-[11px] text-muted-foreground">{rec.frequency}</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 bg-white/60 border border-border rounded-full text-muted-foreground ms-auto">{text("Due:", "الاستحقاق:")} {rec.dueIn}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 bg-card/60 border border-border rounded-full text-muted-foreground ms-auto">{text("Due:", "الاستحقاق:")} {rec.dueIn}</span>
                       </div>
                       {rec.members?.length > 0 && (
                         <div>
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5">{text("Applies to", "ينطبق على")}</p>
                           <div className="flex flex-wrap gap-1">
                             {rec.members.slice(0, 3).map((m: string, mi: number) => (
-                              <div key={mi} className="flex items-center gap-1 bg-white/60 border border-border px-2 py-0.5 rounded-xl">
+                              <div key={mi} className="flex items-center gap-1 bg-card/60 border border-border px-2 py-0.5 rounded-xl">
                                 <User className="w-2.5 h-2.5 text-muted-foreground" />
                                 <span className="text-[10px] font-medium text-foreground">{m.split(" ")[0]}</span>
                               </div>
@@ -553,7 +553,7 @@ export default function FamilyPortal() {
                 <CardBody className="p-0">
                   <div className="divide-y divide-border">
                     {[{ ...data.patient, relationship: text("Index Patient (You)", "المريض الأساسي (أنت)") }, ...(data.familyMembers ?? [])].map((m: any, i: number) => {
-                      const riskColor = m.riskScore >= 70 ? "text-red-600 bg-red-50" : m.riskScore >= 40 ? "text-amber-600 bg-amber-50" : "text-emerald-600 bg-emerald-50";
+                      const riskColor = m.riskScore >= 70 ? "text-red-600 bg-destructive/10" : m.riskScore >= 40 ? "text-amber-600 bg-amber-50" : "text-emerald-600 bg-emerald-50";
                       return (
                         <div key={i} className="flex items-center gap-4 px-5 py-3.5 hover:bg-secondary/30 transition-colors">
                           <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">

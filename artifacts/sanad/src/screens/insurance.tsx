@@ -43,8 +43,8 @@ async function reviewClaim(claimId: string, action: string, notes: string) {
 const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string; badge: any; label: string }> = {
   approved: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200", badge: "success" as const, label: "Approved" },
   pending: { color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200", badge: "warning" as const, label: "Pending" },
-  under_review: { color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-200", badge: "info" as const, label: "Under Review" },
-  rejected: { color: "text-red-700", bg: "bg-red-50", border: "border-red-200", badge: "destructive" as const, label: "Rejected" },
+  under_review: { color: "text-blue-700", bg: "bg-primary/10", border: "border-blue-200", badge: "info" as const, label: "Under Review" },
+  rejected: { color: "text-red-700", bg: "bg-destructive/10", border: "border-red-200", badge: "destructive" as const, label: "Rejected" },
 };
 const PORTFOLIO_COLORS = ["#22c55e", "#f59e0b", "#ef4444", "#7c3aed"];
 type TabId = "dashboard" | "patient" | "portfolio";
@@ -198,7 +198,7 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody className="space-y-2.5">
                     {dashboard.fraudAlerts?.map((alert: any, i: number) => (
-                      <div key={i} className={`p-3.5 rounded-2xl border ${alert.severity === "high" ? "bg-red-50 border-red-200" : "bg-amber-50 border-amber-100"}`}>
+                      <div key={i} className={`p-3.5 rounded-2xl border ${alert.severity === "high" ? "bg-destructive/10 border-red-200" : "bg-amber-50 border-amber-100"}`}>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
                           <div className="flex items-center gap-1.5">
                             <ShieldAlert className={`w-3.5 h-3.5 shrink-0 ${alert.severity === "high" ? "text-red-500" : "text-amber-500"}`} />
@@ -336,7 +336,7 @@ export default function InsurancePortal() {
             </div>
           )}
           {patientError && nationalId && (
-            <Card className="border-red-200 bg-red-50">
+            <Card className="border-red-200 bg-destructive/10">
               <CardBody className="flex items-center gap-3 p-4">
                 <X className="w-4 h-4 text-red-500" />
                 <p className="text-sm text-red-700">{text("No policy found for", "No policy found for")} <span className="font-mono">{nationalId}</span></p>
@@ -366,7 +366,7 @@ export default function InsurancePortal() {
                     <div className="px-4 py-3 flex items-center justify-center">
                       <AnomalyGauge score={patient.anomalyScore ?? 0} />
                     </div>
-                    <div className={`px-6 py-4 flex flex-col items-center justify-center min-w-[130px] ${patient.fraudRisk === "high" ? "bg-red-50" : patient.fraudRisk === "medium" ? "bg-amber-50" : "bg-emerald-50/50"}`}>
+                    <div className={`px-6 py-4 flex flex-col items-center justify-center min-w-[130px] ${patient.fraudRisk === "high" ? "bg-destructive/10" : patient.fraudRisk === "medium" ? "bg-amber-50" : "bg-emerald-50/50"}`}>
                       <DataLabel label={text("Fraud Risk", "Fraud Risk")}>
                         <p className={`text-2xl font-bold ${patient.fraudRisk === "high" ? "text-red-600" : patient.fraudRisk === "medium" ? "text-amber-600" : "text-emerald-600"}`}>{patient.fraudRisk?.toUpperCase()}</p>
                       </DataLabel>
@@ -398,13 +398,13 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody className="space-y-2.5">
                     {patient.anomalyFactors?.map((factor: any, i: number) => (
-                      <div key={i} className={`p-3 rounded-2xl border ${factor.flag ? "bg-red-50 border-red-200" : "bg-secondary border-transparent"}`}>
+                      <div key={i} className={`p-3 rounded-2xl border ${factor.flag ? "bg-destructive/10 border-red-200" : "bg-secondary border-transparent"}`}>
                         <div className="flex items-center justify-between gap-2 mb-1">
                           <p className={`text-xs font-bold ${factor.flag ? "text-red-700" : "text-foreground"}`}>{factor.label}</p>
                           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${factor.flag ? "bg-red-100 text-red-700" : "bg-secondary text-muted-foreground"}`}>+{factor.weight}{text("pts", "pts")}</span>
                         </div>
                         <p className={`text-[11px] ${factor.flag ? "text-red-600" : "text-muted-foreground"}`}>{factor.value}</p>
-                        <div className="mt-1.5 h-1 bg-white rounded-full overflow-hidden">
+                        <div className="mt-1.5 h-1 bg-card rounded-full overflow-hidden">
                           <div className={`h-full rounded-full transition-all ${factor.flag ? "bg-red-500" : "bg-emerald-400"}`} style={{ width: `${Math.min(100, factor.weight * 4)}%` }} />
                         </div>
                       </div>
@@ -533,7 +533,7 @@ export default function InsurancePortal() {
 
                           {/* Expanded Panel */}
                           {expandedClaim === claim.claimId && (
-                            <div className="mx-5 mb-4 p-4 bg-white border border-border rounded-2xl space-y-3">
+                            <div className="mx-5 mb-4 p-4 bg-card border border-border rounded-2xl space-y-3">
                               {claim.anomalyReasons?.length > 0 && (
                                 <div>
                                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
@@ -602,13 +602,13 @@ export default function InsurancePortal() {
                   { label: "Low Risk", value: dashboard.portfolioRisk?.low, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200" },
                   { label: "Medium Risk", value: dashboard.portfolioRisk?.medium, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-200" },
                   { label: "High Risk", value: dashboard.portfolioRisk?.high, color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-200" },
-                  { label: "Critical Risk", value: dashboard.portfolioRisk?.critical, color: "text-red-600", bg: "bg-red-50", border: "border-red-200" },
+                  { label: "Critical Risk", value: dashboard.portfolioRisk?.critical, color: "text-red-600", bg: "bg-destructive/10", border: "border-red-200" },
                 ].map((band, i) => (
                   <div key={i} className={`p-5 rounded-3xl border ${band.bg} ${band.border}`}>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{band.label}</p>
                     <p className={`text-4xl font-bold ${band.color}`}>{band.value}</p>
                     <p className="text-xs text-muted-foreground mt-1">{text("policyholders", "policyholders")}</p>
-                    <div className="mt-3 h-1.5 bg-white/60 rounded-full overflow-hidden">
+                    <div className="mt-3 h-1.5 bg-card/60 rounded-full overflow-hidden">
                       <div className={`h-full rounded-full ${band.bg.replace("50", "500")}`} style={{ width: `${Math.round((band.value / dashboard.totalPolicies) * 100)}%` }} />
                     </div>
                     <p className="text-[10px] font-semibold text-muted-foreground mt-1">{Math.round((band.value / dashboard.totalPolicies) * 100)}{text("% of portfolio", "% of portfolio")}</p>
