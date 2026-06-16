@@ -49,38 +49,33 @@
   --radius-3xl: 2rem;
 }
 
-.dark {
-  --background: 240 10% 8%;
-  --foreground: 0 0% 96%;
-  --card: 240 8% 12%;
-  --card-foreground: 0 0% 96%;
-  --primary: 211 100% 58%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 240 7% 16%;
-  --secondary-foreground: 0 0% 94%;
-  --muted: 240 7% 15%;
-  --muted-foreground: 240 5% 68%;
-  --accent: 211 100% 58%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 75% 58%;
-  --destructive-foreground: 0 0% 100%;
-  --warning: 35 95% 56%;
-  --warning-foreground: 240 10% 8%;
-  --success: 142 65% 45%;
-  --success-foreground: 0 0% 100%;
-  --sidebar: 240 8% 11%;
-  --sidebar-foreground: 0 0% 94%;
-  --border: 240 7% 22%;
-  --input: 240 7% 22%;
-  --ring: 211 100% 58%;
+[data-theme="dark"] {
+  --background: 222 47% 8%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 100% 56%;
+  --primary-foreground: 222 47% 8%;
+  --secondary: 217 32% 17%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 32% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 32% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 50%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 32% 17%;
+  --input: 217 32% 17%;
+  --ring: 210 100% 56%;
+
+  /* Risk tokens — same hue, higher contrast for dark bg */
   --risk-critical: 0 90% 65%;
-  --risk-high: 25 95% 62%;
-  --risk-medium: 43 96% 65%;
-  --risk-low: 142 71% 52%;
-  --risk-critical-bg: 0 55% 16%;
-  --risk-high-bg: 25 55% 16%;
-  --risk-medium-bg: 43 55% 15%;
-  --risk-low-bg: 142 45% 14%;
+  --risk-high: 25 95% 60%;
+  --risk-medium: 45 95% 55%;
+  --risk-low: 142 70% 50%;
+  --risk-none: 217 32% 50%;
 }
 
 :root {
@@ -107,10 +102,11 @@
   --border: 240 6% 91%;
   --input: 240 6% 91%;
   --ring: 211 100% 50%;
-  --risk-critical: 0 85% 57%;
-  --risk-high: 25 95% 53%;
-  --risk-medium: 43 96% 56%;
-  --risk-low: 142 71% 40%;
+  --risk-critical: 0 84% 55%;
+  --risk-high: 25 90% 50%;
+  --risk-medium: 45 90% 48%;
+  --risk-low: 142 65% 40%;
+  --risk-none: 215 20% 60%;
   --risk-critical-bg: 0 100% 97%;
   --risk-high-bg: 25 100% 96%;
   --risk-medium-bg: 43 100% 95%;

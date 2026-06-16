@@ -12,10 +12,10 @@ const riskLabels: Record<RiskLevel, string> = {
 }
 
 const riskStyles: Record<RiskLevel, string> = {
-  critical: "border-risk-critical/20 bg-risk-critical-bg text-risk-critical",
-  high: "border-risk-high/20 bg-risk-high-bg text-risk-high",
-  medium: "border-risk-medium/25 bg-risk-medium-bg text-risk-medium",
-  low: "border-risk-low/20 bg-risk-low-bg text-risk-low",
+  critical: "bg-[hsl(var(--risk-critical)/0.15)] text-[hsl(var(--risk-critical))] border-[hsl(var(--risk-critical)/0.3)]",
+  high:     "bg-[hsl(var(--risk-high)/0.15)]     text-[hsl(var(--risk-high))]     border-[hsl(var(--risk-high)/0.3)]",
+  medium:   "bg-[hsl(var(--risk-medium)/0.15)]   text-[hsl(var(--risk-medium))]   border-[hsl(var(--risk-medium)/0.3)]",
+  low:      "bg-[hsl(var(--risk-low)/0.15)]       text-[hsl(var(--risk-low))]       border-[hsl(var(--risk-low)/0.3)]",
 }
 
 const dotStyles: Record<RiskLevel, string> = {

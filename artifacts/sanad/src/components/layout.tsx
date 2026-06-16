@@ -6,9 +6,11 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   ShieldAlert, HeartPulse, User, Building2,
   LayoutDashboard, LogOut, Bell, Activity, FlaskConical, Pill, BedDouble,
-  Shield, Brain, Users, Package, AlertTriangle, CheckCircle2, X, Menu, Languages,
+  Shield, Brain, Users, Package, AlertTriangle, CheckCircle2, X, Menu, Languages, Moon, Sun,
 } from "lucide-react";
 import { cn } from "./shared";
+import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -168,6 +170,7 @@ function SanadMark({ size = 32 }: { size?: number }) {
 
 export function Layout({ children, role, localized = false }: { children: React.ReactNode; role: Role; localized?: boolean }) {
   const location = usePathname();
+  const { theme, setTheme } = useTheme();
   const config = roleConfigs[role];
   const { user: authUser, logout } = useAuth();
   const { locale, dir, text, toggleLocale } = useLanguage();
@@ -349,6 +352,16 @@ export function Layout({ children, role, localized = false }: { children: React.
               <Languages className="h-3.5 w-3.5" />
               {locale === "ar" ? "EN" : "عربي"}
             </button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label="Toggle dark mode"
+              className="h-8 w-8 rounded-full bg-card border border-border"
+            >
+              {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-muted-foreground" /> : <Moon className="h-3.5 w-3.5 text-muted-foreground" />}
+            </Button>
 
             {/* Alerts Bell */}
             <div className="relative">
