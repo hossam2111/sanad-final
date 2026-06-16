@@ -124,16 +124,16 @@
 }
 
 .ios-card {
-  background: white;
+  background: hsl(var(--card));
   border-radius: 20px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .data-table { border-collapse: separate; border-spacing: 0; width: 100%; }
-.data-table th { @apply px-5 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest; background: hsl(240 6% 97%); border-bottom: 1px solid hsl(240 6% 91%); }
-.data-table td { @apply px-5 py-3.5 text-sm; border-bottom: 1px solid hsl(240 6% 93%); }
+.data-table th { @apply px-5 py-3 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest; background: hsl(var(--secondary)); border-bottom: 1px solid hsl(var(--border)); }
+.data-table td { @apply px-5 py-3.5 text-sm; border-bottom: 1px solid hsl(var(--border)); }
 .data-table tr:last-child td { border-bottom: none; }
-.data-table tbody tr:hover td { background: hsl(240 6% 97%); transition: background 0.15s ease; }
+.data-table tbody tr:hover td { background: hsl(var(--secondary)); transition: background 0.15s ease; }
 
 .sidebar-scroll { scrollbar-width: none; }
 .sidebar-scroll::-webkit-scrollbar { width: 0; display: none; }

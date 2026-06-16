@@ -341,8 +341,8 @@ function Hero() {
           <Reveal delay={0.16}>
             <p className="mx-auto mb-10 max-w-[640px] text-[16px] leading-relaxed text-white/60 lg:text-[17px]">
               {text(
-                "SANAD Health connects every hospital, laboratory, pharmacy and ambulance into one sovereign intelligence layer — where every clinical event becomes a decision, and every decision carries its evidence.",
-                "تربط سند كل مستشفى ومختبر وصيدلية وسيارة إسعاف في طبقة ذكاء سيادية واحدة — حيث يتحوّل كل حدث سريري إلى قرار، ويحمل كل قرارٍ دليله.",
+                "In scholarly tradition, a 'sanad' is the unbroken chain of transmission that makes knowledge trustworthy. SANAD Health applies this to medicine, connecting every hospital, clinic, and pharmacy into one sovereign intelligence layer — where every clinical event becomes a decision, and every decision carries its evidence.",
+                "في التراث العلمي، «السند» هو سلسلة الرواية المتصلة التي تجعل المعرفة جديرة بالثقة. تطبّق منظومة سند هذا المبدأ في الرعاية الصحية، فتربط كل مستشفى وعيادة وصيدلية في طبقة ذكاء سيادية واحدة — حيث يتحوّل كل حدث سريري إلى قرار، ويحمل كل قرارٍ إسناده الخاص.",
               )}
             </p>
           </Reveal>

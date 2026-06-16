@@ -61,7 +61,7 @@ const SEVERITY_COLOR: Record<string, string> = {
   CONTRAINDICATED: "bg-red-600 text-white",
   MAJOR: "bg-red-100 text-red-700",
   HIGH: "bg-orange-100 text-orange-700",
-  MODERATE: "bg-amber-100 text-amber-700",
+  MODERATE: "bg-risk-high-bg text-risk-high",
   MINOR: "bg-yellow-100 text-yellow-700",
 };
 
@@ -69,7 +69,7 @@ const SEVERITY_CELL: Record<string, string> = {
   CONTRAINDICATED: "bg-red-600 text-white font-bold",
   MAJOR: "bg-red-200 text-red-800",
   HIGH: "bg-orange-200 text-orange-800",
-  MODERATE: "bg-amber-100 text-amber-800",
+  MODERATE: "bg-risk-high-bg text-risk-high",
   MINOR: "bg-yellow-100 text-yellow-800",
 };
 
@@ -294,9 +294,9 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
               <span className="font-bold text-sm">{receipt.insurance.eligible ? `${receipt.insurance.coveragePercent}% · SAR ${receipt.insurance.copay} copay` : "Not covered"}</span>
             </div>
             {receipt.supplyChainStatus?.warning && (
-              <div className="flex items-start gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-[11px] text-amber-800 font-medium">{receipt.supplyChainStatus.warning}</p>
+              <div className="flex items-start gap-2 px-3 py-2 bg-risk-high-bg border border-risk-high/20 rounded-xl">
+                <AlertTriangle className="w-3.5 h-3.5 text-risk-high shrink-0 mt-0.5" />
+                <p className="text-[11px] text-risk-high font-medium">{receipt.supplyChainStatus.warning}</p>
               </div>
             )}
           </div>
@@ -601,7 +601,7 @@ export default function PharmacyPortal() {
       {error && !isLoading && (
         <Card>
           <CardBody className="py-10 text-center">
-            <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+            <AlertTriangle className="w-8 h-8 text-risk-high mx-auto mb-3" />
             <p className="font-bold text-foreground">{text("Patient Not Found", "Patient Not Found")}</p>
             <p className="text-sm text-muted-foreground mt-1">{text("No records for National ID:", "No records for National ID:")} {nationalId}</p>
           </CardBody>
@@ -667,7 +667,7 @@ export default function PharmacyPortal() {
                 variant="outline"
                 size="sm"
                 onClick={handlePrintRx}
-                className="bg-card/20 text-white border-white/30 hover:bg-card/30 text-xs"
+                className="bg-card/20 text-white border-border/30 hover:bg-card/30 text-xs"
               >
                 <Printer className="w-3.5 h-3.5 mr-1.5" /> {text("Print Rx", "Print Rx")}
               </Button>
@@ -863,12 +863,12 @@ export default function PharmacyPortal() {
                 {(data.prescriptions ?? []).map((presc: any, i: number) => {
                   const avail = presc.stockAvailability;
                   const pct = avail ? Math.min(100, Math.round((avail.daysOfStock / 45) * 100)) : 0;
-                  const barColor = !avail ? "bg-gray-300" : avail.status === "critical" ? "bg-red-500" : avail.status === "low" ? "bg-amber-500" : "bg-emerald-500";
+                  const barColor = !avail ? "bg-gray-300" : avail.status === "critical" ? "bg-red-500" : avail.status === "low" ? "bg-risk-high" : "bg-emerald-500";
                   return (
-                    <div key={i} className={`px-4 py-4 rounded-2xl border ${avail?.status === "critical" ? "border-red-300 bg-destructive/10" : avail?.status === "low" ? "border-amber-200 bg-amber-50" : "border-border bg-card"}`}>
+                    <div key={i} className={`px-4 py-4 rounded-2xl border ${avail?.status === "critical" ? "border-red-300 bg-destructive/10" : avail?.status === "low" ? "border-risk-high/20 bg-risk-high-bg" : "border-border bg-card"}`}>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
-                          <Package className={`w-4 h-4 shrink-0 ${avail?.status === "critical" ? "text-red-600" : avail?.status === "low" ? "text-amber-600" : "text-muted-foreground"}`} />
+                          <Package className={`w-4 h-4 shrink-0 ${avail?.status === "critical" ? "text-red-600" : avail?.status === "low" ? "text-risk-high" : "text-muted-foreground"}`} />
                           <div>
                             <p className="font-bold text-sm text-foreground">{presc.drugName}</p>
                             <p className="text-[11px] text-muted-foreground">{presc.dosage}</p>

@@ -32,7 +32,7 @@ async function fetchRetrainingJobs() {
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string; badge: any; dot: string }> = {
   operational: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", badge: "success" as const, dot: "bg-emerald-500" },
-  degraded: { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", badge: "warning" as const, dot: "bg-amber-500 animate-pulse" },
+  degraded: { bg: "bg-risk-high-bg", text: "text-risk-high", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high animate-pulse" },
   drift_detected: { bg: "bg-destructive/10", text: "text-red-700", border: "border-red-200", badge: "destructive" as const, dot: "bg-red-500 animate-pulse" },
   monitoring: { bg: "bg-sky-50", text: "text-sky-700", border: "border-sky-200", badge: "info" as const, dot: "bg-sky-500" },
   stable: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", badge: "success" as const, dot: "bg-emerald-500" },
@@ -186,7 +186,7 @@ export default function AIControlCenter() {
         <KpiCard
           title={text("Total AI Decisions", "إجمالي قرارات الذكاء")} value={metrics?.totalDecisions?.toLocaleString()}
           sub={text(`${metrics?.decisionsLast24h} in last 24 hours`, `${metrics?.decisionsLast24h} خلال 24 ساعة`)}
-          icon={Zap} iconBg="bg-amber-100" iconColor="text-amber-600"
+          icon={Zap} iconBg="bg-risk-high-bg" iconColor="text-risk-high"
         />
         <KpiCard
           title={text("Audit Records", "سجلات التدقيق")} value={metrics?.auditRecords?.toLocaleString()}
@@ -245,7 +245,7 @@ export default function AIControlCenter() {
                 <div className="mt-4 grid grid-cols-2 gap-2">
                   {[
                     { label: text("Immediate", "فوري"), value: metrics?.urgencyBreakdown?.immediate, color: "text-red-600", bg: "bg-destructive/10" },
-                    { label: text("Urgent", "عاجل"), value: metrics?.urgencyBreakdown?.urgent, color: "text-amber-600", bg: "bg-amber-50" },
+                    { label: text("Urgent", "عاجل"), value: metrics?.urgencyBreakdown?.urgent, color: "text-risk-high", bg: "bg-risk-high-bg" },
                     { label: text("Soon", "قريب"), value: metrics?.urgencyBreakdown?.soon, color: "text-sky-600", bg: "bg-sky-50" },
                     { label: text("Routine", "روتيني"), value: metrics?.urgencyBreakdown?.routine, color: "text-emerald-600", bg: "bg-emerald-50" },
                   ].map((u, i) => (
@@ -313,7 +313,7 @@ export default function AIControlCenter() {
                       </div>
                       <span className="text-xs font-bold text-foreground w-8">{engine.accuracy}%</span>
                       {driftInfo && (
-                        <span className={`text-[10px] font-bold ${driftInfo.driftScore > 5 ? "text-red-600 bg-destructive/10 border-red-200" : driftInfo.driftScore > 3 ? "text-amber-600 bg-amber-50 border-amber-200" : "text-emerald-600 bg-emerald-50 border-emerald-200"} px-2 py-0.5 rounded-full border`}>
+                        <span className={`text-[10px] font-bold ${driftInfo.driftScore > 5 ? "text-red-600 bg-destructive/10 border-red-200" : driftInfo.driftScore > 3 ? "text-risk-high bg-risk-high-bg border-risk-high/20" : "text-emerald-600 bg-emerald-50 border-emerald-200"} px-2 py-0.5 rounded-full border`}>
                           {text("Drift:", "انحراف:")} {driftInfo.driftScore}
                         </span>
                       )}
@@ -370,7 +370,7 @@ export default function AIControlCenter() {
                           <span className={`text-xs font-bold ${hasDrift ? "text-red-700" : "text-emerald-700"}`} dir="ltr">{driftInfo.driftScore} / {driftInfo.threshold}</span>
                         </div>
                         <div className="mt-1.5 w-full bg-card/60 rounded-full h-1.5">
-                          <div className={`h-full rounded-full ${hasDrift ? "bg-red-500" : isMonitoring ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${Math.min((driftInfo.driftScore / driftInfo.threshold) * 100, 100)}%` }} />
+                          <div className={`h-full rounded-full ${hasDrift ? "bg-red-500" : isMonitoring ? "bg-risk-high" : "bg-emerald-500"}`} style={{ width: `${Math.min((driftInfo.driftScore / driftInfo.threshold) * 100, 100)}%` }} />
                         </div>
                       </div>
                     )}
@@ -451,9 +451,9 @@ export default function AIControlCenter() {
               <div className="space-y-2.5">
                 {[...driftEngines].sort((a: any, b: any) => b.driftScore - a.driftScore).map((engine: any, i: number) => {
                   const pct = (engine.driftScore / 10) * 100;
-                  const color = engine.driftScore > 5 ? "bg-red-500" : engine.driftScore > 3 ? "bg-amber-500" : "bg-emerald-500";
-                  const textColor = engine.driftScore > 5 ? "text-red-700" : engine.driftScore > 3 ? "text-amber-700" : "text-emerald-700";
-                  const bg = engine.driftScore > 5 ? "bg-destructive/10 border-red-100" : engine.driftScore > 3 ? "bg-amber-50 border-amber-100" : "bg-secondary border-border";
+                  const color = engine.driftScore > 5 ? "bg-red-500" : engine.driftScore > 3 ? "bg-risk-high" : "bg-emerald-500";
+                  const textColor = engine.driftScore > 5 ? "text-red-700" : engine.driftScore > 3 ? "text-risk-high" : "text-emerald-700";
+                  const bg = engine.driftScore > 5 ? "bg-destructive/10 border-red-100" : engine.driftScore > 3 ? "bg-risk-high-bg border-risk-high/20" : "bg-secondary border-border";
                   const statusCfg = STATUS_COLORS[engine.status] ?? STATUS_COLORS.stable;
                   return (
                     <div key={i} className={`flex items-center gap-3 px-3.5 py-3 rounded-2xl border ${bg}`}>
@@ -488,10 +488,10 @@ export default function AIControlCenter() {
                 { engine: "Behavioral AI", score: 7.2, cause: text("Ramadan seasonal behavior patterns not captured in training data — medication adherence model degraded for observant patient cohort", "أنماط سلوك رمضان الموسمية غير مُمثّلة في بيانات التدريب — تراجَع نموذج الالتزام الدوائي لفئة المرضى الصائمين"), action: text("Augment training data with seasonal behavioral patterns; implement time-aware feature engineering", "إثراء بيانات التدريب بالأنماط السلوكية الموسمية؛ تطبيق هندسة سمات مدركة للزمن") },
                 { engine: "Policy AI", score: 4.1, cause: text("MOH Circular 47/1445 introduced new screening protocols not reflected in current policy ruleset — minor policy drift", "أدخل تعميم وزارة الصحة 47/1445 بروتوكولات فحص جديدة غير مُضمّنة في قواعد السياسة الحالية — انحراف طفيف"), action: text("Manual rule update + full retrain scheduled for March 2026 review cycle", "تحديث القواعد يدويًا + إعادة تدريب كاملة مجدولة لدورة مراجعة مارس 2026") },
               ].map((item, i) => (
-                <div key={i} className={`px-4 py-3.5 rounded-2xl border ${item.score > 5 ? "bg-destructive/10 border-red-200" : "bg-amber-50 border-amber-200"}`}>
+                <div key={i} className={`px-4 py-3.5 rounded-2xl border ${item.score > 5 ? "bg-destructive/10 border-red-200" : "bg-risk-high-bg border-risk-high/20"}`}>
                   <div className="flex items-center justify-between mb-1.5">
                     <p className="text-sm font-bold text-foreground">{item.engine}</p>
-                    <span className={`text-xs font-bold ${item.score > 5 ? "text-red-600" : "text-amber-600"}`}>{text("Score:", "الدرجة:")} {item.score}</span>
+                    <span className={`text-xs font-bold ${item.score > 5 ? "text-red-600" : "text-risk-high"}`}>{text("Score:", "الدرجة:")} {item.score}</span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2"><span className="font-semibold text-foreground">{text("Root cause:", "السبب الجذري:")}</span> {item.cause}</p>
                   <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
@@ -533,7 +533,7 @@ export default function AIControlCenter() {
                 const isMonitoring = driftInfo?.status === "monitoring";
                 return (
                   <div key={i} className={`flex items-center gap-4 px-5 py-4 ${hasDrift ? "bg-destructive/10/20" : ""}`}>
-                    <div className={`w-2 h-2 rounded-full ${hasDrift ? "bg-red-500 animate-pulse" : isMonitoring ? "bg-amber-500" : "bg-emerald-500"} shrink-0`} />
+                    <div className={`w-2 h-2 rounded-full ${hasDrift ? "bg-red-500 animate-pulse" : isMonitoring ? "bg-risk-high" : "bg-emerald-500"} shrink-0`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground">{engine.name}</p>
                       <p className="text-xs text-muted-foreground">{engine.version} · {text("Accuracy:", "الدقّة:")} {engine.accuracy}% · {text("Drift:", "الانحراف:")} {driftInfo?.driftScore ?? "—"}</p>
@@ -622,7 +622,7 @@ export default function AIControlCenter() {
               <div className="divide-y divide-border">
                 {jobs.jobs.map((job: any, i: number) => (
                   <div key={i} className="flex items-center gap-4 px-5 py-3.5">
-                    <div className={`w-2 h-2 rounded-full ${job.status === "completed" ? "bg-emerald-500" : job.status === "running" ? "bg-blue-500 animate-pulse" : "bg-amber-500"} shrink-0`} />
+                    <div className={`w-2 h-2 rounded-full ${job.status === "completed" ? "bg-emerald-500" : job.status === "running" ? "bg-blue-500 animate-pulse" : "bg-risk-high"} shrink-0`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground font-mono">{job.id}</p>
                       <p className="text-xs text-muted-foreground">{job.engine} · {text("Started:", "بدأ:")} {new Date(job.createdAt || job.startedAt).toLocaleTimeString()} · {text("By:", "بواسطة:")} {job.triggeredBy}</p>
@@ -658,7 +658,7 @@ export default function AIControlCenter() {
                 <div className="space-y-4">
                   {[
                     { urgency: text("Immediate", "فوري"), value: metrics?.urgencyBreakdown?.immediate, color: "bg-red-500", text: "text-red-700" },
-                    { urgency: text("Urgent", "عاجل"), value: metrics?.urgencyBreakdown?.urgent, color: "bg-amber-500", text: "text-amber-700" },
+                    { urgency: text("Urgent", "عاجل"), value: metrics?.urgencyBreakdown?.urgent, color: "bg-risk-high", text: "text-risk-high" },
                     { urgency: text("Soon", "قريب"), value: metrics?.urgencyBreakdown?.soon, color: "bg-sky-500", text: "text-sky-700" },
                     { urgency: text("Routine", "روتيني"), value: metrics?.urgencyBreakdown?.routine, color: "bg-emerald-500", text: "text-emerald-700" },
                   ].map((item, i) => (
@@ -681,7 +681,7 @@ export default function AIControlCenter() {
               <CardBody className="space-y-3">
                 {[
                   { level: text("Critical Risk", "خطورة حرجة"), value: metrics?.riskBreakdown?.critical, color: "bg-red-500", text: "text-red-700" },
-                  { level: text("High Risk", "خطورة مرتفعة"), value: metrics?.riskBreakdown?.high, color: "bg-amber-500", text: "text-amber-700" },
+                  { level: text("High Risk", "خطورة مرتفعة"), value: metrics?.riskBreakdown?.high, color: "bg-risk-high", text: "text-risk-high" },
                   { level: text("Medium Risk", "خطورة متوسطة"), value: metrics?.riskBreakdown?.medium, color: "bg-sky-500", text: "text-sky-700" },
                   { level: text("Low Risk", "خطورة منخفضة"), value: metrics?.riskBreakdown?.low, color: "bg-emerald-500", text: "text-emerald-700" },
                 ].map((item, i) => (
@@ -700,8 +700,8 @@ export default function AIControlCenter() {
                     <p className="text-sm font-bold text-foreground">{metrics?.totalDecisions?.toLocaleString()}</p>
                     <p className="text-[10px] text-muted-foreground">{text("Total Decisions", "إجمالي القرارات")}</p>
                   </div>
-                  <div className="bg-amber-50 border border-amber-100 px-3 py-2.5 rounded-xl text-center">
-                    <p className="text-sm font-bold text-amber-700">{metrics?.lowConfidenceCount?.toLocaleString()}</p>
+                  <div className="bg-risk-high-bg border border-risk-high/20 px-3 py-2.5 rounded-xl text-center">
+                    <p className="text-sm font-bold text-risk-high">{metrics?.lowConfidenceCount?.toLocaleString()}</p>
                     <p className="text-[10px] text-muted-foreground">{text("Low Confidence", "ثقة منخفضة")}</p>
                   </div>
                 </div>
@@ -731,7 +731,7 @@ export default function AIControlCenter() {
                     }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      className={`inline-block h-4 w-4 transform rounded-full bg-card transition-transform ${
                         enabled ? "translate-x-6" : "translate-x-1"
                       }`}
                     />

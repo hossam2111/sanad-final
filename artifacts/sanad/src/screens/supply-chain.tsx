@@ -31,10 +31,10 @@ async function submitReorder(body: Record<string, any>) {
 
 const STATUS_CFG: Record<string, { bg: string; border: string; text: string; badge: any; dot: string }> = {
   critical: { bg: "bg-destructive/10", border: "border-red-200", text: "text-red-700", badge: "destructive" as const, dot: "bg-red-500 animate-pulse" },
-  low: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", badge: "warning" as const, dot: "bg-amber-500" },
+  low: { bg: "bg-risk-high-bg", border: "border-risk-high/20", text: "text-risk-high", badge: "warning" as const, dot: "bg-risk-high" },
   adequate: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", badge: "success" as const, dot: "bg-emerald-500" },
   High: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", badge: "success" as const, dot: "bg-emerald-500" },
-  Medium: { bg: "bg-amber-50", border: "border-amber-200", text: "text-amber-700", badge: "warning" as const, dot: "bg-amber-500" },
+  Medium: { bg: "bg-risk-high-bg", border: "border-risk-high/20", text: "text-risk-high", badge: "warning" as const, dot: "bg-risk-high" },
   Low: { bg: "bg-destructive/10", border: "border-red-200", text: "text-red-700", badge: "destructive" as const, dot: "bg-red-500" },
 };
 
@@ -251,9 +251,9 @@ export default function SupplyChainPortal() {
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               <div className="w-16 bg-secondary rounded-full h-1.5">
-                                <div className={`h-full rounded-full ${item.daysOfStock < 14 ? "bg-red-500" : item.daysOfStock < 30 ? "bg-amber-500" : "bg-emerald-500"}`} style={{ width: `${Math.min((item.daysOfStock / 90) * 100, 100)}%` }} />
+                                <div className={`h-full rounded-full ${item.daysOfStock < 14 ? "bg-red-500" : item.daysOfStock < 30 ? "bg-risk-high" : "bg-emerald-500"}`} style={{ width: `${Math.min((item.daysOfStock / 90) * 100, 100)}%` }} />
                               </div>
-                              <span className={`text-xs font-bold ${item.daysOfStock < 14 ? "text-red-600" : item.daysOfStock < 30 ? "text-amber-600" : "text-foreground"}`}>{item.daysOfStock}{text("d", "d")}</span>
+                              <span className={`text-xs font-bold ${item.daysOfStock < 14 ? "text-red-600" : item.daysOfStock < 30 ? "text-risk-high" : "text-foreground"}`}>{item.daysOfStock}{text("d", "d")}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3">
@@ -394,7 +394,7 @@ export default function SupplyChainPortal() {
                       <p className="text-xs text-muted-foreground mt-0.5">{text("Supplier:", "Supplier:")} {item.supplier} {text("· Lead time:", "· Lead time:")} {item.leadTimeDays}{text("d", "d")}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={`text-2xl font-bold ${item.daysOfStock < 14 ? "text-red-600" : "text-amber-600"}`}>{item.daysOfStock}{text("d", "d")}</p>
+                      <p className={`text-2xl font-bold ${item.daysOfStock < 14 ? "text-red-600" : "text-risk-high"}`}>{item.daysOfStock}{text("d", "d")}</p>
                       <p className="text-[10px] text-muted-foreground">{text("stock left", "stock left")}</p>
                     </div>
                   </div>
@@ -506,8 +506,8 @@ export default function SupplyChainPortal() {
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600" /> {text("Computing recommendations...", "Computing recommendations...")}
                 </div>
               ) : regionalRecs.length > 0 ? regionalRecs.map((rec: any, i: number) => (
-                <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-destructive/10 border-red-200" : "bg-amber-50 border-amber-200"}`}>
-                  <Truck className={`w-4 h-4 shrink-0 mt-0.5 ${rec.urgency === "critical" ? "text-red-600" : "text-amber-600"}`} />
+                <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-destructive/10 border-red-200" : "bg-risk-high-bg border-risk-high/20"}`}>
+                  <Truck className={`w-4 h-4 shrink-0 mt-0.5 ${rec.urgency === "critical" ? "text-red-600" : "text-risk-high"}`} />
                   <div className="flex-1">
                     <p className="text-sm font-bold text-foreground">{rec.region} — {rec.action}</p>
                     {rec.criticalDrugs > 0 && (
@@ -670,7 +670,7 @@ export default function SupplyChainPortal() {
                         <button
                           onClick={() => reorderMutation.mutate({ drugName: item.drugName, quantity: item.avgMonthlyDemand * 3, supplier: item.supplier, requestedBy: "Ibrahim Al-Dosari" })}
                           disabled={reorderMutation.isPending}
-                          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${item.status === "critical" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-amber-100 hover:bg-amber-200 text-amber-800"}`}
+                          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${item.status === "critical" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-risk-high-bg hover:bg-amber-200 text-risk-high"}`}
                         >
                           <ShoppingCart className="w-3 h-3" />
                           {text("Order", "Order")}

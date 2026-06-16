@@ -116,7 +116,7 @@ function gradeLadder(score: number, text: TextFn): { grade: "A" | "B" | "C" | "D
     return { grade: "B", label: text("Good", "جيدة"), color: "text-sky-600", bg: "bg-sky-50",
       summary: text("Your health is generally good. A few areas could benefit from attention.", "صحتك جيدة بشكل عام. هناك جوانب قليلة تستحق الاهتمام.") };
   } else if (score >= 55) {
-    return { grade: "C", label: text("Fair", "مقبولة"), color: "text-amber-600", bg: "bg-amber-50",
+    return { grade: "C", label: text("Fair", "مقبولة"), color: "text-risk-high", bg: "bg-risk-high-bg",
       summary: text("Some health factors need monitoring. Follow your doctor's recommendations.", "بعض العوامل الصحية بحاجة إلى متابعة. اتبع توصيات طبيبك.") };
   } else if (score >= 40) {
     return { grade: "D", label: text("Needs Attention", "تحتاج إلى عناية"), color: "text-orange-600", bg: "bg-orange-50",
@@ -587,8 +587,8 @@ export default function CitizenPortal() {
       <Layout role="citizen" localized>
         <div className="max-w-md mx-auto mt-10">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-3xl bg-amber-100 flex items-center justify-center mx-auto mb-5">
-              <Lock className="w-7 h-7 text-amber-600" />
+            <div className="w-16 h-16 rounded-3xl bg-risk-high-bg flex items-center justify-center mx-auto mb-5">
+              <Lock className="w-7 h-7 text-risk-high" />
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">{text("Link your health record", "اربط سجلك الصحي")}</h1>
             <p className="text-sm text-muted-foreground leading-relaxed">
@@ -657,7 +657,7 @@ export default function CitizenPortal() {
 
   const priorityColors = {
     high: { bg: "bg-destructive/10", border: "border-red-100", badge: "destructive" as const, dot: "bg-red-500" },
-    medium: { bg: "bg-amber-50", border: "border-amber-100", badge: "warning" as const, dot: "bg-amber-500" },
+    medium: { bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high" },
     low: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground" },
   };
 
@@ -684,7 +684,7 @@ export default function CitizenPortal() {
                   </span>
                 )}
               </button>
-              <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} />
+              <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} />
             </div>
             <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }}>
               {text("Sign Out", "تسجيل الخروج")}
@@ -711,7 +711,7 @@ export default function CitizenPortal() {
                 onClick={() => markSseRead(alert.id)}
                 className={`px-4 py-3 flex gap-3 cursor-pointer hover:bg-red-100/40 transition-colors ${!alert.read ? "bg-destructive/10" : "bg-card/50"}`}
               >
-                <ShieldAlert className={`w-4 h-4 mt-0.5 shrink-0 ${alert.severity === "critical" ? "text-red-600" : "text-amber-500"}`} />
+                <ShieldAlert className={`w-4 h-4 mt-0.5 shrink-0 ${alert.severity === "critical" ? "text-red-600" : "text-risk-high"}`} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-red-900">{alert.title}</p>
                   <p className="text-xs text-red-700 mt-0.5 truncate">{alert.significance}</p>
@@ -738,8 +738,8 @@ export default function CitizenPortal() {
       <div className="grid grid-cols-12 gap-4 mb-5">
         <Card className="col-span-7">
           <CardBody className="flex items-center gap-4 p-5">
-            <div className="w-14 h-14 rounded-3xl bg-amber-100 flex items-center justify-center shrink-0">
-              <User className="w-7 h-7 text-amber-600" />
+            <div className="w-14 h-14 rounded-3xl bg-risk-high-bg flex items-center justify-center shrink-0">
+              <User className="w-7 h-7 text-risk-high" />
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-foreground mb-1.5">{patient.fullName}</h2>
@@ -789,7 +789,7 @@ export default function CitizenPortal() {
         <Card className="col-span-2">
           <CardBody className="flex flex-col gap-3 justify-center h-full py-5 px-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Pill className="w-3.5 h-3.5 text-amber-500" /> {text("Active Meds", "الأدوية الفعّالة")}</div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Pill className="w-3.5 h-3.5 text-risk-high" /> {text("Active Meds", "الأدوية الفعّالة")}</div>
               <span className="font-bold text-foreground">{activeMeds.length}</span>
             </div>
             <div className="flex items-center justify-between">
@@ -798,7 +798,7 @@ export default function CitizenPortal() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Bell className="w-3.5 h-3.5 text-red-500" /> {text("Abnormal", "غير طبيعية")}</div>
-              <span className={`font-bold ${abnormal > 0 ? "text-amber-600" : "text-foreground"}`}>{abnormal}</span>
+              <span className={`font-bold ${abnormal > 0 ? "text-risk-high" : "text-foreground"}`}>{abnormal}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lightbulb className="w-3.5 h-3.5 text-violet-500" /> {text("AI Tips", "نصائح ذكية")}</div>
@@ -858,7 +858,7 @@ export default function CitizenPortal() {
                 {/* Overall Health Trajectory */}
                 <div className={`rounded-3xl p-5 ${
                   aiDecision.digitalTwin?.riskTrajectory === "rapidly_worsening" ? "bg-red-600 text-white" :
-                  aiDecision.digitalTwin?.riskTrajectory === "worsening" ? "bg-amber-500 text-white" :
+                  aiDecision.digitalTwin?.riskTrajectory === "worsening" ? "bg-risk-high text-white" :
                   aiDecision.digitalTwin?.riskTrajectory === "improving" ? "bg-emerald-500 text-white" :
                   "bg-sky-500 text-white"
                 }`}>
@@ -890,12 +890,12 @@ export default function CitizenPortal() {
                 {aiDecision.digitalTwin?.predictedConditions && aiDecision.digitalTwin.predictedConditions.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <AlertCircle className="w-3.5 h-3.5 text-amber-500" /> {text("Conditions to Watch Out For", "حالات يجب الانتباه لها")}
+                      <AlertCircle className="w-3.5 h-3.5 text-risk-high" /> {text("Conditions to Watch Out For", "حالات يجب الانتباه لها")}
                     </p>
                     <div className="space-y-2">
                       {aiDecision.digitalTwin.predictedConditions.map((c, i) => (
-                        <div key={i} className="flex items-start gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
-                          <ArrowUpRight className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                        <div key={i} className="flex items-start gap-3 px-4 py-3 bg-risk-high-bg border border-risk-high/20 rounded-xl">
+                          <ArrowUpRight className="w-4 h-4 text-risk-high shrink-0 mt-0.5" />
                           <p className="text-sm text-foreground">{c}</p>
                         </div>
                       ))}
@@ -1002,13 +1002,13 @@ export default function CitizenPortal() {
                   const isGood = item.value <= item.good;
                   return (
                     <div key={item.label} className="flex items-center gap-3 px-4 py-3 bg-secondary rounded-2xl">
-                      <item.icon className={`w-4 h-4 shrink-0 ${isGood ? "text-emerald-500" : item.value >= item.max * 0.7 ? "text-red-500" : "text-amber-500"}`} />
+                      <item.icon className={`w-4 h-4 shrink-0 ${isGood ? "text-emerald-500" : item.value >= item.max * 0.7 ? "text-red-500" : "text-risk-high"}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-foreground truncate">{item.label}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex-1 bg-background rounded-full h-1.5">
                             <div
-                              className={`h-full rounded-full ${isGood ? "bg-emerald-500" : item.value >= item.max * 0.7 ? "bg-red-500" : "bg-amber-500"}`}
+                              className={`h-full rounded-full ${isGood ? "bg-emerald-500" : item.value >= item.max * 0.7 ? "bg-red-500" : "bg-risk-high"}`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -1182,7 +1182,7 @@ const CONSENT_ICONS: Record<string, React.ElementType> = {
 
 const SEVERITY_CFG = {
   high:   { bg: "bg-destructive/10",     border: "border-red-200",    text: "text-red-700",    badge: "destructive" as const },
-  medium: { bg: "bg-amber-50",   border: "border-amber-200",  text: "text-amber-700",  badge: "warning" as const },
+  medium: { bg: "bg-risk-high-bg",   border: "border-risk-high/20",  text: "text-risk-high",  badge: "warning" as const },
   low:    { bg: "bg-emerald-50", border: "border-emerald-200",text: "text-emerald-700",badge: "success" as const },
 };
 
@@ -1325,7 +1325,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
               }`}
             >
               {/* Status dot */}
-              <div className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full border-2 border-white ${
+              <div className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full border-2 border-card ${
                 consent.granted ? "bg-emerald-400 shadow-emerald-200 shadow-sm" : "bg-gray-300"
               }`} />
 
@@ -1351,7 +1351,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
                 <div className="flex-1">
                   <p className="text-[9px] text-muted-foreground/70 font-medium truncate">{consent.legalBasis}</p>
                   {!consent.canRevoke && (
-                    <p className="text-[9px] text-amber-600 font-bold mt-0.5">{text("⚠ Required — cannot revoke", "⚠ مطلوبة — لا يمكن سحبها")}</p>
+                    <p className="text-[9px] text-risk-high font-bold mt-0.5">{text("⚠ Required — cannot revoke", "⚠ مطلوبة — لا يمكن سحبها")}</p>
                   )}
                 </div>
 

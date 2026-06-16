@@ -45,7 +45,7 @@ type PredictionWarning = {
 
 const predictionSeverityStyle: Record<string, { bg: string; border: string; icon: string; badge: "destructive" | "warning" | "info" | "outline" | "success" | "default"  }> = {
   critical: { bg: "bg-destructive/10", border: "border-red-200", icon: "text-red-600", badge: "destructive" },
-  high: { bg: "bg-amber-50", border: "border-amber-200", icon: "text-amber-600", badge: "warning" },
+  high: { bg: "bg-risk-high-bg", border: "border-risk-high/20", icon: "text-risk-high", badge: "warning" },
   moderate: { bg: "bg-sky-50", border: "border-sky-200", icon: "text-sky-600", badge: "info" },
   low: { bg: "bg-secondary", border: "border-border", icon: "text-muted-foreground", badge: "outline" },
 };
@@ -380,7 +380,7 @@ export default function DoctorDashboard() {
       )}
       {criticalPredictions > 0 && (
         <AlertBanner variant="warning">
-          <Brain className="w-4 h-4 text-amber-600 shrink-0" />
+          <Brain className="w-4 h-4 text-risk-high shrink-0" />
           <span>
             <strong>{text("AI Warning:", "إنذار ذكاء اصطناعي:")}</strong>{" "}
             {text(
@@ -411,7 +411,7 @@ export default function DoctorDashboard() {
           <div className="divide-y divide-red-200 max-h-64 overflow-y-auto">
             {sseAlerts.map(alert => (
               <div key={alert.id} className={`px-4 py-3 flex items-start gap-3 ${alert.read ? "opacity-60" : ""}`}>
-                <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${alert.severity === "critical" ? "bg-red-500" : "bg-amber-500"}`} />
+                <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${alert.severity === "critical" ? "bg-red-500" : "bg-risk-high"}`} />
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-sm text-red-900">{alert.title}</p>
                   <p className="text-xs text-red-700 mt-0.5">{alert.patientName} · {alert.result}</p>
@@ -464,7 +464,7 @@ export default function DoctorDashboard() {
                 </span>
               )}
             </button>
-            <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-white ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} title={sseConnected ? text("Live", "مباشر") : text("Offline", "غير متصل")} />
+            <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} title={sseConnected ? text("Live", "مباشر") : text("Offline", "غير متصل")} />
           </div>
         <form onSubmit={handleSearch} className="flex items-center gap-2">
           <div className="relative" ref={searchRef}>
@@ -482,7 +482,7 @@ export default function DoctorDashboard() {
               onFocus={() => setShowDropdown(true)}
             />
             {showDropdown && searchPatients.length > 0 && (
-              <div className="absolute top-full left-0 mt-1 w-full bg-card rounded-2xl shadow-xl border border-black/[0.07] z-50 overflow-hidden">
+              <div className="absolute top-full left-0 mt-1 w-full bg-card rounded-2xl shadow-xl border border-border z-50 overflow-hidden">
                 {searchPatients.map((p: any) => (
                   <button
                     key={p.id}
@@ -613,8 +613,8 @@ export default function DoctorDashboard() {
               value={predictions.length}
               sub={text(`${criticalPredictions} high priority`, `${criticalPredictions} عالية الأولوية`)}
               icon={Brain}
-              iconBg={criticalPredictions > 0 ? "bg-amber-100" : "bg-violet-100"}
-              iconColor={criticalPredictions > 0 ? "text-amber-600" : "text-violet-600"}
+              iconBg={criticalPredictions > 0 ? "bg-risk-high-bg" : "bg-violet-100"}
+              iconColor={criticalPredictions > 0 ? "text-risk-high" : "text-violet-600"}
             />
             <KpiCard
               title={text("Active Alerts", "التنبيهات النشطة")}
@@ -704,14 +704,14 @@ export default function DoctorDashboard() {
                       {/* WHY Block */}
                       <div className="flex-1 min-w-0">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                          <TriangleAlert className="w-3 h-3 text-amber-500" /> {text("WHY — Top Risk Factors", "المُبرّرات — أبرز عوامل الخطورة")}
+                          <TriangleAlert className="w-3 h-3 text-risk-high" /> {text("WHY — Top Risk Factors", "المُبرّرات — أبرز عوامل الخطورة")}
                         </p>
                         <div className="space-y-1.5">
                           {riskScore.factors.slice(0, 4).map((f: any, i: number) => (
-                            <div key={i} className="flex items-center gap-2.5 px-3 py-2 bg-card/70 border border-white rounded-xl">
+                            <div key={i} className="flex items-center gap-2.5 px-3 py-2 bg-card/70 border border-border rounded-xl">
                               <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                                 f.impact === "high" ? "bg-red-500" :
-                                f.impact === "moderate" ? "bg-amber-500" : "bg-primary"
+                                f.impact === "moderate" ? "bg-risk-high" : "bg-primary"
                               }`} />
                               <span className="text-xs font-semibold text-foreground flex-1 truncate">{f.factor}</span>
                               <Badge variant={f.impact === "high" ? "destructive" : f.impact === "moderate" ? "warning" : "info"} className="text-[9px] shrink-0">{f.impact === "high" ? text("high", "مرتفع") : f.impact === "moderate" ? text("moderate", "متوسط") : text("low", "منخفض")}</Badge>
@@ -730,16 +730,16 @@ export default function DoctorDashboard() {
                         </p>
                         <div className="space-y-1.5">
                           {riskScore.recommendations.slice(0, 3).map((rec: string, i: number) => (
-                            <div key={i} className="flex items-start gap-2 px-3 py-2 bg-card/70 border border-white rounded-xl">
+                            <div key={i} className="flex items-start gap-2 px-3 py-2 bg-card/70 border border-border rounded-xl">
                               <Lightbulb className="w-3 h-3 text-primary shrink-0 mt-0.5" />
                               <p className="text-xs text-foreground leading-snug">{rec}</p>
                             </div>
                           ))}
                         </div>
                         {topPredictions.length > 0 && (
-                          <div className="mt-2 px-3 py-2 bg-amber-100/60 border border-amber-200 rounded-xl">
-                            <p className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1">{text("AI Alert", "تنبيه ذكي")}</p>
-                            <p className="text-xs text-amber-800 font-medium">{topPredictions[0]?.title}</p>
+                          <div className="mt-2 px-3 py-2 bg-risk-high-bg/60 border border-risk-high/20 rounded-xl">
+                            <p className="text-[10px] font-bold text-risk-high uppercase tracking-wide mb-1">{text("AI Alert", "تنبيه ذكي")}</p>
+                            <p className="text-xs text-risk-high font-medium">{topPredictions[0]?.title}</p>
                           </div>
                         )}
                       </div>
@@ -833,7 +833,7 @@ export default function DoctorDashboard() {
 
             {activeTab === "record" && recordView === "medications" && (
               <div>
-                <div className="flex items-center justify-between px-5 py-3 border-b border-black/[0.05]" style={{ background: "hsl(240 6% 97%)" }}>
+                <div className="flex items-center justify-between px-5 py-3 border-b border-border" style={{ background: "hsl(240 6% 97%)" }}>
                   <p className="text-xs font-semibold text-muted-foreground">{text(`${activeMeds.length} active prescription${activeMeds.length !== 1 ? "s" : ""}`, `${activeMeds.length} وصفة فعّالة`)}</p>
                   <PrescribeModal patientId={patient.id} />
                 </div>
@@ -863,7 +863,7 @@ export default function DoctorDashboard() {
 
             {activeTab === "record" && recordView === "labs" && (
               <div>
-                <div className="flex items-center gap-3 px-5 py-3 border-b border-black/[0.05]" style={{ background: "hsl(240 6% 97%)" }}>
+                <div className="flex items-center gap-3 px-5 py-3 border-b border-border" style={{ background: "hsl(240 6% 97%)" }}>
                   {criticalLabs > 0 && <Badge variant="destructive">{text(`${criticalLabs} Critical`, `${criticalLabs} حرجة`)}</Badge>}
                   {abnormalLabs > 0 && <Badge variant="warning">{text(`${abnormalLabs} Abnormal`, `${abnormalLabs} غير طبيعية`)}</Badge>}
                   <span className="text-xs text-muted-foreground ms-auto">{text(`${labResults.length} results · sparkline shows value trend over time`, `${labResults.length} نتيجة · يوضّح المخطط المصغّر اتجاه القيم عبر الزمن`)}</span>
@@ -905,7 +905,7 @@ export default function DoctorDashboard() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className={`text-2xl font-black ${latest.val >= 7.0 ? "text-red-600" : latest.val >= 5.7 ? "text-amber-600" : "text-emerald-600"}`}>
+                          <p className={`text-2xl font-black ${latest.val >= 7.0 ? "text-red-600" : latest.val >= 5.7 ? "text-risk-high" : "text-emerald-600"}`}>
                             {latest.val}%
                           </p>
                           <p className="text-[10px] text-muted-foreground">{latest.val >= 7.0 ? "Diabetic range" : latest.val >= 5.7 ? "Pre-diabetic" : "Normal"}</p>
@@ -930,7 +930,7 @@ export default function DoctorDashboard() {
                                   <div className="bg-card rounded-xl px-3 py-2 shadow-lg border border-border text-xs">
                                     <p className="font-bold text-foreground">{d?.val}% HbA1c</p>
                                     <p className="text-muted-foreground">{d?.date}</p>
-                                    <p className={`font-medium mt-0.5 ${d?.val >= 7.0 ? "text-red-600" : d?.val >= 5.7 ? "text-amber-600" : "text-emerald-600"}`}>
+                                    <p className={`font-medium mt-0.5 ${d?.val >= 7.0 ? "text-red-600" : d?.val >= 5.7 ? "text-risk-high" : "text-emerald-600"}`}>
                                       {d?.val >= 7.0 ? text("Diabetic range", "نطاق السكري") : d?.val >= 5.7 ? text("Pre-diabetic", "ما قبل السكري") : text("Normal", "طبيعي")}
                                     </p>
                                   </div>
@@ -967,7 +967,7 @@ export default function DoctorDashboard() {
                     return (
                       <div key={latest.id} className={`px-5 py-3.5 flex items-center gap-4 hover:bg-secondary/20 transition-colors ${
                         latest.status === "critical" ? "border-l-2 border-red-500 bg-destructive/10/30" :
-                        latest.status === "abnormal" ? "border-l-2 border-amber-400 bg-amber-50/20" : ""
+                        latest.status === "abnormal" ? "border-l-2 border-risk-high/50 bg-risk-high-bg/20" : ""
                       }`}>
                         {/* Lab Name + Status */}
                         <div className="w-44 shrink-0">
@@ -1021,7 +1021,7 @@ export default function DoctorDashboard() {
                             <React.Fragment key={i}>
                               <span className={`text-xs font-mono tabular-nums ${
                                 i === chartData.length - 1
-                                  ? (latest.status === "normal" ? "text-emerald-600 font-bold" : latest.status === "critical" ? "text-red-600 font-bold" : "text-amber-600 font-bold")
+                                  ? (latest.status === "normal" ? "text-emerald-600 font-bold" : latest.status === "critical" ? "text-red-600 font-bold" : "text-risk-high font-bold")
                                   : "text-muted-foreground"
                               }`}>{d.val}</span>
                               {i < chartData.length - 1 && (
@@ -1031,7 +1031,7 @@ export default function DoctorDashboard() {
                           ))}
                           {hasChart && (
                             <span className="ml-1">
-                              {trend === "rising" ? <TrendingUp className="w-3.5 h-3.5 text-amber-500 inline" /> :
+                              {trend === "rising" ? <TrendingUp className="w-3.5 h-3.5 text-risk-high inline" /> :
                                trend === "falling" ? <TrendingDown className="w-3.5 h-3.5 text-sky-500 inline" /> :
                                <Minus className="w-3 h-3 text-muted-foreground inline" />}
                             </span>
@@ -1057,7 +1057,7 @@ export default function DoctorDashboard() {
 
             {activeTab === "record" && recordView === "visits" && (
               <div>
-                <div className="px-5 py-3 border-b border-black/[0.05]" style={{ background: "hsl(240 6% 97%)" }}>
+                <div className="px-5 py-3 border-b border-border" style={{ background: "hsl(240 6% 97%)" }}>
                   <p className="text-xs font-semibold text-muted-foreground">{text(`${patient.visits?.length ?? 0} recorded visits`, `${patient.visits?.length ?? 0} زيارة مُسجّلة`)}</p>
                 </div>
                 <table className="w-full data-table">
@@ -1082,7 +1082,7 @@ export default function DoctorDashboard() {
 
             {activeTab === "alerts" && (
               <div>
-                <div className="flex items-center justify-between px-5 py-3 border-b border-black/[0.05]" style={{ background: "hsl(240 6% 97%)" }}>
+                <div className="flex items-center justify-between px-5 py-3 border-b border-border" style={{ background: "hsl(240 6% 97%)" }}>
                   <div className="flex items-center gap-2">
                     {unreadAlerts > 0 && <Badge variant="destructive">{text(`${unreadAlerts} unread`, `${unreadAlerts} غير مقروء`)}</Badge>}
                     <span className="text-xs text-muted-foreground">{text(`${alerts.length} total alerts`, `${alerts.length} إجمالي التنبيهات`)}</span>
@@ -1111,10 +1111,10 @@ export default function DoctorDashboard() {
                 ) : (
                   <div className="divide-y divide-border">
                     {alerts.map(alert => (
-                      <div key={alert.id} className={`flex items-start gap-4 px-5 py-4 transition-colors ${alert.isRead ? "opacity-60" : "bg-amber-50/30"}`}>
+                      <div key={alert.id} className={`flex items-start gap-4 px-5 py-4 transition-colors ${alert.isRead ? "opacity-60" : "bg-risk-high-bg/30"}`}>
                         <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
                           alert.severity === "critical" ? "bg-red-600" :
-                          alert.severity === "high" ? "bg-amber-500" :
+                          alert.severity === "high" ? "bg-risk-high" :
                           alert.severity === "moderate" ? "bg-sky-500" : "bg-secondary"
                         }`} />
                         <div className="flex-1 min-w-0">
@@ -1168,7 +1168,7 @@ export default function DoctorDashboard() {
                     {/* Urgency Header Strip */}
                     <div className={`rounded-2xl p-5 ${
                       aiDecision.urgency === "immediate" ? "bg-red-600 text-white" :
-                      aiDecision.urgency === "urgent" ? "bg-amber-500 text-white" :
+                      aiDecision.urgency === "urgent" ? "bg-risk-high text-white" :
                       aiDecision.urgency === "soon" ? "bg-sky-500 text-white" :
                       "bg-emerald-500 text-white"
                     }`}>
@@ -1207,19 +1207,19 @@ export default function DoctorDashboard() {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <TriangleAlert className="w-3.5 h-3.5 text-amber-500" /> {text("WHY — Clinical Factors", "المُبرّرات — العوامل السريرية")}
+                          <TriangleAlert className="w-3.5 h-3.5 text-risk-high" /> {text("WHY — Clinical Factors", "المُبرّرات — العوامل السريرية")}
                         </p>
                         <div className="space-y-2">
                           {aiDecision.whyFactors.map((f, i) => (
                             <div key={i} className={`flex items-start gap-3 px-3.5 py-3 rounded-2xl border ${
                               f.impact === "critical" ? "bg-destructive/10 border-red-200" :
-                              f.impact === "high" ? "bg-amber-50 border-amber-200" :
+                              f.impact === "high" ? "bg-risk-high-bg border-risk-high/20" :
                               f.impact === "moderate" ? "bg-sky-50 border-sky-200" :
                               "bg-secondary border-border"
                             }`}>
                               <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${
                                 f.impact === "critical" ? "bg-red-600" :
-                                f.impact === "high" ? "bg-amber-500" :
+                                f.impact === "high" ? "bg-risk-high" :
                                 f.impact === "moderate" ? "bg-sky-500" : "bg-muted-foreground"
                               }`} />
                               <div className="flex-1 min-w-0">
@@ -1272,7 +1272,7 @@ export default function DoctorDashboard() {
                     {aiDecision.digitalTwin && (
                       <div className={`p-5 rounded-2xl border-2 ${
                         aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "bg-destructive/10 border-red-300" :
-                        aiDecision.digitalTwin.riskTrajectory === "worsening" ? "bg-amber-50 border-amber-200" :
+                        aiDecision.digitalTwin.riskTrajectory === "worsening" ? "bg-risk-high-bg border-risk-high/20" :
                         aiDecision.digitalTwin.riskTrajectory === "improving" ? "bg-emerald-50 border-emerald-200" :
                         "bg-secondary border-border"
                       }`}>
@@ -1283,7 +1283,7 @@ export default function DoctorDashboard() {
                             </p>
                             <p className="font-bold text-foreground">{text("Trajectory:", "المسار:")} <span className={
                               aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "text-red-600" :
-                              aiDecision.digitalTwin.riskTrajectory === "worsening" ? "text-amber-600" :
+                              aiDecision.digitalTwin.riskTrajectory === "worsening" ? "text-risk-high" :
                               aiDecision.digitalTwin.riskTrajectory === "improving" ? "text-emerald-600" :
                               "text-muted-foreground"
                             }>{trajectoryLabel(aiDecision.digitalTwin.riskTrajectory, text)}</span></p>
@@ -1292,7 +1292,7 @@ export default function DoctorDashboard() {
                             <p className="text-xs text-muted-foreground">{text("Projected Risk Score", "درجة الخطورة المتوقعة")}</p>
                             <p className={`text-3xl font-bold tabular-nums ${
                               aiDecision.digitalTwin.projectedRiskScore >= 70 ? "text-red-600" :
-                              aiDecision.digitalTwin.projectedRiskScore >= 50 ? "text-amber-600" : "text-emerald-600"
+                              aiDecision.digitalTwin.projectedRiskScore >= 50 ? "text-risk-high" : "text-emerald-600"
                             }`}>{aiDecision.digitalTwin.projectedRiskScore}<span className="text-sm text-muted-foreground font-normal">/100</span></p>
                           </div>
                         </div>
@@ -1300,7 +1300,7 @@ export default function DoctorDashboard() {
                           <div className="space-y-1.5 mb-3">
                             {aiDecision.digitalTwin.predictedConditions.map((c, i) => (
                               <div key={i} className="flex items-start gap-2 text-xs text-foreground">
-                                <ArrowUpRight className="w-3.5 h-3.5 shrink-0 text-amber-600 mt-0.5" />
+                                <ArrowUpRight className="w-3.5 h-3.5 shrink-0 text-risk-high mt-0.5" />
                                 <span>{c}</span>
                               </div>
                             ))}
@@ -1321,12 +1321,12 @@ export default function DoctorDashboard() {
                         <div className="space-y-2">
                           {aiDecision.behavioralFlags.map((flag, i) => (
                             <div key={i} className={`flex items-start gap-3 p-4 rounded-2xl border ${
-                              flag.severity === "high" ? "bg-amber-50 border-amber-200" :
+                              flag.severity === "high" ? "bg-risk-high-bg border-risk-high/20" :
                               flag.severity === "moderate" ? "bg-sky-50 border-sky-200" :
                               "bg-secondary border-border"
                             }`}>
                               <Bell className={`w-4 h-4 shrink-0 mt-0.5 ${
-                                flag.severity === "high" ? "text-amber-600" :
+                                flag.severity === "high" ? "text-risk-high" :
                                 flag.severity === "moderate" ? "text-sky-600" : "text-muted-foreground"
                               }`} />
                               <div>
@@ -1375,7 +1375,7 @@ export default function DoctorDashboard() {
                               </div>
                               <p className="font-bold text-sm text-foreground">{p.title}</p>
                               <p className="text-xs text-muted-foreground mt-0.5">{p.description}</p>
-                              <div className="mt-2 p-2.5 bg-card/60 border border-white rounded-xl">
+                              <div className="mt-2 p-2.5 bg-card/60 border border-border rounded-xl">
                                 <p className="text-xs font-semibold text-foreground">{text("Recommendation:", "التوصية:")} {p.recommendation}</p>
                               </div>
                             </div>
@@ -1583,7 +1583,7 @@ export default function DoctorDashboard() {
                           <div key={i} className="flex items-start gap-3 p-3.5 bg-secondary rounded-2xl">
                             <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
                               f.impact === "high" ? "bg-red-500" :
-                              f.impact === "moderate" ? "bg-amber-500" : "bg-primary"
+                              f.impact === "moderate" ? "bg-risk-high" : "bg-primary"
                             }`} />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between gap-2">

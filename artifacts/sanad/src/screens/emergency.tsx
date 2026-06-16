@@ -57,13 +57,13 @@ const actionConfig: Record<ClinicalAction["action"], { icon: React.ElementType; 
   HOLD_MEDICATION: { icon: PauseCircle, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200", label: "HOLD" },
   URGENT_REVIEW: { icon: Brain, color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-200", label: "URGENT REVIEW" },
   ALERT_FAMILY: { icon: PhoneCall, color: "text-blue-700", bg: "bg-primary/10", border: "border-blue-200", label: "ALERT FAMILY" },
-  MONITOR: { icon: Eye, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200", label: "MONITOR" },
+  MONITOR: { icon: Eye, color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "MONITOR" },
   PREPARE_EQUIPMENT: { icon: Wrench, color: "text-sky-700", bg: "bg-sky-50", border: "border-sky-200", label: "PREPARE" },
 };
 
 const priorityBadge: Record<ClinicalAction["priority"], string> = {
   immediate: "bg-red-600 text-white",
-  urgent: "bg-amber-500 text-white",
+  urgent: "bg-risk-high text-white",
   standard: "bg-secondary text-muted-foreground",
 };
 
@@ -194,12 +194,12 @@ export default function EmergencyPage() {
           {/* TRIAGE LEVEL STRIP */}
           <div className={`rounded-3xl overflow-hidden border-2 ${
             (patient as unknown as EmergencyPatient).riskLevel === "critical" ? "border-red-500" :
-            (patient as unknown as EmergencyPatient).riskLevel === "high" ? "border-amber-400" :
+            (patient as unknown as EmergencyPatient).riskLevel === "high" ? "border-risk-high/50" :
             "border-sky-400"
           }`}>
             <div className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:gap-5 ${
               (patient as unknown as EmergencyPatient).riskLevel === "critical" ? "bg-red-600" :
-              (patient as unknown as EmergencyPatient).riskLevel === "high" ? "bg-amber-500" :
+              (patient as unknown as EmergencyPatient).riskLevel === "high" ? "bg-risk-high" :
               "bg-sky-500"
             } text-white`}>
               <div className="hidden shrink-0 sm:block">
@@ -360,7 +360,7 @@ export default function EmergencyPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <UserCheck className="w-4 h-4 text-amber-600" />
+                  <UserCheck className="w-4 h-4 text-risk-high" />
                   <CardTitle>{text("Clinical Guidance", "إرشادات سريرية")}</CardTitle>
                 </div>
                 <Badge variant="warning">{text(`${urgentActions.length} notes`, `${urgentActions.length} ملاحظات`)}</Badge>
@@ -440,7 +440,7 @@ export default function EmergencyPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Pill className="w-4 h-4 text-amber-600" />
+                  <Pill className="w-4 h-4 text-risk-high" />
                   <CardTitle>{text("Active Medications", "الأدوية الفعّالة")}</CardTitle>
                 </div>
                 <Badge variant="warning">{patient.currentMedications.length}</Badge>

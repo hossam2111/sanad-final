@@ -131,7 +131,7 @@ export default function LabPortal() {
       return <TrendingUp className="w-3.5 h-3.5 text-red-500" />;
     }
     if (trend === "NORMAL" || trend === "OPTIMAL") return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />;
-    return <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />;
+    return <AlertTriangle className="w-3.5 h-3.5 text-risk-high" />;
   };
 
   return (
@@ -171,7 +171,7 @@ export default function LabPortal() {
       {error && (
         <Card>
           <CardBody className="py-10 text-center">
-            <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-3" />
+            <AlertTriangle className="w-8 h-8 text-risk-high mx-auto mb-3" />
             <p className="font-bold text-foreground">{text("Patient Not Found", "المريض غير موجود")}</p>
             <p className="text-sm text-muted-foreground mt-1">{text("No records for National ID:", "لا توجد سجلات لرقم الهوية:")} <span dir="ltr">{nationalId}</span></p>
           </CardBody>
@@ -183,7 +183,7 @@ export default function LabPortal() {
           {/* Patient Strip */}
           <div className={`rounded-3xl p-5 flex items-center justify-between gap-5 ${
             data.patient.riskLevel === "critical" ? "bg-red-600" :
-            data.patient.riskLevel === "high" ? "bg-amber-500" :
+            data.patient.riskLevel === "high" ? "bg-risk-high" :
             "bg-teal-500"
           } text-white`}>
             <div>
@@ -319,7 +319,7 @@ export default function LabPortal() {
 
           {/* AI Interpretation of last submitted result */}
           {lastResult && (
-            <div className={`rounded-2xl p-5 border-2 ${lastResult.aiAnalysis?.status === "critical" ? "bg-destructive/10 border-red-300" : lastResult.aiAnalysis?.status === "abnormal" ? "bg-amber-50 border-amber-300" : "bg-emerald-50 border-emerald-300"}`}>
+            <div className={`rounded-2xl p-5 border-2 ${lastResult.aiAnalysis?.status === "critical" ? "bg-destructive/10 border-red-300" : lastResult.aiAnalysis?.status === "abnormal" ? "bg-risk-high-bg border-risk-high/20" : "bg-emerald-50 border-emerald-300"}`}>
               <div className="flex items-start gap-3 mb-3">
                 <Brain className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
                 <div>
@@ -446,7 +446,7 @@ export default function LabPortal() {
                 </div>
               ) : (
                 data.labs.map((lab: any) => (
-                  <div key={lab.id} className={`p-4 ${lab.status === "critical" ? "bg-destructive/10/50" : lab.status === "abnormal" ? "bg-amber-50/30" : ""}`}>
+                  <div key={lab.id} className={`p-4 ${lab.status === "critical" ? "bg-destructive/10/50" : lab.status === "abnormal" ? "bg-risk-high-bg/30" : ""}`}>
                     <div className="flex items-start gap-4">
                       <div className="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-teal-500" />
                       <div className="flex-1 min-w-0">
@@ -466,7 +466,7 @@ export default function LabPortal() {
                         </div>
                         <div className={`px-3 py-2.5 rounded-xl border text-xs ${
                           lab.status === "critical" ? "bg-destructive/10 border-red-200" :
-                          lab.status === "abnormal" ? "bg-amber-50 border-amber-200" :
+                          lab.status === "abnormal" ? "bg-risk-high-bg border-risk-high/20" :
                           "bg-emerald-50 border-emerald-200"
                         }`}>
                           <div className="flex items-start gap-2">

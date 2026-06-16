@@ -35,20 +35,20 @@ async function fetchFamilyData(nationalId: string) {
 
 const RISK_CONFIG = {
   high: { color: "text-red-700", bg: "bg-destructive/10", border: "border-red-200", badge: "destructive" as const, dot: "bg-red-500", bar: "#ef4444" },
-  medium: { color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-200", badge: "warning" as const, dot: "bg-amber-500", bar: "#f59e0b" },
+  medium: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high", bar: "#f59e0b" },
   low: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200", badge: "success" as const, dot: "bg-emerald-500", bar: "#22c55e" },
 };
 
 const STATUS_CONFIG = {
   "high-risk": { bg: "bg-red-100", border: "border-red-200", text: "text-red-700", ringColor: "ring-red-400", dotColor: "bg-red-500" },
-  "moderate": { bg: "bg-amber-100", border: "border-amber-200", text: "text-amber-700", ringColor: "ring-amber-400", dotColor: "bg-amber-500" },
+  "moderate": { bg: "bg-risk-high-bg", border: "border-risk-high/20", text: "text-risk-high", ringColor: "ring-amber-400", dotColor: "bg-risk-high" },
   "healthy": { bg: "bg-emerald-100", border: "border-emerald-200", text: "text-emerald-700", ringColor: "ring-emerald-400", dotColor: "bg-emerald-500" },
 };
 
 function FamilyMemberCard({ member, isPatient = false }: { member: any; isPatient?: boolean }) {
   const statusCfg = STATUS_CONFIG[member.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG["healthy"];
-  const riskColor = member.riskScore >= 70 ? "text-red-600" : member.riskScore >= 40 ? "text-amber-600" : "text-emerald-600";
-  const riskBg = member.riskScore >= 70 ? "bg-destructive/10" : member.riskScore >= 40 ? "bg-amber-50" : "bg-emerald-50";
+  const riskColor = member.riskScore >= 70 ? "text-red-600" : member.riskScore >= 40 ? "text-risk-high" : "text-emerald-600";
+  const riskBg = member.riskScore >= 70 ? "bg-destructive/10" : member.riskScore >= 40 ? "bg-risk-high-bg" : "bg-emerald-50";
 
   return (
     <div className={`relative p-4 rounded-2xl border-2 transition-all ${isPatient ? "border-primary bg-primary/5 ring-2 ring-primary/20" : `${statusCfg.border} ${statusCfg.bg} ring-1 ${statusCfg.ringColor}/20`}`}>
@@ -175,16 +175,16 @@ export default function FamilyPortal() {
         consentRequired ? (
           // The consent gate is a feature, not a failure: record access here is
           // controlled by the patient's Family Health Linking consent.
-          <Card className="border-amber-200 bg-amber-50">
+          <Card className="border-risk-high/20 bg-risk-high-bg">
             <CardBody className="p-5">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-                  <Shield className="w-4.5 h-4.5 text-amber-600" />
+                <div className="w-9 h-9 rounded-xl bg-risk-high-bg flex items-center justify-center shrink-0">
+                  <Shield className="w-4.5 h-4.5 text-risk-high" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-amber-900 mb-1">{text("Family Health Linking consent required", "مطلوبة موافقة الربط الصحي للأسرة")}</p>
-                  <p className="text-sm text-amber-800">{error instanceof Error ? error.message : text("This patient has not granted Family Health Linking consent.", "لم يمنح هذا المريض موافقة الربط الصحي للأسرة.")}</p>
-                  <p className="mt-2 text-xs text-amber-700">{text("The record holder controls this access from the Privacy tab of their SANAD citizen portal. Access attempts are recorded in the national audit chain.", "يتحكّم صاحب السجل بهذا الوصول من تبويب الخصوصية في بوابته بسند. وتُسجّل محاولات الوصول في سلسلة التدقيق الوطنية.")}</p>
+                  <p className="text-sm font-bold text-risk-high mb-1">{text("Family Health Linking consent required", "مطلوبة موافقة الربط الصحي للأسرة")}</p>
+                  <p className="text-sm text-risk-high">{error instanceof Error ? error.message : text("This patient has not granted Family Health Linking consent.", "لم يمنح هذا المريض موافقة الربط الصحي للأسرة.")}</p>
+                  <p className="mt-2 text-xs text-risk-high">{text("The record holder controls this access from the Privacy tab of their SANAD citizen portal. Access attempts are recorded in the national audit chain.", "يتحكّم صاحب السجل بهذا الوصول من تبويب الخصوصية في بوابته بسند. وتُسجّل محاولات الوصول في سلسلة التدقيق الوطنية.")}</p>
                 </div>
               </div>
             </CardBody>
@@ -203,10 +203,10 @@ export default function FamilyPortal() {
         <div className="space-y-5">
           {/* Alert Banner */}
           {data.familyRiskAlert && (
-            <div className={`flex items-start gap-3 p-4 border-2 rounded-3xl ${data.summary.overallFamilyRisk === "HIGH" ? "bg-destructive/10 border-red-300" : "bg-amber-50 border-amber-300"}`}>
-              <AlertTriangle className={`w-5 h-5 shrink-0 mt-0.5 ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-600" : "text-amber-600"}`} />
+            <div className={`flex items-start gap-3 p-4 border-2 rounded-3xl ${data.summary.overallFamilyRisk === "HIGH" ? "bg-destructive/10 border-red-300" : "bg-risk-high-bg border-risk-high/20"}`}>
+              <AlertTriangle className={`w-5 h-5 shrink-0 mt-0.5 ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-600" : "text-risk-high"}`} />
               <div>
-                <p className={`text-sm font-bold ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-800" : "text-amber-800"}`}>{data.familyRiskAlert}</p>
+                <p className={`text-sm font-bold ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-800" : "text-risk-high"}`}>{data.familyRiskAlert}</p>
                 <div className="flex items-center gap-3 mt-1.5">
                   <span className="text-[10px] font-semibold text-muted-foreground">{text(`${data.summary.totalMembers} family members mapped`, `${data.summary.totalMembers} فرد مُسجّل`)}</span>
                   <span className="text-[10px] font-semibold text-red-600">{text(`${data.summary.highRiskMembers} high-risk`, `${data.summary.highRiskMembers} مرتفع الخطورة`)}</span>
@@ -215,7 +215,7 @@ export default function FamilyPortal() {
               </div>
               <div className="ms-auto shrink-0 text-end">
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Family Risk", "خطورة الأسرة")}</p>
-                <p className={`text-2xl font-bold ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-600" : data.summary.overallFamilyRisk === "MODERATE" ? "text-amber-600" : "text-emerald-600"}`}>{data.summary.overallFamilyRisk === "HIGH" ? text("HIGH", "مرتفعة") : data.summary.overallFamilyRisk === "MODERATE" ? text("MODERATE", "متوسطة") : text("LOW", "منخفضة")}</p>
+                <p className={`text-2xl font-bold ${data.summary.overallFamilyRisk === "HIGH" ? "text-red-600" : data.summary.overallFamilyRisk === "MODERATE" ? "text-risk-high" : "text-emerald-600"}`}>{data.summary.overallFamilyRisk === "HIGH" ? text("HIGH", "مرتفعة") : data.summary.overallFamilyRisk === "MODERATE" ? text("MODERATE", "متوسطة") : text("LOW", "منخفضة")}</p>
               </div>
             </div>
           )}
@@ -223,10 +223,10 @@ export default function FamilyPortal() {
           {/* Summary KPIs */}
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-red-600" : data.heritabilityScore >= 40 ? "text-amber-600" : "text-emerald-600", bg: data.heritabilityScore >= 70 ? "bg-destructive/10" : "bg-secondary" },
+              { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-red-600" : data.heritabilityScore >= 40 ? "text-risk-high" : "text-emerald-600", bg: data.heritabilityScore >= 70 ? "bg-destructive/10" : "bg-secondary" },
               { label: text("Genetic Risk Factors", "عوامل الخطورة الوراثية"), value: data.geneticRisks?.length, suffix: text(" identified", " مُحدّد"), color: "text-violet-600", bg: "bg-violet-50" },
               { label: text("Family Members Linked", "أفراد الأسرة المرتبطون"), value: data.summary?.totalMembers, suffix: text(" members", " فرد"), color: "text-primary", bg: "bg-primary/5" },
-              { label: text("Patient Risk Score", "درجة خطورة المريض"), value: data.patient?.riskScore, suffix: "/100", color: data.patient?.riskScore >= 70 ? "text-red-600" : "text-amber-600", bg: "bg-amber-50" },
+              { label: text("Patient Risk Score", "درجة خطورة المريض"), value: data.patient?.riskScore, suffix: "/100", color: data.patient?.riskScore >= 70 ? "text-red-600" : "text-risk-high", bg: "bg-risk-high-bg" },
             ].map((kpi, i) => (
               <div key={i} className={`p-5 rounded-3xl ${kpi.bg}`}>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{kpi.label}</p>
@@ -372,10 +372,10 @@ export default function FamilyPortal() {
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Transmission Probability", "احتمال الانتقال")}</p>
                           <div className="flex items-center gap-3">
                             <div className="flex-1 h-3 bg-card rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${risk.riskLevel === "high" ? "bg-red-500" : risk.riskLevel === "medium" ? "bg-amber-500" : "bg-emerald-500"}`}
+                              <div className={`h-full rounded-full ${risk.riskLevel === "high" ? "bg-red-500" : risk.riskLevel === "medium" ? "bg-risk-high" : "bg-emerald-500"}`}
                                 style={{ width: `${risk.transmissionProb * 100}%` }} />
                             </div>
-                            <span className={`text-sm font-bold shrink-0 ${risk.riskLevel === "high" ? "text-red-600" : risk.riskLevel === "medium" ? "text-amber-600" : "text-emerald-600"}`}>
+                            <span className={`text-sm font-bold shrink-0 ${risk.riskLevel === "high" ? "text-red-600" : risk.riskLevel === "medium" ? "text-risk-high" : "text-emerald-600"}`}>
                               {Math.round(risk.transmissionProb * 100)}%
                             </span>
                           </div>
@@ -448,7 +448,7 @@ export default function FamilyPortal() {
                   <CardBody className="space-y-2.5">
                     {data.conditionBurden?.slice(0, 6).map((c: any, i: number) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-secondary rounded-2xl">
-                        <div className={`w-2 h-2 rounded-full shrink-0 ${i === 0 ? "bg-red-500" : i === 1 ? "bg-orange-500" : i <= 3 ? "bg-amber-500" : "bg-blue-500"}`} />
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${i === 0 ? "bg-red-500" : i === 1 ? "bg-orange-500" : i <= 3 ? "bg-risk-high" : "bg-blue-500"}`} />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-foreground truncate">{c.condition}</p>
                           <p className="text-[10px] text-muted-foreground">{c.penetrance}</p>
@@ -484,9 +484,9 @@ export default function FamilyPortal() {
                         </LineChart>
                       </ResponsiveContainer>
                     </div>
-                    <div className="mt-3 p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5">
-                      <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      <p className="text-xs text-amber-800">{text("AI projection based on current chronic condition trajectory, age-related risk accumulation, and hereditary penetrance rates. Assumes no major lifestyle or therapeutic intervention.", "توقّع ذكي مبني على مسار الأمراض المزمنة الحالي، وتراكم الخطورة المرتبط بالعمر، ومعدّلات النفاذية الوراثية. يفترض عدم وجود تدخّل علاجي أو في نمط الحياة.")}</p>
+                    <div className="mt-3 p-3.5 bg-risk-high-bg border border-risk-high/20 rounded-2xl flex items-start gap-2.5">
+                      <Info className="w-4 h-4 text-risk-high shrink-0 mt-0.5" />
+                      <p className="text-xs text-risk-high">{text("AI projection based on current chronic condition trajectory, age-related risk accumulation, and hereditary penetrance rates. Assumes no major lifestyle or therapeutic intervention.", "توقّع ذكي مبني على مسار الأمراض المزمنة الحالي، وتراكم الخطورة المرتبط بالعمر، ومعدّلات النفاذية الوراثية. يفترض عدم وجود تدخّل علاجي أو في نمط الحياة.")}</p>
                     </div>
                   </CardBody>
                 </Card>
@@ -548,7 +548,7 @@ export default function FamilyPortal() {
                 <CardBody className="p-0">
                   <div className="divide-y divide-border">
                     {[{ ...data.patient, relationship: text("Index Patient (You)", "المريض الأساسي (أنت)") }, ...(data.familyMembers ?? [])].map((m: any, i: number) => {
-                      const riskColor = m.riskScore >= 70 ? "text-red-600 bg-destructive/10" : m.riskScore >= 40 ? "text-amber-600 bg-amber-50" : "text-emerald-600 bg-emerald-50";
+                      const riskColor = m.riskScore >= 70 ? "text-red-600 bg-destructive/10" : m.riskScore >= 40 ? "text-risk-high bg-risk-high-bg" : "text-emerald-600 bg-emerald-50";
                       return (
                         <div key={i} className="flex items-center gap-4 px-5 py-3.5 hover:bg-secondary/30 transition-colors">
                           <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center shrink-0">

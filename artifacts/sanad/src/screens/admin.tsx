@@ -258,7 +258,7 @@ export default function AdminDashboard() {
     <Layout role="admin" localized>
       {stats && stats.highRiskPatients > 0 && (
         <AlertBanner variant="warning">
-          <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+          <AlertTriangle className="w-4 h-4 text-risk-high shrink-0" />
           <span>
             <strong>{text(`${stats.highRiskPatients} patients`, `${stats.highRiskPatients} مريض`)}</strong> {text("currently classified as high or critical risk require clinical follow-up.", "مصنّفون حاليًا ضمن الخطورة المرتفعة أو الحرجة ويحتاجون إلى متابعة سريرية.")}
           </span>
@@ -412,7 +412,7 @@ export default function AdminDashboard() {
           {stats?.riskDistribution && (
             <Card className="col-span-6">
               <CardHeader>
-                <div className="flex items-center gap-2"><PieIcon className="w-4 h-4 text-amber-600" /><CardTitle>{text("Patient Risk Distribution", "توزيع خطورة المرضى")}</CardTitle></div>
+                <div className="flex items-center gap-2"><PieIcon className="w-4 h-4 text-risk-high" /><CardTitle>{text("Patient Risk Distribution", "توزيع خطورة المرضى")}</CardTitle></div>
                 <Badge variant="warning">{text(`${stats.highRiskPatients} high/critical`, `${stats.highRiskPatients} مرتفعة/حرجة`)}</Badge>
               </CardHeader>
               <CardBody>
@@ -494,7 +494,7 @@ export default function AdminDashboard() {
                 {/* AI Engine Status */}
                 <div>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Zap className="w-3.5 h-3.5 text-amber-500" /> {text("AI Engine Cluster — 9 Active Engines", "عنقود محرّكات الذكاء — 9 محرّكات نشطة")}
+                    <Zap className="w-3.5 h-3.5 text-risk-high" /> {text("AI Engine Cluster — 9 Active Engines", "عنقود محرّكات الذكاء — 9 محرّكات نشطة")}
                   </p>
                   <div className="grid grid-cols-3 gap-2.5">
                     {[
@@ -528,9 +528,9 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-2 gap-2.5">
                       {((intelligence as Record<string, any>)).epidemicRadar.map((item: any, i: number) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${
-                          item.alert === "high" ? "bg-destructive/10 border-red-200" : item.alert === "medium" ? "bg-amber-50 border-amber-200" : "bg-secondary border-border"
+                          item.alert === "high" ? "bg-destructive/10 border-red-200" : item.alert === "medium" ? "bg-risk-high-bg border-risk-high/20" : "bg-secondary border-border"
                         }`}>
-                          <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${item.alert === "high" ? "bg-red-500" : item.alert === "medium" ? "bg-amber-500" : "bg-muted-foreground"}`} />
+                          <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${item.alert === "high" ? "bg-red-500" : item.alert === "medium" ? "bg-risk-high" : "bg-muted-foreground"}`} />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <p className="text-sm font-bold text-foreground">{item.condition}</p>

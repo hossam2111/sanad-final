@@ -13,9 +13,9 @@ export function Card({ className, children, ...props }: React.HTMLAttributes<HTM
   return (
     <div
       className={cn(
-        "bg-white rounded-[20px]",
+        "bg-card rounded-[20px]",
         "shadow-[0_1px_3px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.04)]",
-        "border border-black/[0.05]",
+        "border border-border",
         className
       )}
       {...props}
@@ -27,7 +27,7 @@ export function Card({ className, children, ...props }: React.HTMLAttributes<HTM
 
 export function CardHeader({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex items-center justify-between px-5 py-4 border-b border-black/[0.05]", className)} {...props}>
+    <div className={cn("flex items-center justify-between px-5 py-4 border-b border-border", className)} {...props}>
       {children}
     </div>
   );
@@ -65,7 +65,7 @@ export function Button({
   const variants = {
     primary:     "bg-primary text-white hover:bg-primary/90 shadow-sm shadow-primary/20 active:scale-[0.97]",
     secondary:   "bg-secondary text-foreground hover:bg-border active:scale-[0.97]",
-    outline:     "border border-black/[0.1] bg-white text-foreground hover:bg-secondary active:scale-[0.97]",
+    outline:     "border border-border bg-card text-foreground hover:bg-secondary active:scale-[0.97]",
     destructive: "bg-destructive text-white hover:bg-destructive/90 shadow-sm shadow-destructive/20 active:scale-[0.97]",
     accent:      "bg-primary text-white hover:bg-primary/90 shadow-sm shadow-primary/20 active:scale-[0.97]",
     ghost:       "bg-transparent text-foreground hover:bg-secondary active:scale-[0.97]",
@@ -105,7 +105,7 @@ export function Input({ className, ...props }: React.InputHTMLAttributes<HTMLInp
   return (
     <input
       className={cn(
-        "flex h-9 w-full rounded-[12px] border border-black/[0.1] bg-white px-4 py-2 text-sm",
+        "flex h-9 w-full rounded-[12px] border border-border bg-background px-4 py-2 text-sm",
         "placeholder:text-muted-foreground/60",
         "focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/40",
         "transition-all duration-150 ease-out",
@@ -122,7 +122,7 @@ export function Select({ className, children, ...props }: React.SelectHTMLAttrib
   return (
     <select
       className={cn(
-        "flex h-9 w-full rounded-[12px] border border-black/[0.1] bg-white px-4 py-2 text-sm",
+        "flex h-9 w-full rounded-[12px] border border-border bg-background px-4 py-2 text-sm",
         "focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/40",
         "transition-all duration-150 ease-out",
         "disabled:cursor-not-allowed disabled:opacity-50",
@@ -149,9 +149,9 @@ export function Badge({
     default:     "bg-primary/10 text-primary",
     info:        "bg-sky-100 text-sky-700",
     success:     "bg-emerald-100 text-emerald-700",
-    warning:     "bg-amber-100 text-amber-700",
+    warning:     "bg-risk-high-bg text-risk-high",
     destructive: "bg-red-100 text-red-700",
-    outline:     "bg-secondary text-muted-foreground border border-black/[0.07]",
+    outline:     "bg-secondary text-muted-foreground border border-border",
     purple:      "bg-violet-100 text-violet-700",
   };
   return (
@@ -217,7 +217,7 @@ export function StatusDot({ status }: { status: "normal" | "abnormal" | "critica
   const colors = {
     normal:   "bg-emerald-500",
     active:   "bg-emerald-500",
-    abnormal: "bg-amber-500",
+    abnormal: "bg-risk-high",
     inactive: "bg-muted-foreground",
     critical: "bg-red-500 animate-pulse",
   };
@@ -231,7 +231,7 @@ export function Tabs({ tabs, active, onChange }: {
   onChange: (id: string) => void;
 }) {
   return (
-    <div className="flex border-b border-black/[0.06] overflow-x-auto">
+    <div className="flex border-b border-border overflow-x-auto">
       {tabs.map(tab => (
         <button
           key={tab.id}
@@ -267,7 +267,7 @@ export function AlertBanner({ children, variant = "warning" }: {
   variant?: "warning" | "destructive" | "info";
 }) {
   const styles = {
-    warning:     "bg-amber-50 border-amber-200/60 text-amber-900",
+    warning:     "bg-risk-high-bg border-risk-high/20/60 text-risk-high",
     destructive: "bg-red-50 border-red-200/60 text-red-900",
     info:        "bg-sky-50 border-sky-200/60 text-sky-900",
   };

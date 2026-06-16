@@ -24,7 +24,7 @@ async function fetchResearchInsights() {
 
 const TREND_CONFIG = {
   rising: { color: "text-red-600", bg: "bg-destructive/10", border: "border-red-100", label: "Rising ↑", dot: "bg-red-500" },
-  stable: { color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100", label: "Stable →", dot: "bg-amber-500" },
+  stable: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "Stable →", dot: "bg-risk-high" },
   declining: { color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100", label: "Declining ↓", dot: "bg-emerald-500" },
 };
 
@@ -130,7 +130,7 @@ const STATUS_CONFIG: Record<string, { bg: string; border: string; badge: any; do
   active: { bg: "bg-emerald-50", border: "border-emerald-200", badge: "success" as const, dot: "bg-emerald-500 animate-pulse", label: "Active" },
   recruiting: { bg: "bg-sky-50", border: "border-sky-200", badge: "info" as const, dot: "bg-sky-500 animate-pulse", label: "Recruiting" },
   completed: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground", label: "Completed" },
-  paused: { bg: "bg-amber-50", border: "border-amber-200", badge: "warning" as const, dot: "bg-amber-500", label: "Paused" },
+  paused: { bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high", label: "Paused" },
 };
 
 type ViewTab = "overview" | "studies" | "trends" | "correlations" | "cohorts";
@@ -210,7 +210,7 @@ export default function ResearchPortal() {
       <div className="grid grid-cols-4 gap-4 mb-6">
         <KpiCard title={text("Anonymized Records", "سجلات مجهّلة")} value={data?.totalAnonymizedRecords?.toLocaleString()} sub={text("Fully de-identified", "مجهّلة الهوية بالكامل")} icon={Users} iconBg="bg-teal-100" iconColor="text-teal-600" />
         <KpiCard title={text("Active Studies", "الدراسات النشطة")} value={CLINICAL_STUDIES.filter(s => s.status === "active").length} sub={text(`${CLINICAL_STUDIES.length} total registered`, `${CLINICAL_STUDIES.length} مُسجّلة إجمالًا`)} icon={BookOpen} iconBg="bg-violet-100" iconColor="text-violet-600" />
-        <KpiCard title={text("AI Decisions Analyzed", "قرارات ذكاء مُحلّلة")} value={data?.aiMetrics?.totalDecisions?.toLocaleString()} sub={text(`${data?.aiMetrics?.avgConfidence}% avg confidence`, `${data?.aiMetrics?.avgConfidence}% متوسط الثقة`)} icon={Brain} iconBg="bg-amber-100" iconColor="text-amber-600" />
+        <KpiCard title={text("AI Decisions Analyzed", "قرارات ذكاء مُحلّلة")} value={data?.aiMetrics?.totalDecisions?.toLocaleString()} sub={text(`${data?.aiMetrics?.avgConfidence}% avg confidence`, `${data?.aiMetrics?.avgConfidence}% متوسط الثقة`)} icon={Brain} iconBg="bg-risk-high-bg" iconColor="text-risk-high" />
         <KpiCard title={text("Lab Results", "نتائج المختبر")} value={data?.totalLabResults?.toLocaleString()} sub={text("Cross-patient trend data", "بيانات اتجاهات عبر المرضى")} icon={FlaskConical} iconBg="bg-primary/10" iconColor="text-primary" />
       </div>
 
@@ -239,13 +239,13 @@ export default function ResearchPortal() {
           {/* AI Clinical Findings */}
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2"><Lightbulb className="w-4 h-4 text-amber-500" /><CardTitle>{text("AI Clinical Findings — Population Level", "AI Clinical Findings — Population Level")}</CardTitle></div>
+              <div className="flex items-center gap-2"><Lightbulb className="w-4 h-4 text-risk-high" /><CardTitle>{text("AI Clinical Findings — Population Level", "AI Clinical Findings — Population Level")}</CardTitle></div>
               <Badge variant="warning">{data?.clinicalFindings?.length} {text("insights", "insights")}</Badge>
             </CardHeader>
             <CardBody className="space-y-3">
               {data?.clinicalFindings?.map((f: any, i: number) => (
-                <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${f.significance === "high" ? "bg-amber-50 border-amber-200" : "bg-sky-50 border-sky-200"}`}>
-                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${f.significance === "high" ? "bg-amber-500" : "bg-sky-500"}`} />
+                <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${f.significance === "high" ? "bg-risk-high-bg border-risk-high/20" : "bg-sky-50 border-sky-200"}`}>
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${f.significance === "high" ? "bg-risk-high" : "bg-sky-500"}`} />
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">{f.finding}</p>
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
@@ -435,7 +435,7 @@ export default function ResearchPortal() {
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1">
-                        <Star className="w-3 h-3 text-amber-500" /> {text("Key Finding", "Key Finding")}
+                        <Star className="w-3 h-3 text-risk-high" /> {text("Key Finding", "Key Finding")}
                       </p>
                       <p className="text-xs font-semibold text-foreground leading-relaxed">{study.keyFinding}</p>
                     </div>
@@ -545,7 +545,7 @@ export default function ResearchPortal() {
                       <tr key={ri} className="hover:bg-secondary/20">
                         <td className="px-4 py-3 text-sm font-bold text-foreground">{row.condition}</td>
                         {[row.hypertension, row.ckd, row.heartDisease, row.obesity, row.dyslipidemia].map((val, ci) => {
-                          const intensity = val >= 60 ? "bg-red-100 text-red-700 font-bold" : val >= 40 ? "bg-amber-100 text-amber-700 font-semibold" : val >= 20 ? "bg-sky-100 text-sky-700" : "bg-secondary text-muted-foreground";
+                          const intensity = val >= 60 ? "bg-red-100 text-red-700 font-bold" : val >= 40 ? "bg-risk-high-bg text-risk-high font-semibold" : val >= 20 ? "bg-sky-100 text-sky-700" : "bg-secondary text-muted-foreground";
                           return (
                             <td key={ci} className="px-4 py-3 text-center">
                               <span className={`inline-block text-sm px-2.5 py-1 rounded-xl ${intensity}`}>{val}%</span>
@@ -561,7 +561,7 @@ export default function ResearchPortal() {
                 <div className="flex items-center gap-4 text-[10px]">
                   <span className="font-bold text-muted-foreground uppercase tracking-wide">{text("Legend:", "Legend:")}</span>
                   <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-100" /> {text("≥60% Strong", "≥60% Strong")}</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-100" /> {text("40–59% Moderate", "40–59% Moderate")}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-risk-high-bg" /> {text("40–59% Moderate", "40–59% Moderate")}</span>
                   <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-100" /> {text("20–39% Weak", "20–39% Weak")}</span>
                 </div>
               </div>
@@ -570,7 +570,7 @@ export default function ResearchPortal() {
 
           <div className="grid grid-cols-12 gap-5">
             <Card className="col-span-6">
-              <CardHeader><div className="flex items-center gap-2"><Zap className="w-4 h-4 text-amber-500" /><CardTitle>{text("Top Clinical Associations", "Top Clinical Associations")}</CardTitle></div></CardHeader>
+              <CardHeader><div className="flex items-center gap-2"><Zap className="w-4 h-4 text-risk-high" /><CardTitle>{text("Top Clinical Associations", "Top Clinical Associations")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-3">
                 {[
                   { a: "Hypertension", b: "Heart Disease", r: 64, p: "<0.001", note: "Most critical dyad — shared vascular pathology" },

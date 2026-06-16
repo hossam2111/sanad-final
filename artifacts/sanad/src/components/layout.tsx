@@ -433,12 +433,12 @@ export function Layout({ children, role, localized = false }: { children: React.
                             <div className={cn(
                               "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
                               alert.severity === "critical" ? "bg-red-100" :
-                              alert.severity === "warning" ? "bg-amber-100" : "bg-blue-100"
+                              alert.severity === "warning" ? "bg-risk-high-bg" : "bg-blue-100"
                             )}>
                               <AlertTriangle className={cn(
                                 "h-3 w-3",
                                 alert.severity === "critical" ? "text-red-600" :
-                                alert.severity === "warning" ? "text-amber-600" : "text-blue-600"
+                                alert.severity === "warning" ? "text-risk-high" : "text-blue-600"
                               )} />
                             </div>
                             <div className="min-w-0 flex-1">
