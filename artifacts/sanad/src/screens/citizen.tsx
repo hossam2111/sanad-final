@@ -4,7 +4,7 @@ import { Layout } from "@/components/layout";
 import {
   Card, CardHeader, CardTitle, CardBody,
   Input, Button, PageHeader, Badge, StatusDot, Tabs, DataLabel, Select
-} from "@/components/shared";
+, SkeletonCard, ErrorBanner} from "@/components/shared";
 import { useGetPatientByNationalId } from "@workspace/api-client-react";
 import { useAiDecision } from "@/hooks/use-ai-decision";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

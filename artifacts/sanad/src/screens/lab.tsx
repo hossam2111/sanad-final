@@ -4,7 +4,7 @@ import { Layout } from "@/components/layout";
 import {
   Card, CardHeader, CardTitle, CardBody,
   Input, Button, Badge, PageHeader, StatusDot, DataLabel
-} from "@/components/shared";
+, SkeletonCard, ErrorBanner} from "@/components/shared";
 import {
   FlaskConical, Search, AlertTriangle, CheckCircle2, Zap,
   Brain, TrendingUp, TrendingDown, Minus, ArrowRight, Plus, X, Activity

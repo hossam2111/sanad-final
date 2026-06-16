@@ -9,7 +9,7 @@ import { Layout } from "@/components/layout";
 import {
   Card, CardHeader, CardTitle, CardBody,
   Input, Button, Badge, PageHeader, StatusDot, DataLabel
-} from "@/components/shared";
+, SkeletonCard, ErrorBanner} from "@/components/shared";
 import { useEmergencyLookup, useListPatients } from "@workspace/api-client-react";
 import { useLanguage } from "@/contexts/language-context";
 

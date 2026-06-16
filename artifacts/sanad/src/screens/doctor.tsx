@@ -16,7 +16,7 @@ import { RiskBadge } from "@/components/ui/risk-badge";
 import {
   Card, CardHeader, CardTitle, CardBody,
   Input, Button, Badge, PageHeader, Tabs, KpiCard, StatusDot, Select, DataLabel, AlertBanner
-} from "@/components/shared";
+, SkeletonCard, ErrorBanner} from "@/components/shared";
 import {
   useGetPatientByNationalId,
   useGetPatientRiskScore,
@@ -525,12 +525,7 @@ export default function DoctorDashboard() {
         </Card>
       )}
 
-      {isLoading && (
-        <div className="flex items-center gap-3 py-16 text-muted-foreground justify-center">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" />
-          <span className="text-sm">{text("Loading patient record...", "جارٍ تحميل سجل المريض...")}</span>
-        </div>
-      )}
+      {isLoading && <div className="p-5"><SkeletonCard rows={3} /></div>}
 
       {patient && (
         <div className="space-y-5">

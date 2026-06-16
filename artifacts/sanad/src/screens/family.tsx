@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
-import { Card, CardHeader, CardTitle, CardBody, Input, Button, Badge, PageHeader, DataLabel } from "@/components/shared";
+import { Card, CardHeader, CardTitle, CardBody, Input, Button, Badge, PageHeader, DataLabel , SkeletonCard, ErrorBanner} from "@/components/shared";
 import {
   Users, Search, Heart, AlertTriangle, Shield, Dna, CalendarDays, Activity,
   User, X, ChevronRight, TrendingUp, Brain, Zap, CheckCircle2, Clock, Info
@@ -170,12 +170,7 @@ export default function FamilyPortal() {
           </CardBody>
         </Card>
       )}
-      {isLoading && (
-        <div className="flex items-center gap-3 py-16 text-muted-foreground justify-center">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-pink-500" />
-          <span className="text-sm">{text("Loading family health data...", "جارٍ تحميل بيانات صحة الأسرة...")}</span>
-        </div>
-      )}
+      {isLoading && <div className="p-5"><SkeletonCard rows={3} /></div>}
       {isError && nationalId && (
         consentRequired ? (
           // The consent gate is a feature, not a failure: record access here is

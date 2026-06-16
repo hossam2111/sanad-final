@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
-import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard } from "@/components/shared";
+import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard , SkeletonCard, ErrorBanner} from "@/components/shared";
 import {
   Brain, Activity, AlertTriangle, CheckCircle2, Zap, TrendingUp,
   RefreshCw, RotateCcw, Shield, Cpu, Database, Clock, Settings, BarChart2,

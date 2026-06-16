@@ -6,6 +6,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+import { AlertTriangle } from "lucide-react";
+
 /* ─── Card ─────────────────────────────────────────────── */
 export function Card({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
@@ -290,5 +292,48 @@ export function DataLabel({ label, children, className }: {
       <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em]">{label}</p>
       <div className="text-foreground">{children}</div>
     </div>
+  );
+}
+
+/* ─── Loading skeleton ─────────────────────────────────── */
+export function SkeletonCard({ rows = 3 }: { rows?: number }) {
+  return (
+    <Card className="animate-pulse">
+      <CardBody className="space-y-4">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-secondary shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-secondary rounded-md w-1/3" />
+              <div className="h-3 bg-secondary rounded-md w-2/3" />
+            </div>
+          </div>
+        ))}
+      </CardBody>
+    </Card>
+  );
+}
+
+/* ─── Error state ──────────────────────────────────────── */
+export function ErrorBanner({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return (
+    <Card className="border-red-200 bg-destructive/10">
+      <CardBody className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+          <AlertTriangle className="w-6 h-6 text-red-600" />
+        </div>
+        <h3 className="text-lg font-bold text-red-900 mb-1">
+          {message}
+        </h3>
+        <p className="text-sm text-red-700/80 mb-6 max-w-[300px]">
+          We couldn't reach the backend. Please check your connection or try again.
+        </p>
+        {onRetry && (
+          <Button variant="destructive" onClick={onRetry} size="sm">
+            Retry Connection
+          </Button>
+        )}
+      </CardBody>
+    </Card>
   );
 }

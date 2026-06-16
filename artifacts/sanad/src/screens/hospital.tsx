@@ -4,7 +4,7 @@ import { Layout } from "@/components/layout";
 import {
   Card, CardHeader, CardTitle, CardBody,
   Badge, PageHeader, KpiCard
-} from "@/components/shared";
+, SkeletonCard, ErrorBanner} from "@/components/shared";
 import {
   Building2, BedDouble, Users, Brain, Activity, AlertTriangle,
   TrendingUp, Zap, Lightbulb, ChevronRight, Stethoscope, Clock,
