@@ -61,6 +61,15 @@ export default function SupplyChainPortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeTab, setActiveTab] = useState<ViewTab>("inventory");
   const [reorderResults, setReorderResults] = useState<Record<string, any>>({});
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newPO, setNewPO] = useState({ item: "", quantity: 1, supplier: "", urgency: "routine" as "routine" | "urgent" | "critical" });
+  const [lowStockAlerts, setLowStockAlerts] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    apiFetch("/api/alerts?type=LOW_STOCK&limit=10")
+      .then(r => r.json())
+      .then(data => setLowStockAlerts(data.alerts ?? []));
+  }, []);
 
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({ queryKey: ["supply-inventory"], queryFn: fetchInventory, refetchInterval: 60000 });
@@ -78,6 +87,25 @@ export default function SupplyChainPortal() {
     onSuccess: (result, body) => {
       setReorderResults(prev => ({ ...prev, [body.drugName]: result }));
       qc.invalidateQueries({ queryKey: ["supply-inventory"] });
+    },
+  });
+
+  const { data: poData } = useQuery({ queryKey: ["supply-pos"], queryFn: async () => (await apiFetch("/api/supply-chain/purchase-orders")).json() });
+  
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/supply-chain/orders/${id}/approve`, { method: "PATCH" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["supply-pos"] }),
+  });
+  const rejectMutation = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/supply-chain/orders/${id}/reject`, { method: "PATCH" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["supply-pos"] }),
+  });
+  const createMutation = useMutation({
+    mutationFn: (body: any) => apiFetch("/api/supply-chain/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["supply-pos"] });
+      setShowCreateForm(false);
+      setNewPO({ item: "", quantity: 1, supplier: "", urgency: "routine" });
     },
   });
 
@@ -130,6 +158,20 @@ export default function SupplyChainPortal() {
           {text("Inventory Value:", "قيمة المخزون:")} {text("SAR", "ر.س")} {data?.summary?.totalInventoryValue?.toLocaleString()}
         </div>
       </div>
+
+      {lowStockAlerts.length > 0 && (
+        <div className="mb-5 rounded-lg border border-[hsl(var(--risk-high)/0.4)] bg-[hsl(var(--risk-high)/0.08)] p-3 flex items-start gap-2" dir={dir}>
+          <AlertTriangle className="h-4 w-4 text-[hsl(var(--risk-high))] flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {text(`${lowStockAlerts.length} low-stock alerts`, `${lowStockAlerts.length} تنبيه مخزون منخفض`)}
+            </p>
+            <ul className="text-xs text-muted-foreground mt-1 space-y-0.5">
+              {lowStockAlerts.map(a => <li key={a.id}>{a.message}</li>)}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <PageHeader
         title={text("National Drug Supply Chain", "سلسلة إمداد الأدوية الوطنية")}
@@ -491,6 +533,75 @@ export default function SupplyChainPortal() {
       {/* ─── PURCHASE ORDERS ─── */}
       {activeTab === "reorder" && (
         <div className="space-y-5">
+          {/* New Purchase Order Form & PO List */}
+          <div className="mb-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold">{text("Purchase Orders", "أوامر الشراء")}</h3>
+              <button onClick={() => setShowCreateForm(true)} className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium">
+                {text("New Purchase Order", "أمر شراء جديد")}
+              </button>
+            </div>
+            {showCreateForm && (
+              <Card className="border-primary/30 bg-primary/5" dir={dir}>
+                <CardBody className="p-4 space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input placeholder={text("Item name", "اسم المادة")} value={newPO.item}
+                      onChange={e => setNewPO(p => ({...p, item: e.target.value}))}
+                      className="rounded-md border border-border bg-background text-foreground px-3 py-2 text-sm" />
+                    <input type="number" placeholder={text("Quantity", "الكمية")} value={newPO.quantity}
+                      onChange={e => setNewPO(p => ({...p, quantity: parseInt(e.target.value) || 1}))}
+                      className="rounded-md border border-border bg-background text-foreground px-3 py-2 text-sm" dir="ltr" />
+                    <input placeholder={text("Supplier", "المورد")} value={newPO.supplier}
+                      onChange={e => setNewPO(p => ({...p, supplier: e.target.value}))}
+                      className="rounded-md border border-border bg-background text-foreground px-3 py-2 text-sm" />
+                    <select value={newPO.urgency} onChange={e => setNewPO(p => ({...p, urgency: e.target.value as "routine" | "urgent" | "critical"}))}
+                      className="rounded-md border border-border bg-background text-foreground px-3 py-2 text-sm">
+                      <option value="routine">{text("Routine", "اعتيادي")}</option>
+                      <option value="urgent">{text("Urgent", "عاجل")}</option>
+                      <option value="critical">{text("Critical", "حرج")}</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => createMutation.mutate({ drugName: newPO.item, quantity: newPO.quantity, supplier: newPO.supplier })}
+                      className="rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90" disabled={createMutation.isPending}>
+                      {text("Submit Order", "إرسال الطلب")}
+                    </button>
+                    <button onClick={() => setShowCreateForm(false)}
+                      className="rounded-md border border-border text-foreground px-4 py-2 text-sm hover:bg-muted">
+                      {text("Cancel", "إلغاء")}
+                    </button>
+                  </div>
+                </CardBody>
+              </Card>
+            )}
+            
+            <div className="grid gap-3">
+              {poData?.orders?.map((order: any) => (
+                <div key={order.id} className="p-4 rounded-xl border border-border bg-card flex justify-between items-center">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold">{order.drugName}</span>
+                      <span className="text-xs text-muted-foreground">x{order.quantity}</span>
+                      <Badge variant="outline">{order.status}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{order.supplier} • {order.id}</p>
+                  </div>
+                  {order.status === "submitted" && (
+                    <div className="flex gap-2 mt-2">
+                      <button onClick={() => approveMutation.mutate(order.id)} disabled={approveMutation.isPending}
+                        className="text-xs rounded bg-primary/10 text-primary px-3 py-1.5 hover:bg-primary/20">
+                        {text("Approve", "اعتماد")}
+                      </button>
+                      <button onClick={() => rejectMutation.mutate(order.id)} disabled={rejectMutation.isPending}
+                        className="text-xs rounded bg-destructive/10 text-destructive px-3 py-1.5 hover:bg-destructive/20">
+                        {text("Reject", "رفض")}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
           {/* Critical alerts */}
           {data?.criticalAlerts?.length > 0 && (
             <Card>

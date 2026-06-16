@@ -276,4 +276,40 @@ router.get("/regional-distribution", async (_req, res) => {
   });
 });
 
+// POST /api/supply-chain/orders
+router.post("/orders", async (req, res) => {
+  const { drugName, quantity, supplier } = req.body as {
+    drugName: string; quantity: number; supplier: string;
+  };
+  const [order] = await db.insert(purchaseOrdersTable).values({
+    id: `PO-${Date.now()}`,
+    drugName, quantity, supplier,
+    requestedBy: req.userId ?? "unknown",
+    status: "submitted",
+  }).returning();
+  res.status(201).json(order);
+});
+
+// PATCH /api/supply-chain/orders/:id/approve
+router.patch("/orders/:id/approve", async (req, res) => {
+  const id = req.params["id"]!;
+  const [order] = await db.update(purchaseOrdersTable)
+    .set({ status: "confirmed", updatedAt: new Date() })
+    .where(eq(purchaseOrdersTable.id, id))
+    .returning();
+  if (!order) return res.status(404).json({ error: "NOT_FOUND" });
+  res.json(order);
+});
+
+// PATCH /api/supply-chain/orders/:id/reject
+router.patch("/orders/:id/reject", async (req, res) => {
+  const id = req.params["id"]!;
+  const [order] = await db.update(purchaseOrdersTable)
+    .set({ status: "cancelled", updatedAt: new Date() })
+    .where(eq(purchaseOrdersTable.id, id))
+    .returning();
+  if (!order) return res.status(404).json({ error: "NOT_FOUND" });
+  res.json(order);
+});
+
 export default router;

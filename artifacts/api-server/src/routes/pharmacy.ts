@@ -285,7 +285,10 @@ router.post("/dispense/:medicationId", validate(dispenseSchema), async (req, res
   const medicationId = String(req.params["medicationId"]);
   const { pharmacistName, notes } = req.body as z.infer<typeof dispenseSchema>;
 
-  const meds = await db.select().from(medicationsTable).where(eq(medicationsTable.id, parseInt(medicationId))).limit(1);
+  const meds = await db.update(medicationsTable)
+    .set({ isActive: false, updatedAt: new Date() })
+    .where(eq(medicationsTable.id, parseInt(medicationId)))
+    .returning();
   if (!meds.length) return res.status(404).json({ error: "Prescription not found" });
 
   const med = meds[0]!;

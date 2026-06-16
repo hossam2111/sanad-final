@@ -37,7 +37,7 @@ import {
   db, pool,
   patientsTable, medicationsTable, visitsTable, labResultsTable,
   alertsTable, consentTable, appointmentsTable, aiDecisionsTable,
-  staffAssignmentsTable
+  staffAssignmentsTable, purchaseOrdersTable
 } from "@workspace/db";
 
 // ── Deterministic PRNG ────────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ async function reset() {
   await pool.query(`
     TRUNCATE TABLE
       audit_log, events, ai_decisions, alerts, lab_results, visits,
-      medications, consent_records, appointments, claim_reviews, patients
+      medications, consent_records, appointments, claim_reviews, purchase_orders, patients
     RESTART IDENTITY CASCADE
   `);
   console.log("Database reset (identities restarted)");
@@ -529,7 +529,31 @@ async function seed() {
     }
   }
   await db.insert(aiDecisionsTable).values(decisions);
-  console.log(`Inserted ${decisions.length} historical AI decisions`);
+  console.log(`Inserted ${decisions.length} AI decisions`);
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // PURCHASE ORDERS — Demo POs for Supply Chain module
+  // ════════════════════════════════════════════════════════════════════════════
+  const pos = [
+    {
+      id: "PO-2026-0001",
+      drugName: "Amiodarone",
+      quantity: 500,
+      supplier: "SaudiVax",
+      status: "submitted",
+    },
+    {
+      id: "PO-2026-0002",
+      drugName: "Insulin Glargine",
+      quantity: 2000,
+      supplier: "SPIMACO",
+      status: "approved",
+    }
+  ];
+  await db.insert(purchaseOrdersTable).values(pos);
+  console.log(`Inserted ${pos.length} purchase orders`);
+
+  console.log("-----------------------------------------");
 
   // ════════════════════════════════════════════════════════════════════════════
   // CONSENTS — the consent module is load-bearing: family + insurance routes
