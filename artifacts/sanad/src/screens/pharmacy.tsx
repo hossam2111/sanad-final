@@ -18,20 +18,12 @@ import { format } from "date-fns";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
 
 async function fetchPharmacyPatient(nationalId: string) {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
-  
-
   const res = await apiFetch(`/api/pharmacy/patient/${nationalId}`);
   if (!res.ok) throw new Error("Patient not found");
   return res.json();
 }
 
 async function dispenseMed(medicationId: number, pharmacistName: string) {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
-  
-
   const res = await apiFetch(`/api/pharmacy/dispense/${medicationId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

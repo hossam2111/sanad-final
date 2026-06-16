@@ -15,22 +15,16 @@ import {
 } from "recharts";
 
 async function fetchInsurancePatient(nationalId: string) {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
   const res = await apiFetch(`/api/insurance/patient/${nationalId}`);
   if (!res.ok) throw new Error("Patient not found");
   return res.json();
 }
 async function fetchInsuranceDashboard() {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
   const res = await apiFetch("/api/insurance/dashboard");
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
 async function reviewClaim(claimId: string, action: string, notes: string) {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
   const res = await apiFetch(`/api/insurance/claim/${claimId}/review`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

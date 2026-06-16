@@ -51,8 +51,6 @@ const predictionSeverityStyle: Record<string, { bg: string; border: string; icon
 };
 
 function safeDate(dateStr: string) {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
   const d = new Date(dateStr);
   return isValid(d) ? d : new Date();
 }
@@ -166,8 +164,6 @@ export default function DoctorDashboard() {
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
       }
@@ -268,15 +264,11 @@ export default function DoctorDashboard() {
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
     e.preventDefault();
     if (searchId.trim()) { setPatientId(searchId.trim()); setActiveTab("overview"); setShowDropdown(false); setNarrativeText(""); setNarrativeProvider(""); setChatAnswer(""); setChatQuestion(""); }
   };
 
   const handleSelectPatient = (nationalId: string, name: string) => {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
     setSearchId(nationalId);
     setSearchQuery(name);
     setPatientId(nationalId);
@@ -350,8 +342,6 @@ export default function DoctorDashboard() {
   }
 
   const getTrend = (labGroup: typeof labResults) => {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
     if (labGroup.length < 2) return "stable";
     const vals = labGroup.slice(0, 3).map(l => parseFloat(l.result)).filter(v => !isNaN(v));
     if (vals.length < 2) return "stable";
