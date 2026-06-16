@@ -1223,12 +1223,12 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       qc.invalidateQueries({ queryKey: ["consent", nationalId] });
       setToggling(null);
       setToast({ msg: res.message, ok: true });
-      setTimeout(() => setToast(null), 3500);
+      setTimeout(() => setToast(null), 3000);
     },
     onError: (err: Error, vars) => {
       setToggling(null);
       setToast({ msg: err.message, ok: false });
-      setTimeout(() => setToast(null), 4000);
+      setTimeout(() => setToast(null), 3000);
     },
   });
 
