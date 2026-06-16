@@ -44,10 +44,10 @@ type PredictionWarning = {
 };
 
 const predictionSeverityStyle: Record<string, { bg: string; border: string; icon: string; badge: "destructive" | "warning" | "info" | "outline" | "success" | "default"  }> = {
-  critical: { bg: "bg-destructive/10", border: "border-red-200", icon: "text-red-600", badge: "destructive" },
-  high: { bg: "bg-risk-high-bg", border: "border-risk-high/20", icon: "text-risk-high", badge: "warning" },
-  moderate: { bg: "bg-sky-50", border: "border-sky-200", icon: "text-sky-600", badge: "info" },
-  low: { bg: "bg-secondary", border: "border-border", icon: "text-muted-foreground", badge: "outline" },
+  critical: { bg: "bg-risk-critical-bg", border: "border-risk-critical/25", icon: "text-risk-critical", badge: "destructive" },
+  high:     { bg: "bg-risk-high-bg",     border: "border-risk-high/25",     icon: "text-risk-high",     badge: "warning" },
+  moderate: { bg: "bg-risk-medium-bg",   border: "border-risk-medium/25",   icon: "text-risk-medium",   badge: "info" },
+  low:      { bg: "bg-secondary",        border: "border-border",            icon: "text-muted-foreground", badge: "outline" },
 };
 
 function safeDate(dateStr: string) {

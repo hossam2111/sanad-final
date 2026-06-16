@@ -76,6 +76,12 @@
   --risk-medium: 45 95% 55%;
   --risk-low: 142 70% 50%;
   --risk-none: 217 32% 50%;
+
+  /* Risk background tokens for dark mode — deep tinted, not the washed-out light values */
+  --risk-critical-bg: 0 40% 14%;
+  --risk-high-bg: 25 45% 13%;
+  --risk-medium-bg: 45 45% 12%;
+  --risk-low-bg: 142 35% 12%;
 }
 
 :root {
