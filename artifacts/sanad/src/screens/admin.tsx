@@ -290,8 +290,8 @@ export default function AdminDashboard() {
       {stats && (
         <div className="grid grid-cols-4 gap-4 mb-6">
           <KpiCard title={text("Registered Patients", "المرضى المسجّلون")} value={(stats.totalPatients ?? 0).toLocaleString()} sub={text("Active national records", "سجلات وطنية نشطة")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
-          <KpiCard title={text("Visits Today", "زيارات اليوم")} value={(stats.totalVisitsToday ?? 0).toLocaleString()} sub={text("Across all facilities", "في جميع المنشآت")} icon={Activity} iconBg="bg-sky-100" iconColor="text-sky-600" />
-          <KpiCard title={text("Drug Conflicts Prevented", "تداخلات دوائية مُنعت")} value={(stats.drugInteractionsBlocked ?? 0).toLocaleString()} sub={text("Blocked by interaction screening", "حُجبت عبر فحص التداخلات")} icon={ShieldAlert} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
+          <KpiCard title={text("Visits Today", "زيارات اليوم")} value={(stats.totalVisitsToday ?? 0).toLocaleString()} sub={text("Across all facilities", "في جميع المنشآت")} icon={Activity} iconBg="bg-info-bg" iconColor="text-info" />
+          <KpiCard title={text("Drug Conflicts Prevented", "تداخلات دوائية مُنعت")} value={(stats.drugInteractionsBlocked ?? 0).toLocaleString()} sub={text("Blocked by interaction screening", "حُجبت عبر فحص التداخلات")} icon={ShieldAlert} iconBg="bg-success-bg" iconColor="text-success" />
           <KpiCard title={text("AI Decisions Made", "قرارات الذكاء الاصطناعي")} value={(stats.aiDecisionsMade ?? 0).toLocaleString()} sub={text(`${(stats.activeAlerts ?? 0).toLocaleString()} active alerts`, `${(stats.activeAlerts ?? 0).toLocaleString()} تنبيه نشط`)} icon={Building} iconBg="bg-violet-100" iconColor="text-violet-600" />
         </div>
       )}
@@ -449,7 +449,7 @@ export default function AdminDashboard() {
           {upcomingAppts.length > 0 && (
             <Card className="col-span-12">
               <CardHeader>
-                <Calendar className="w-4 h-4 text-sky-600" />
+                <Calendar className="w-4 h-4 text-info" />
                 <CardTitle>{text("National Appointments — Upcoming Confirmed", "المواعيد الوطنية — المؤكّدة القادمة")}</CardTitle>
                 <Badge variant="info" className="ms-auto">{text(`${appointments.filter((a: any) => a.status === "confirmed").length} total`, `${appointments.filter((a: any) => a.status === "confirmed").length} الإجمالي`)}</Badge>
               </CardHeader>
@@ -508,8 +508,8 @@ export default function AdminDashboard() {
                       { name: "Explainability Layer", status: "online", version: "v2.0" },
                       { name: "Unknown Pattern Detector", status: "standby", version: "v0.9" },
                     ].map((engine, i) => (
-                      <div key={i} className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border ${engine.status === "online" ? "bg-emerald-50 border-emerald-200" : "bg-secondary border-border"}`}>
-                        <div className={`w-2 h-2 rounded-full shrink-0 ${engine.status === "online" ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"}`} />
+                      <div key={i} className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border ${engine.status === "online" ? "bg-success-bg border-success/20" : "bg-secondary border-border"}`}>
+                        <div className={`w-2 h-2 rounded-full shrink-0 ${engine.status === "online" ? "bg-success animate-pulse" : "bg-muted-foreground"}`} />
                         <div>
                           <p className="text-xs font-bold text-foreground">{engine.name}</p>
                           <p className="text-[10px] text-muted-foreground">{engine.version} · {engine.status === "online" ? text("online", "متّصل") : text("standby", "احتياطي")}</p>
@@ -523,14 +523,14 @@ export default function AdminDashboard() {
                 {((intelligence as Record<string, any>))?.epidemicRadar && ((intelligence as Record<string, any>)).epidemicRadar.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Radio className="w-3.5 h-3.5 text-red-500" /> {text("Epidemic Radar — Disease Surveillance", "رادار الأوبئة — ترصّد الأمراض")}
+                      <Radio className="w-3.5 h-3.5 text-danger" /> {text("Epidemic Radar — Disease Surveillance", "رادار الأوبئة — ترصّد الأمراض")}
                     </p>
                     <div className="grid grid-cols-2 gap-2.5">
                       {((intelligence as Record<string, any>)).epidemicRadar.map((item: any, i: number) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${
-                          item.alert === "high" ? "bg-destructive/10 border-red-200" : item.alert === "medium" ? "bg-risk-high-bg border-risk-high/20" : "bg-secondary border-border"
+                          item.alert === "high" ? "bg-destructive/10 border-danger/20" : item.alert === "medium" ? "bg-risk-high-bg border-risk-high/20" : "bg-secondary border-border"
                         }`}>
-                          <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${item.alert === "high" ? "bg-red-500" : item.alert === "medium" ? "bg-risk-high" : "bg-muted-foreground"}`} />
+                          <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${item.alert === "high" ? "bg-danger" : item.alert === "medium" ? "bg-risk-high" : "bg-muted-foreground"}`} />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <p className="text-sm font-bold text-foreground">{item.condition}</p>
@@ -613,7 +613,7 @@ export default function AdminDashboard() {
                       <td className="font-mono tabular-nums text-muted-foreground text-xs">{r.population?.toLocaleString()}</td>
                       <td className="font-mono tabular-nums">{r.patients?.toLocaleString()}</td>
                       <td className="tabular-nums">{r.hospitals}</td>
-                      <td><span className={`font-mono font-bold ${r.highRisk > 5 ? "text-orange-600" : "text-muted-foreground"}`}>{r.highRisk ?? "—"}</span></td>
+                      <td><span className={`font-mono font-bold ${r.highRisk > 5 ? "text-danger" : "text-muted-foreground"}`}>{r.highRisk ?? "—"}</span></td>
                       <td>
                         <Badge variant={r.riskLevel === "critical" ? "destructive" : r.riskLevel === "high" ? "warning" : r.riskLevel === "medium" ? "info" : "success"} className="text-[10px]">
                           {r.riskRate}% {r.riskLevel}

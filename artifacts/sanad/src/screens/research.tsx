@@ -23,9 +23,9 @@ async function fetchResearchInsights() {
 }
 
 const TREND_CONFIG = {
-  rising: { color: "text-red-600", bg: "bg-destructive/10", border: "border-red-100", label: "Rising ↑", dot: "bg-red-500" },
+  rising: { color: "text-danger", bg: "bg-danger-bg", border: "border-danger/30", label: "Rising ↑", dot: "bg-danger" },
   stable: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "Stable →", dot: "bg-risk-high" },
-  declining: { color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100", label: "Declining ↓", dot: "bg-emerald-500" },
+  declining: { color: "text-success", bg: "bg-success-bg", border: "border-success/30", label: "Declining ↓", dot: "bg-success" },
 };
 
 const CLINICAL_STUDIES = [
@@ -127,8 +127,8 @@ const COHORT_RADAR = [
 ];
 
 const STATUS_CONFIG: Record<string, { bg: string; border: string; badge: any; dot: string; label: string }> = {
-  active: { bg: "bg-emerald-50", border: "border-emerald-200", badge: "success" as const, dot: "bg-emerald-500 animate-pulse", label: "Active" },
-  recruiting: { bg: "bg-sky-50", border: "border-sky-200", badge: "info" as const, dot: "bg-sky-500 animate-pulse", label: "Recruiting" },
+  active: { bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, dot: "bg-success animate-pulse", label: "Active" },
+  recruiting: { bg: "bg-info-bg", border: "border-info/20", badge: "info" as const, dot: "bg-info animate-pulse", label: "Recruiting" },
   completed: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground", label: "Completed" },
   paused: { bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high", label: "Paused" },
 };
@@ -179,7 +179,7 @@ export default function ResearchPortal() {
           <FlaskConical className="w-3 h-3" />
           {text("Research Portal", "بوابة الأبحاث")}
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-success bg-success-bg px-3 py-1.5 rounded-full">
           <Lock className="w-3 h-3" />
           {text("All data anonymized · PDPL compliant", "جميع البيانات مجهّلة · متوافقة مع PDPL")}
         </div>
@@ -244,8 +244,8 @@ export default function ResearchPortal() {
             </CardHeader>
             <CardBody className="space-y-3">
               {data?.clinicalFindings?.map((f: any, i: number) => (
-                <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${f.significance === "high" ? "bg-risk-high-bg border-risk-high/20" : "bg-sky-50 border-sky-200"}`}>
-                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${f.significance === "high" ? "bg-risk-high" : "bg-sky-500"}`} />
+                <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${f.significance === "high" ? "bg-risk-high-bg border-risk-high/20" : "bg-info-bg border-info/20"}`}>
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${f.significance === "high" ? "bg-risk-high" : "bg-info"}`} />
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">{f.finding}</p>
                     <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
@@ -459,18 +459,18 @@ export default function ResearchPortal() {
       {/* ─── DISEASE TRENDS ─── */}
       {activeView === "trends" && (
         <div className="space-y-5">
-          <div className="flex items-center gap-3 p-4 bg-destructive/10 border border-red-200 rounded-2xl">
-            <TrendingUp className="w-5 h-5 text-red-600 shrink-0" />
+          <div className="flex items-center gap-3 p-4 bg-danger-bg border border-danger/20 rounded-2xl">
+            <TrendingUp className="w-5 h-5 text-danger shrink-0" />
             <div>
-              <p className="text-sm font-bold text-red-800">{text("National Disease Trend Radar — 12-Month View", "National Disease Trend Radar — 12-Month View")}</p>
-              <p className="text-xs text-red-600 mt-0.5">{text("All 4 major chronic diseases showing upward trend — immediate national response required", "All 4 major chronic diseases showing upward trend — immediate national response required")}</p>
+              <p className="text-sm font-bold text-danger">{text("National Disease Trend Radar — 12-Month View", "National Disease Trend Radar — 12-Month View")}</p>
+              <p className="text-xs text-danger mt-0.5">{text("All 4 major chronic diseases showing upward trend — immediate national response required", "All 4 major chronic diseases showing upward trend — immediate national response required")}</p>
             </div>
             <Badge variant="destructive" className="ml-auto shrink-0">{text("RISING", "RISING")}</Badge>
           </div>
 
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-red-500" /><CardTitle>{text("Disease Prevalence Trends — 12-Month Progression", "Disease Prevalence Trends — 12-Month Progression")}</CardTitle></div>
+              <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-danger" /><CardTitle>{text("Disease Prevalence Trends — 12-Month Progression", "Disease Prevalence Trends — 12-Month Progression")}</CardTitle></div>
               <span className="text-[11px] text-muted-foreground font-mono ml-auto">{text("% of total patient population", "% of total patient population")}</span>
             </CardHeader>
             <CardBody>
@@ -545,7 +545,7 @@ export default function ResearchPortal() {
                       <tr key={ri} className="hover:bg-secondary/20">
                         <td className="px-4 py-3 text-sm font-bold text-foreground">{row.condition}</td>
                         {[row.hypertension, row.ckd, row.heartDisease, row.obesity, row.dyslipidemia].map((val, ci) => {
-                          const intensity = val >= 60 ? "bg-red-100 text-red-700 font-bold" : val >= 40 ? "bg-risk-high-bg text-risk-high font-semibold" : val >= 20 ? "bg-sky-100 text-sky-700" : "bg-secondary text-muted-foreground";
+                          const intensity = val >= 60 ? "bg-danger-bg text-danger font-bold" : val >= 40 ? "bg-risk-high-bg text-risk-high font-semibold" : val >= 20 ? "bg-info-bg text-info" : "bg-secondary text-muted-foreground";
                           return (
                             <td key={ci} className="px-4 py-3 text-center">
                               <span className={`inline-block text-sm px-2.5 py-1 rounded-xl ${intensity}`}>{val}%</span>
@@ -560,9 +560,9 @@ export default function ResearchPortal() {
               <div className="px-5 py-3 border-t border-border bg-secondary/30">
                 <div className="flex items-center gap-4 text-[10px]">
                   <span className="font-bold text-muted-foreground uppercase tracking-wide">{text("Legend:", "Legend:")}</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-red-100" /> {text("≥60% Strong", "≥60% Strong")}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-danger-bg" /> {text("≥60% Strong", "≥60% Strong")}</span>
                   <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-risk-high-bg" /> {text("40–59% Moderate", "40–59% Moderate")}</span>
-                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-sky-100" /> {text("20–39% Weak", "20–39% Weak")}</span>
+                  <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-info-bg" /> {text("20–39% Weak", "20–39% Weak")}</span>
                 </div>
               </div>
             </CardBody>
@@ -619,11 +619,11 @@ export default function ResearchPortal() {
       {/* ─── COHORT COMPARISON ─── */}
       {activeView === "cohorts" && (
         <div className="space-y-5">
-          <div className="flex items-center gap-3 p-4 bg-sky-50 border border-sky-200 rounded-2xl">
-            <Users className="w-5 h-5 text-sky-600 shrink-0" />
+          <div className="flex items-center gap-3 p-4 bg-info-bg border border-info/20 rounded-2xl">
+            <Users className="w-5 h-5 text-info shrink-0" />
             <div>
-              <p className="text-sm font-bold text-sky-800">{text("Population Cohort Analysis — AI Treatment Group vs. Standard Care", "Population Cohort Analysis — AI Treatment Group vs. Standard Care")}</p>
-              <p className="text-xs text-sky-600 mt-0.5">{text("Comparing health outcomes across AI-managed cohort (n=12,480) vs. standard care cohort (n=11,200)", "Comparing health outcomes across AI-managed cohort (n=12,480) vs. standard care cohort (n=11,200)")}</p>
+              <p className="text-sm font-bold text-info">{text("Population Cohort Analysis — AI Treatment Group vs. Standard Care", "Population Cohort Analysis — AI Treatment Group vs. Standard Care")}</p>
+              <p className="text-xs text-info mt-0.5">{text("Comparing health outcomes across AI-managed cohort (n=12,480) vs. standard care cohort (n=11,200)", "Comparing health outcomes across AI-managed cohort (n=12,480) vs. standard care cohort (n=11,200)")}</p>
             </div>
           </div>
 
@@ -651,7 +651,7 @@ export default function ResearchPortal() {
             </Card>
 
             <Card className="col-span-7">
-              <CardHeader><div className="flex items-center gap-2"><Target className="w-4 h-4 text-emerald-600" /><CardTitle>{text("Outcome Metrics — AI vs. Standard Care", "Outcome Metrics — AI vs. Standard Care")}</CardTitle></div></CardHeader>
+              <CardHeader><div className="flex items-center gap-2"><Target className="w-4 h-4 text-success" /><CardTitle>{text("Outcome Metrics — AI vs. Standard Care", "Outcome Metrics — AI vs. Standard Care")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-4">
                 {[
                   { metric: "HbA1c Control (<7.0%)", ai: 68, std: 41, unit: "%" },
@@ -667,22 +667,22 @@ export default function ResearchPortal() {
                     <div key={i} className="space-y-1.5">
                       <div className="flex items-center justify-between">
                         <p className="text-xs font-semibold text-foreground">{item.metric}</p>
-                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <span className="text-[10px] font-bold text-success bg-success-bg px-2 py-0.5 rounded-full">
                           {text("AI: +", "AI: +")}{diff}{item.unit} {text("better", "better")}
                         </span>
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] w-24 text-red-600 font-semibold">{text("AI Cohort", "AI Cohort")}</span>
+                          <span className="text-[10px] w-24 text-danger font-semibold">{text("AI Cohort", "AI Cohort")}</span>
                           <div className="flex-1 bg-secondary rounded-full h-2">
-                            <div className="h-full rounded-full bg-red-500 transition-all" style={{ width: `${item.ai}%` }} />
+                            <div className="h-full rounded-full bg-danger transition-all" style={{ width: `${item.ai}%` }} />
                           </div>
                           <span className="text-[10px] font-bold w-10 text-right text-foreground">{item.ai}{item.unit}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-[10px] w-24 text-primary font-semibold">{text("Standard Care", "Standard Care")}</span>
                           <div className="flex-1 bg-secondary rounded-full h-2">
-                            <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${item.std}%` }} />
+                            <div className="h-full rounded-full bg-info transition-all" style={{ width: `${item.std}%` }} />
                           </div>
                           <span className="text-[10px] font-bold w-10 text-right text-foreground">{item.std}{item.unit}</span>
                         </div>

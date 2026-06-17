@@ -29,15 +29,15 @@ const UNIT_COLORS: Record<string, string> = {
 };
 
 const PRIORITY_COLORS = {
-  immediate: { bg: "bg-destructive/10", border: "border-red-300", badge: "destructive" as const, text: "text-red-600" },
+  immediate: { bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, text: "text-danger" },
   urgent: { bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, text: "text-risk-high" },
-  soon: { bg: "bg-sky-50", border: "border-sky-200", badge: "info" as const, text: "text-sky-600" },
+  soon: { bg: "bg-info-bg", border: "border-info/20", badge: "info" as const, text: "text-info" },
 };
 
 const OR_STATUS = {
-  in_progress: { bg: "bg-[hsl(var(--risk-low)/0.1)]", border: "border-green-200", badge: "success" as const, label: "In Progress", dot: "bg-green-500 animate-pulse" },
-  scheduled: { bg: "bg-sky-50", border: "border-sky-200", badge: "info" as const, label: "Scheduled", dot: "bg-sky-500" },
-  emergency: { bg: "bg-destructive/10", border: "border-red-300", badge: "destructive" as const, label: "Emergency", dot: "bg-red-500 animate-pulse" },
+  in_progress: { bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, label: "In Progress", dot: "bg-success animate-pulse" },
+  scheduled: { bg: "bg-info-bg", border: "border-info/20", badge: "info" as const, label: "Scheduled", dot: "bg-info" },
+  emergency: { bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, label: "Emergency", dot: "bg-danger animate-pulse" },
 };
 
 type TabId = "overview" | "icu" | "or" | "readmission";
@@ -55,7 +55,7 @@ export default function HospitalPortal() {
     return (
       <Layout role="hospital" localized>
         <div className="flex items-center justify-center gap-3 py-20 text-muted-foreground">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
           <span className="text-sm font-medium">{text("Loading hospital operations...", "جارٍ تحميل عمليات المستشفى...")}</span>
         </div>
       </Layout>
@@ -67,12 +67,12 @@ export default function HospitalPortal() {
   return (
     <Layout role="hospital" localized>
       <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 bg-blue-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
+        <div className="flex items-center gap-2 bg-primary text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Building2 className="w-3 h-3" />
           {text("Hospital Operations Center", "مركز عمليات المستشفى")}
         </div>
         {icuCritical > 0 && (
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-red-600 bg-destructive/10 border border-red-200 px-3 py-1.5 rounded-full ms-2 animate-pulse">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-danger bg-danger-bg border border-danger/20 px-3 py-1.5 rounded-full ms-2 animate-pulse">
             <AlertTriangle className="w-3 h-3" />
             {text(`${icuCritical} ICU Critical Alert${icuCritical > 1 ? "s" : ""}`, `${icuCritical} تنبيه حرج بالعناية المركّزة`)}
           </div>
@@ -135,7 +135,7 @@ export default function HospitalPortal() {
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
               activeTab === tab.id
                 ? tab.id === "icu" && icuCritical > 0
-                  ? "bg-red-600 text-white"
+                  ? "bg-danger text-white"
                   : "bg-primary text-white"
                 : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
@@ -159,7 +159,7 @@ export default function HospitalPortal() {
                   const color = UNIT_COLORS[unit.unit] ?? "#007AFF";
                   return (
                     <div key={unit.unitKey} className={`p-4 rounded-2xl border ${
-                      unit.status === "critical" ? "bg-destructive/10 border-red-200" :
+                      unit.status === "critical" ? "bg-danger-bg border-danger/20" :
                       unit.status === "high" ? "bg-risk-high-bg border-risk-high/20" :
                       "bg-secondary border-border"
                     }`}>
@@ -283,9 +283,9 @@ export default function HospitalPortal() {
                       <td className="tabular-nums">{p.age}</td>
                       <td>
                         <div className="flex items-center gap-2">
-                          <span className={`text-sm font-bold tabular-nums ${p.riskScore >= 70 ? "text-red-600" : p.riskScore >= 50 ? "text-risk-high" : "text-foreground"}`}>{p.riskScore}</span>
+                          <span className={`text-sm font-bold tabular-nums ${p.riskScore >= 70 ? "text-danger" : p.riskScore >= 50 ? "text-risk-high" : "text-foreground"}`}>{p.riskScore}</span>
                           <div className="w-16 bg-secondary rounded-full h-1.5">
-                            <div className={`h-full rounded-full ${p.riskScore >= 70 ? "bg-red-500" : p.riskScore >= 50 ? "bg-risk-high" : "bg-emerald-500"}`} style={{ width: `${p.riskScore}%` }} />
+                            <div className={`h-full rounded-full ${p.riskScore >= 70 ? "bg-danger" : p.riskScore >= 50 ? "bg-risk-high" : "bg-success"}`} style={{ width: `${p.riskScore}%` }} />
                           </div>
                         </div>
                       </td>
@@ -298,7 +298,7 @@ export default function HospitalPortal() {
                         </div>
                       </td>
                       <td>
-                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.suggestedWard === "ICU" ? "bg-red-100 text-red-700" : p.suggestedWard === "Emergency" ? "bg-risk-high-bg text-risk-high" : "bg-sky-100 text-sky-700"}`}>{p.suggestedWard}</span>
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${p.suggestedWard === "ICU" ? "bg-danger-bg text-danger" : p.suggestedWard === "Emergency" ? "bg-risk-high-bg text-risk-high" : "bg-info-bg text-info"}`}>{p.suggestedWard}</span>
                       </td>
                       <td className="text-[10px] text-muted-foreground font-mono">
                         {p.lastVisit ? `${p.lastVisit.date} · ${p.lastVisit.department}` : "—"}
@@ -314,20 +314,20 @@ export default function HospitalPortal() {
 
       {activeTab === "icu" && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-destructive/10 border-2 border-red-300 rounded-2xl">
-            <HeartPulse className="w-5 h-5 text-red-600 shrink-0" />
+          <div className="flex items-center gap-3 p-4 bg-danger-bg border-2 border-danger/30 rounded-2xl">
+            <HeartPulse className="w-5 h-5 text-danger shrink-0" />
             <div>
-              <p className="text-sm font-bold text-red-800">{text("ICU Alert System — Real-time Patient Monitoring", "ICU Alert System — Real-time Patient Monitoring")}</p>
-              <p className="text-xs text-red-600 mt-0.5">{(data?.icuAlerts ?? []).length} {text("patients flagged ·", "patients flagged ·")} {icuCritical} {text("require immediate action", "require immediate action")}</p>
+              <p className="text-sm font-bold text-danger">{text("ICU Alert System — Real-time Patient Monitoring", "ICU Alert System — Real-time Patient Monitoring")}</p>
+              <p className="text-xs text-danger mt-0.5">{(data?.icuAlerts ?? []).length} {text("patients flagged ·", "patients flagged ·")} {icuCritical} {text("require immediate action", "require immediate action")}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {(data?.icuAlerts ?? []).map((alert: any, i: number) => (
-              <div key={i} className={`p-5 rounded-2xl border-2 ${alert.severity === "critical" ? "bg-destructive/10 border-red-300" : "bg-risk-high-bg border-risk-high/20"}`}>
+              <div key={i} className={`p-5 rounded-2xl border-2 ${alert.severity === "critical" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
                 <div className="flex items-start gap-3 mb-3">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${alert.severity === "critical" ? "bg-red-100" : "bg-risk-high-bg"}`}>
-                    <AlertTriangle className={`w-5 h-5 ${alert.severity === "critical" ? "text-red-600" : "text-risk-high"}`} />
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${alert.severity === "critical" ? "bg-danger-bg" : "bg-risk-high-bg"}`}>
+                    <AlertTriangle className={`w-5 h-5 ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`} />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
@@ -337,22 +337,22 @@ export default function HospitalPortal() {
                     <p className="text-[10px] font-mono text-muted-foreground">{alert.nationalId}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={`text-2xl font-bold ${alert.riskScore >= 90 ? "text-red-600" : "text-risk-high"}`}>{alert.riskScore}</p>
+                    <p className={`text-2xl font-bold ${alert.riskScore >= 90 ? "text-danger" : "text-risk-high"}`}>{alert.riskScore}</p>
                     <p className="text-[10px] text-muted-foreground">{text("risk score", "risk score")}</p>
                   </div>
                 </div>
 
-                <div className={`px-3 py-2 rounded-xl mb-2 ${alert.severity === "critical" ? "bg-red-100" : "bg-risk-high-bg"}`}>
-                  <p className={`text-xs font-bold ${alert.severity === "critical" ? "text-red-800" : "text-risk-high"}`}>{alert.alertType}</p>
+                <div className={`px-3 py-2 rounded-xl mb-2 ${alert.severity === "critical" ? "bg-danger-bg" : "bg-risk-high-bg"}`}>
+                  <p className={`text-xs font-bold ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`}>{alert.alertType}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Clock className={`w-3 h-3 ${alert.severity === "critical" ? "text-red-600" : "text-risk-high"}`} />
-                    <p className={`text-[11px] font-bold ${alert.severity === "critical" ? "text-red-600" : "text-risk-high"}`}>{text("Time window:", "Time window:")} {alert.timeWindow}</p>
+                    <Clock className={`w-3 h-3 ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`} />
+                    <p className={`text-[11px] font-bold ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`}>{text("Time window:", "Time window:")} {alert.timeWindow}</p>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-1">
                   {alert.conditions.map((c: string, ci: number) => (
-                    <span key={ci} className="text-[10px] font-semibold bg-card/80 border border-red-100 text-red-700 px-2 py-0.5 rounded-full">{c}</span>
+                    <span key={ci} className="text-[10px] font-semibold bg-card/80 border border-danger/20 text-danger px-2 py-0.5 rounded-full">{c}</span>
                   ))}
                 </div>
               </div>
@@ -363,17 +363,17 @@ export default function HospitalPortal() {
 
       {activeTab === "or" && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-sky-50 border border-sky-200 rounded-2xl">
-            <Stethoscope className="w-5 h-5 text-sky-600 shrink-0" />
+          <div className="flex items-center gap-3 p-4 bg-info-bg border border-info/20 rounded-2xl">
+            <Stethoscope className="w-5 h-5 text-info shrink-0" />
             <div>
-              <p className="text-sm font-bold text-sky-800">{text("Operating Room Schedule — Today", "Operating Room Schedule — Today")}</p>
-              <p className="text-xs text-sky-600 mt-0.5">{(data?.orSchedule ?? []).length} {text("procedures ·", "procedures ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} {text("in progress ·", "in progress ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "emergency").length} {text("emergency", "emergency")}</p>
+              <p className="text-sm font-bold text-info">{text("Operating Room Schedule — Today", "Operating Room Schedule — Today")}</p>
+              <p className="text-xs text-info mt-0.5">{(data?.orSchedule ?? []).length} {text("procedures ·", "procedures ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} {text("in progress ·", "in progress ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "emergency").length} {text("emergency", "emergency")}</p>
             </div>
           </div>
 
           <Card>
             <CardHeader>
-              <Stethoscope className="w-4 h-4 text-sky-600" />
+              <Stethoscope className="w-4 h-4 text-info" />
               <CardTitle>{text("OR Schedule", "OR Schedule")}</CardTitle>
               <Badge variant="outline" className="ml-auto">{(data?.orSchedule ?? []).length} {text("procedures today", "procedures today")}</Badge>
             </CardHeader>
@@ -429,8 +429,8 @@ export default function HospitalPortal() {
               {(data?.readmissionRisks ?? []).map((p: any, i: number) => (
                 <div key={i} className={`p-5 ${p.readmissionRisk >= 80 ? "bg-destructive/10/30" : p.readmissionRisk >= 60 ? "bg-risk-high-bg/20" : ""}`}>
                   <div className="flex items-center gap-4">
-                    <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shrink-0 ${p.readmissionRisk >= 80 ? "bg-red-100" : p.readmissionRisk >= 60 ? "bg-risk-high-bg" : "bg-secondary"}`}>
-                      <p className={`text-lg font-bold tabular-nums ${p.readmissionRisk >= 80 ? "text-red-700" : p.readmissionRisk >= 60 ? "text-risk-high" : "text-foreground"}`}>{p.readmissionRisk}%</p>
+                    <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shrink-0 ${p.readmissionRisk >= 80 ? "bg-danger-bg" : p.readmissionRisk >= 60 ? "bg-risk-high-bg" : "bg-secondary"}`}>
+                      <p className={`text-lg font-bold tabular-nums ${p.readmissionRisk >= 80 ? "text-danger" : p.readmissionRisk >= 60 ? "text-risk-high" : "text-foreground"}`}>{p.readmissionRisk}%</p>
                       <p className="text-[9px] text-muted-foreground">{text("risk", "risk")}</p>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -442,9 +442,9 @@ export default function HospitalPortal() {
                       </div>
                     </div>
                     <div className="shrink-0 max-w-[200px] text-right">
-                      <div className={`flex items-start gap-1.5 px-3 py-2 rounded-xl ${p.readmissionRisk >= 80 ? "bg-destructive/10 border border-red-200" : "bg-secondary border border-border"}`}>
-                        <ChevronRight className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${p.readmissionRisk >= 80 ? "text-red-500" : "text-primary"}`} />
-                        <p className={`text-[11px] font-semibold ${p.readmissionRisk >= 80 ? "text-red-700" : "text-foreground"}`}>{p.recommendedAction}</p>
+                      <div className={`flex items-start gap-1.5 px-3 py-2 rounded-xl ${p.readmissionRisk >= 80 ? "bg-danger-bg border border-danger/20" : "bg-secondary border border-border"}`}>
+                        <ChevronRight className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${p.readmissionRisk >= 80 ? "text-danger" : "text-primary"}`} />
+                        <p className={`text-[11px] font-semibold ${p.readmissionRisk >= 80 ? "text-danger" : "text-foreground"}`}>{p.recommendedAction}</p>
                       </div>
                     </div>
                   </div>

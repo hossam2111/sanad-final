@@ -328,10 +328,10 @@ export default function DoctorDashboard() {
   ].sort((a, b) => b.date.getTime() - a.date.getTime());
 
   const timelineIconMap = {
-    visit: { icon: Building2, bg: "bg-sky-100", color: "text-sky-600" },
+    visit: { icon: Building2, bg: "bg-info-bg", color: "text-info" },
     lab: { icon: FlaskConical, bg: "bg-violet-100", color: "text-violet-600" },
-    medication: { icon: Pill, bg: "bg-emerald-100", color: "text-emerald-600" },
-    alert: { icon: AlertCircle, bg: "bg-red-100", color: "text-red-600" },
+    medication: { icon: Pill, bg: "bg-success-bg", color: "text-success" },
+    alert: { icon: AlertCircle, bg: "bg-danger-bg", color: "text-danger" },
   };
 
   const labsByName: Record<string, typeof labResults> = {};
@@ -357,7 +357,7 @@ export default function DoctorDashboard() {
     <Layout role="doctor" localized>
       {criticalLabs > 0 && (
         <AlertBanner variant="destructive">
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          <AlertCircle className="w-4 h-4 text-danger shrink-0" />
           <span>
             <strong>{text("Critical Lab Alert:", "تنبيه مختبر حرج:")}</strong>{" "}
             {text(
@@ -384,39 +384,39 @@ export default function DoctorDashboard() {
 
       {/* SSE Real-time Lab Alerts Panel */}
       {showSsePanel && sseAlerts.length > 0 && (
-        <div className="mx-0 mb-4 rounded-2xl border border-red-200 bg-destructive/10 shadow-sm overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2 border-b border-red-200 bg-red-100/60">
+        <div className="mx-0 mb-4 rounded-2xl border border-danger/30 bg-destructive/10 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-danger/30 bg-danger-bg/60">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="font-bold text-sm text-red-800">{text("Live Lab Alerts", "تنبيهات مخبرية حيّة")}</span>
+              <div className="w-2 h-2 rounded-full bg-danger animate-pulse" />
+              <span className="font-bold text-sm text-danger">{text("Live Lab Alerts", "تنبيهات مخبرية حيّة")}</span>
               <Badge variant="destructive" className="text-[10px]">{text(`${sseUnread} new`, `${sseUnread} جديدة`)}</Badge>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={clearSseAlerts} className="text-[11px] text-red-600 hover:text-red-800 font-medium">{text("Clear all", "مسح الكل")}</button>
-              <button onClick={() => setShowSsePanel(false)} className="text-red-400 hover:text-red-700">
+              <button onClick={clearSseAlerts} className="text-[11px] text-danger hover:text-danger font-medium">{text("Clear all", "مسح الكل")}</button>
+              <button onClick={() => setShowSsePanel(false)} className="text-danger hover:text-danger">
                 <X className="w-4 h-4" />
               </button>
             </div>
           </div>
-          <div className="divide-y divide-red-200 max-h-64 overflow-y-auto">
+          <div className="divide-y divide-danger/30 max-h-64 overflow-y-auto">
             {sseAlerts.map(alert => (
               <div key={alert.id} className={`px-4 py-3 flex items-start gap-3 ${alert.read ? "opacity-60" : ""}`}>
-                <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${alert.severity === "critical" ? "bg-red-500" : "bg-risk-high"}`} />
+                <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${alert.severity === "critical" ? "bg-danger" : "bg-risk-high"}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm text-red-900">{alert.title}</p>
-                  <p className="text-xs text-red-700 mt-0.5">{alert.patientName} · {alert.result}</p>
-                  <p className="text-xs text-red-600 mt-0.5">{alert.action}</p>
-                  <p className="text-[10px] text-red-400 mt-1">{new Date(alert.timestamp).toLocaleTimeString()}</p>
+                  <p className="font-bold text-sm text-danger">{alert.title}</p>
+                  <p className="text-xs text-danger mt-0.5">{alert.patientName} · {alert.result}</p>
+                  <p className="text-xs text-danger mt-0.5">{alert.action}</p>
+                  <p className="text-[10px] text-danger mt-1">{new Date(alert.timestamp).toLocaleTimeString()}</p>
                 </div>
                 <div className="flex flex-col items-end gap-2 shrink-0">
                   <button
                     onClick={() => { handleSelectPatient(alert.nationalId, alert.patientName); markSseRead(alert.id); }}
-                    className="text-[10px] font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-lg px-2 py-1 transition-colors"
+                    className="text-[10px] font-semibold text-danger bg-danger-bg hover:bg-danger-bg/80 rounded-lg px-2 py-1 transition-colors"
                   >
                     {text("View Patient", "عرض المريض")}
                   </button>
                   {!alert.read && (
-                    <button onClick={() => markSseRead(alert.id)} className="text-[10px] text-red-400 hover:text-red-700">{text("Dismiss", "تجاهل")}</button>
+                    <button onClick={() => markSseRead(alert.id)} className="text-[10px] text-danger hover:text-danger">{text("Dismiss", "تجاهل")}</button>
                   )}
                 </div>
               </div>
@@ -439,22 +439,22 @@ export default function DoctorDashboard() {
             <button
               onClick={() => setShowSsePanel(p => !p)}
               className={`relative flex items-center justify-center w-10 h-10 rounded-full border transition-colors ${
-                sseUnread > 0 ? "bg-destructive/10 border-red-200 hover:bg-red-100" : "bg-card border-border hover:bg-secondary"
+                sseUnread > 0 ? "bg-destructive/10 border-danger/30 hover:bg-danger-bg" : "bg-card border-border hover:bg-secondary"
               }`}
               title={sseConnected ? text("Live alerts connected", "التنبيهات الحيّة متصلة") : text("Connecting to live alerts...", "جارٍ الاتصال بالتنبيهات الحيّة...")}
             >
               {sseUnread > 0 ? (
-                <Bell className="w-4.5 h-4.5 text-red-600" />
+                <Bell className="w-4.5 h-4.5 text-danger" />
               ) : (
                 <Bell className="w-4.5 h-4.5 text-muted-foreground" />
               )}
               {sseUnread > 0 && (
-                <span className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none">
+                <span className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full bg-danger text-white text-[9px] font-bold flex items-center justify-center leading-none">
                   {sseUnread > 9 ? "9+" : sseUnread}
                 </span>
               )}
             </button>
-            <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} title={sseConnected ? text("Live", "مباشر") : text("Offline", "غير متصل")} />
+            <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-success" : "bg-gray-300"}`} title={sseConnected ? text("Live", "مباشر") : text("Offline", "غير متصل")} />
           </div>
         <form onSubmit={handleSearch} className="flex items-center gap-2">
           <div className="relative" ref={searchRef}>
@@ -544,7 +544,7 @@ export default function DoctorDashboard() {
 
                 <div className="px-6 py-4 flex flex-col items-center justify-center bg-destructive/10 min-w-[90px]">
                   <DataLabel label={text("Blood Type", "فصيلة الدم")}>
-                    <p className="text-3xl font-bold text-red-600" dir="ltr">{patient.bloodType}</p>
+                    <p className="text-3xl font-bold text-danger" dir="ltr">{patient.bloodType}</p>
                   </DataLabel>
                 </div>
 
@@ -587,16 +587,16 @@ export default function DoctorDashboard() {
               value={labResults.length}
               sub={text(`${criticalLabs} critical · ${abnormalLabs} abnormal`, `${criticalLabs} حرجة · ${abnormalLabs} غير طبيعية`)}
               icon={FlaskConical}
-              iconBg={criticalLabs > 0 ? "bg-red-100" : "bg-sky-100"}
-              iconColor={criticalLabs > 0 ? "text-red-600" : "text-sky-600"}
+              iconBg={criticalLabs > 0 ? "bg-danger-bg" : "bg-info-bg"}
+              iconColor={criticalLabs > 0 ? "text-danger" : "text-info"}
             />
             <KpiCard
               title={text("Visit History", "سجل الزيارات")}
               value={patient.visits?.length ?? 0}
               sub={text("Total hospital visits", "إجمالي الزيارات")}
               icon={Building2}
-              iconBg="bg-emerald-100"
-              iconColor="text-emerald-600"
+              iconBg="bg-success-bg"
+              iconColor="text-success"
             />
             <KpiCard
               title={text("AI Predictions", "التنبؤات الذكية")}
@@ -611,8 +611,8 @@ export default function DoctorDashboard() {
               value={unreadAlerts}
               sub={text(`${alerts.length} total alerts`, `${alerts.length} إجمالي التنبيهات`)}
               icon={Bell}
-              iconBg={unreadAlerts > 0 ? "bg-red-100" : "bg-secondary"}
-              iconColor={unreadAlerts > 0 ? "text-red-600" : "text-muted-foreground"}
+              iconBg={unreadAlerts > 0 ? "bg-danger-bg" : "bg-secondary"}
+              iconColor={unreadAlerts > 0 ? "text-danger" : "text-muted-foreground"}
             />
           </div>
 
@@ -700,7 +700,7 @@ export default function DoctorDashboard() {
                           {riskScore.factors.slice(0, 4).map((f: any, i: number) => (
                             <div key={i} className="flex items-center gap-2.5 px-3 py-2 bg-card/70 border border-border rounded-xl">
                               <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
-                                f.impact === "high" ? "bg-red-500" :
+                                f.impact === "high" ? "bg-danger" :
                                 f.impact === "moderate" ? "bg-risk-high" : "bg-primary"
                               }`} />
                               <span className="text-xs font-semibold text-foreground flex-1 truncate">{f.factor}</span>
@@ -756,14 +756,14 @@ export default function DoctorDashboard() {
                   </div>
                   <div className="p-5">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <AlertCircle className="w-3.5 h-3.5 text-red-500" /> {text("Documented Allergies", "الحساسية المُوثّقة")}
+                      <AlertCircle className="w-3.5 h-3.5 text-danger" /> {text("Documented Allergies", "الحساسية المُوثّقة")}
                     </p>
                     {(patient.allergies?.length ?? 0) > 0 ? (
                       <div className="space-y-2">
                         {patient.allergies?.map((a, i) => (
-                          <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-destructive/10 border border-red-100 rounded-2xl">
+                          <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-destructive/10 border border-danger/30 rounded-2xl">
                             <StatusDot status="critical" />
-                            <span className="text-sm font-bold text-red-700">{a}</span>
+                            <span className="text-sm font-bold text-danger">{a}</span>
                           </div>
                         ))}
                       </div>
@@ -778,9 +778,9 @@ export default function DoctorDashboard() {
                 <div className="flex items-center gap-3 mb-5">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Unified Clinical Timeline", "الجدول الزمني السريري الموحّد")}</p>
                   <div className="flex items-center gap-2 ms-auto">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-sky-500" /> {text("Visit", "زيارة")}</div>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-info" /> {text("Visit", "زيارة")}</div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-violet-500" /> {text("Lab", "مختبر")}</div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-emerald-500" /> {text("Medication", "دواء")}</div>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-success" /> {text("Medication", "دواء")}</div>
                   </div>
                 </div>
                 <div className="relative">
@@ -880,13 +880,13 @@ export default function DoctorDashboard() {
                   const trend = isWorsening ? "↑ WORSENING" : isImproving ? "↓ IMPROVING" : "→ STABLE";
 
                   return (
-                    <div className={`mx-5 my-4 rounded-2xl border p-4 ${isWorsening ? "border-red-200 bg-destructive/10" : isImproving ? "border-emerald-200 bg-emerald-50" : "border-violet-200 bg-violet-50/40"}`}>
+                    <div className={`mx-5 my-4 rounded-2xl border p-4 ${isWorsening ? "border-danger/30 bg-danger-bg" : isImproving ? "border-success/30 bg-success-bg" : "border-violet-200 bg-violet-50/40"}`}>
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <FlaskConical className={`w-4 h-4 ${isWorsening ? "text-red-500" : isImproving ? "text-emerald-500" : "text-violet-500"}`} />
+                            <FlaskConical className={`w-4 h-4 ${isWorsening ? "text-danger" : isImproving ? "text-success" : "text-violet-500"}`} />
                             <span className="font-bold text-sm">HbA1c Glycemic Trajectory</span>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isWorsening ? "bg-red-100 text-red-700" : isImproving ? "bg-emerald-100 text-emerald-700" : "bg-violet-100 text-violet-700"}`}>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isWorsening ? "bg-danger-bg text-danger" : isImproving ? "bg-success-bg text-success" : "bg-violet-100 text-violet-700"}`}>
                               {trend}
                             </span>
                           </div>
@@ -895,7 +895,7 @@ export default function DoctorDashboard() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className={`text-2xl font-black ${latest.val >= 7.0 ? "text-red-600" : latest.val >= 5.7 ? "text-risk-high" : "text-emerald-600"}`}>
+                          <p className={`text-2xl font-black ${latest.val >= 7.0 ? "text-danger" : latest.val >= 5.7 ? "text-risk-high" : "text-success"}`}>
                             {latest.val}%
                           </p>
                           <p className="text-[10px] text-muted-foreground">{latest.val >= 7.0 ? "Diabetic range" : latest.val >= 5.7 ? "Pre-diabetic" : "Normal"}</p>
@@ -920,7 +920,7 @@ export default function DoctorDashboard() {
                                   <div className="bg-card rounded-xl px-3 py-2 shadow-lg border border-border text-xs">
                                     <p className="font-bold text-foreground">{d?.val}% HbA1c</p>
                                     <p className="text-muted-foreground">{d?.date}</p>
-                                    <p className={`font-medium mt-0.5 ${d?.val >= 7.0 ? "text-red-600" : d?.val >= 5.7 ? "text-risk-high" : "text-emerald-600"}`}>
+                                    <p className={`font-medium mt-0.5 ${d?.val >= 7.0 ? "text-danger" : d?.val >= 5.7 ? "text-risk-high" : "text-success"}`}>
                                       {d?.val >= 7.0 ? text("Diabetic range", "نطاق السكري") : d?.val >= 5.7 ? text("Pre-diabetic", "ما قبل السكري") : text("Normal", "طبيعي")}
                                     </p>
                                   </div>
@@ -956,7 +956,7 @@ export default function DoctorDashboard() {
 
                     return (
                       <div key={latest.id} className={`px-5 py-3.5 flex items-center gap-4 hover:bg-secondary/20 transition-colors ${
-                        latest.status === "critical" ? "border-l-2 border-red-500 bg-destructive/10/30" :
+                        latest.status === "critical" ? "border-l-2 border-danger bg-danger-bg/30" :
                         latest.status === "abnormal" ? "border-l-2 border-risk-high/50 bg-risk-high-bg/20" : ""
                       }`}>
                         {/* Lab Name + Status */}
@@ -1011,7 +1011,7 @@ export default function DoctorDashboard() {
                             <React.Fragment key={i}>
                               <span className={`text-xs font-mono tabular-nums ${
                                 i === chartData.length - 1
-                                  ? (latest.status === "normal" ? "text-emerald-600 font-bold" : latest.status === "critical" ? "text-red-600 font-bold" : "text-risk-high font-bold")
+                                  ? (latest.status === "normal" ? "text-success font-bold" : latest.status === "critical" ? "text-danger font-bold" : "text-risk-high font-bold")
                                   : "text-muted-foreground"
                               }`}>{d.val}</span>
                               {i < chartData.length - 1 && (
@@ -1022,7 +1022,7 @@ export default function DoctorDashboard() {
                           {hasChart && (
                             <span className="ml-1">
                               {trend === "rising" ? <TrendingUp className="w-3.5 h-3.5 text-risk-high inline" /> :
-                               trend === "falling" ? <TrendingDown className="w-3.5 h-3.5 text-sky-500 inline" /> :
+                               trend === "falling" ? <TrendingDown className="w-3.5 h-3.5 text-info inline" /> :
                                <Minus className="w-3 h-3 text-muted-foreground inline" />}
                             </span>
                           )}
@@ -1103,9 +1103,9 @@ export default function DoctorDashboard() {
                     {alerts.map(alert => (
                       <div key={alert.id} className={`flex items-start gap-4 px-5 py-4 transition-colors ${alert.isRead ? "opacity-60" : "bg-risk-high-bg/30"}`}>
                         <div className={`w-2 h-2 rounded-full mt-2 shrink-0 ${
-                          alert.severity === "critical" ? "bg-red-600" :
+                          alert.severity === "critical" ? "bg-danger" :
                           alert.severity === "high" ? "bg-risk-high" :
-                          alert.severity === "moderate" ? "bg-sky-500" : "bg-secondary"
+                          alert.severity === "moderate" ? "bg-info" : "bg-secondary"
                         }`} />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
@@ -1157,10 +1157,10 @@ export default function DoctorDashboard() {
                   <div className="space-y-5">
                     {/* Urgency Header Strip */}
                     <div className={`rounded-2xl p-5 ${
-                      aiDecision.urgency === "immediate" ? "bg-red-600 text-white" :
+                      aiDecision.urgency === "immediate" ? "bg-danger text-white" :
                       aiDecision.urgency === "urgent" ? "bg-risk-high text-white" :
-                      aiDecision.urgency === "soon" ? "bg-sky-500 text-white" :
-                      "bg-emerald-500 text-white"
+                      aiDecision.urgency === "soon" ? "bg-info text-white" :
+                      "bg-success text-white"
                     }`}>
                       <div className="flex items-start justify-between gap-4">
                         <div>
@@ -1202,15 +1202,15 @@ export default function DoctorDashboard() {
                         <div className="space-y-2">
                           {aiDecision.whyFactors.map((f, i) => (
                             <div key={i} className={`flex items-start gap-3 px-3.5 py-3 rounded-2xl border ${
-                              f.impact === "critical" ? "bg-destructive/10 border-red-200" :
+                              f.impact === "critical" ? "bg-destructive/10 border-danger/30" :
                               f.impact === "high" ? "bg-risk-high-bg border-risk-high/20" :
-                              f.impact === "moderate" ? "bg-sky-50 border-sky-200" :
+                              f.impact === "moderate" ? "bg-info-bg border-info/30" :
                               "bg-secondary border-border"
                             }`}>
                               <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${
-                                f.impact === "critical" ? "bg-red-600" :
+                                f.impact === "critical" ? "bg-danger" :
                                 f.impact === "high" ? "bg-risk-high" :
-                                f.impact === "moderate" ? "bg-sky-500" : "bg-muted-foreground"
+                                f.impact === "moderate" ? "bg-info" : "bg-muted-foreground"
                               }`} />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-0.5">
@@ -1261,9 +1261,9 @@ export default function DoctorDashboard() {
                     {/* Digital Twin */}
                     {aiDecision.digitalTwin && (
                       <div className={`p-5 rounded-2xl border-2 ${
-                        aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "bg-destructive/10 border-red-300" :
+                        aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "bg-destructive/10 border-danger/30" :
                         aiDecision.digitalTwin.riskTrajectory === "worsening" ? "bg-risk-high-bg border-risk-high/20" :
-                        aiDecision.digitalTwin.riskTrajectory === "improving" ? "bg-emerald-50 border-emerald-200" :
+                        aiDecision.digitalTwin.riskTrajectory === "improving" ? "bg-success-bg border-success/30" :
                         "bg-secondary border-border"
                       }`}>
                         <div className="flex items-start justify-between mb-3">
@@ -1272,17 +1272,17 @@ export default function DoctorDashboard() {
                               <Brain className="w-3.5 h-3.5 text-violet-600" /> {text("Digital Twin", "التوأم الرقمي")} — {aiDecision.digitalTwin.timeframe}
                             </p>
                             <p className="font-bold text-foreground">{text("Trajectory:", "المسار:")} <span className={
-                              aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "text-red-600" :
+                              aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "text-danger" :
                               aiDecision.digitalTwin.riskTrajectory === "worsening" ? "text-risk-high" :
-                              aiDecision.digitalTwin.riskTrajectory === "improving" ? "text-emerald-600" :
+                              aiDecision.digitalTwin.riskTrajectory === "improving" ? "text-success" :
                               "text-muted-foreground"
                             }>{trajectoryLabel(aiDecision.digitalTwin.riskTrajectory, text)}</span></p>
                           </div>
                           <div className="text-end">
                             <p className="text-xs text-muted-foreground">{text("Projected Risk Score", "درجة الخطورة المتوقعة")}</p>
                             <p className={`text-3xl font-bold tabular-nums ${
-                              aiDecision.digitalTwin.projectedRiskScore >= 70 ? "text-red-600" :
-                              aiDecision.digitalTwin.projectedRiskScore >= 50 ? "text-risk-high" : "text-emerald-600"
+                              aiDecision.digitalTwin.projectedRiskScore >= 70 ? "text-danger" :
+                              aiDecision.digitalTwin.projectedRiskScore >= 50 ? "text-risk-high" : "text-success"
                             }`}>{aiDecision.digitalTwin.projectedRiskScore}<span className="text-sm text-muted-foreground font-normal">/100</span></p>
                           </div>
                         </div>
@@ -1306,18 +1306,18 @@ export default function DoctorDashboard() {
                     {aiDecision.behavioralFlags && aiDecision.behavioralFlags.length > 0 && (
                       <div>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                          <Activity className="w-3.5 h-3.5 text-sky-600" /> {text("Behavioral AI Flags", "إشارات سلوكية ذكية")}
+                          <Activity className="w-3.5 h-3.5 text-info" /> {text("Behavioral AI Flags", "إشارات سلوكية ذكية")}
                         </p>
                         <div className="space-y-2">
                           {aiDecision.behavioralFlags.map((flag, i) => (
                             <div key={i} className={`flex items-start gap-3 p-4 rounded-2xl border ${
                               flag.severity === "high" ? "bg-risk-high-bg border-risk-high/20" :
-                              flag.severity === "moderate" ? "bg-sky-50 border-sky-200" :
+                              flag.severity === "moderate" ? "bg-info-bg border-info/30" :
                               "bg-secondary border-border"
                             }`}>
                               <Bell className={`w-4 h-4 shrink-0 mt-0.5 ${
                                 flag.severity === "high" ? "text-risk-high" :
-                                flag.severity === "moderate" ? "text-sky-600" : "text-muted-foreground"
+                                flag.severity === "moderate" ? "text-info" : "text-muted-foreground"
                               }`} />
                               <div>
                                 <p className="text-sm font-bold text-foreground">{flag.description}</p>
@@ -1572,7 +1572,7 @@ export default function DoctorDashboard() {
                         {riskScore.factors.map((f: any, i: number) => (
                           <div key={i} className="flex items-start gap-3 p-3.5 bg-secondary rounded-2xl">
                             <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
-                              f.impact === "high" ? "bg-red-500" :
+                              f.impact === "high" ? "bg-danger" :
                               f.impact === "moderate" ? "bg-risk-high" : "bg-primary"
                             }`} />
                             <div className="flex-1 min-w-0">
@@ -1711,26 +1711,26 @@ function PrescribeModal({ patientId }: { patientId: number }) {
               {checkMutation.data && (
                 <div className="space-y-3 border-t border-border pt-4">
                   {checkMutation.data.safe ? (
-                    <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
-                      <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                        <Shield className="w-4.5 h-4.5 text-emerald-600" />
+                    <div className="flex items-center gap-3 p-4 bg-success-bg border border-success/30 rounded-2xl">
+                      <div className="w-9 h-9 rounded-xl bg-success-bg flex items-center justify-center shrink-0">
+                        <Shield className="w-4.5 h-4.5 text-success" />
                       </div>
                       <div>
-                        <p className="font-bold text-emerald-700 text-sm">{text("No Interactions Detected", "لم تُكتشف تداخلات دوائية")}</p>
+                        <p className="font-bold text-success text-sm">{text("No Interactions Detected", "لم تُكتشف تداخلات دوائية")}</p>
                         <p className="text-xs text-muted-foreground">{text("Safe to prescribe based on current medication profile.", "آمن للوصف بناءً على ملف الأدوية الحالي.")}</p>
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-2.5">
                       {checkMutation.data.warnings.map((w: any, i: number) => (
-                        <div key={i} className="p-4 bg-destructive/10 border border-red-200 rounded-2xl">
+                        <div key={i} className="p-4 bg-destructive/10 border border-danger/30 rounded-2xl">
                           <div className="flex items-center gap-2 mb-2">
-                            <AlertCircle className="w-4 h-4 text-red-600" />
-                            <span className="text-sm font-bold text-red-700">{text("Interaction:", "تداخل:")} {w.conflictingDrug}</span>
+                            <AlertCircle className="w-4 h-4 text-danger" />
+                            <span className="text-sm font-bold text-danger">{text("Interaction:", "تداخل:")} {w.conflictingDrug}</span>
                             <Badge variant={w.severity === "critical" ? "destructive" : "warning"} className="ms-auto text-[10px]">{severityLabel(w.severity, text)}</Badge>
                           </div>
                           <p className="text-xs text-foreground/80 mb-2 ms-6">{w.description}</p>
-                          <p className="text-xs font-semibold bg-card border border-red-100 rounded-xl p-2 ms-6">{w.recommendation}</p>
+                          <p className="text-xs font-semibold bg-card border border-danger/30 rounded-xl p-2 ms-6">{w.recommendation}</p>
                         </div>
                       ))}
                     </div>

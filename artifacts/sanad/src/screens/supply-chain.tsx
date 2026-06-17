@@ -30,12 +30,12 @@ async function submitReorder(body: Record<string, any>) {
 }
 
 const STATUS_CFG: Record<string, { bg: string; border: string; text: string; badge: any; dot: string }> = {
-  critical: { bg: "bg-destructive/10", border: "border-red-200", text: "text-red-700", badge: "destructive" as const, dot: "bg-red-500 animate-pulse" },
+  critical: { bg: "bg-danger-bg", border: "border-danger/30", text: "text-danger", badge: "destructive" as const, dot: "bg-danger animate-pulse" },
   low: { bg: "bg-risk-high-bg", border: "border-risk-high/20", text: "text-risk-high", badge: "warning" as const, dot: "bg-risk-high" },
-  adequate: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", badge: "success" as const, dot: "bg-emerald-500" },
-  High: { bg: "bg-emerald-50", border: "border-emerald-200", text: "text-emerald-700", badge: "success" as const, dot: "bg-emerald-500" },
+  adequate: { bg: "bg-success-bg", border: "border-success/30", text: "text-success", badge: "success" as const, dot: "bg-success" },
+  High: { bg: "bg-success-bg", border: "border-success/30", text: "text-success", badge: "success" as const, dot: "bg-success" },
   Medium: { bg: "bg-risk-high-bg", border: "border-risk-high/20", text: "text-risk-high", badge: "warning" as const, dot: "bg-risk-high" },
-  Low: { bg: "bg-destructive/10", border: "border-red-200", text: "text-red-700", badge: "destructive" as const, dot: "bg-red-500" },
+  Low: { bg: "bg-danger-bg", border: "border-danger/30", text: "text-danger", badge: "destructive" as const, dot: "bg-danger" },
 };
 
 type ShortagePrediction = { drug: string; day30: number; day60: number; day90: number; current: number; min: number };
@@ -113,7 +113,7 @@ export default function SupplyChainPortal() {
     return (
       <Layout role="supply-chain" localized>
         <div className="flex items-center justify-center gap-3 py-20 text-muted-foreground">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-lime-600" />
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
           <span className="text-sm font-medium">{text("Loading inventory data...", "جارٍ تحميل بيانات المخزون...")}</span>
         </div>
       </Layout>
@@ -133,7 +133,7 @@ export default function SupplyChainPortal() {
     <Layout role="supply-chain" localized>
       {/* Priority Strip */}
       {criticals > 0 && (
-        <div className="flex items-center gap-3 px-4 py-2.5 bg-red-600 text-white rounded-2xl mb-5">
+        <div className="flex items-center gap-3 px-4 py-2.5 bg-danger text-white rounded-2xl mb-5">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <p className="text-xs font-bold uppercase tracking-widest">
             {text(`${criticals} CRITICAL SHORTAGE${criticals > 1 ? "S" : ""} —`, `${criticals} نقص حرج —`)}{" "}
@@ -146,12 +146,12 @@ export default function SupplyChainPortal() {
       )}
 
       <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 bg-lime-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
+        <div className="flex items-center gap-2 bg-lime-750 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Package className="w-3 h-3" />
           {text("Supply Chain", "سلسلة الإمداد")}
         </div>
-        <div className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full ${criticals > 0 ? "text-red-600 bg-destructive/10" : "text-emerald-600 bg-emerald-50"}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${criticals > 0 ? "bg-red-500 animate-pulse" : "bg-emerald-500"}`} />
+        <div className={`flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full ${criticals > 0 ? "text-danger bg-danger-bg" : "text-success bg-success-bg"}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${criticals > 0 ? "bg-danger animate-pulse" : "bg-success"}`} />
           {criticals > 0 ? text(`${criticals} Critical Shortages`, `${criticals} نقص حرج`) : text("No Critical Shortages", "لا يوجد نقص حرج")}
         </div>
         <div className="ms-auto font-mono text-[11px] text-muted-foreground bg-secondary border border-border px-3 py-1.5 rounded-full">
@@ -184,9 +184,9 @@ export default function SupplyChainPortal() {
         <KpiCard
           title={text("Critical Shortages", "النقص الحرج")} value={data?.summary?.criticalShortages}
           sub={text(`${data?.summary?.reorderAlerts} reorder alerts active`, `${data?.summary?.reorderAlerts} تنبيه إعادة طلب`)}
-          icon={AlertTriangle} iconBg={criticals > 0 ? "bg-red-100" : "bg-emerald-100"} iconColor={criticals > 0 ? "text-red-600" : "text-emerald-600"}
+          icon={AlertTriangle} iconBg={criticals > 0 ? "bg-danger-bg" : "bg-success-bg"} iconColor={criticals > 0 ? "text-danger" : "text-success"}
         />
-        <KpiCard title={text("Adequate Stock", "مخزون كافٍ")} value={data?.summary?.adequate} sub={text("Lines fully stocked", "أصناف مكتملة المخزون")} icon={CheckCircle2} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
+        <KpiCard title={text("Adequate Stock", "مخزون كافٍ")} value={data?.summary?.adequate} sub={text("Lines fully stocked", "أصناف مكتملة المخزون")} icon={CheckCircle2} iconBg="bg-success-bg" iconColor="text-success" />
         <KpiCard title={text("Inventory Value", "قيمة المخزون")} value={`${text("SAR", "ر.س")} ${data?.summary?.totalInventoryValue?.toLocaleString()}`} sub={text("Current stock value", "قيمة المخزون الحالية")} icon={BarChart2} iconBg="bg-primary/10" iconColor="text-primary" />
       </div>
 
@@ -205,7 +205,7 @@ export default function SupplyChainPortal() {
               <Icon className="w-3 h-3" />
               {tab.label}
               {tab.id === "reorder" && criticals > 0 && (
-                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-danger text-white text-[8px] font-bold rounded-full flex items-center justify-center">
                   {criticals}
                 </span>
               )}
@@ -233,7 +233,7 @@ export default function SupplyChainPortal() {
                     {data?.inventory?.map((item: any, i: number) => {
                       const cfg = STATUS_CFG[item.status] ?? STATUS_CFG.adequate;
                       return (
-                        <tr key={i} className={`${item.status === "critical" ? "bg-destructive/10/30" : ""} hover:bg-secondary/20`}>
+                        <tr key={i} className={`${item.status === "critical" ? "bg-danger-bg/50" : ""} hover:bg-secondary/20`}>
                           <td className="px-4 py-3">
                             <p className="text-sm font-semibold text-foreground">{item.drugName}</p>
                             <p className="text-[10px] text-muted-foreground">{item.supplier}</p>
@@ -251,9 +251,9 @@ export default function SupplyChainPortal() {
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               <div className="w-16 bg-secondary rounded-full h-1.5">
-                                <div className={`h-full rounded-full ${item.daysOfStock < 14 ? "bg-red-500" : item.daysOfStock < 30 ? "bg-risk-high" : "bg-emerald-500"}`} style={{ width: `${Math.min((item.daysOfStock / 90) * 100, 100)}%` }} />
+                                <div className={`h-full rounded-full ${item.daysOfStock < 14 ? "bg-danger" : item.daysOfStock < 30 ? "bg-risk-high" : "bg-success"}`} style={{ width: `${Math.min((item.daysOfStock / 90) * 100, 100)}%` }} />
                               </div>
-                              <span className={`text-xs font-bold ${item.daysOfStock < 14 ? "text-red-600" : item.daysOfStock < 30 ? "text-risk-high" : "text-foreground"}`}>{item.daysOfStock}{text("d", "d")}</span>
+                              <span className={`text-xs font-bold ${item.daysOfStock < 14 ? "text-danger" : item.daysOfStock < 30 ? "text-risk-high" : "text-foreground"}`}>{item.daysOfStock}{text("d", "d")}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3">
@@ -394,14 +394,14 @@ export default function SupplyChainPortal() {
                       <p className="text-xs text-muted-foreground mt-0.5">{text("Supplier:", "Supplier:")} {item.supplier} {text("· Lead time:", "· Lead time:")} {item.leadTimeDays}{text("d", "d")}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={`text-2xl font-bold ${item.daysOfStock < 14 ? "text-red-600" : "text-risk-high"}`}>{item.daysOfStock}{text("d", "d")}</p>
+                      <p className={`text-2xl font-bold ${item.daysOfStock < 14 ? "text-danger" : "text-risk-high"}`}>{item.daysOfStock}{text("d", "d")}</p>
                       <p className="text-[10px] text-muted-foreground">{text("stock left", "stock left")}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => reorderMutation.mutate({ drugName: item.drugName, quantity: item.avgMonthlyDemand * 3, supplier: item.supplier, requestedBy: "Ibrahim Al-Dosari" })}
                     disabled={reorderMutation.isPending || !!reorderResults[item.drugName]}
-                    className={`mt-3 w-full text-xs font-semibold py-1.5 rounded-xl transition-colors ${reorderResults[item.drugName] ? "bg-emerald-100 text-emerald-700" : "bg-red-600 hover:bg-red-700 text-white"}`}
+                    className={`mt-3 w-full text-xs font-semibold py-1.5 rounded-xl transition-colors ${reorderResults[item.drugName] ? "bg-success-bg text-success border border-success/30" : "bg-danger hover:bg-danger text-white"}`}
                   >
                     {reorderResults[item.drugName] ? `✓ Order Placed: ${reorderResults[item.drugName]?.orderId}` : "Issue Emergency Order"}
                   </button>
@@ -415,8 +415,8 @@ export default function SupplyChainPortal() {
       {/* ─── REGIONAL DISTRIBUTION ─── */}
       {activeTab === "distribution" && (
         <div className="space-y-5">
-          <div className="flex items-center gap-3 px-4 py-3 bg-sky-50 border border-sky-200 rounded-2xl">
-            <Globe className="w-4 h-4 text-sky-600 shrink-0" />
+          <div className="flex items-center gap-3 px-4 py-3 bg-info-bg border border-info/20 rounded-2xl">
+            <Globe className="w-4 h-4 text-info shrink-0" />
             <div>
               <p className="text-xs font-bold text-foreground">{text("National Drug Distribution Optimization", "National Drug Distribution Optimization")}</p>
               <p className="text-[11px] text-muted-foreground mt-0.5">{text("AI redistribution model identifies supply-demand gaps per region — redistribution recommendations updated every 6 hours", "AI redistribution model identifies supply-demand gaps per region — redistribution recommendations updated every 6 hours")}</p>
@@ -435,8 +435,8 @@ export default function SupplyChainPortal() {
               <CardBody>
                 <div className="h-72">
                   {loadingRegional ? (
-                    <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2" /> {text("Loading regional data...", "Loading regional data...")}
+                     <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2" /> {text("Loading regional data...", "Loading regional data...")}
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
@@ -471,23 +471,23 @@ export default function SupplyChainPortal() {
               <CardBody className="space-y-2.5">
                 {loadingRegional ? (
                   <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2" /> {text("Loading...", "Loading...")}
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" /> {text("Loading...", "Loading...")}
                   </div>
                 ) : regionalDistribution.map((r: any, i: number) => (
-                  <div key={i} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border ${r.gap < 0 ? "bg-destructive/10 border-red-100" : "bg-emerald-50 border-emerald-100"}`}>
-                    <MapPin className={`w-3.5 h-3.5 shrink-0 ${r.gap < 0 ? "text-red-500" : "text-emerald-500"}`} />
+                  <div key={i} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border ${r.gap < 0 ? "bg-danger-bg border-danger/30" : "bg-success-bg border-success/30"}`}>
+                    <MapPin className={`w-3.5 h-3.5 shrink-0 ${r.gap < 0 ? "text-danger" : "text-success"}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-foreground">{r.region}</p>
                       <p className="text-[10px] text-muted-foreground">
                         {text("Stock", "Stock")} {r.stock.toLocaleString()} {text("· Demand", "· Demand")} {r.demand.toLocaleString()}
-                        {r.criticalDrugs > 0 && <span className="text-red-500 font-bold"> · {r.criticalDrugs} {text("critical drugs", "critical drugs")}</span>}
+                        {r.criticalDrugs > 0 && <span className="text-danger font-bold"> · {r.criticalDrugs} {text("critical drugs", "critical drugs")}</span>}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={`text-sm font-bold ${r.gap < 0 ? "text-red-600" : "text-emerald-600"}`}>
+                      <p className={`text-sm font-bold ${r.gap < 0 ? "text-danger" : "text-success"}`}>
                         {r.gap > 0 ? "+" : ""}{r.gapPct}%
                       </p>
-                      <p className={`text-[9px] font-bold ${r.gap < 0 ? "text-red-500" : "text-emerald-500"}`}>
+                      <p className={`text-[9px] font-bold ${r.gap < 0 ? "text-danger" : "text-success"}`}>
                         {r.gap < 0 ? "DEFICIT" : "SURPLUS"}
                       </p>
                     </div>
@@ -506,18 +506,18 @@ export default function SupplyChainPortal() {
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600" /> {text("Computing recommendations...", "Computing recommendations...")}
                 </div>
               ) : regionalRecs.length > 0 ? regionalRecs.map((rec: any, i: number) => (
-                <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-destructive/10 border-red-200" : "bg-risk-high-bg border-risk-high/20"}`}>
-                  <Truck className={`w-4 h-4 shrink-0 mt-0.5 ${rec.urgency === "critical" ? "text-red-600" : "text-risk-high"}`} />
+                <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
+                  <Truck className={`w-4 h-4 shrink-0 mt-0.5 ${rec.urgency === "critical" ? "text-danger" : "text-risk-high"}`} />
                   <div className="flex-1">
                     <p className="text-sm font-bold text-foreground">{rec.region} — {rec.action}</p>
                     {rec.criticalDrugs > 0 && (
-                      <p className="text-xs text-red-700 font-semibold mt-0.5">{rec.criticalDrugs} {text("critical drug(s) below minimum threshold in this region", "critical drug(s) below minimum threshold in this region")}</p>
+                      <p className="text-xs text-danger font-semibold mt-0.5">{rec.criticalDrugs} {text("critical drug(s) below minimum threshold in this region", "critical drug(s) below minimum threshold in this region")}</p>
                     )}
                     <Badge variant={rec.urgency === "critical" ? "destructive" : "warning"} className="text-[9px] mt-1">{rec.urgency.toUpperCase()}</Badge>
                   </div>
                 </div>
               )) : (
-                <div className="flex items-center gap-2 text-sm text-emerald-700 bg-emerald-50 px-4 py-3 rounded-2xl border border-emerald-200">
+                <div className="flex items-center gap-2 text-sm text-success bg-success-bg px-4 py-3 rounded-2xl border border-success/30">
                   <CheckCircle2 className="w-4 h-4" /> {text("All regions within acceptable supply thresholds — no redistribution needed.", "All regions within acceptable supply thresholds — no redistribution needed.")}
                 </div>
               )}
@@ -605,23 +605,23 @@ export default function SupplyChainPortal() {
           {/* Critical alerts */}
           {data?.criticalAlerts?.length > 0 && (
             <Card>
-              <CardHeader><AlertTriangle className="w-4 h-4 text-red-600" /><CardTitle>{text("Emergency Purchase Orders Required", "Emergency Purchase Orders Required")}</CardTitle><Badge variant="destructive">{data.criticalAlerts.length} {text("critical", "critical")}</Badge></CardHeader>
+              <CardHeader><AlertTriangle className="w-4 h-4 text-danger" /><CardTitle>{text("Emergency Purchase Orders Required", "Emergency Purchase Orders Required")}</CardTitle><Badge variant="destructive">{data.criticalAlerts.length} {text("critical", "critical")}</Badge></CardHeader>
               <div className="divide-y divide-border">
                 {data.criticalAlerts.map((alert: any, i: number) => {
                   const result = reorderResults[alert.drug];
                   return (
-                    <div key={i} className="flex items-center gap-4 px-5 py-4 bg-destructive/10/30">
-                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+                    <div key={i} className="flex items-center gap-4 px-5 py-4 bg-danger-bg/30">
+                      <div className="w-2 h-2 rounded-full bg-danger animate-pulse shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-foreground">{alert.drug}</p>
                         <p className="text-xs text-muted-foreground">
-                          {text("Current:", "Current:")} {alert.currentStock.toLocaleString()} {text("· Required:", "· Required:")} {alert.minRequired.toLocaleString()} {text("· Deficit:", "· Deficit:")} <span className="font-bold text-red-600">{alert.deficit.toLocaleString()}</span>
+                          {text("Current:", "Current:")} {alert.currentStock.toLocaleString()} {text("· Required:", "· Required:")} {alert.minRequired.toLocaleString()} {text("· Deficit:", "· Deficit:")} <span className="font-bold text-danger">{alert.deficit.toLocaleString()}</span>
                         </p>
                         <p className="text-[10px] text-muted-foreground mt-0.5">{text("Supplier:", "Supplier:")} {alert.supplier} {text("· Lead time:", "· Lead time:")} {alert.leadTimeDays} {text("days", "days")}</p>
                       </div>
                       {result ? (
                         <div className="text-right shrink-0">
-                          <p className="text-xs font-bold text-emerald-600 flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> {text("Order Placed", "Order Placed")}</p>
+                          <p className="text-xs font-bold text-success flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> {text("Order Placed", "Order Placed")}</p>
                           <p className="font-mono text-[10px] text-muted-foreground">{result.orderId}</p>
                         </div>
                       ) : (
@@ -631,7 +631,7 @@ export default function SupplyChainPortal() {
                             reorderMutation.mutate({ drugName: alert.drug, quantity: (drug?.avgMonthlyDemand ?? alert.minRequired) * 3, supplier: alert.supplier, requestedBy: "Ibrahim Al-Dosari" });
                           }}
                           disabled={reorderMutation.isPending}
-                          className="flex items-center gap-1.5 text-xs font-bold bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl transition-colors shrink-0"
+                          className="flex items-center gap-1.5 text-xs font-bold bg-danger hover:bg-danger text-white px-3 py-1.5 rounded-xl transition-colors shrink-0"
                         >
                           <ShoppingCart className="w-3 h-3" />
                           {text("Issue Order", "Issue Order")}
@@ -665,12 +665,12 @@ export default function SupplyChainPortal() {
                       </div>
                       <Badge variant={cfg.badge} className="text-[9px]">{item.status}</Badge>
                       {result ? (
-                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />{result.orderId}</span>
+                        <span className="text-[10px] font-bold text-success flex items-center gap-1"><CheckCircle2 className="w-3 h-3" />{result.orderId}</span>
                       ) : (
                         <button
                           onClick={() => reorderMutation.mutate({ drugName: item.drugName, quantity: item.avgMonthlyDemand * 3, supplier: item.supplier, requestedBy: "Ibrahim Al-Dosari" })}
                           disabled={reorderMutation.isPending}
-                          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${item.status === "critical" ? "bg-red-600 hover:bg-red-700 text-white" : "bg-risk-high-bg hover:bg-amber-200 text-risk-high"}`}
+                          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${item.status === "critical" ? "bg-danger hover:bg-danger text-white" : "bg-risk-high-bg hover:bg-risk-high/30 text-risk-high"}`}
                         >
                           <ShoppingCart className="w-3 h-3" />
                           {text("Order", "Order")}

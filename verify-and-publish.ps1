@@ -84,12 +84,12 @@ if ($SkipSeed) {
   Info "Skipping seed (-SkipSeed flag set)"
 } else {
   Info "Running: pnpm --filter @workspace/scripts seed"
-  $seed = Start-Process -FilePath "pnpm" `
-    -ArgumentList "--filter", "@workspace/scripts", "seed" `
-    -WorkingDirectory $root `
-    -Wait -PassThru -NoNewWindow
-  if ($seed.ExitCode -ne 0) {
-    Fail "Seed failed (exit $($seed.ExitCode)) — check DATABASE_URL and Neon connectivity"
+  Push-Location $root
+  & pnpm --filter "@workspace/scripts" seed
+  $seedExit = $LASTEXITCODE
+  Pop-Location
+  if ($seedExit -ne 0) {
+    Fail "Seed failed (exit $seedExit) — check DATABASE_URL and Neon connectivity"
     exit 1
   }
   Pass "Seed completed"
@@ -148,7 +148,7 @@ if ($allPassed) {
   Write-Host "  Run these two commands to publish:" -ForegroundColor White
   Write-Host ""
   Write-Host "    git push -u sanad-final main" -ForegroundColor Cyan
-  Write-Host "    git push sanad-final demo-ready-v2" -ForegroundColor Cyan
+  Write-Host "    git push sanad-final demo-ready-v3" -ForegroundColor Cyan
   Write-Host ""
 } else {
   Write-Host "  ╔═══════════════════════════════════╗" -ForegroundColor Red

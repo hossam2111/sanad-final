@@ -160,8 +160,8 @@ export default function PortalAccess() {
             )}
           </p>
           <div className={`flex items-center gap-5 text-[11px] text-white/45 ${isAr ? "font-semibold" : "font-mono"}`} dir={dir}>
-            <span className="flex items-center gap-1.5 text-emerald-400/90">
-              <span className="beacon h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className="flex items-center gap-1.5 text-success/90">
+              <span className="beacon h-1.5 w-1.5 rounded-full bg-success" />
               {text("OPERATIONAL", "تعمل")}
             </span>
             <span>9 {text("ENGINES", "محركات")}</span>
@@ -277,7 +277,7 @@ export default function PortalAccess() {
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-xl border border-red-400/25 bg-red-500/[0.08] px-4 py-3 text-[13px] font-medium text-red-300"
+                className="rounded-xl border border-danger/25 bg-danger/[0.08] px-4 py-3 text-[13px] font-medium text-danger"
               >
                 {error}
               </motion.div>

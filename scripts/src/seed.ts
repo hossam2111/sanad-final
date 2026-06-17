@@ -534,7 +534,7 @@ async function seed() {
   // ════════════════════════════════════════════════════════════════════════════
   // PURCHASE ORDERS — Demo POs for Supply Chain module
   // ════════════════════════════════════════════════════════════════════════════
-  const pos = [
+  const pos: (typeof purchaseOrdersTable.$inferInsert)[] = [
     {
       id: "PO-2026-0001",
       drugName: "Amiodarone",
@@ -547,7 +547,7 @@ async function seed() {
       drugName: "Insulin Glargine",
       quantity: 2000,
       supplier: "SPIMACO",
-      status: "approved",
+      status: "confirmed",
     }
   ];
   await db.insert(purchaseOrdersTable).values(pos);

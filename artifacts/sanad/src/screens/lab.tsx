@@ -128,9 +128,9 @@ export default function LabPortal() {
 
   const trendIcon = (trend: string) => {
     if (trend.includes("WORSENING") || trend.includes("HIGH") || trend.includes("ELEVATED") || trend.includes("DIABETIC") || trend.includes("CRITICAL") || trend.includes("ANEMIA") || trend.includes("STRESS") || trend.includes("ABNORMAL")) {
-      return <TrendingUp className="w-3.5 h-3.5 text-red-500" />;
+      return <TrendingUp className="w-3.5 h-3.5 text-danger" />;
     }
-    if (trend === "NORMAL" || trend === "OPTIMAL") return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />;
+    if (trend === "NORMAL" || trend === "OPTIMAL") return <CheckCircle2 className="w-3.5 h-3.5 text-success" />;
     return <AlertTriangle className="w-3.5 h-3.5 text-risk-high" />;
   };
 
@@ -182,7 +182,7 @@ export default function LabPortal() {
         <div className="space-y-4">
           {/* Patient Strip */}
           <div className={`rounded-3xl p-5 flex items-center justify-between gap-5 ${
-            data.patient.riskLevel === "critical" ? "bg-red-600" :
+            data.patient.riskLevel === "critical" ? "bg-danger" :
             data.patient.riskLevel === "high" ? "bg-risk-high" :
             "bg-teal-500"
           } text-white`}>
@@ -260,12 +260,12 @@ export default function LabPortal() {
                           </div>
                           <div className="flex items-center gap-1.5">
                             {isWorsening && (
-                              <span className="text-[10px] font-bold text-red-600 bg-destructive/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <span className="text-[10px] font-bold text-danger bg-danger-bg px-2 py-0.5 rounded-full flex items-center gap-1">
                                 <TrendingUp className="w-3 h-3" /> WORSENING
                               </span>
                             )}
                             {isImproving && (
-                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <span className="text-[10px] font-bold text-success bg-success-bg px-2 py-0.5 rounded-full flex items-center gap-1">
                                 <TrendingDown className="w-3 h-3" /> IMPROVING
                               </span>
                             )}
@@ -319,7 +319,7 @@ export default function LabPortal() {
 
           {/* AI Interpretation of last submitted result */}
           {lastResult && (
-            <div className={`rounded-2xl p-5 border-2 ${lastResult.aiAnalysis?.status === "critical" ? "bg-destructive/10 border-red-300" : lastResult.aiAnalysis?.status === "abnormal" ? "bg-risk-high-bg border-risk-high/20" : "bg-emerald-50 border-emerald-300"}`}>
+            <div className={`rounded-2xl p-5 border-2 ${lastResult.aiAnalysis?.status === "critical" ? "bg-danger-bg border-danger/30" : lastResult.aiAnalysis?.status === "abnormal" ? "bg-risk-high-bg border-risk-high/20" : "bg-success-bg border-success/30"}`}>
               <div className="flex items-start gap-3 mb-3">
                 <Brain className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
                 <div>
@@ -446,7 +446,7 @@ export default function LabPortal() {
                 </div>
               ) : (
                 data.labs.map((lab: any) => (
-                  <div key={lab.id} className={`p-4 ${lab.status === "critical" ? "bg-destructive/10/50" : lab.status === "abnormal" ? "bg-risk-high-bg/30" : ""}`}>
+                  <div key={lab.id} className={`p-4 ${lab.status === "critical" ? "bg-danger-bg" : lab.status === "abnormal" ? "bg-risk-high-bg/30" : ""}`}>
                     <div className="flex items-start gap-4">
                       <div className="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-teal-500" />
                       <div className="flex-1 min-w-0">
@@ -465,9 +465,9 @@ export default function LabPortal() {
                           <p className="text-[10px] text-muted-foreground">{lab.hospital}</p>
                         </div>
                         <div className={`px-3 py-2.5 rounded-xl border text-xs ${
-                          lab.status === "critical" ? "bg-destructive/10 border-red-200" :
+                          lab.status === "critical" ? "bg-danger-bg border-danger/20" :
                           lab.status === "abnormal" ? "bg-risk-high-bg border-risk-high/20" :
-                          "bg-emerald-50 border-emerald-200"
+                          "bg-success-bg border-success/30"
                         }`}>
                           <div className="flex items-start gap-2">
                             <Brain className="w-3.5 h-3.5 text-violet-600 shrink-0 mt-0.5" />

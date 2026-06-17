@@ -50,19 +50,19 @@ interface DispenseReceipt {
 }
 
 const SEVERITY_COLOR: Record<string, string> = {
-  CONTRAINDICATED: "bg-red-600 text-white",
-  MAJOR: "bg-red-100 text-red-700",
-  HIGH: "bg-orange-100 text-orange-700",
+  CONTRAINDICATED: "bg-danger text-white",
+  MAJOR: "bg-danger-bg text-danger",
+  HIGH: "bg-risk-high-bg text-risk-high",
   MODERATE: "bg-risk-high-bg text-risk-high",
-  MINOR: "bg-yellow-100 text-yellow-700",
+  MINOR: "bg-warning-bg text-warning",
 };
 
 const SEVERITY_CELL: Record<string, string> = {
-  CONTRAINDICATED: "bg-red-600 text-white font-bold",
-  MAJOR: "bg-red-200 text-red-800",
-  HIGH: "bg-orange-200 text-orange-800",
+  CONTRAINDICATED: "bg-danger text-white font-bold",
+  MAJOR: "bg-danger-bg text-danger",
+  HIGH: "bg-risk-high-bg text-risk-high",
   MODERATE: "bg-risk-high-bg text-risk-high",
-  MINOR: "bg-yellow-100 text-yellow-800",
+  MINOR: "bg-warning-bg text-warning",
 };
 
 const SEVERITY_ORDER: Record<string, number> = {
@@ -113,7 +113,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
           {(["CONTRAINDICATED", "MAJOR", "MODERATE"] as const).map((s) => (
             <span key={s} className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[s]}`}>{s}</span>
           ))}
-          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">{text("SAFE", "SAFE")}</span>
+          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-success-bg text-success">{text("SAFE", "SAFE")}</span>
         </div>
       </div>
 
@@ -150,7 +150,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
                     <td
                       key={colDrug}
                       onClick={() => warnings.length > 0 && setSelected({ a: rowDrug, b: colDrug, warnings })}
-                      className={`text-center px-2 py-2.5 border-r border-border transition-all ${warnings.length > 0 ? "cursor-pointer hover:opacity-80 " + (SEVERITY_CELL[topSeverity] ?? "bg-red-100 text-red-700") : "bg-emerald-50 text-emerald-700"}`}
+                      className={`text-center px-2 py-2.5 border-r border-border transition-all ${warnings.length > 0 ? "cursor-pointer hover:opacity-80 " + (SEVERITY_CELL[topSeverity] ?? "bg-danger-bg text-danger") : "bg-success-bg text-success"}`}
                     >
                       {warnings.length > 0
                         ? <span className="font-bold text-[9px]">{topSeverity.slice(0, 3)}</span>
@@ -165,23 +165,23 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
       </div>
 
       {selected && (
-        <div className="mt-4 rounded-2xl border border-red-200 bg-destructive/10 p-4">
+        <div className="mt-4 rounded-2xl border border-danger/20 bg-danger-bg p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <FlaskConical className="w-4 h-4 text-red-600" />
+              <FlaskConical className="w-4 h-4 text-danger" />
               <p className="font-bold text-sm text-foreground">{selected.a} ↔ {selected.b}</p>
             </div>
             <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
           </div>
           {selected.warnings.map((w: any, i: number) => (
-            <div key={i} className="bg-card rounded-xl border border-red-100 p-3 mb-2 last:mb-0">
+            <div key={i} className="bg-card rounded-xl border border-danger/20 p-3 mb-2 last:mb-0">
               <div className="flex items-center gap-2 mb-2">
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[w.severity] ?? "bg-muted"}`}>{w.severity}</span>
                 <p className="text-xs font-bold text-foreground">{w.text ?? `${w.drugA} ↔ ${w.drugB}`}</p>
               </div>
               <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "Mechanism:")} </span>{w.mechanism}</p>
               <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "Clinical basis:")} </span>{w.clinicalBasis}</p>
-              <p className="text-[11px] font-semibold text-red-700 mb-2">{w.recommendation}</p>
+              <p className="text-[11px] font-semibold text-danger mb-2">{w.recommendation}</p>
               <div className="flex flex-wrap gap-1">
                 {(w.sources ?? [w.source]).filter(Boolean).map((src: string, si: number) => (
                   <span key={si} className="text-[9px] font-mono bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded-md">{src}</span>
@@ -264,10 +264,10 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-card rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="bg-emerald-600 text-white p-5 text-center">
+        <div className="bg-success text-white p-5 text-center">
           <CheckCircle2 className="w-10 h-10 mx-auto mb-2" />
           <p className="font-bold text-lg">{text("Medication Dispensed", "Medication Dispensed")}</p>
-          <p className="text-emerald-100 text-sm font-mono mt-1">{receipt.refNo}</p>
+          <p className="text-white/80 text-sm font-mono mt-1">{receipt.refNo}</p>
         </div>
         <div className="p-5 space-y-3">
           <div className="bg-secondary rounded-2xl p-4 space-y-2">
@@ -459,8 +459,8 @@ export default function PharmacyPortal() {
             )}
           </button>
           <div className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-card">
-            <Bell className={`w-3.5 h-3.5 ${sseConnected ? "text-emerald-500" : "text-gray-400"}`} />
-            <div className={`w-1.5 h-1.5 rounded-full ${sseConnected ? "bg-emerald-500 animate-pulse" : "bg-gray-300"}`} />
+            <Bell className={`w-3.5 h-3.5 ${sseConnected ? "text-success" : "text-gray-400"}`} />
+            <div className={`w-1.5 h-1.5 rounded-full ${sseConnected ? "bg-success animate-pulse" : "bg-gray-300"}`} />
             <span className="text-muted-foreground">{sseConnected ? text("Live", "مباشر") : text("Connecting...", "جارٍ الاتصال...")}</span>
           </div>
         </div>
@@ -468,12 +468,12 @@ export default function PharmacyPortal() {
 
       {/* SSE Critical Alerts */}
       {sseAlerts.filter((a) => a.severity === "critical").length > 0 && (
-        <div className="mb-5 px-4 py-3 bg-destructive/10 border border-red-200 rounded-2xl flex items-start gap-3">
-          <ShieldAlert className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+        <div className="mb-5 px-4 py-3 bg-danger-bg border border-danger/20 rounded-2xl flex items-start gap-3">
+          <ShieldAlert className="w-4 h-4 text-danger shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="text-xs font-bold text-red-700 mb-0.5">{text("Critical Pharmacy Alert", "تنبيه صيدلية حرج")}</p>
+            <p className="text-xs font-bold text-danger mb-0.5">{text("Critical Pharmacy Alert", "تنبيه صيدلية حرج")}</p>
             {sseAlerts.filter((a) => a.severity === "critical").slice(0, 2).map((a, i) => (
-              <p key={i} className="text-xs text-red-600">{a.title}: {a.action}</p>
+              <p key={i} className="text-xs text-danger">{a.title}: {a.action}</p>
             ))}
           </div>
         </div>
@@ -515,16 +515,16 @@ export default function PharmacyPortal() {
       {/* KPI Row */}
       <div className="grid grid-cols-4 gap-4 mb-5">
         <KpiCard title={text("Dispensed Today", "صُرف اليوم")} value={String(todayLog.length)} sub={text("Medications issued", "أدوية مصروفة")} icon={Receipt} iconBg="bg-violet-100" iconColor="text-violet-600" />
-        <KpiCard title={text("Queue", "قائمة الانتظار")} value={String(queue.length)} sub={text("Patients waiting", "مرضى منتظرون")} icon={Users} iconBg="bg-blue-100" iconColor="text-primary" />
+        <KpiCard title={text("Queue", "قائمة الانتظار")} value={String(queue.length)} sub={text("Patients waiting", "مرضى منتظرون")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
         <KpiCard
           title={text("Interactions", "التداخلات")}
           value={String(data?.summary?.interactions ?? 0)}
           sub={text("Drug conflicts flagged", "تعارضات دوائية موسومة")}
           icon={ShieldAlert}
-          iconBg={data?.summary?.interactions > 0 ? "bg-red-100" : "bg-secondary"}
-          iconColor={data?.summary?.interactions > 0 ? "text-red-600" : "text-muted-foreground"}
+          iconBg={data?.summary?.interactions > 0 ? "bg-danger-bg" : "bg-secondary"}
+          iconColor={data?.summary?.interactions > 0 ? "text-danger" : "text-muted-foreground"}
         />
-        <KpiCard title={text("Insured", "مؤمّن")} value={String(data?.summary?.insuranceCovered ?? 0)} sub={text("Coverage eligible", "مؤهّل للتغطية")} icon={CreditCard} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
+        <KpiCard title={text("Insured", "مؤمّن")} value={String(data?.summary?.insuranceCovered ?? 0)} sub={text("Coverage eligible", "مؤهّل للتغطية")} icon={CreditCard} iconBg="bg-success-bg" iconColor="text-success" />
       </div>
 
       {/* Search + Queue */}
@@ -571,7 +571,7 @@ export default function PharmacyPortal() {
                         else { setNationalId(""); setSearchId(""); }
                       }
                     }}
-                    className={`${q.id === nationalId ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-red-500"} transition-colors`}
+                    className={`${q.id === nationalId ? "text-white/70 hover:text-white" : "text-muted-foreground hover:text-danger"} transition-colors`}
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -614,7 +614,7 @@ export default function PharmacyPortal() {
         <div className="space-y-4" ref={printRef}>
           {/* Patient Header */}
           <div className={`rounded-3xl p-5 flex items-start justify-between gap-5 ${
-            data.summary.interactions > 0 ? "bg-red-600" : "bg-gradient-to-br from-violet-600 to-purple-700"
+            data.summary.interactions > 0 ? "bg-danger" : "bg-gradient-to-br from-violet-600 to-purple-700"
           } text-white`}>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Patient Record", "Patient Record")}</p>
@@ -649,7 +649,7 @@ export default function PharmacyPortal() {
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-white/70">{text("Conflicts", "Conflicts")}</p>
-                <p className={`text-3xl font-bold ${data.summary.interactions > 0 ? "text-yellow-300" : ""}`}>{data.summary.interactions}</p>
+                <p className={`text-3xl font-bold ${data.summary.interactions > 0 ? "text-warning" : ""}`}>{data.summary.interactions}</p>
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-white/70">{text("Insured", "Insured")}</p>
@@ -684,7 +684,7 @@ export default function PharmacyPortal() {
                     <Icon className="w-3.5 h-3.5" />
                     {tab.label}
                     {tab.id === "matrix" && data.summary.interactions > 0 && (
-                      <span className="w-4 h-4 bg-red-600 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{data.summary.interactions}</span>
+                      <span className="w-4 h-4 bg-danger text-white text-[9px] font-bold rounded-full flex items-center justify-center">{data.summary.interactions}</span>
                     )}
                   </button>
                 );
@@ -727,13 +727,13 @@ export default function PharmacyPortal() {
                               onClick={() => { setDispensingId(presc.id); dispenseMutation.mutate({ id: presc.id }); }}
                               disabled={dispenseMutation.isPending && dispensingId === presc.id}
                               variant={check.safe ? "primary" : "outline"}
-                              className={`shrink-0 ${check.safe ? "bg-violet-600 hover:bg-violet-700 text-white" : "border-red-300 text-red-600 hover:bg-destructive/10"}`}
+                              className={`shrink-0 ${check.safe ? "bg-violet-600 hover:bg-violet-700 text-white" : "border-danger/30 text-danger hover:bg-danger-bg"}`}
                             >
                               <Zap className="w-3.5 h-3.5" />
                               {dispensingId === presc.id && dispenseMutation.isPending ? "Dispensing..." : check.safe ? "Dispense" : "Override & Dispense"}
                             </Button>
                           ) : (
-                            <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 shrink-0">
+                            <div className="flex items-center gap-2 text-xs font-bold text-success shrink-0">
                               <CheckCircle2 className="w-4 h-4" />
                               {text("Dispensed", "Dispensed")}
                             </div>
@@ -741,7 +741,7 @@ export default function PharmacyPortal() {
                         </div>
 
                         {/* AI Safety Block */}
-                        <div className={`px-3.5 py-3 rounded-2xl border mb-2 ${!check.safe ? "bg-destructive/10 border-red-200" : "bg-emerald-50 border-emerald-200"}`}>
+                        <div className={`px-3.5 py-3 rounded-2xl border mb-2 ${!check.safe ? "bg-danger-bg border-danger/30" : "bg-success-bg border-success/30"}`}>
                           <div className="flex items-center gap-2 mb-1.5">
                             <Brain className="w-3.5 h-3.5 text-violet-600" />
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("AI Dispense Safety Check", "AI Dispense Safety Check")}</p>
@@ -763,17 +763,17 @@ export default function PharmacyPortal() {
                               {expandedWarnings[presc.id] && (
                                 <div className="mt-2 space-y-2">
                                   {check.detailedWarnings.map((dw: any, wi: number) => (
-                                    <div key={wi} className="rounded-xl bg-card/80 border border-red-100 p-3">
+                                    <div key={wi} className="rounded-xl bg-card/80 border border-danger/20 p-3">
                                       <div className="flex items-start justify-between gap-2 mb-1.5">
                                         <div className="flex items-center gap-1.5">
-                                          <FlaskConical className="w-3 h-3 text-red-500 shrink-0" />
+                                          <FlaskConical className="w-3 h-3 text-danger shrink-0" />
                                           <p className="text-[11px] font-bold text-foreground">{dw.drugA} ↔ {dw.drugB}</p>
                                         </div>
                                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${SEVERITY_COLOR[dw.severity] ?? "bg-muted"}`}>{dw.severity}</span>
                                       </div>
                                       <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "Mechanism:")} </span>{dw.mechanism}</p>
                                       <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "Clinical basis:")} </span>{dw.clinicalBasis}</p>
-                                      <p className="text-[11px] font-semibold text-red-700 mb-2">{dw.recommendation}</p>
+                                      <p className="text-[11px] font-semibold text-danger mb-2">{dw.recommendation}</p>
                                       <div className="flex flex-wrap gap-1">
                                         {(dw.sources ?? [dw.source]).filter(Boolean).map((src: string, si: number) => (
                                           <span key={si} className="text-[9px] font-mono bg-violet-50 text-violet-700 border border-violet-100 px-1.5 py-0.5 rounded-md">{src}</span>
@@ -827,7 +827,7 @@ export default function PharmacyPortal() {
                 </div>
                 <div className="space-y-2">
                   {(data.allMedications ?? data.prescriptions ?? []).map((med: any, i: number) => (
-                    <div key={i} className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl border ${med.isActive ? "bg-card border-emerald-200" : "bg-muted/50 border-border opacity-70"}`}>
+                    <div key={i} className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl border ${med.isActive ? "bg-card border-success/30" : "bg-muted/50 border-border opacity-70"}`}>
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${med.isActive ? "bg-purple-100" : "bg-muted"}`}>
                         <Pill className={`w-4 h-4 ${med.isActive ? "text-purple-600" : "text-gray-400"}`} />
                       </div>
@@ -855,12 +855,12 @@ export default function PharmacyPortal() {
                 {(data.prescriptions ?? []).map((presc: any, i: number) => {
                   const avail = presc.stockAvailability;
                   const pct = avail ? Math.min(100, Math.round((avail.daysOfStock / 45) * 100)) : 0;
-                  const barColor = !avail ? "bg-gray-300" : avail.status === "critical" ? "bg-red-500" : avail.status === "low" ? "bg-risk-high" : "bg-emerald-500";
+                  const barColor = !avail ? "bg-gray-300" : avail.status === "critical" ? "bg-danger" : avail.status === "low" ? "bg-risk-high" : "bg-success";
                   return (
-                    <div key={i} className={`px-4 py-4 rounded-2xl border ${avail?.status === "critical" ? "border-red-300 bg-destructive/10" : avail?.status === "low" ? "border-risk-high/20 bg-risk-high-bg" : "border-border bg-card"}`}>
+                    <div key={i} className={`px-4 py-4 rounded-2xl border ${avail?.status === "critical" ? "border-danger/30 bg-danger-bg" : avail?.status === "low" ? "border-risk-high/20 bg-risk-high-bg" : "border-border bg-card"}`}>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-3">
-                          <Package className={`w-4 h-4 shrink-0 ${avail?.status === "critical" ? "text-red-600" : avail?.status === "low" ? "text-risk-high" : "text-muted-foreground"}`} />
+                          <Package className={`w-4 h-4 shrink-0 ${avail?.status === "critical" ? "text-danger" : avail?.status === "low" ? "text-risk-high" : "text-muted-foreground"}`} />
                           <div>
                             <p className="font-bold text-sm text-foreground">{presc.drugName}</p>
                             <p className="text-[11px] text-muted-foreground">{presc.dosage}</p>

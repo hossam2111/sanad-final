@@ -35,10 +35,10 @@ async function reviewClaim(claimId: string, action: string, notes: string) {
 }
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string; badge: any; label: string }> = {
-  approved: { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200", badge: "success" as const, label: "Approved" },
+  approved: { color: "text-success", bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, label: "Approved" },
   pending: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, label: "Pending" },
-  under_review: { color: "text-blue-700", bg: "bg-primary/10", border: "border-blue-200", badge: "info" as const, label: "Under Review" },
-  rejected: { color: "text-red-700", bg: "bg-destructive/10", border: "border-red-200", badge: "destructive" as const, label: "Rejected" },
+  under_review: { color: "text-info", bg: "bg-info-bg", border: "border-info/30", badge: "info" as const, label: "Under Review" },
+  rejected: { color: "text-danger", bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, label: "Rejected" },
 };
 const PORTFOLIO_COLORS = ["#22c55e", "#f59e0b", "#ef4444", "#7c3aed"];
 type TabId = "dashboard" | "patient" | "portfolio";
@@ -125,8 +125,8 @@ export default function InsurancePortal() {
         <div className="flex items-center gap-2 bg-violet-600 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Shield className="w-3 h-3" /> {text("Insurance Operations Center", "مركز عمليات التأمين")}
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-success bg-success-bg px-3 py-1.5 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse inline-block" />
           {text(`AI Fraud Engine: Active · ${dashboard?.fraudSuspected ?? "—"} cases flagged`, `محرك كشف الاحتيال: نشط · ${dashboard?.fraudSuspected ?? "—"} حالة موسومة`)}
         </div>
         <div className="ms-auto flex gap-1.5">
@@ -154,8 +154,8 @@ export default function InsurancePortal() {
               <div className="grid grid-cols-4 gap-4">
                 <KpiCard title={text("Active Policies", "الوثائق النشطة")} value={dashboard.totalPolicies?.toLocaleString()} sub={text("National coverage", "تغطية وطنية")} icon={Users} iconBg="bg-violet-100" iconColor="text-violet-600" />
                 <KpiCard title={text("Total Claims", "إجمالي المطالبات")} value={dashboard.totalClaims?.toLocaleString()} sub={text(`${dashboard.pendingClaims} awaiting review`, `${dashboard.pendingClaims} بانتظار المراجعة`)} icon={Shield} iconBg="bg-primary/10" iconColor="text-primary" />
-                <KpiCard title={text("Total Payout", "إجمالي المدفوعات")} value={`${text("SAR", "ر.س")} ${(dashboard.totalPayout / 1000).toFixed(0)}K`} sub={text(`Avg SAR ${dashboard.avgClaimValue?.toLocaleString()} per claim`, `متوسط ${dashboard.avgClaimValue?.toLocaleString()} ر.س للمطالبة`)} icon={DollarSign} iconBg="bg-emerald-100" iconColor="text-emerald-600" />
-                <KpiCard title={text("Fraud Flagged", "حالات احتيال موسومة")} value={dashboard.fraudSuspected} sub={text(`${dashboard.fraudRate}% fraud rate`, `معدّل الاحتيال ${dashboard.fraudRate}%`)} icon={ShieldAlert} iconBg="bg-red-100" iconColor="text-red-600" />
+                <KpiCard title={text("Total Payout", "إجمالي المدفوعات")} value={`${text("SAR", "ر.س")} ${(dashboard.totalPayout / 1000).toFixed(0)}K`} sub={text(`Avg SAR ${dashboard.avgClaimValue?.toLocaleString()} per claim`, `متوسط ${dashboard.avgClaimValue?.toLocaleString()} ر.س للمطالبة`)} icon={DollarSign} iconBg="bg-success-bg" iconColor="text-success" />
+                <KpiCard title={text("Fraud Flagged", "حالات احتيال موسومة")} value={dashboard.fraudSuspected} sub={text(`${dashboard.fraudRate}% fraud rate`, `معدّل الاحتيال ${dashboard.fraudRate}%`)} icon={ShieldAlert} iconBg="bg-danger-bg" iconColor="text-danger" />
               </div>
 
               <div className="grid grid-cols-12 gap-5">
@@ -195,15 +195,15 @@ export default function InsurancePortal() {
                 {/* Fraud Alerts Panel */}
                 <Card className="col-span-4">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-red-500" /><CardTitle>{text("AI Fraud Intelligence", "AI Fraud Intelligence")}</CardTitle></div>
+                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-danger" /><CardTitle>{text("AI Fraud Intelligence", "AI Fraud Intelligence")}</CardTitle></div>
                     <Badge variant="destructive">{dashboard.fraudSuspected} {text("active", "active")}</Badge>
                   </CardHeader>
                   <CardBody className="space-y-2.5">
                     {dashboard.fraudAlerts?.map((alert: any, i: number) => (
-                      <div key={i} className={`p-3.5 rounded-2xl border ${alert.severity === "high" ? "bg-destructive/10 border-red-200" : "bg-risk-high-bg border-risk-high/20"}`}>
+                      <div key={i} className={`p-3.5 rounded-2xl border ${alert.severity === "high" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
                           <div className="flex items-center gap-1.5">
-                            <ShieldAlert className={`w-3.5 h-3.5 shrink-0 ${alert.severity === "high" ? "text-red-500" : "text-risk-high"}`} />
+                            <ShieldAlert className={`w-3.5 h-3.5 shrink-0 ${alert.severity === "high" ? "text-danger" : "text-risk-high"}`} />
                             <p className="text-xs font-bold text-foreground">{alert.type}</p>
                           </div>
                           <Badge variant={alert.severity === "high" ? "destructive" : "warning"} className="text-[9px] shrink-0">{alert.count} {text("cases", "cases")}</Badge>
@@ -215,11 +215,11 @@ export default function InsurancePortal() {
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5"><Zap className="w-3 h-3 text-risk-high" /> {text("Regional Pricing Alerts", "Regional Pricing Alerts")}</p>
                       {dashboard.riskPricingAlerts?.map((a: any, i: number) => (
                         <div key={i} className="flex items-center gap-2 py-1.5">
-                          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.trend === "rising" ? "bg-red-500" : a.trend === "declining" ? "bg-emerald-500" : "bg-risk-high"}`} />
+                          <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.trend === "rising" ? "bg-danger" : a.trend === "declining" ? "bg-success" : "bg-risk-high"}`} />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <p className="text-xs font-semibold text-foreground truncate">{a.region}</p>
-                              <span className={`text-[10px] font-bold shrink-0 ml-2 ${a.trend === "rising" ? "text-red-600" : "text-emerald-600"}`}>{a.change}</span>
+                              <span className={`text-[10px] font-bold shrink-0 ml-2 ${a.trend === "rising" ? "text-danger" : "text-success"}`}>{a.change}</span>
                             </div>
                             <p className="text-[10px] text-muted-foreground truncate">{a.action}</p>
                           </div>
@@ -285,10 +285,10 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody className="space-y-3">
                     {[
-                      { label: "Approval Rate", value: `${dashboard.approvalRate}%`, color: "text-emerald-600" },
-                      { label: "Fraud Rate", value: `${dashboard.fraudRate}%`, color: "text-red-600" },
+                      { label: "Approval Rate", value: `${dashboard.approvalRate}%`, color: "text-success" },
+                      { label: "Fraud Rate", value: `${dashboard.fraudRate}%`, color: "text-danger" },
                       { label: "High-Risk Policies", value: dashboard.highRiskPolicies, color: "text-risk-high" },
-                      { label: "Critical Policies", value: dashboard.criticalPolicies, color: "text-red-600" },
+                      { label: "Critical Policies", value: dashboard.criticalPolicies, color: "text-danger" },
                       { label: "Avg Claim Value", value: `SAR ${dashboard.avgClaimValue?.toLocaleString()}`, color: "text-primary" },
                     ].map((s, i) => (
                       <div key={i} className="flex items-center justify-between">
@@ -338,10 +338,10 @@ export default function InsurancePortal() {
             </div>
           )}
           {patientError && nationalId && (
-            <Card className="border-red-200 bg-destructive/10">
+            <Card className="border-danger/30 bg-danger-bg">
               <CardBody className="flex items-center gap-3 p-4">
-                <X className="w-4 h-4 text-red-500" />
-                <p className="text-sm text-red-700">{text("No policy found for", "No policy found for")} <span className="font-mono">{nationalId}</span></p>
+                <X className="w-4 h-4 text-danger" />
+                <p className="text-sm text-danger">{text("No policy found for", "No policy found for")} <span className="font-mono">{nationalId}</span></p>
               </CardBody>
             </Card>
           )}
@@ -358,7 +358,7 @@ export default function InsurancePortal() {
                       <div className="flex items-center gap-2 mt-1">
                         <span className="font-mono text-xs bg-secondary px-2.5 py-1 rounded-xl">{patient.patient?.nationalId}</span>
                         <span className="text-xs text-muted-foreground">{text("Age", "Age")} {patient.patient?.age} · {patient.patient?.gender}</span>
-                        <span className="text-xs font-bold text-red-600">{patient.patient?.bloodType}</span>
+                        <span className="text-xs font-bold text-danger">{patient.patient?.bloodType}</span>
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="success">{text("Active Policy", "Active Policy")}</Badge>
@@ -368,9 +368,9 @@ export default function InsurancePortal() {
                     <div className="px-4 py-3 flex items-center justify-center">
                       <AnomalyGauge score={patient.anomalyScore ?? 0} />
                     </div>
-                    <div className={`px-6 py-4 flex flex-col items-center justify-center min-w-[130px] ${patient.fraudRisk === "high" ? "bg-destructive/10" : patient.fraudRisk === "medium" ? "bg-risk-high-bg" : "bg-emerald-50/50"}`}>
+                    <div className={`px-6 py-4 flex flex-col items-center justify-center min-w-[130px] ${patient.fraudRisk === "high" ? "bg-danger-bg" : patient.fraudRisk === "medium" ? "bg-risk-high-bg" : "bg-success-bg/50"}`}>
                       <DataLabel label={text("Fraud Risk", "Fraud Risk")}>
-                        <p className={`text-2xl font-bold ${patient.fraudRisk === "high" ? "text-red-600" : patient.fraudRisk === "medium" ? "text-risk-high" : "text-emerald-600"}`}>{patient.fraudRisk?.toUpperCase()}</p>
+                        <p className={`text-2xl font-bold ${patient.fraudRisk === "high" ? "text-danger" : patient.fraudRisk === "medium" ? "text-risk-high" : "text-success"}`}>{patient.fraudRisk?.toUpperCase()}</p>
                       </DataLabel>
                     </div>
                     <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[150px] bg-violet-50">
@@ -400,14 +400,14 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody className="space-y-2.5">
                     {patient.anomalyFactors?.map((factor: any, i: number) => (
-                      <div key={i} className={`p-3 rounded-2xl border ${factor.flag ? "bg-destructive/10 border-red-200" : "bg-secondary border-transparent"}`}>
+                      <div key={i} className={`p-3 rounded-2xl border ${factor.flag ? "bg-danger-bg border-danger/30" : "bg-secondary border-transparent"}`}>
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <p className={`text-xs font-bold ${factor.flag ? "text-red-700" : "text-foreground"}`}>{factor.label}</p>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${factor.flag ? "bg-red-100 text-red-700" : "bg-secondary text-muted-foreground"}`}>+{factor.weight}{text("pts", "pts")}</span>
+                          <p className={`text-xs font-bold ${factor.flag ? "text-danger" : "text-foreground"}`}>{factor.label}</p>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${factor.flag ? "bg-danger-bg text-danger" : "bg-secondary text-muted-foreground"}`}>+{factor.weight}{text("pts", "pts")}</span>
                         </div>
-                        <p className={`text-[11px] ${factor.flag ? "text-red-600" : "text-muted-foreground"}`}>{factor.value}</p>
+                        <p className={`text-[11px] ${factor.flag ? "text-danger" : "text-muted-foreground"}`}>{factor.value}</p>
                         <div className="mt-1.5 h-1 bg-card rounded-full overflow-hidden">
-                          <div className={`h-full rounded-full transition-all ${factor.flag ? "bg-red-500" : "bg-emerald-400"}`} style={{ width: `${Math.min(100, factor.weight * 4)}%` }} />
+                          <div className={`h-full rounded-full transition-all ${factor.flag ? "bg-danger" : "bg-success"}`} style={{ width: `${Math.min(100, factor.weight * 4)}%` }} />
                         </div>
                       </div>
                     ))}
@@ -500,12 +500,12 @@ export default function InsurancePortal() {
                                 <span className="font-mono text-xs text-muted-foreground">{claim.claimId}</span>
                                 <Badge variant={claim.type === "Emergency" ? "destructive" : claim.type === "Inpatient" ? "warning" : "outline"} className="text-[10px]">{claim.type}</Badge>
                                 {(reviewResult?.newStatus ?? claim.aiVerified) && (
-                                  <span className="flex items-center gap-1 text-[10px] text-emerald-600 font-semibold">
+                                  <span className="flex items-center gap-1 text-[10px] text-success font-semibold">
                                     <CheckCircle2 className="w-3 h-3" />{text("AI Verified", "AI Verified")}
                                   </span>
                                 )}
                                 {claim.anomalyScore > 0 && (
-                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${claim.anomalyScore >= 30 ? "bg-red-100 text-red-700" : "bg-risk-high-bg text-risk-high"}`}>
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${claim.anomalyScore >= 30 ? "bg-danger-bg text-danger" : "bg-risk-high-bg text-risk-high"}`}>
                                     {text("Anomaly:", "Anomaly:")} {claim.anomalyScore}
                                   </span>
                                 )}
@@ -526,7 +526,7 @@ export default function InsurancePortal() {
                               )}
                               {claim.anomalyReasons?.length > 0 && (
                                 <button onClick={() => setExpandedClaim(expandedClaim === claim.claimId ? null : claim.claimId)}
-                                  className="text-[11px] font-bold text-risk-high bg-risk-high-bg px-2.5 py-1 rounded-xl hover:bg-amber-200 transition-colors flex items-center gap-1">
+                                  className="text-[11px] font-bold text-risk-high bg-risk-high-bg px-2.5 py-1 rounded-xl hover:bg-risk-high/35 transition-colors flex items-center gap-1">
                                   <Eye className="w-3 h-3" /> {text("Details", "Details")}
                                 </button>
                               )}
@@ -549,8 +549,8 @@ export default function InsurancePortal() {
                                 </div>
                               )}
                               {reviewResult && (
-                                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                                  <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest mb-1">{text("Review Complete", "Review Complete")}</p>
+                                <div className="p-3 bg-success-bg border border-success/30 rounded-xl">
+                                  <p className="text-[10px] font-bold text-success uppercase tracking-widest mb-1">{text("Review Complete", "Review Complete")}</p>
                                   <p className="text-xs text-foreground">{reviewResult.aiReason}</p>
                                   <p className="text-[10px] text-muted-foreground mt-1">{text("By", "By")} {reviewResult.reviewedBy} · {new Date(reviewResult.reviewedAt).toLocaleString()}</p>
                                 </div>
@@ -565,7 +565,7 @@ export default function InsurancePortal() {
                                     {aiRecs[claim.claimId] && (
                                       <span className={`text-xs px-2.5 py-1 rounded-full font-bold ${
                                         aiRecs[claim.claimId]!.recommendation === "auto_approve"
-                                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                                          ? "bg-success-bg text-success border border-success/30"
                                           : "bg-risk-high-bg text-risk-high border border-risk-high/20"
                                       }`}>
                                         {aiRecs[claim.claimId]!.recommendation === "auto_approve"
@@ -581,17 +581,17 @@ export default function InsurancePortal() {
                                   <div className="flex gap-2">
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "approve" })}
                                       disabled={reviewMutation.isPending}
-                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors disabled:opacity-50">
+                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-success text-white rounded-xl hover:bg-emerald-650 transition-colors disabled:opacity-50">
                                       <CheckCircle2 className="w-3.5 h-3.5" /> {text("Approve", "Approve")}
                                     </button>
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "flag" })}
                                       disabled={reviewMutation.isPending}
-                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-risk-high text-white rounded-xl hover:bg-amber-600 transition-colors disabled:opacity-50">
+                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-risk-high text-white rounded-xl hover:bg-risk-high/90 transition-colors disabled:opacity-50">
                                       <Clock className="w-3.5 h-3.5" /> {text("Flag for Review", "Flag for Review")}
                                     </button>
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "reject" })}
                                       disabled={reviewMutation.isPending}
-                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50">
+                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-danger text-white rounded-xl hover:bg-red-650 transition-colors disabled:opacity-50">
                                       <X className="w-3.5 h-3.5" /> {text("Reject", "Reject")}
                                     </button>
                                   </div>
@@ -618,17 +618,17 @@ export default function InsurancePortal() {
             <>
               <div className="grid grid-cols-4 gap-4">
                 {[
-                  { label: "Low Risk", value: dashboard.portfolioRisk?.low, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-200" },
+                  { label: "Low Risk", value: dashboard.portfolioRisk?.low, color: "text-success", bg: "bg-success-bg", border: "border-success/30" },
                   { label: "Medium Risk", value: dashboard.portfolioRisk?.medium, color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20" },
-                  { label: "High Risk", value: dashboard.portfolioRisk?.high, color: "text-orange-600", bg: "bg-orange-50", border: "border-orange-200" },
-                  { label: "Critical Risk", value: dashboard.portfolioRisk?.critical, color: "text-red-600", bg: "bg-destructive/10", border: "border-red-200" },
+                  { label: "High Risk", value: dashboard.portfolioRisk?.high, color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20" },
+                  { label: "Critical Risk", value: dashboard.portfolioRisk?.critical, color: "text-danger", bg: "bg-danger-bg", border: "border-danger/30" },
                 ].map((band, i) => (
                   <div key={i} className={`p-5 rounded-3xl border ${band.bg} ${band.border}`}>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{band.label}</p>
                     <p className={`text-4xl font-bold ${band.color}`}>{band.value}</p>
                     <p className="text-xs text-muted-foreground mt-1">{text("policyholders", "policyholders")}</p>
                     <div className="mt-3 h-1.5 bg-card/60 rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${band.bg.replace("50", "500")}`} style={{ width: `${Math.round((band.value / dashboard.totalPolicies) * 100)}%` }} />
+                      <div className={`h-full rounded-full ${band.color === "text-success" ? "bg-success" : band.color === "text-danger" ? "bg-danger" : "bg-risk-high"}`} style={{ width: `${Math.round((band.value / dashboard.totalPolicies) * 100)}%` }} />
                     </div>
                     <p className="text-[10px] font-semibold text-muted-foreground mt-1">{Math.round((band.value / dashboard.totalPolicies) * 100)}{text("% of portfolio", "% of portfolio")}</p>
                   </div>
@@ -670,16 +670,16 @@ export default function InsurancePortal() {
                         <div key={i}>
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">
-                              {a.trend === "rising" ? <TrendingUp className="w-3.5 h-3.5 text-red-500" /> : a.trend === "declining" ? <TrendingDown className="w-3.5 h-3.5 text-emerald-500" /> : <Activity className="w-3.5 h-3.5 text-risk-high" />}
+                              {a.trend === "rising" ? <TrendingUp className="w-3.5 h-3.5 text-danger" /> : a.trend === "declining" ? <TrendingDown className="w-3.5 h-3.5 text-success" /> : <Activity className="w-3.5 h-3.5 text-risk-high" />}
                               <p className="text-sm font-semibold text-foreground">{a.region}</p>
                             </div>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-muted-foreground">{text("Risk:", "Risk:")} {a.avgRisk}</span>
-                              <span className={`text-xs font-bold ${a.trend === "rising" ? "text-red-600" : "text-emerald-600"}`}>{a.change}</span>
+                              <span className={`text-xs font-bold ${a.trend === "rising" ? "text-danger" : "text-success"}`}>{a.change}</span>
                             </div>
                           </div>
                           <div className="h-2 bg-secondary rounded-full overflow-hidden mb-1">
-                            <div className={`h-full rounded-full transition-all ${a.trend === "rising" ? "bg-red-500" : a.trend === "declining" ? "bg-emerald-500" : "bg-risk-high"}`} style={{ width: `${a.avgRisk}%` }} />
+                            <div className={`h-full rounded-full transition-all ${a.trend === "rising" ? "bg-danger" : a.trend === "declining" ? "bg-success" : "bg-risk-high"}`} style={{ width: `${a.avgRisk}%` }} />
                           </div>
                           <p className="text-[10px] text-muted-foreground">{a.action}</p>
                         </div>

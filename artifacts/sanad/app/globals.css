@@ -41,6 +41,15 @@
   --color-risk-medium-bg: hsl(var(--risk-medium-bg));
   --color-risk-low-bg: hsl(var(--risk-low-bg));
 
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+  --color-danger: hsl(var(--danger));
+  --color-danger-foreground: hsl(var(--danger-foreground));
+  --color-success-bg: hsl(var(--success-bg));
+  --color-warning-bg: hsl(var(--warning-bg));
+  --color-info-bg: hsl(var(--info-bg));
+  --color-danger-bg: hsl(var(--danger-bg));
+
   --radius-sm:  0.625rem;
   --radius-md:  0.875rem;
   --radius-lg:  1.125rem;
@@ -82,6 +91,20 @@
   --risk-high-bg: 25 45% 13%;
   --risk-medium-bg: 45 45% 12%;
   --risk-low-bg: 142 35% 12%;
+
+  /* Status tokens — dark: vivid foreground hues, deep tinted backgrounds */
+  --success: 142 65% 45%;
+  --success-foreground: 222 47% 8%;
+  --warning: 38 92% 55%;
+  --warning-foreground: 222 47% 8%;
+  --info: 210 90% 60%;
+  --info-foreground: 222 47% 8%;
+  --danger: 0 84% 62%;
+  --danger-foreground: 210 40% 98%;
+  --success-bg: 142 35% 12%;
+  --warning-bg: 38 45% 13%;
+  --info-bg: 210 45% 14%;
+  --danger-bg: 0 40% 14%;
 }
 
 :root {
@@ -117,6 +140,16 @@
   --risk-high-bg: 25 100% 96%;
   --risk-medium-bg: 43 100% 95%;
   --risk-low-bg: 142 76% 95%;
+
+  /* Status tokens — light (success/warning already defined above) */
+  --info: 211 100% 50%;
+  --info-foreground: 0 0% 100%;
+  --danger: 0 85% 57%;
+  --danger-foreground: 0 0% 100%;
+  --success-bg: 142 76% 95%;
+  --warning-bg: 43 100% 95%;
+  --info-bg: 210 100% 96%;
+  --danger-bg: 0 100% 97%;
 }
 
 @layer base {

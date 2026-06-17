@@ -157,7 +157,7 @@ function TraceRows({ rows, animate }: { rows: TraceRow[]; animate: boolean }) {
           transition={{ duration: 0.45, delay: animate ? 0.2 + i * 0.26 : 0, ease: EASE }}
           className="flex items-baseline gap-4 border-b border-white/[0.04] py-2.5 font-mono text-[12px] last:border-b-0"
         >
-          <span className={`w-14 shrink-0 text-[10.5px] tracking-[0.1em] ${r.accent ? "text-[#7CB9FF]" : r.seal ? "text-emerald-400" : "text-white/50"}`}>
+          <span className={`w-14 shrink-0 text-[10.5px] tracking-[0.1em] ${r.accent ? "text-[#7CB9FF]" : r.seal ? "text-success" : "text-white/50"}`}>
             {r.tag}
           </span>
           <span className="min-w-0 flex-1">
@@ -498,7 +498,7 @@ function BrokenTrace() {
               key={r.tag}
               className="flex items-baseline gap-4 border-b border-white/[0.03] py-2.5 font-mono text-[12px] last:border-b-0"
             >
-              <span className={`w-[72px] shrink-0 text-[10.5px] tracking-[0.1em] ${r.tag === "OUTCOME" ? "text-red-400/70" : "text-white/30"}`}>
+              <span className={`w-[72px] shrink-0 text-[10.5px] tracking-[0.1em] ${r.tag === "OUTCOME" ? "text-danger/70" : "text-white/30"}`}>
                 {r.tag}
               </span>
               <span className="min-w-0 flex-1">
@@ -750,7 +750,7 @@ function IsnadChain() {
         className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#070B12] text-left"
       >
         <div aria-hidden className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3 font-mono text-[10.5px] tracking-[0.12em]">
-          <span className="text-emerald-400/90">ISNĀD — case #a3f9-2210</span>
+          <span className="text-success/90">ISNĀD — case #a3f9-2210</span>
           <span className="text-white/35">sealed 14:03:12</span>
         </div>
         <div aria-hidden className="px-5 py-4">
@@ -759,11 +759,11 @@ function IsnadChain() {
               <span className="w-6 shrink-0 text-[10.5px] text-white/40">{l.n}</span>
               <span className="min-w-0 flex-1 truncate text-white/85">{l.main}</span>
               <span className="hidden shrink-0 text-[11px] text-white/30 sm:inline">{l.hash}</span>
-              <span className="shrink-0 text-[11px] text-emerald-400/80">✓</span>
+              <span className="shrink-0 text-[11px] text-success/80">✓</span>
             </div>
           ))}
           <div className="flex items-center gap-2 pt-3 font-mono text-[10.5px] tracking-[0.08em] text-white/40">
-            <span className="h-1 w-1 rounded-full bg-emerald-400/80" />
+            <span className="h-1 w-1 rounded-full bg-success/80" />
             chain verified · attributable at every link · nothing erasable
           </div>
         </div>

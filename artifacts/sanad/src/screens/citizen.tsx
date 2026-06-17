@@ -110,19 +110,19 @@ function computeHealthScore(patient: {
 
 function gradeLadder(score: number, text: TextFn): { grade: "A" | "B" | "C" | "D" | "F"; label: string; color: string; bg: string; summary: string } {
   if (score >= 85) {
-    return { grade: "A", label: text("Excellent", "ممتازة"), color: "text-emerald-600", bg: "bg-emerald-50",
+    return { grade: "A", label: text("Excellent", "ممتازة"), color: "text-success", bg: "bg-success-bg",
       summary: text("Your health indicators are in great shape. Keep up your healthy habits!", "مؤشّراتك الصحية في حالة ممتازة. واصِل عاداتك الصحية!") };
   } else if (score >= 70) {
-    return { grade: "B", label: text("Good", "جيدة"), color: "text-sky-600", bg: "bg-sky-50",
+    return { grade: "B", label: text("Good", "جيدة"), color: "text-info", bg: "bg-info-bg",
       summary: text("Your health is generally good. A few areas could benefit from attention.", "صحتك جيدة بشكل عام. هناك جوانب قليلة تستحق الاهتمام.") };
   } else if (score >= 55) {
     return { grade: "C", label: text("Fair", "مقبولة"), color: "text-risk-high", bg: "bg-risk-high-bg",
       summary: text("Some health factors need monitoring. Follow your doctor's recommendations.", "بعض العوامل الصحية بحاجة إلى متابعة. اتبع توصيات طبيبك.") };
   } else if (score >= 40) {
-    return { grade: "D", label: text("Needs Attention", "تحتاج إلى عناية"), color: "text-orange-600", bg: "bg-orange-50",
+    return { grade: "D", label: text("Needs Attention", "تحتاج إلى عناية"), color: "text-warning", bg: "bg-warning-bg",
       summary: text("Multiple health concerns detected. Regular medical follow-up is important.", "رُصدت عدة مخاوف صحية. المتابعة الطبية المنتظمة مهمة.") };
   } else {
-    return { grade: "F", label: text("High Risk", "خطورة مرتفعة"), color: "text-red-600", bg: "bg-destructive/10",
+    return { grade: "F", label: text("High Risk", "خطورة مرتفعة"), color: "text-danger", bg: "bg-danger-bg",
       summary: text("Significant health risks identified. Please see your doctor as soon as possible.", "رُصدت مخاطر صحية كبيرة. يُرجى مراجعة طبيبك في أقرب وقت ممكن.") };
   }
 }
@@ -363,10 +363,10 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
           </p>
           <div className="space-y-2">
             {myAppointments.map((apt: any) => (
-              <div key={apt.id} className={`flex items-start gap-4 p-4 rounded-2xl border ${apt.status === "confirmed" ? "bg-emerald-50 border-emerald-200" : "bg-secondary border-border"}`}>
+              <div key={apt.id} className={`flex items-start gap-4 p-4 rounded-2xl border ${apt.status === "confirmed" ? "bg-success-bg border-success/30" : "bg-secondary border-border"}`}>
                 <div className="w-10 h-10 rounded-xl bg-card flex flex-col items-center justify-center shrink-0 border border-border">
-                  <p className="text-[9px] font-bold text-muted-foreground uppercase">{new Date(apt.date).toLocaleString("en", { month: "short" })}</p>
-                  <p className="text-lg font-bold text-foreground leading-none">{new Date(apt.date).getDate()}</p>
+                  <p className="text-[9px] font-bold text-muted-foreground uppercase">{apt.date ? new Date(apt.date).toLocaleString("en", { month: "short" }) : "-"}</p>
+                  <p className="text-lg font-bold text-foreground leading-none">{apt.date ? new Date(apt.date).getDate() : "-"}</p>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
@@ -384,12 +384,12 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
 
       {/* Success Banner */}
       {booked && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-300">
+        <div className="p-4 rounded-2xl bg-success-bg border-2 border-success/30">
           <div className="flex items-start gap-3 mb-3">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+            <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-emerald-800">Appointment Confirmed!</p>
-              <p className="text-xs text-emerald-700 mt-0.5">Reference: <span className="font-mono font-bold">{booked.referenceNo}</span></p>
+              <p className="font-bold text-success font-medium">Appointment Confirmed!</p>
+              <p className="text-xs text-success mt-0.5">Reference: <span className="font-mono font-bold">{booked.referenceNo}</span></p>
             </div>
             <button onClick={() => setBooked(null)} className="ml-auto text-muted-foreground hover:text-foreground">
               <X className="w-4 h-4" />
@@ -413,8 +413,8 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
             <div className="space-y-1.5">
               {booked.aiReminders.map((r: string, i: number) => (
                 <div key={i} className="flex items-start gap-2 px-3 py-1.5 bg-card/50 rounded-xl">
-                  <Sparkles className="w-3 h-3 text-emerald-600 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-emerald-800">{r}</p>
+                  <Sparkles className="w-3 h-3 text-success shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-success">{r}</p>
                 </div>
               ))}
             </div>
@@ -510,7 +510,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
         </div>
 
         {bookingError && (
-          <div className="mb-3 px-4 py-2.5 bg-destructive/10 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+          <div className="mb-3 px-4 py-2.5 bg-danger-bg border border-danger/30 rounded-xl text-sm text-danger font-medium">
             {bookingError}
           </div>
         )}
@@ -627,7 +627,7 @@ export default function CitizenPortal() {
     return (
       <Layout role="citizen" localized>
         <div className="flex items-center gap-3 py-20 justify-center text-muted-foreground">
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-500" />
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-warning" />
           <span className="text-sm">{text("Loading your health records...", "جارٍ تحميل سجلاتك الصحية...")}</span>
         </div>
       </Layout>
@@ -656,7 +656,7 @@ export default function CitizenPortal() {
   const highPriorityRecs = recommendations.filter(r => r.priority === "high").length;
 
   const priorityColors = {
-    high: { bg: "bg-destructive/10", border: "border-red-100", badge: "destructive" as const, dot: "bg-red-500" },
+    high: { bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, dot: "bg-danger" },
     medium: { bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high" },
     low: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground" },
   };
@@ -673,18 +673,18 @@ export default function CitizenPortal() {
               <button
                 onClick={() => setShowSsePanel(p => !p)}
                 className={`relative flex items-center justify-center w-9 h-9 rounded-xl border transition-all ${
-                  sseUnread > 0 ? "bg-destructive/10 border-red-200 hover:bg-red-100" : "bg-card border-border hover:bg-secondary"
+                  sseUnread > 0 ? "bg-destructive/10 border-danger/30 hover:bg-danger-bg" : "bg-card border-border hover:bg-secondary"
                 }`}
                 title={sseConnected ? text("Live health alerts", "تنبيهات صحية حيّة") : text("Connecting...", "جارٍ الاتصال...")}
               >
-                <Bell className={`w-4 h-4 ${sseUnread > 0 ? "text-red-600" : "text-muted-foreground"}`} />
+                <Bell className={`w-4 h-4 ${sseUnread > 0 ? "text-danger" : "text-muted-foreground"}`} />
                 {sseUnread > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-danger text-white text-[9px] font-bold flex items-center justify-center">
                     {sseUnread > 9 ? "9+" : sseUnread}
                   </span>
                 )}
               </button>
-              <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-emerald-400" : "bg-gray-300"}`} />
+              <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-success" : "bg-gray-300"}`} />
             </div>
             <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }}>
               {text("Sign Out", "تسجيل الخروج")}
@@ -695,29 +695,29 @@ export default function CitizenPortal() {
 
       {/* SSE Real-time Lab Alert Panel */}
       {showSsePanel && sseAlerts.length > 0 && (
-        <div className="mb-4 rounded-2xl border border-red-200 bg-destructive/10 overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-red-200 bg-red-100/60">
-            <Bell className="w-4 h-4 text-red-600" />
-            <span className="font-bold text-sm text-red-800">{text("Live Health Alerts", "تنبيهات صحية حيّة")}</span>
+        <div className="mb-4 rounded-2xl border border-danger/30 bg-danger-bg overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-danger/30 bg-danger-bg/60">
+            <Bell className="w-4 h-4 text-danger" />
+            <span className="font-bold text-sm text-danger">{text("Live Health Alerts", "تنبيهات صحية حيّة")}</span>
             {sseUnread > 0 && <Badge variant="destructive" className="text-[10px]">{text(`${sseUnread} new`, `${sseUnread} جديد`)}</Badge>}
-            <button onClick={() => { clearSseAlerts(); setShowSsePanel(false); }} className="ml-auto text-red-400 hover:text-red-600">
+            <button onClick={() => { clearSseAlerts(); setShowSsePanel(false); }} className="ml-auto text-danger hover:text-danger">
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="divide-y divide-red-100 max-h-56 overflow-y-auto">
+          <div className="divide-y divide-danger/30 max-h-56 overflow-y-auto">
             {sseAlerts.map(alert => (
               <div
                 key={alert.id}
                 onClick={() => markSseRead(alert.id)}
-                className={`px-4 py-3 flex gap-3 cursor-pointer hover:bg-red-100/40 transition-colors ${!alert.read ? "bg-destructive/10" : "bg-card/50"}`}
+                className={`px-4 py-3 flex gap-3 cursor-pointer hover:bg-danger-bg/40 transition-colors ${!alert.read ? "bg-danger-bg" : "bg-card/50"}`}
               >
-                <ShieldAlert className={`w-4 h-4 mt-0.5 shrink-0 ${alert.severity === "critical" ? "text-red-600" : "text-risk-high"}`} />
+                <ShieldAlert className={`w-4 h-4 mt-0.5 shrink-0 ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-red-900">{alert.title}</p>
-                  <p className="text-xs text-red-700 mt-0.5 truncate">{alert.significance}</p>
+                  <p className="text-xs font-bold text-danger">{alert.title}</p>
+                  <p className="text-xs text-danger mt-0.5 truncate">{alert.significance}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{alert.testName} · {alert.result} · {new Date(alert.timestamp).toLocaleTimeString()}</p>
                 </div>
-                {!alert.read && <span className="w-2 h-2 rounded-full bg-red-500 mt-1.5 shrink-0" />}
+                {!alert.read && <span className="w-2 h-2 rounded-full bg-danger mt-1.5 shrink-0" />}
               </div>
             ))}
           </div>
@@ -725,9 +725,9 @@ export default function CitizenPortal() {
       )}
 
       {criticalCount > 0 && (
-        <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-destructive/10 border border-red-200 rounded-2xl">
-          <ShieldAlert className="w-5 h-5 text-red-600 shrink-0" />
-          <p className="text-sm font-semibold text-red-700">
+        <div className="mb-4 flex items-center gap-3 px-4 py-3 bg-danger-bg border border-danger/30 rounded-2xl">
+          <ShieldAlert className="w-5 h-5 text-danger shrink-0" />
+          <p className="text-sm font-semibold text-danger">
             <strong>{text(`${criticalCount} critical lab result${criticalCount > 1 ? "s" : ""}`, `${criticalCount} نتيجة مخبرية حرجة`)}</strong> — {text("please contact your doctor as soon as possible.", "يُرجى التواصل مع طبيبك في أقرب وقت ممكن.")}
           </p>
           <Badge variant="destructive" className="ms-auto shrink-0">{text("Urgent", "عاجل")}</Badge>
@@ -747,7 +747,7 @@ export default function CitizenPortal() {
                 <span className="font-mono bg-secondary text-xs px-2.5 py-1 rounded-xl" dir="ltr">{patient.nationalId}</span>
                 <span className="text-xs text-muted-foreground">{text("DOB:", "تاريخ الميلاد:")} {format(new Date(patient.dateOfBirth), "dd MMM yyyy")}</span>
                 <span className="text-xs text-muted-foreground">· {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}</span>
-                <span className="text-xs font-bold text-red-600 bg-destructive/10 px-2.5 py-0.5 rounded-full">{text("Blood:", "فصيلة الدم:")} <span dir="ltr">{patient.bloodType}</span></span>
+                <span className="text-xs font-bold text-danger bg-danger-bg px-2.5 py-0.5 rounded-full">{text("Blood:", "فصيلة الدم:")} <span dir="ltr">{patient.bloodType}</span></span>
               </div>
             </div>
             {(patient.allergies?.length ?? 0) > 0 && (
@@ -793,16 +793,16 @@ export default function CitizenPortal() {
               <span className="font-bold text-foreground">{activeMeds.length}</span>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><FlaskConical className="w-3.5 h-3.5 text-sky-500" /> {text("Lab Results", "نتائج المختبر")}</div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><FlaskConical className="w-3.5 h-3.5 text-info" /> {text("Lab Results", "نتائج المختبر")}</div>
               <span className="font-bold text-foreground">{labResults.length}</span>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Bell className="w-3.5 h-3.5 text-red-500" /> {text("Abnormal", "غير طبيعية")}</div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Bell className="w-3.5 h-3.5 text-danger" /> {text("Abnormal", "غير طبيعية")}</div>
               <span className={`font-bold ${abnormal > 0 ? "text-risk-high" : "text-foreground"}`}>{abnormal}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lightbulb className="w-3.5 h-3.5 text-violet-500" /> {text("AI Tips", "نصائح ذكية")}</div>
-              <span className={`font-bold ${highPriorityRecs > 0 ? "text-red-600" : "text-foreground"}`}>{recommendations.length}</span>
+              <span className={`font-bold ${highPriorityRecs > 0 ? "text-danger" : "text-foreground"}`}>{recommendations.length}</span>
             </div>
           </CardBody>
         </Card>
@@ -857,10 +857,10 @@ export default function CitizenPortal() {
               <div className="space-y-5">
                 {/* Overall Health Trajectory */}
                 <div className={`rounded-3xl p-5 ${
-                  aiDecision.digitalTwin?.riskTrajectory === "rapidly_worsening" ? "bg-red-600 text-white" :
+                  aiDecision.digitalTwin?.riskTrajectory === "rapidly_worsening" ? "bg-danger text-white" :
                   aiDecision.digitalTwin?.riskTrajectory === "worsening" ? "bg-risk-high text-white" :
-                  aiDecision.digitalTwin?.riskTrajectory === "improving" ? "bg-emerald-500 text-white" :
-                  "bg-sky-500 text-white"
+                  aiDecision.digitalTwin?.riskTrajectory === "improving" ? "bg-success text-white" :
+                  "bg-info text-white"
                 }`}>
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -980,7 +980,7 @@ export default function CitizenPortal() {
                 </div>
                 <p className="text-sm text-foreground font-medium leading-relaxed">{healthScore.summary}</p>
                 <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> {text("Based on your live medical data", "بناءً على بياناتك الطبية الحيّة")}</span>
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-success" /> {text("Based on your live medical data", "بناءً على بياناتك الطبية الحيّة")}</span>
                   <span className="flex items-center gap-1.5"><Info className="w-3.5 h-3.5" /> {text("AI-powered analysis", "تحليل بالذكاء الاصطناعي")}</span>
                 </div>
               </div>
@@ -1002,13 +1002,13 @@ export default function CitizenPortal() {
                   const isGood = item.value <= item.good;
                   return (
                     <div key={item.label} className="flex items-center gap-3 px-4 py-3 bg-secondary rounded-2xl">
-                      <item.icon className={`w-4 h-4 shrink-0 ${isGood ? "text-emerald-500" : item.value >= item.max * 0.7 ? "text-red-500" : "text-risk-high"}`} />
+                      <item.icon className={`w-4 h-4 shrink-0 ${isGood ? "text-success" : item.value >= item.max * 0.7 ? "text-danger" : "text-risk-high"}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-foreground truncate">{item.label}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex-1 bg-background rounded-full h-1.5">
                             <div
-                              className={`h-full rounded-full ${isGood ? "bg-emerald-500" : item.value >= item.max * 0.7 ? "bg-red-500" : "bg-risk-high"}`}
+                              className={`h-full rounded-full ${isGood ? "bg-success" : item.value >= item.max * 0.7 ? "bg-danger" : "bg-risk-high"}`}
                               style={{ width: `${pct}%` }}
                             />
                           </div>
@@ -1049,9 +1049,9 @@ export default function CitizenPortal() {
                   );
                 })}
                 {recommendations.length === 0 && (
-                  <div className="flex items-center gap-3 px-4 py-5 bg-emerald-50 border border-emerald-100 rounded-2xl">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                    <p className="text-sm font-semibold text-emerald-700">{text("No urgent recommendations. Continue your healthy routine!", "لا توجد توصيات عاجلة. واصِل روتينك الصحي!")}</p>
+                  <div className="flex items-center gap-3 px-4 py-5 bg-success-bg border border-success/30 rounded-2xl">
+                    <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
+                    <p className="text-sm font-semibold text-success">{text("No urgent recommendations. Continue your healthy routine!", "لا توجد توصيات عاجلة. واصِل روتينك الصحي!")}</p>
                   </div>
                 )}
               </div>
@@ -1082,14 +1082,14 @@ export default function CitizenPortal() {
             </div>
             <div className="p-5">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Bell className="w-3.5 h-3.5 text-red-500" /> {text("Documented Allergies", "الحساسية المُوثّقة")}
+                <Bell className="w-3.5 h-3.5 text-danger" /> {text("Documented Allergies", "الحساسية المُوثّقة")}
               </p>
               {(patient.allergies?.length ?? 0) > 0 ? (
                 <div className="space-y-2">
                   {patient.allergies?.map((a, i) => (
-                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-destructive/10 border border-red-100 rounded-2xl">
+                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-danger-bg border border-danger/30 rounded-2xl">
                       <StatusDot status="critical" />
-                      <span className="text-sm font-bold text-red-700">{a}</span>
+                      <span className="text-sm font-bold text-danger">{a}</span>
                     </div>
                   ))}
                 </div>
@@ -1181,9 +1181,9 @@ const CONSENT_ICONS: Record<string, React.ElementType> = {
 };
 
 const SEVERITY_CFG = {
-  high:   { bg: "bg-destructive/10",     border: "border-red-200",    text: "text-red-700",    badge: "destructive" as const },
+  high:   { bg: "bg-danger-bg",     border: "border-danger/30",    text: "text-danger",    badge: "destructive" as const },
   medium: { bg: "bg-risk-high-bg",   border: "border-risk-high/20",  text: "text-risk-high",  badge: "warning" as const },
-  low:    { bg: "bg-emerald-50", border: "border-emerald-200",text: "text-emerald-700",badge: "success" as const },
+  low:    { bg: "bg-success-bg", border: "border-success/30",text: "text-success",badge: "success" as const },
 };
 
 async function fetchConsent(nationalId: string) {
@@ -1257,7 +1257,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 gap-3 text-muted-foreground">
-        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600" />
+        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-info" />
         <span className="text-sm font-medium">{text("Loading your consent preferences...", "جارٍ تحميل تفضيلات الموافقة...")}</span>
       </div>
     );
@@ -1272,7 +1272,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       {/* Toast */}
       {toast && (
         <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-medium transition-all ${
-          toast.ok ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-destructive/10 border-red-200 text-red-800"
+          toast.ok ? "bg-success-bg border-success/30 text-success" : "bg-danger-bg border-danger/30 text-danger"
         }`}>
           {toast.ok ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertOctagon className="w-4 h-4 shrink-0" />}
           {toast.msg}
@@ -1280,8 +1280,8 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       )}
 
       {/* Header */}
-      <div className="flex items-start gap-4 px-5 py-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
-        <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center shrink-0">
+      <div className="flex items-start gap-4 px-5 py-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-info/30">
+        <div className="w-10 h-10 rounded-2xl bg-info-bg flex items-center justify-center shrink-0">
           <Lock className="w-5 h-5 text-primary" />
         </div>
         <div className="flex-1">
@@ -1292,12 +1292,12 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
         </div>
         <div className="flex items-center gap-3 text-xs shrink-0">
           <div className="text-center">
-            <p className="text-lg font-black text-emerald-600">{summary.granted ?? 0}</p>
+            <p className="text-lg font-black text-success">{summary.granted ?? 0}</p>
             <p className="text-muted-foreground">{text("Active", "نشطة")}</p>
           </div>
           <div className="w-px h-8 bg-border" />
           <div className="text-center">
-            <p className="text-lg font-black text-red-500">{summary.revoked ?? 0}</p>
+            <p className="text-lg font-black text-danger">{summary.revoked ?? 0}</p>
             <p className="text-muted-foreground">{text("Revoked", "مسحوبة")}</p>
           </div>
           <div className="w-px h-8 bg-border" />
@@ -1320,13 +1320,13 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
               key={consent.type}
               className={`relative p-4 rounded-2xl border-2 transition-all ${
                 consent.granted
-                  ? "bg-card border-emerald-200 shadow-sm"
+                  ? "bg-card border-success/30 shadow-sm"
                   : "bg-muted/50/80 border-border"
               }`}
             >
               {/* Status dot */}
               <div className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full border-2 border-card ${
-                consent.granted ? "bg-emerald-400 shadow-emerald-200 shadow-sm" : "bg-gray-300"
+                consent.granted ? "bg-success" : "bg-gray-300"
               }`} />
 
               <div className="flex items-start gap-3 mb-3">
@@ -1360,7 +1360,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
                   disabled={isToggling || !consent.canRevoke}
                   className={`ml-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all disabled:opacity-50 ${
                     consent.granted
-                      ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                      ? "bg-success-bg text-success hover:bg-success-bg/80"
                       : "bg-muted text-muted-foreground hover:bg-gray-200"
                   } ${!consent.canRevoke ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
@@ -1398,11 +1398,11 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
             {history.map((h: any, i: number) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5">
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                  h.action === "granted" ? "bg-emerald-100" : "bg-red-100"
+                  h.action === "granted" ? "bg-success-bg" : "bg-danger-bg"
                 }`}>
                   {h.action === "granted"
-                    ? <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    : <EyeOff className="w-3 h-3 text-red-500" />
+                    ? <CheckCircle2 className="w-3 h-3 text-success" />
+                    : <EyeOff className="w-3 h-3 text-danger" />
                   }
                 </div>
                 <div className="flex-1 min-w-0">

@@ -53,16 +53,16 @@ interface EmergencyPatient {
 }
 
 const actionConfig: Record<ClinicalAction["action"], { icon: React.ElementType; color: string; bg: string; border: string; label: string }> = {
-  DO_NOT_GIVE: { icon: Ban, color: "text-red-700", bg: "bg-destructive/10", border: "border-red-200", label: "DO NOT GIVE" },
-  HOLD_MEDICATION: { icon: PauseCircle, color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-200", label: "HOLD" },
+  DO_NOT_GIVE: { icon: Ban, color: "text-danger", bg: "bg-danger-bg", border: "border-danger/20", label: "DO NOT GIVE" },
+  HOLD_MEDICATION: { icon: PauseCircle, color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "HOLD" },
   URGENT_REVIEW: { icon: Brain, color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-200", label: "URGENT REVIEW" },
-  ALERT_FAMILY: { icon: PhoneCall, color: "text-blue-700", bg: "bg-primary/10", border: "border-blue-200", label: "ALERT FAMILY" },
+  ALERT_FAMILY: { icon: PhoneCall, color: "text-info", bg: "bg-info-bg", border: "border-info/20", label: "ALERT FAMILY" },
   MONITOR: { icon: Eye, color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "MONITOR" },
-  PREPARE_EQUIPMENT: { icon: Wrench, color: "text-sky-700", bg: "bg-sky-50", border: "border-sky-200", label: "PREPARE" },
+  PREPARE_EQUIPMENT: { icon: Wrench, color: "text-info", bg: "bg-info-bg", border: "border-info/20", label: "PREPARE" },
 };
 
 const priorityBadge: Record<ClinicalAction["priority"], string> = {
-  immediate: "bg-red-600 text-white",
+  immediate: "bg-danger text-white",
   urgent: "bg-risk-high text-white",
   standard: "bg-secondary text-muted-foreground",
 };
@@ -122,7 +122,7 @@ export default function EmergencyPage() {
                 dir="ltr"
               />
             </div>
-            <Button type="submit" variant="destructive" size="lg" className="shrink-0 bg-red-600 hover:bg-red-700">
+            <Button type="submit" variant="destructive" size="lg" className="shrink-0 bg-danger hover:bg-danger/80">
               <Search className="h-4 w-4" /> {text("Emergency Lookup", "استدعاء طارئ")}
             </Button>
           </form>
@@ -137,7 +137,7 @@ export default function EmergencyPage() {
         <Card className="mb-6">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4 text-red-600" />
+              <ShieldAlert className="h-4 w-4 text-danger" />
               <CardTitle>{text("Critical Risk Queue", "قائمة الحالات الحرجة")}</CardTitle>
             </div>
             <Badge variant="destructive">{text(`${criticalPatients.length} patients · risk 80+`, `${criticalPatients.length} مريض · خطورة 80+`)}</Badge>
@@ -170,20 +170,20 @@ export default function EmergencyPage() {
 
       {isLoading && (
         <div className="flex items-center gap-3 text-muted-foreground py-16 justify-center">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500" />
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-danger" />
           <span className="text-sm font-medium">{text("Retrieving critical patient data...", "جارٍ استدعاء بيانات المريض الحرجة...")}</span>
         </div>
       )}
 
       {isError && !isLoading && (
-        <Card className="border-red-200 bg-destructive/10">
+        <Card className="border-danger/20 bg-danger-bg">
           <CardBody className="flex items-center gap-4 p-5">
-            <div className="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
+            <div className="w-10 h-10 rounded-2xl bg-danger-bg flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-danger" />
             </div>
             <div>
-              <p className="font-bold text-red-700">{text("Patient Not Found", "المريض غير موجود")}</p>
-              <p className="text-sm text-red-600/80 mt-0.5">{text("No record for", "لا يوجد سجل لـ")} <span className="font-mono" dir="ltr">{submittedId}</span>. {text("Verify the National ID and retry.", "تحقّق من رقم الهوية وأعد المحاولة.")}</p>
+              <p className="font-bold text-danger">{text("Patient Not Found", "المريض غير موجود")}</p>
+              <p className="text-sm text-danger/80 mt-0.5">{text("No record for", "لا يوجد سجل لـ")} <span className="font-mono" dir="ltr">{submittedId}</span>. {text("Verify the National ID and retry.", "تحقّق من رقم الهوية وأعد المحاولة.")}</p>
             </div>
           </CardBody>
         </Card>
@@ -193,14 +193,14 @@ export default function EmergencyPage() {
         <div className="space-y-4">
           {/* TRIAGE LEVEL STRIP */}
           <div className={`rounded-3xl overflow-hidden border-2 ${
-            (patient as unknown as EmergencyPatient).riskLevel === "critical" ? "border-red-500" :
+            (patient as unknown as EmergencyPatient).riskLevel === "critical" ? "border-danger" :
             (patient as unknown as EmergencyPatient).riskLevel === "high" ? "border-risk-high/50" :
-            "border-sky-400"
+            "border-info/40"
           }`}>
             <div className={`flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:gap-5 ${
-              (patient as unknown as EmergencyPatient).riskLevel === "critical" ? "bg-red-600" :
+              (patient as unknown as EmergencyPatient).riskLevel === "critical" ? "bg-danger" :
               (patient as unknown as EmergencyPatient).riskLevel === "high" ? "bg-risk-high" :
-              "bg-sky-500"
+              "bg-info"
             } text-white`}>
               <div className="hidden shrink-0 sm:block">
                 <Target className="w-8 h-8 text-white/80" />
@@ -232,8 +232,8 @@ export default function EmergencyPage() {
 
           {/* IMMEDIATE ACTIONS — highest priority, shown first */}
           {immediateActions.length > 0 && (
-            <div className="border-2 border-red-500 rounded-3xl overflow-hidden">
-              <div className="bg-red-600 px-5 py-3 flex items-center gap-3">
+            <div className="border-2 border-danger rounded-3xl overflow-hidden">
+              <div className="bg-danger px-5 py-3 flex items-center gap-3">
                 <ShieldAlert className="w-5 h-5 text-white" />
                 <span className="text-white font-bold text-sm uppercase tracking-widest">
                   {text("⚠ IMMEDIATE CLINICAL ACTIONS REQUIRED", "⚠ إجراءات سريرية فورية مطلوبة")}
@@ -275,7 +275,7 @@ export default function EmergencyPage() {
 
           {/* Critical Alerts */}
           {patient.criticalAlerts.length > 0 && (
-            <Card className="bg-red-600 border-red-600 text-white">
+            <Card className="bg-danger border-danger text-white">
               <CardBody className="flex items-start gap-4 p-5">
                 <div className="w-10 h-10 rounded-2xl bg-card/15 flex items-center justify-center shrink-0 mt-0.5">
                   <AlertTriangle className="w-5 h-5" />
@@ -346,11 +346,11 @@ export default function EmergencyPage() {
               </div>
             </Card>
 
-            <Card className="bg-destructive/10 border-red-100 md:col-span-3">
+            <Card className="bg-danger-bg border-danger/20 md:col-span-3">
               <CardBody className="flex h-full flex-col items-center justify-center py-8">
-                <Droplet className="mb-2 h-7 w-7 text-red-400" />
-                <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-red-400">{text("Blood Type", "فصيلة الدم")}</p>
-                <p className="text-5xl font-bold text-red-600" dir="ltr">{patient.bloodType}</p>
+                <Droplet className="mb-2 h-7 w-7 text-danger/70" />
+                <p className="mb-1 text-[10px] font-bold uppercase tracking-widest text-danger/70">{text("Blood Type", "فصيلة الدم")}</p>
+                <p className="text-5xl font-bold text-danger" dir="ltr">{patient.bloodType}</p>
               </CardBody>
             </Card>
           </div>
@@ -396,7 +396,7 @@ export default function EmergencyPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <FileWarning className="w-4 h-4 text-red-500" />
+                  <FileWarning className="w-4 h-4 text-danger" />
                   <CardTitle>{text("Known Allergies", "الحساسية المعروفة")}</CardTitle>
                 </div>
                 <Badge variant="destructive">{patient.allergies.length}</Badge>
@@ -405,9 +405,9 @@ export default function EmergencyPage() {
                 {patient.allergies.length > 0 ? (
                   <div className="space-y-2">
                     {patient.allergies.map((a, i) => (
-                      <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-destructive/10 border border-red-100 rounded-2xl">
+                      <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 bg-danger-bg border border-danger/20 rounded-2xl">
                         <StatusDot status="critical" />
-                        <span className="text-sm font-bold text-red-700">{a}</span>
+                        <span className="text-sm font-bold text-danger">{a}</span>
                       </div>
                     ))}
                   </div>
