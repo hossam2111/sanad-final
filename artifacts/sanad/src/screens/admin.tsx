@@ -4,7 +4,7 @@ import { Layout } from "@/components/layout";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody, KpiCard, Badge, AlertBanner , SkeletonCard, ErrorBanner} from "@/components/shared";
 import { useGetAdminStats, useGetPopulationHealth } from "@workspace/api-client-react";
 import { useNationalIntelligence } from "@/hooks/use-ai-decision";
-import { Users, Activity, ShieldAlert, Building, TrendingUp, AlertTriangle, PieChart as PieIcon, Globe, Brain, Zap, Radio, Lightbulb, Target, MapPin, Calendar } from "lucide-react";
+import { Users, Activity, ShieldAlert, Building, TrendingUp, AlertTriangle, PieChart as PieIcon, Globe, Brain, Zap, Radio, Lightbulb, Target, MapPin, Calendar, RefreshCw, X } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -233,10 +233,30 @@ async function fetchAppointmentsSummary() {
 
 export default function AdminDashboard() {
   const { text, dir, locale, toggleLocale } = useLanguage();
-  const { data: statsRaw, isLoading: statsLoading } = useGetAdminStats();
+  const { data: statsRaw, isLoading: statsLoading, refetch: refetchStats } = useGetAdminStats();
   const { data: popHealth, isLoading: healthLoading } = useGetPopulationHealth();
   const { data: intelligence } = useNationalIntelligence();
   const { data: apptData } = useQuery({ queryKey: ["admin-appointments"], queryFn: fetchAppointmentsSummary, refetchInterval: 60000 });
+
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetState, setResetState] = useState<"idle" | "running" | "done" | "error">("idle");
+  const [resetMsg, setResetMsg] = useState("");
+
+  const handleResetDemo = async () => {
+    setResetState("running");
+    setResetMsg("");
+    try {
+      const res = await apiFetch("/api/admin/reset-demo", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) { setResetState("error"); setResetMsg(data.message ?? "Reset failed"); return; }
+      setResetState("done");
+      setResetMsg(data.message ?? "Done");
+      refetchStats();
+    } catch {
+      setResetState("error");
+      setResetMsg(text("Network error", "خطأ في الاتصال"));
+    }
+  };
 
   const stats = statsRaw as Record<string, any>;
 
@@ -271,9 +291,19 @@ export default function AdminDashboard() {
           title={text("Ministry of Health — Analytics Command Center", "وزارة الصحة — مركز قيادة التحليلات")}
           subtitle={text("Real-time national infrastructure metrics and population health intelligence.", "مؤشّرات البنية التحتية الوطنية الفورية وذكاء صحة السكان.")}
         />
-        <span className="text-xs font-mono bg-card border border-border rounded-xl px-3 py-2 text-muted-foreground shrink-0 ms-4" dir="ltr">
-          {new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" })}
-        </span>
+        <div className="flex items-center gap-2 shrink-0 ms-4">
+          <span className="text-xs font-mono bg-card border border-border rounded-xl px-3 py-2 text-muted-foreground" dir="ltr">
+            {new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" })}
+          </span>
+          <button
+            onClick={() => { setShowResetModal(true); setResetState("idle"); setResetMsg(""); }}
+            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-warning/50 hover:bg-warning-bg transition-colors"
+            title={text("Reset Demo Environment", "إعادة تعيين بيئة العرض")}
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            {text("Reset Demo", "إعادة العرض")}
+          </button>
+        </div>
       </div>
 
       <Tabs defaultValue="dashboard" dir={dir}>
@@ -641,6 +671,81 @@ export default function AdminDashboard() {
           <AuditFeed />
         </TabsContent>
       </Tabs>
+
+      {/* Reset Demo Confirmation Modal */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => { if (resetState !== "running") setShowResetModal(false); }}>
+          <div className="bg-card rounded-2xl border border-border w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-warning" />
+                <span className="font-bold text-foreground">{text("Reset Demo Environment", "إعادة تعيين بيئة العرض")}</span>
+              </div>
+              {resetState !== "running" && (
+                <button onClick={() => setShowResetModal(false)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+              )}
+            </div>
+
+            <div className="p-6 space-y-4">
+              {resetState === "idle" && (
+                <>
+                  <div className="rounded-xl bg-warning-bg border border-warning/25 p-4 space-y-2">
+                    <p className="text-sm font-semibold text-warning">{text("This will:", "هذا الإجراء سيقوم بـ:")}</p>
+                    <ul className="text-sm text-foreground space-y-1 list-disc list-inside">
+                      <li>{text("Delete all current patients, visits, labs, and medications", "حذف جميع المرضى والزيارات والنتائج والأدوية الحالية")}</li>
+                      <li>{text("Re-run the Al-Ghamdi demo dataset (7 scenarios)", "إعادة تشغيل بيانات العرض (7 سيناريوهات)")}</li>
+                      <li>{text("Reset all numeric IDs to their original values", "إعادة تعيين جميع المعرّفات لقيمها الأصلية")}</li>
+                    </ul>
+                    <p className="text-xs text-muted-foreground mt-2">{text("This takes ~15–30 seconds. Do not close the window.", "يستغرق ~15-30 ثانية. لا تغلق النافذة.")}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setShowResetModal(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-secondary transition-colors">
+                      {text("Cancel", "إلغاء")}
+                    </button>
+                    <button onClick={handleResetDemo} className="flex-1 px-4 py-2.5 rounded-xl bg-warning text-white text-sm font-bold hover:bg-warning/90 transition-colors">
+                      {text("Yes, Reset Demo", "نعم، إعادة التعيين")}
+                    </button>
+                  </div>
+                </>
+              )}
+
+              {resetState === "running" && (
+                <div className="flex flex-col items-center gap-3 py-6">
+                  <RefreshCw className="w-10 h-10 text-primary animate-spin" />
+                  <p className="text-sm font-medium text-foreground">{text("Resetting demo environment…", "جاري إعادة تعيين بيئة العرض…")}</p>
+                  <p className="text-xs text-muted-foreground">{text("Truncating tables and re-seeding data. Please wait.", "حذف البيانات وإعادة البذر. يرجى الانتظار.")}</p>
+                </div>
+              )}
+
+              {resetState === "done" && (
+                <div className="flex flex-col items-center gap-3 py-4">
+                  <div className="w-12 h-12 rounded-full bg-success-bg flex items-center justify-center">
+                    <span className="text-2xl text-success">✓</span>
+                  </div>
+                  <p className="text-sm font-bold text-success">{text("Reset complete!", "اكتملت إعادة التعيين!")}</p>
+                  <p className="text-xs text-muted-foreground">{text("Demo dataset restored. Al-Ghamdi scenarios are ready.", "بيانات العرض جاهزة. سيناريوهات الغامدي مُستعادة.")}</p>
+                  <button onClick={() => setShowResetModal(false)} className="mt-2 px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+                    {text("Close", "إغلاق")}
+                  </button>
+                </div>
+              )}
+
+              {resetState === "error" && (
+                <div className="space-y-3">
+                  <div className="rounded-xl bg-danger-bg border border-danger/25 p-4">
+                    <p className="text-sm font-semibold text-danger mb-1">{text("Reset failed", "فشلت إعادة التعيين")}</p>
+                    <p className="text-xs text-foreground font-mono break-all">{resetMsg}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => setShowResetModal(false)} className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm font-medium">{text("Close", "إغلاق")}</button>
+                    <button onClick={handleResetDemo} className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium">{text("Retry", "إعادة المحاولة")}</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

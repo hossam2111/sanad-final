@@ -1,4 +1,7 @@
 import { createHash } from "crypto";
+import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+import path from "path";
 import { Router } from "express";
 import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
@@ -404,6 +407,46 @@ router.get("/audit-feed", async (req, res) => {
     .limit(limit);
 
   res.json({ entries: rows, total: rows.length });
+});
+
+// POST /api/admin/reset-demo
+// Truncates all tables and re-runs the demo seed. Admin-only, non-production.
+router.post("/reset-demo", async (req, res) => {
+  if (req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Admin role required" });
+    return;
+  }
+  if (process.env["NODE_ENV"] === "production") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Reset is not available in production" });
+    return;
+  }
+
+  // Resolve workspace root: admin.ts lives 4 directories deep (artifacts/api-server/src/routes/)
+  const workspaceRoot = path.resolve(fileURLToPath(import.meta.url), "../../../../..");
+  const scriptsDir   = path.join(workspaceRoot, "scripts");
+
+  await new Promise<void>((resolve, reject) => {
+    const proc = spawn(
+      "node",
+      ["--env-file", "../.env", "--import", "tsx/esm", "./src/seed.ts"],
+      { cwd: scriptsDir, stdio: "pipe" }
+    );
+
+    const chunks: Buffer[] = [];
+    proc.stdout?.on("data", (d: Buffer) => chunks.push(d));
+    proc.stderr?.on("data", (d: Buffer) => chunks.push(d));
+
+    proc.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`Seed exited with code ${code}:\n${Buffer.concat(chunks).toString()}`));
+    });
+    proc.on("error", reject);
+
+    // Hard timeout — demo reset should never hang longer than 90s
+    setTimeout(() => reject(new Error("Seed timed out after 90s")), 90_000);
+  });
+
+  res.json({ ok: true, message: "Demo environment reset successfully" });
 });
 
 export default router;
