@@ -4,7 +4,7 @@ import { Layout } from "@/components/layout";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody, KpiCard, Badge, AlertBanner , SkeletonCard, ErrorBanner} from "@/components/shared";
 import { useGetAdminStats, useGetPopulationHealth } from "@workspace/api-client-react";
 import { useNationalIntelligence } from "@/hooks/use-ai-decision";
-import { Users, Activity, ShieldAlert, Building, TrendingUp, AlertTriangle, PieChart as PieIcon, Globe, Brain, Zap, Radio, Lightbulb, Target, MapPin, Calendar, RefreshCw, X } from "lucide-react";
+import { Users, Activity, ShieldAlert, Building, TrendingUp, AlertTriangle, PieChart as PieIcon, Globe, Brain, Zap, Radio, Lightbulb, Target, MapPin, Calendar, RefreshCw, X, Server, Database, Download, CheckCircle2, XCircle, Clock, UserCheck, Shield, Wrench } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
@@ -231,14 +231,54 @@ async function fetchAppointmentsSummary() {
   return res.json();
 }
 
+async function fetchSystemHealth() {
+  const res = await apiFetch("/api/health/healthz");
+  return res.json();
+}
+
+const ROLE_BADGE: Record<string, { label: string; cls: string }> = {
+  admin:        { label: "Admin",        cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
+  doctor:       { label: "Doctor",       cls: "bg-primary/10 text-primary" },
+  emergency:    { label: "Emergency",    cls: "bg-danger-bg text-danger" },
+  lab:          { label: "Lab",          cls: "bg-info-bg text-info" },
+  pharmacy:     { label: "Pharmacy",     cls: "bg-success-bg text-success" },
+  hospital:     { label: "Hospital",     cls: "bg-warning-bg text-warning" },
+  insurance:    { label: "Insurance",    cls: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" },
+  "ai-control": { label: "AI Control",  cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
+  research:     { label: "Research",     cls: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300" },
+  citizen:      { label: "Citizen",      cls: "bg-secondary text-muted-foreground" },
+  family:       { label: "Family",       cls: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300" },
+  "supply-chain":{ label: "Supply Chain",cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
+};
+
+const DEMO_USERS = [
+  { id:"ADM-001", username:"admin.saad",      name:"Eng. Saad Al-Otaibi",      role:"admin",        org:"Ministry of Health — KSA",         title:"National Health Ops Director" },
+  { id:"DOC-001", username:"dr.rashidi",      name:"Dr. Ahmed Al-Rashidi",      role:"doctor",       org:"King Fahd Medical City",           title:"Consultant Physician" },
+  { id:"EMP-001", username:"emergency_unit7", name:"Unit 7 — Riyadh Central",   role:"emergency",    org:"SRCA Emergency Services",          title:"First Responder" },
+  { id:"LAB-001", username:"lab.sara",        name:"Sara Al-Otaibi",            role:"lab",          org:"SANAD Lab Network",                title:"Senior Lab Technician" },
+  { id:"PHA-001", username:"pharm.hassan",    name:"Hassan Al-Ghamdi",          role:"pharmacy",     org:"Central Pharmacy — Riyadh",        title:"Clinical Pharmacist" },
+  { id:"HOS-001", username:"hosp.ops",        name:"Operations Manager",        role:"hospital",     org:"King Fahd Medical City",           title:"Hospital Ops Director" },
+  { id:"INS-001", username:"ins.nora",        name:"Nora Al-Qahtani",           role:"insurance",    org:"Tawuniya Insurance",               title:"Insurance Operations Lead" },
+  { id:"AIC-001", username:"ai.khalid",       name:"Dr. Khalid Al-Mansouri",    role:"ai-control",   org:"SANAD AI Division",                title:"AI Systems Lead" },
+  { id:"RES-001", username:"research.reem",   name:"Dr. Reem Al-Zahrani",       role:"research",     org:"King Abdulaziz University",        title:"Clinical Research Director" },
+  { id:"CIT-001", username:"citizen_demo",    name:"Mohammed Al-Ghamdi",        role:"citizen",      org:"National Health Record",           title:"Citizen" },
+  { id:"FAM-001", username:"family.fatima",   name:"Fatima Al-Ghamdi",          role:"family",       org:"Al-Ghamdi Household",              title:"Family Member" },
+  { id:"SUP-001", username:"supply.ibrahim",  name:"Ibrahim Al-Dosari",         role:"supply-chain", org:"National Pharma Supply",           title:"Supply Chain Manager" },
+];
+
 export default function AdminDashboard() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const { data: statsRaw, isLoading: statsLoading, refetch: refetchStats } = useGetAdminStats();
   const { data: popHealth, isLoading: healthLoading } = useGetPopulationHealth();
   const { data: intelligence } = useNationalIntelligence();
   const { data: apptData } = useQuery({ queryKey: ["admin-appointments"], queryFn: fetchAppointmentsSummary, refetchInterval: 60000 });
+  const { data: sysHealth, refetch: refetchHealth } = useQuery({ queryKey: ["system-health"], queryFn: fetchSystemHealth, refetchInterval: 30000 });
 
   const [showResetModal, setShowResetModal] = useState(false);
+  const [userEnabled, setUserEnabled] = useState<Record<string, boolean>>(
+    Object.fromEntries(DEMO_USERS.map(u => [u.id, true]))
+  );
+  const [exportingLogs, setExportingLogs] = useState(false);
   const [resetState, setResetState] = useState<"idle" | "running" | "done" | "error">("idle");
   const [resetMsg, setResetMsg] = useState("");
 
@@ -256,6 +296,25 @@ export default function AdminDashboard() {
       setResetState("error");
       setResetMsg(text("Network error", "خطأ في الاتصال"));
     }
+  };
+
+  const handleExportLogs = async () => {
+    setExportingLogs(true);
+    try {
+      const res = await apiFetch("/api/admin/audit-log?limit=5000");
+      const data = await res.json();
+      const rows: Record<string, unknown>[] = data.logs ?? [];
+      const cols = ["id","createdAt","whoRole","whoUserId","action","what","patientId","details"];
+      const csv = [
+        cols.join(","),
+        ...rows.map(r => cols.map(c => JSON.stringify(r[c] ?? "")).join(",")),
+      ].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url;
+      a.download = `sanad-audit-${new Date().toISOString().split("T")[0]}.csv`;
+      a.click(); URL.revokeObjectURL(url);
+    } finally { setExportingLogs(false); }
   };
 
   const stats = statsRaw as Record<string, any>;
@@ -310,7 +369,11 @@ export default function AdminDashboard() {
         <div className="mb-6">
           <TabsList>
             <TabsTrigger value="dashboard">{text("Dashboard", "لوحة القيادة")}</TabsTrigger>
+            <TabsTrigger value="system">{text("System Health", "صحة النظام")}</TabsTrigger>
+            <TabsTrigger value="ai-gov">{text("AI Governance", "حوكمة الذكاء")}</TabsTrigger>
+            <TabsTrigger value="users">{text("User Registry", "سجل المستخدمين")}</TabsTrigger>
             <TabsTrigger value="audit">{text("Audit Trail", "سجل التدقيق")}</TabsTrigger>
+            <TabsTrigger value="maintenance">{text("Maintenance", "الصيانة")}</TabsTrigger>
           </TabsList>
         </div>
 
@@ -665,6 +728,348 @@ export default function AdminDashboard() {
           )}
         </div>
       )}
+        </TabsContent>
+
+        {/* ── System Health ─────────────────────────────────────── */}
+        <TabsContent value="system">
+          <div className="space-y-5">
+            {/* Overall status banner */}
+            {sysHealth && (
+              <div className={`rounded-2xl border p-4 flex items-center gap-3 ${
+                sysHealth.status === "ok" ? "bg-success-bg border-success/25" :
+                sysHealth.status === "degraded" ? "bg-warning-bg border-warning/25" :
+                "bg-danger-bg border-danger/25"
+              }`}>
+                {sysHealth.status === "ok"
+                  ? <CheckCircle2 className="w-5 h-5 text-success shrink-0"/>
+                  : <XCircle className="w-5 h-5 text-danger shrink-0"/>
+                }
+                <div>
+                  <p className="font-bold text-foreground text-sm">{text("SANAD API Server", "خادم SANAD API")} — <span className="uppercase">{sysHealth.status}</span></p>
+                  <p className="text-xs text-muted-foreground">{text("Version", "الإصدار")}: {sysHealth.version ?? "—"} · Build: {(sysHealth.buildSha ?? "—").slice(0,7)}</p>
+                </div>
+                <button onClick={() => refetchHealth()} className="ms-auto text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"><RefreshCw className="w-3.5 h-3.5"/>{text("Refresh","تحديث")}</button>
+              </div>
+            )}
+
+            {/* KPI cards */}
+            <div className="grid grid-cols-4 gap-4">
+              <KpiCard
+                title={text("API Uptime","وقت تشغيل الـ API")}
+                value={sysHealth ? `${Math.floor((sysHealth.uptimeSeconds ?? 0) / 60)}m` : "—"}
+                sub={text("Since last restart","منذ آخر إعادة تشغيل")}
+                icon={Server} iconBg="bg-primary/10" iconColor="text-primary"
+              />
+              <KpiCard
+                title={text("DB Latency","زمن استجابة قاعدة البيانات")}
+                value={sysHealth?.services?.database?.latencyMs != null ? `${sysHealth.services.database.latencyMs}ms` : "—"}
+                sub={sysHealth?.services?.database?.ok ? text("Connected","متصلة") : text("Disconnected","منقطعة")}
+                icon={Database}
+                iconBg={sysHealth?.services?.database?.ok ? "bg-success-bg" : "bg-danger-bg"}
+                iconColor={sysHealth?.services?.database?.ok ? "text-success" : "text-danger"}
+              />
+              <KpiCard
+                title={text("DB Pool","حوض الاتصالات")}
+                value={sysHealth?.services?.database?.pool ? `${sysHealth.services.database.pool.totalCount}/${sysHealth.services.database.pool.idleCount}` : "—"}
+                sub={text("Total / Idle","إجمالي / خامل")}
+                icon={Activity} iconBg="bg-info-bg" iconColor="text-info"
+              />
+              <KpiCard
+                title={text("SSE Clients","عملاء الأحداث المباشرة")}
+                value={sysHealth?.services?.sse?.activeClients ?? "—"}
+                sub={text("Live event streams","بث الأحداث المباشر")}
+                icon={Radio} iconBg="bg-violet-100" iconColor="text-violet-600"
+              />
+            </div>
+
+            {/* Service detail cards */}
+            <div className="grid grid-cols-3 gap-4">
+              {/* Database */}
+              <Card>
+                <CardHeader><Database className="w-4 h-4 text-primary"/><CardTitle>{text("Database","قاعدة البيانات")}</CardTitle>
+                  <span className={`ms-auto text-[11px] font-bold px-2 py-0.5 rounded-full ${sysHealth?.services?.database?.ok ? "bg-success-bg text-success" : "bg-danger-bg text-danger"}`}>
+                    {sysHealth?.services?.database?.ok ? "ONLINE" : "OFFLINE"}
+                  </span>
+                </CardHeader>
+                <CardBody className="space-y-2 text-sm">
+                  {[
+                    [text("Latency","زمن الاستجابة"), `${sysHealth?.services?.database?.latencyMs ?? "—"}ms`],
+                    [text("Threshold","الحد الأقصى"), `${sysHealth?.services?.database?.thresholdMs ?? "—"}ms`],
+                    [text("Total connections","إجمالي الاتصالات"), sysHealth?.services?.database?.pool?.totalCount ?? "—"],
+                    [text("Idle connections","الاتصالات الخاملة"), sysHealth?.services?.database?.pool?.idleCount ?? "—"],
+                    [text("Waiting","في الانتظار"), sysHealth?.services?.database?.pool?.waitingCount ?? "—"],
+                  ].map(([k,v])=>(
+                    <div key={String(k)} className="flex justify-between text-[13px]">
+                      <span className="text-muted-foreground">{k}</span>
+                      <span className="font-medium text-foreground font-mono">{v}</span>
+                    </div>
+                  ))}
+                </CardBody>
+              </Card>
+
+              {/* Audit */}
+              <Card>
+                <CardHeader><Shield className="w-4 h-4 text-info"/><CardTitle>{text("Audit Engine","محرك التدقيق")}</CardTitle>
+                  <span className="ms-auto text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-bg text-success">LOGGING</span>
+                </CardHeader>
+                <CardBody className="space-y-2 text-sm">
+                  {[
+                    [text("Total records","إجمالي السجلات"), sysHealth?.services?.audit?.totalRecords ?? "—"],
+                    [text("Last hour","آخر ساعة"), sysHealth?.services?.audit?.lastHour ?? "—"],
+                    [text("Last 24h","آخر 24 ساعة"), sysHealth?.services?.audit?.last24h ?? "—"],
+                    [text("Integrity hash","تجزئة النزاهة"), sysHealth?.services?.audit?.latestChainHash ? `${sysHealth.services.audit.latestChainHash.slice(0,8)}…` : "—"],
+                  ].map(([k,v])=>(
+                    <div key={String(k)} className="flex justify-between text-[13px]">
+                      <span className="text-muted-foreground">{k}</span>
+                      <span className="font-medium text-foreground font-mono">{v}</span>
+                    </div>
+                  ))}
+                </CardBody>
+              </Card>
+
+              {/* SSE */}
+              <Card>
+                <CardHeader><Radio className="w-4 h-4 text-violet-600"/><CardTitle>{text("Real-time Events","الأحداث المباشرة")}</CardTitle>
+                  <span className="ms-auto text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">LIVE</span>
+                </CardHeader>
+                <CardBody className="space-y-2 text-sm">
+                  {[
+                    [text("Active streams","البث النشط"), sysHealth?.services?.sse?.activeClients ?? "—"],
+                    [text("Total connected","إجمالي المتصلين"), sysHealth?.services?.sse?.totalConnected ?? "—"],
+                    [text("Server uptime","وقت تشغيل الخادم"), sysHealth ? `${Math.floor((sysHealth.uptimeSeconds ?? 0) / 60)} min` : "—"],
+                    [text("Drain mode","وضع الاستنزاف"), sysHealth?.draining ? text("ACTIVE","نشط") : text("OFF","معطّل")],
+                  ].map(([k,v])=>(
+                    <div key={String(k)} className="flex justify-between text-[13px]">
+                      <span className="text-muted-foreground">{k}</span>
+                      <span className="font-medium text-foreground font-mono">{v}</span>
+                    </div>
+                  ))}
+                </CardBody>
+              </Card>
+            </div>
+
+            {!sysHealth && (
+              <Card><CardBody className="py-10 text-center text-muted-foreground text-sm">{text("Loading system health…","جاري تحميل بيانات صحة النظام…")}</CardBody></Card>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ── AI Governance ─────────────────────────────────────── */}
+        <TabsContent value="ai-gov">
+          {(() => {
+            const intel = intelligence as Record<string, any> | undefined;
+            const urgency = intel?.urgencyBreakdown ?? {};
+            const insights = intel?.policyInsights ?? [];
+            const sysFlags = intel?.systemHealth ?? {};
+            const total = intel?.totalDecisions ?? 0;
+            const confidence = intel?.avgAiConfidence ?? 0;
+            const critPts = intel?.criticalPatients ?? 0;
+            const todayDec = intel?.aiDecisionsToday ?? 0;
+            return (
+              <div className="space-y-5">
+                {/* KPI row */}
+                <div className="grid grid-cols-4 gap-4">
+                  <KpiCard title={text("Total AI Decisions","إجمالي قرارات الذكاء")} value={total.toLocaleString()} sub={text("All time","منذ البداية")} icon={Brain} iconBg="bg-violet-100" iconColor="text-violet-600" />
+                  <KpiCard title={text("Decisions Today","قرارات اليوم")} value={todayDec.toLocaleString()} sub={text("Since midnight","منذ منتصف الليل")} icon={Clock} iconBg="bg-info-bg" iconColor="text-info" />
+                  <KpiCard title={text("Avg Confidence","متوسط الثقة")} value={`${confidence}%`} sub={text("AI model performance","أداء نموذج الذكاء")} icon={Target} iconBg="bg-success-bg" iconColor="text-success" />
+                  <KpiCard title={text("Critical Patients","المرضى الحرجون")} value={critPts.toLocaleString()} sub={text("Score ≥ 70 — immediate action","نتيجة ≥ 70 — تدخل فوري")} icon={AlertTriangle} iconBg="bg-danger-bg" iconColor="text-danger" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Urgency breakdown */}
+                  <Card>
+                    <CardHeader><Zap className="w-4 h-4 text-warning"/><CardTitle>{text("Decision Urgency Breakdown","توزيع إلحاحية القرارات")}</CardTitle></CardHeader>
+                    <CardBody className="space-y-3">
+                      {[
+                        { key:"immediate", label:text("Immediate","فوري"),   cls:"bg-danger-bg border-danger/20 text-danger" },
+                        { key:"urgent",    label:text("Urgent","عاجل"),       cls:"bg-warning-bg border-warning/20 text-warning" },
+                        { key:"soon",      label:text("Soon","قريباً"),       cls:"bg-info-bg border-info/20 text-info" },
+                        { key:"routine",   label:text("Routine","روتيني"),    cls:"bg-success-bg border-success/20 text-success" },
+                      ].map(({key,label,cls})=>{
+                        const val = urgency[key] ?? 0;
+                        const pct = total > 0 ? Math.round(val/total*100) : 0;
+                        return (
+                          <div key={key} className={`flex items-center justify-between rounded-xl border px-4 py-3 ${cls}`}>
+                            <span className="text-sm font-medium">{label}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-muted-foreground">{pct}%</span>
+                              <span className="text-lg font-bold">{val}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </CardBody>
+                  </Card>
+
+                  {/* System health flags + policy insights */}
+                  <div className="space-y-4">
+                    <Card>
+                      <CardHeader><Server className="w-4 h-4 text-primary"/><CardTitle>{text("Engine Status","حالة المحركات")}</CardTitle></CardHeader>
+                      <CardBody className="space-y-2">
+                        {[
+                          [text("Decision Engine","محرك القرار"), sysFlags.decisionEngine ?? "—"],
+                          [text("Data Fabric","نسيج البيانات"), sysFlags.dataFabric ?? "—"],
+                          [text("Audit Trail","مسار التدقيق"), sysFlags.auditTrail ?? "—"],
+                        ].map(([k,v])=>(
+                          <div key={String(k)} className="flex justify-between text-[13px]">
+                            <span className="text-muted-foreground">{k}</span>
+                            <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded-full ${String(v)==="operational"||String(v)==="connected"||String(v)==="logging" ? "bg-success-bg text-success" : "bg-secondary text-muted-foreground"}`}>{v}</span>
+                          </div>
+                        ))}
+                      </CardBody>
+                    </Card>
+
+                    <Card>
+                      <CardHeader><Lightbulb className="w-4 h-4 text-warning"/><CardTitle>{text("Policy Insights","رؤى السياسة الصحية")}</CardTitle></CardHeader>
+                      <CardBody className="space-y-2">
+                        {insights.slice(0,3).map((ins: any, i: number)=>(
+                          <div key={i} className="text-[13px] border-b border-border last:border-0 pb-2 last:pb-0">
+                            <div className="flex items-start gap-2">
+                              <span className={`shrink-0 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded mt-0.5 ${ins.priority==="high"?"bg-danger-bg text-danger":ins.priority==="medium"?"bg-warning-bg text-warning":"bg-secondary text-muted-foreground"}`}>{ins.priority}</span>
+                              <p className="text-foreground leading-snug">{ins.insight}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </CardBody>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </TabsContent>
+
+        {/* ── User Registry ─────────────────────────────────────── */}
+        <TabsContent value="users">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-bold text-foreground">{text("Platform User Registry","سجل مستخدمي المنصة")}</p>
+                <p className="text-sm text-muted-foreground mt-0.5">{text("12 registered accounts · Demo environment","12 حساب مسجّل · بيئة العرض")}</p>
+              </div>
+              <span className="text-xs bg-warning-bg text-warning border border-warning/20 px-3 py-1.5 rounded-xl font-medium">{text("Demo Mode — changes are local only","وضع العرض — التغييرات محلية فقط")}</span>
+            </div>
+
+            <Card>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-secondary/40">
+                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Name","الاسم")}</th>
+                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Username","اسم المستخدم")}</th>
+                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Role","الدور")}</th>
+                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3 hidden md:table-cell">{text("Organization","المنظمة")}</th>
+                      <th className="text-center text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Status","الحالة")}</th>
+                      <th className="text-center text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Actions","الإجراءات")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {DEMO_USERS.map(u => {
+                      const badge = ROLE_BADGE[u.role] ?? { label: u.role, cls: "bg-secondary text-muted-foreground" };
+                      const enabled = userEnabled[u.id] ?? true;
+                      return (
+                        <tr key={u.id} className={`border-b border-border last:border-0 transition-colors ${!enabled ? "opacity-50" : "hover:bg-secondary/30"}`}>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                                <UserCheck className="w-4 h-4 text-primary"/>
+                              </div>
+                              <div>
+                                <p className="font-medium text-foreground text-[13px]">{u.name}</p>
+                                <p className="text-[11px] text-muted-foreground">{u.title}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 font-mono text-[12px] text-muted-foreground" dir="ltr">{u.username}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-[11px] font-bold px-2 py-1 rounded-lg ${badge.cls}`}>{badge.label}</span>
+                          </td>
+                          <td className="px-4 py-3 text-[12px] text-muted-foreground hidden md:table-cell">{u.org}</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${enabled ? "bg-success-bg text-success" : "bg-secondary text-muted-foreground"}`}>
+                              {enabled ? text("Active","نشط") : text("Disabled","معطّل")}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => setUserEnabled(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
+                              className={`text-[12px] font-medium px-3 py-1 rounded-lg border transition-colors ${enabled ? "border-danger/30 text-danger hover:bg-danger-bg" : "border-success/30 text-success hover:bg-success-bg"}`}
+                            >
+                              {enabled ? text("Disable","تعطيل") : text("Enable","تفعيل")}
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+
+            <p className="text-[11px] text-muted-foreground">{text("User management requires a production identity provider integration (LDAP / SAML / OAuth). Demo controls are UI-only.","إدارة المستخدمين تتطلب تكاملاً مع مزود الهوية (LDAP / SAML / OAuth). عناصر التحكم في العرض لأغراض واجهة المستخدم فقط.")}</p>
+          </div>
+        </TabsContent>
+
+        {/* ── Maintenance ───────────────────────────────────────── */}
+        <TabsContent value="maintenance">
+          <div className="grid grid-cols-2 gap-5">
+            {/* Reset Demo */}
+            <Card>
+              <CardHeader><RefreshCw className="w-4 h-4 text-warning"/><CardTitle>{text("Demo Environment","بيئة العرض")}</CardTitle></CardHeader>
+              <CardBody className="space-y-3">
+                <p className="text-sm text-muted-foreground">{text("Truncates all tables and re-seeds the Al-Ghamdi 7-scenario demo dataset. Takes ~20 seconds.","يحذف جميع البيانات ويعيد تهيئة مجموعة البيانات التجريبية. يستغرق ~20 ثانية.")}</p>
+                <ul className="text-[12px] text-muted-foreground space-y-1">
+                  <li>• {text("Restores 12 demo patients","يستعيد 12 مريضاً تجريبياً")}</li>
+                  <li>• {text("Resets 7 clinical scenarios","يعيد ضبط 7 سيناريوهات سريرية")}</li>
+                  <li>• {text("Clears manually added records","يحذف السجلات المضافة يدوياً")}</li>
+                  <li>• {text("Blocked in production","محظور في بيئة الإنتاج")}</li>
+                </ul>
+                <button onClick={() => { setShowResetModal(true); setResetState("idle"); setResetMsg(""); }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-warning text-white font-bold text-sm hover:bg-warning/90 transition-colors">
+                  <RefreshCw className="w-4 h-4"/>
+                  {text("Reset Demo Environment","إعادة تعيين بيئة العرض")}
+                </button>
+              </CardBody>
+            </Card>
+
+            {/* Export Audit Logs */}
+            <Card>
+              <CardHeader><Download className="w-4 h-4 text-info"/><CardTitle>{text("Audit Log Export","تصدير سجل التدقيق")}</CardTitle></CardHeader>
+              <CardBody className="space-y-3">
+                <p className="text-sm text-muted-foreground">{text("Downloads the complete Isnād audit chain as a CSV file. Up to 5,000 most recent entries.","تنزيل سلسلة التدقيق الكاملة كملف CSV. حتى 5000 إدخال حديث.")}</p>
+                <ul className="text-[12px] text-muted-foreground space-y-1">
+                  <li>• {text("Includes: action, role, patient, timestamp","يشمل: الإجراء، الدور، المريض، التوقيت")}</li>
+                  <li>• {text("Format: CSV (UTF-8)","الصيغة: CSV (UTF-8)")}</li>
+                  <li>• {text("Suitable for compliance review","مناسب لمراجعة الامتثال")}</li>
+                </ul>
+                <button onClick={handleExportLogs} disabled={exportingLogs}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-info text-white font-bold text-sm hover:bg-info/90 transition-colors disabled:opacity-60">
+                  <Download className="w-4 h-4"/>
+                  {exportingLogs ? text("Exporting…","جاري التصدير…") : text("Export Audit Logs (.csv)","تصدير سجل التدقيق (.csv)")}
+                </button>
+              </CardBody>
+            </Card>
+
+            {/* System Info */}
+            <Card className="col-span-2">
+              <CardHeader><Wrench className="w-4 h-4 text-muted-foreground"/><CardTitle>{text("System Information","معلومات النظام")}</CardTitle></CardHeader>
+              <CardBody>
+                <div className="grid grid-cols-4 gap-6">
+                  {[
+                    [text("API Version","إصدار الـ API"), sysHealth?.version ?? "—"],
+                    [text("Build SHA","رقم البناء"), (sysHealth?.buildSha ?? "—").slice(0,8)],
+                    [text("Migration","نسخة المخطط"), sysHealth?.migrationVersion ?? "—"],
+                    [text("Environment","البيئة"), process?.env?.NODE_ENV ?? "development"],
+                  ].map(([k,v])=>(
+                    <div key={String(k)}>
+                      <p className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wide">{k}</p>
+                      <p className="font-mono text-sm font-bold text-foreground">{v}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="audit">
