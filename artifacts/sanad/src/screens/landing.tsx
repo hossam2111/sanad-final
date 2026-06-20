@@ -341,8 +341,8 @@ function Hero() {
           <Reveal delay={0.16}>
             <p className="mx-auto mb-10 max-w-[640px] text-[16px] leading-relaxed text-white/60 lg:text-[17px]">
               {text(
-                "In scholarly tradition, a 'sanad' is the unbroken chain of transmission that makes knowledge trustworthy. SANAD Health applies this to medicine, connecting every hospital, clinic, and pharmacy into one sovereign intelligence layer — where every clinical event becomes a decision, and every decision carries its evidence.",
-                "في التراث العلمي، «السند» هو سلسلة الرواية المتصلة التي تجعل المعرفة جديرة بالثقة. تطبّق منظومة سند هذا المبدأ في الرعاية الصحية، فتربط كل مستشفى وعيادة وصيدلية في طبقة ذكاء سيادية واحدة — حيث يتحوّل كل حدث سريري إلى قرار، ويحمل كل قرارٍ إسناده الخاص.",
+                "In a critical moment, missing information isn't just a gap — it's a risk. An unknown allergy. A medication no one can verify. A file that exists somewhere else. A decision made in the dark. SANAD is the national backbone that ensures every doctor, every paramedic, every pharmacist knows what they need — exactly when they need it.",
+                "في لحظة الأزمة، المعلومة الناقصة ليست مجرد نقص — إنها خطر. حساسية مجهولة. دواء لا يعرفه المسعف. ملف في مستشفى آخر. وقرار طبي يُتّخذ في فراغ. سند هي المنظومة الوطنية التي تضمن أن كل طبيب وكل مسعف وكل صيدلي يعرف ما يحتاجه — في اللحظة التي يحتاجه فيها.",
               )}
             </p>
           </Reveal>
@@ -699,8 +699,8 @@ function Trust() {
         <Reveal delay={0.15}>
           <p className="text-[14px] leading-relaxed text-white/55">
             {text(
-              "In the scholarly tradition, a sanad is the chain of transmission that makes knowledge trustworthy. SANAD gives every clinical decision its own — provenance, reasoning and attribution, recorded immutably. We call it the Isnād.",
-              "في التراث العلمي، السند هو سلسلة الرواية التي تجعل المعرفة جديرة بالثقة. وتمنح سند كل قرار سريري سندَه الخاص — إسنادًا وتعليلًا ونسبةً، مسجَّلة بصورة غير قابلة للتغيير. ونسمّيه الإسناد.",
+              "SANAD doesn't make decisions for clinicians. It ensures no decision is ever made without real ground to stand on. Every action recorded. Every decision justified. Every patient protected.",
+              "سند لا تتخذ القرار بدلًا عن الطبيب — لكنها تضمن ألّا يُتّخذ قرار في فراغ. كل إجراء مسجَّل. كل قرار مبرَّر. كل مريض محمي.",
             )}
           </p>
         </Reveal>
