@@ -148,6 +148,14 @@ export default function DoctorDashboard() {
   const [regAllergyInput, setRegAllergyInput] = useState("");
   const [regLoading, setRegLoading] = useState(false);
   const [regError, setRegError] = useState("");
+  const [wizardStep, setWizardStep] = useState<1|2|3>(1);
+  const [registeredPatientId, setRegisteredPatientId] = useState<number|null>(null);
+  const [medRows, setMedRows] = useState<{drugName:string;dosage:string;frequency:string}[]>([{drugName:"",dosage:"",frequency:""}]);
+  const [labRows, setLabRows] = useState<{testName:string;result:string;unit:string;referenceRange:string;status:string}[]>([{testName:"",result:"",unit:"",referenceRange:"",status:"final"}]);
+  const [step2Loading, setStep2Loading] = useState(false);
+  const [step2Error, setStep2Error] = useState("");
+  const [aiResult, setAiResult] = useState<{riskScore:number;riskLevel:string;urgency:string;primaryAction:string;whyFactors:string[];recommendations:string[];}|null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
   const [narrativeText, setNarrativeText] = useState("");
   const [narrativeProvider, setNarrativeProvider] = useState("");
   const [narrativeLoading, setNarrativeLoading] = useState(false);
@@ -272,6 +280,26 @@ export default function DoctorDashboard() {
     window.print();
   }, []);
 
+  const closeWizard = () => {
+    setShowRegisterModal(false);
+    setWizardStep(1);
+    setRegisteredPatientId(null);
+    setMedRows([{drugName:"",dosage:"",frequency:""}]);
+    setLabRows([{testName:"",result:"",unit:"",referenceRange:"",status:"final"}]);
+    setAiResult(null);
+    setStep2Error("");
+    setRegError("");
+    setRegForm({ nationalId: "", fullName: "", dateOfBirth: "", gender: "male", bloodType: "O+", phone: "", chronicConditions: [], allergies: [] });
+  };
+
+  const finishWizard = () => {
+    setSearchId(regForm.nationalId);
+    setSearchQuery(regForm.fullName);
+    setPatientId(regForm.nationalId);
+    setActiveTab("overview");
+    closeWizard();
+  };
+
   const handleRegisterPatient = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegError("");
@@ -285,16 +313,55 @@ export default function DoctorDashboard() {
       });
       const data = await res.json();
       if (!res.ok) { setRegError(data.message ?? text("Registration failed", "فشل التسجيل")); return; }
-      setShowRegisterModal(false);
-      setSearchId(regForm.nationalId);
-      setSearchQuery(regForm.fullName);
-      setPatientId(regForm.nationalId);
-      setActiveTab("overview");
-      setRegForm({ nationalId: "", fullName: "", dateOfBirth: "", gender: "male", bloodType: "O+", phone: "", chronicConditions: [], allergies: [] });
+      setRegisteredPatientId(data.id);
+      const hasT2DM = regForm.chronicConditions.some(c => /diabetes|t2dm|سكري/i.test(c));
+      const hasHTN  = regForm.chronicConditions.some(c => /hypertension|htn|ضغط/i.test(c));
+      const suggestedMeds: {drugName:string;dosage:string;frequency:string}[] = [];
+      if (hasT2DM) suggestedMeds.push({drugName:"Metformin",dosage:"500mg",frequency:"Twice daily"});
+      if (hasHTN)  suggestedMeds.push({drugName:"Amlodipine",dosage:"5mg",frequency:"Once daily"});
+      if (hasT2DM || hasHTN) suggestedMeds.push({drugName:"Atorvastatin",dosage:"20mg",frequency:"Once daily at night"});
+      setMedRows(suggestedMeds.length > 0 ? suggestedMeds : [{drugName:"",dosage:"",frequency:""}]);
+      const suggestedLabs: {testName:string;result:string;unit:string;referenceRange:string;status:string}[] = [];
+      if (hasT2DM) suggestedLabs.push({testName:"HbA1c",result:"",unit:"%",referenceRange:"< 7.0",status:"final"});
+      suggestedLabs.push({testName:"Creatinine",result:"",unit:"mg/dL",referenceRange:"0.6 – 1.2",status:"final"});
+      if (!hasT2DM && !hasHTN) suggestedLabs.push({testName:"",result:"",unit:"",referenceRange:"",status:"final"});
+      setLabRows(suggestedLabs);
+      setWizardStep(2);
     } catch {
       setRegError(text("Network error", "خطأ في الاتصال"));
     } finally {
       setRegLoading(false);
+    }
+  };
+
+  const handleStep2Submit = async () => {
+    setStep2Error("");
+    setStep2Loading(true);
+    try {
+      const filledMeds = medRows.filter(m => m.drugName.trim());
+      const filledLabs = labRows.filter(l => l.testName.trim() && l.result.trim());
+      await Promise.all([
+        ...filledMeds.map(m => apiFetch("/api/medications", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ patientId: registeredPatientId, drugName: m.drugName, dosage: m.dosage, frequency: m.frequency, status: "active" }),
+        })),
+        ...filledLabs.map(l => apiFetch("/api/lab-results", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ patientId: registeredPatientId, testName: l.testName, result: l.result, unit: l.unit, referenceRange: l.referenceRange, status: l.status, testDate: new Date().toISOString().split("T")[0] }),
+        })),
+      ]);
+      setWizardStep(3);
+      setAiLoading(true);
+      try {
+        const aiRes = await apiFetch(`/api/ai/decision/${registeredPatientId}`);
+        const aiData = await aiRes.json();
+        setAiResult(aiData);
+      } catch { /* AI failed silently — patient was still saved */ }
+      finally { setAiLoading(false); }
+    } catch {
+      setStep2Error(text("Failed to save some data. Check your entries.", "فشل حفظ بعض البيانات. راجع المدخلات."));
+    } finally {
+      setStep2Loading(false);
     }
   };
 
@@ -544,91 +611,235 @@ export default function DoctorDashboard() {
       </div>
 
       {showRegisterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowRegisterModal(false)}>
-          <div className="bg-card rounded-2xl border border-border w-full max-w-lg shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeWizard}>
+          <div className="bg-card rounded-2xl border border-border w-full max-w-xl shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2">
                 <UserPlus className="w-5 h-5 text-primary" />
                 <span className="font-bold text-foreground">{text("Register New Patient", "تسجيل مريض جديد")}</span>
               </div>
-              <button onClick={() => setShowRegisterModal(false)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+              <button onClick={closeWizard} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
             </div>
-            <form onSubmit={handleRegisterPatient} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("National ID (10 digits)", "رقم الهوية (10 أرقام)")}</label>
-                  <Input value={regForm.nationalId} onChange={e => setRegForm(f=>({...f,nationalId:e.target.value}))} placeholder="1000000051" maxLength={10} required dir="ltr" />
-                </div>
-                <div className="col-span-2">
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Full Name", "الاسم الكامل")}</label>
-                  <Input value={regForm.fullName} onChange={e => setRegForm(f=>({...f,fullName:e.target.value}))} placeholder={text("Ahmed Al-Ghamdi","أحمد الغامدي")} required />
+
+            {/* Step indicator */}
+            <div className="flex items-center gap-0 px-6 pt-4 pb-2 shrink-0">
+              {([
+                {n:1, label: text("Patient Info","بيانات المريض")},
+                {n:2, label: text("Clinical Data","البيانات السريرية")},
+                {n:3, label: text("AI Assessment","تقييم الذكاء")},
+              ] as {n:1|2|3; label:string}[]).map(({n, label}, idx) => (
+                <React.Fragment key={n}>
+                  <div className="flex flex-col items-center gap-1">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold transition-colors ${wizardStep === n ? "bg-primary text-primary-foreground" : wizardStep > n ? "bg-success text-white" : "bg-secondary text-muted-foreground"}`}>{wizardStep > n ? "✓" : n}</div>
+                    <span className={`text-[11px] font-medium whitespace-nowrap ${wizardStep === n ? "text-primary" : "text-muted-foreground"}`}>{label}</span>
+                  </div>
+                  {idx < 2 && <div className={`flex-1 h-0.5 mb-3 mx-2 ${wizardStep > n ? "bg-success" : "bg-border"}`} />}
+                </React.Fragment>
+              ))}
+            </div>
+
+            {/* Step 1 — Patient Info */}
+            {wizardStep === 1 && (
+              <form onSubmit={handleRegisterPatient} className="p-6 space-y-4 overflow-y-auto">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                    <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("National ID (10 digits)", "رقم الهوية (10 أرقام)")}</label>
+                    <Input value={regForm.nationalId} onChange={e => setRegForm(f=>({...f,nationalId:e.target.value}))} placeholder="1000000051" maxLength={10} required dir="ltr" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Full Name", "الاسم الكامل")}</label>
+                    <Input value={regForm.fullName} onChange={e => setRegForm(f=>({...f,fullName:e.target.value}))} placeholder={text("Ahmed Al-Ghamdi","أحمد الغامدي")} required />
+                  </div>
+                  <div>
+                    <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Date of Birth","تاريخ الميلاد")}</label>
+                    <Input type="date" value={regForm.dateOfBirth} onChange={e => setRegForm(f=>({...f,dateOfBirth:e.target.value}))} required />
+                  </div>
+                  <div>
+                    <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Gender","الجنس")}</label>
+                    <Select value={regForm.gender} onChange={e => setRegForm(f=>({...f,gender:e.target.value as "male"|"female"}))}>
+                      <option value="male">{text("Male","ذكر")}</option>
+                      <option value="female">{text("Female","أنثى")}</option>
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Blood Type","فصيلة الدم")}</label>
+                    <Select value={regForm.bloodType} onChange={e => setRegForm(f=>({...f,bloodType:e.target.value}))}>
+                      {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(b=><option key={b} value={b}>{b}</option>)}
+                    </Select>
+                  </div>
+                  <div>
+                    <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Phone (optional)","الجوال (اختياري)")}</label>
+                    <Input value={regForm.phone} onChange={e => setRegForm(f=>({...f,phone:e.target.value}))} placeholder="+966 5x xxx xxxx" dir="ltr" />
+                  </div>
                 </div>
                 <div>
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Date of Birth","تاريخ الميلاد")}</label>
-                  <Input type="date" value={regForm.dateOfBirth} onChange={e => setRegForm(f=>({...f,dateOfBirth:e.target.value}))} required />
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Chronic Conditions","الأمراض المزمنة")}</label>
+                  <div className="flex gap-2 mb-2">
+                    <Input value={regCondInput} onChange={e=>setRegCondInput(e.target.value)} placeholder={text("e.g. T2DM, Hypertension","مثال: السكري، الضغط")}
+                      onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();if(regCondInput.trim()){setRegForm(f=>({...f,chronicConditions:[...f.chronicConditions,regCondInput.trim()]}));setRegCondInput("");}}}} />
+                    <button type="button" onClick={()=>{if(regCondInput.trim()){setRegForm(f=>({...f,chronicConditions:[...f.chronicConditions,regCondInput.trim()]}));setRegCondInput("");}}}
+                      className="px-3 py-2 rounded-xl bg-secondary border border-border hover:bg-border transition-colors"><Plus className="w-4 h-4"/></button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {regForm.chronicConditions.map((c,i)=>(
+                      <span key={i} className="flex items-center gap-1 px-2 py-1 bg-warning-bg text-warning rounded-lg text-[12px] font-medium">
+                        {c}<button type="button" onClick={()=>setRegForm(f=>({...f,chronicConditions:f.chronicConditions.filter((_,j)=>j!==i)}))}><X className="w-3 h-3"/></button></span>
+                    ))}
+                  </div>
                 </div>
                 <div>
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Gender","الجنس")}</label>
-                  <Select value={regForm.gender} onChange={e => setRegForm(f=>({...f,gender:e.target.value as "male"|"female"}))}>
-                    <option value="male">{text("Male","ذكر")}</option>
-                    <option value="female">{text("Female","أنثى")}</option>
-                  </Select>
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Allergies","الحساسية")}</label>
+                  <div className="flex gap-2 mb-2">
+                    <Input value={regAllergyInput} onChange={e=>setRegAllergyInput(e.target.value)} placeholder={text("e.g. Penicillin","مثال: بنسيلين")}
+                      onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();if(regAllergyInput.trim()){setRegForm(f=>({...f,allergies:[...f.allergies,regAllergyInput.trim()]}));setRegAllergyInput("");}}}} />
+                    <button type="button" onClick={()=>{if(regAllergyInput.trim()){setRegForm(f=>({...f,allergies:[...f.allergies,regAllergyInput.trim()]}));setRegAllergyInput("");}}}
+                      className="px-3 py-2 rounded-xl bg-secondary border border-border hover:bg-border transition-colors"><Plus className="w-4 h-4"/></button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {regForm.allergies.map((a,i)=>(
+                      <span key={i} className="flex items-center gap-1 px-2 py-1 bg-danger-bg text-danger rounded-lg text-[12px] font-medium">
+                        {a}<button type="button" onClick={()=>setRegForm(f=>({...f,allergies:f.allergies.filter((_,j)=>j!==i)}))}><X className="w-3 h-3"/></button></span>
+                    ))}
+                  </div>
                 </div>
+                {regError && <p className="text-[13px] text-danger bg-danger-bg px-3 py-2 rounded-xl">{regError}</p>}
+                <div className="flex gap-2 pt-2">
+                  <Button type="button" variant="outline" className="flex-1" onClick={closeWizard}>{text("Cancel","إلغاء")}</Button>
+                  <Button type="submit" className="flex-1" disabled={regLoading}>
+                    {regLoading ? text("Registering...","جاري التسجيل...") : text("Next: Clinical Data →","التالي: البيانات السريرية ←")}
+                  </Button>
+                </div>
+              </form>
+            )}
+
+            {/* Step 2 — Medications + Labs */}
+            {wizardStep === 2 && (
+              <div className="p-6 space-y-5 overflow-y-auto">
+                {/* Medications */}
                 <div>
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Blood Type","فصيلة الدم")}</label>
-                  <Select value={regForm.bloodType} onChange={e => setRegForm(f=>({...f,bloodType:e.target.value}))}>
-                    {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(b=><option key={b} value={b}>{b}</option>)}
-                  </Select>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[13px] font-semibold text-foreground flex items-center gap-1.5"><Pill className="w-4 h-4 text-primary"/>{text("Medications","الأدوية")}</label>
+                    <button type="button" onClick={()=>setMedRows(r=>[...r,{drugName:"",dosage:"",frequency:""}])}
+                      className="flex items-center gap-1 text-[12px] text-primary hover:underline"><Plus className="w-3.5 h-3.5"/>{text("Add","إضافة")}</button>
+                  </div>
+                  <div className="space-y-2">
+                    {medRows.map((m,i)=>(
+                      <div key={i} className="grid grid-cols-[1fr_100px_110px_28px] gap-1.5 items-center">
+                        <Input value={m.drugName} onChange={e=>setMedRows(r=>r.map((x,j)=>j===i?{...x,drugName:e.target.value}:x))} placeholder={text("Drug name","اسم الدواء")} />
+                        <Input value={m.dosage} onChange={e=>setMedRows(r=>r.map((x,j)=>j===i?{...x,dosage:e.target.value}:x))} placeholder={text("Dose","الجرعة")} dir="ltr" />
+                        <Input value={m.frequency} onChange={e=>setMedRows(r=>r.map((x,j)=>j===i?{...x,frequency:e.target.value}:x))} placeholder={text("Frequency","التكرار")} dir="ltr" />
+                        <button type="button" onClick={()=>setMedRows(r=>r.filter((_,j)=>j!==i))} className="text-muted-foreground hover:text-danger"><X className="w-4 h-4"/></button>
+                      </div>
+                    ))}
+                  </div>
+                  {medRows.length === 0 && <p className="text-[12px] text-muted-foreground mt-1">{text("No medications — click Add","لا أدوية — انقر إضافة")}</p>}
                 </div>
+
+                {/* Lab Results */}
                 <div>
-                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Phone (optional)","الجوال (اختياري)")}</label>
-                  <Input value={regForm.phone} onChange={e => setRegForm(f=>({...f,phone:e.target.value}))} placeholder="+966 5x xxx xxxx" dir="ltr" />
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-[13px] font-semibold text-foreground flex items-center gap-1.5"><FlaskConical className="w-4 h-4 text-info"/>{text("Initial Lab Results","نتائج المختبر الأولية")}</label>
+                    <button type="button" onClick={()=>setLabRows(r=>[...r,{testName:"",result:"",unit:"",referenceRange:"",status:"final"}])}
+                      className="flex items-center gap-1 text-[12px] text-primary hover:underline"><Plus className="w-3.5 h-3.5"/>{text("Add","إضافة")}</button>
+                  </div>
+                  <div className="space-y-2">
+                    {labRows.map((l,i)=>(
+                      <div key={i} className="grid grid-cols-[1fr_80px_60px_80px_28px] gap-1.5 items-center">
+                        <Input value={l.testName} onChange={e=>setLabRows(r=>r.map((x,j)=>j===i?{...x,testName:e.target.value}:x))} placeholder={text("Test name","اسم التحليل")} />
+                        <Input value={l.result} onChange={e=>setLabRows(r=>r.map((x,j)=>j===i?{...x,result:e.target.value}:x))} placeholder={text("Result","النتيجة")} dir="ltr" />
+                        <Input value={l.unit} onChange={e=>setLabRows(r=>r.map((x,j)=>j===i?{...x,unit:e.target.value}:x))} placeholder="unit" dir="ltr" />
+                        <Input value={l.referenceRange} onChange={e=>setLabRows(r=>r.map((x,j)=>j===i?{...x,referenceRange:e.target.value}:x))} placeholder="ref range" dir="ltr" />
+                        <button type="button" onClick={()=>setLabRows(r=>r.filter((_,j)=>j!==i))} className="text-muted-foreground hover:text-danger"><X className="w-4 h-4"/></button>
+                      </div>
+                    ))}
+                  </div>
+                  {labRows.length === 0 && <p className="text-[12px] text-muted-foreground mt-1">{text("No labs — click Add","لا نتائج — انقر إضافة")}</p>}
+                  <p className="text-[11px] text-muted-foreground mt-2">{text("Only filled rows will be saved. Empty rows are skipped.","الصفوف الفارغة لن تُحفظ.")}</p>
+                </div>
+
+                {step2Error && <p className="text-[13px] text-danger bg-danger-bg px-3 py-2 rounded-xl">{step2Error}</p>}
+
+                <div className="flex gap-2 pt-2">
+                  <Button type="button" variant="outline" className="flex-1" onClick={()=>setWizardStep(1)}>{text("← Back","← رجوع")}</Button>
+                  <Button type="button" className="flex-1" disabled={step2Loading} onClick={handleStep2Submit}>
+                    {step2Loading ? text("Saving & Analyzing...","جاري الحفظ والتحليل...") : text("Next: AI Assessment →","التالي: تقييم الذكاء ←")}
+                  </Button>
                 </div>
               </div>
+            )}
 
-              <div>
-                <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Chronic Conditions","الأمراض المزمنة")}</label>
-                <div className="flex gap-2 mb-2">
-                  <Input value={regCondInput} onChange={e=>setRegCondInput(e.target.value)} placeholder={text("e.g. T2DM","مثال: السكري")}
-                    onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();if(regCondInput.trim()){setRegForm(f=>({...f,chronicConditions:[...f.chronicConditions,regCondInput.trim()]}));setRegCondInput("");}}} } />
-                  <button type="button" onClick={()=>{if(regCondInput.trim()){setRegForm(f=>({...f,chronicConditions:[...f.chronicConditions,regCondInput.trim()]}));setRegCondInput("");}}}
-                    className="px-3 py-2 rounded-xl bg-secondary border border-border hover:bg-border transition-colors"><Plus className="w-4 h-4"/></button>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {regForm.chronicConditions.map((c,i)=>(
-                    <span key={i} className="flex items-center gap-1 px-2 py-1 bg-warning-bg text-warning rounded-lg text-[12px] font-medium">
-                      {c}<button type="button" onClick={()=>setRegForm(f=>({...f,chronicConditions:f.chronicConditions.filter((_,j)=>j!==i)}))}>
-                        <X className="w-3 h-3"/></button></span>
-                  ))}
+            {/* Step 3 — AI Assessment */}
+            {wizardStep === 3 && (
+              <div className="p-6 space-y-4 overflow-y-auto">
+                {aiLoading ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-3">
+                    <Brain className="w-10 h-10 text-primary animate-pulse" />
+                    <p className="text-sm text-muted-foreground">{text("Running AI decision engine…","جاري تشغيل محرك الذكاء الاصطناعي…")}</p>
+                  </div>
+                ) : aiResult ? (
+                  <div className="space-y-4">
+                    {/* Risk score hero */}
+                    <div className={`rounded-2xl p-4 border flex items-center gap-4 ${
+                      aiResult.riskLevel === "critical" ? "bg-risk-critical-bg border-risk-critical/25" :
+                      aiResult.riskLevel === "high"     ? "bg-risk-high-bg border-risk-high/25" :
+                      aiResult.riskLevel === "medium"   ? "bg-risk-medium-bg border-risk-medium/25" :
+                                                          "bg-secondary border-border"
+                    }`}>
+                      <div className="shrink-0">
+                        <RiskBadge level={aiResult.riskLevel as "critical"|"high"|"medium"|"low"} label={`${aiResult.riskScore}`} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-foreground text-sm">{aiResult.urgency}</p>
+                        <p className="text-[12px] text-muted-foreground mt-0.5">{aiResult.primaryAction}</p>
+                      </div>
+                    </div>
+
+                    {/* Why factors */}
+                    {aiResult.whyFactors?.length > 0 && (
+                      <div>
+                        <p className="text-[12px] font-semibold text-muted-foreground mb-2 uppercase tracking-wide">{text("Risk Factors","عوامل الخطر")}</p>
+                        <div className="space-y-1.5">
+                          {aiResult.whyFactors.map((f,i)=>(
+                            <div key={i} className="flex items-start gap-2 text-[13px]">
+                              <TriangleAlert className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5"/>
+                              <span className="text-foreground">{f}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recommendations */}
+                    {aiResult.recommendations?.length > 0 && (
+                      <div>
+                        <p className="text-[12px] font-semibold text-muted-foreground mb-2 uppercase tracking-wide">{text("Recommendations","التوصيات")}</p>
+                        <div className="space-y-1.5">
+                          {aiResult.recommendations.slice(0,4).map((r,i)=>(
+                            <div key={i} className="flex items-start gap-2 text-[13px]">
+                              <Lightbulb className="w-3.5 h-3.5 text-info shrink-0 mt-0.5"/>
+                              <span className="text-foreground">{r}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-10">
+                    <Brain className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">{text("AI assessment unavailable — patient was saved successfully.","تعذّر التقييم — تم حفظ المريض بنجاح.")}</p>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-2 border-t border-border">
+                  <Button type="button" variant="outline" className="flex-1" onClick={closeWizard}>{text("Close","إغلاق")}</Button>
+                  <Button type="button" className="flex-1" onClick={finishWizard}>
+                    <span className="flex items-center gap-1.5"><ArrowUpRight className="w-4 h-4"/>{text("Open Patient Record","فتح سجل المريض")}</span>
+                  </Button>
                 </div>
               </div>
-
-              <div>
-                <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Allergies","الحساسية")}</label>
-                <div className="flex gap-2 mb-2">
-                  <Input value={regAllergyInput} onChange={e=>setRegAllergyInput(e.target.value)} placeholder={text("e.g. Penicillin","مثال: بنسيلين")}
-                    onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();if(regAllergyInput.trim()){setRegForm(f=>({...f,allergies:[...f.allergies,regAllergyInput.trim()]}));setRegAllergyInput("");}}} } />
-                  <button type="button" onClick={()=>{if(regAllergyInput.trim()){setRegForm(f=>({...f,allergies:[...f.allergies,regAllergyInput.trim()]}));setRegAllergyInput("");}}}
-                    className="px-3 py-2 rounded-xl bg-secondary border border-border hover:bg-border transition-colors"><Plus className="w-4 h-4"/></button>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {regForm.allergies.map((a,i)=>(
-                    <span key={i} className="flex items-center gap-1 px-2 py-1 bg-danger-bg text-danger rounded-lg text-[12px] font-medium">
-                      {a}<button type="button" onClick={()=>setRegForm(f=>({...f,allergies:f.allergies.filter((_,j)=>j!==i)}))}>
-                        <X className="w-3 h-3"/></button></span>
-                  ))}
-                </div>
-              </div>
-
-              {regError && <p className="text-[13px] text-danger bg-danger-bg px-3 py-2 rounded-xl">{regError}</p>}
-
-              <div className="flex gap-2 pt-2">
-                <Button type="button" variant="outline" className="flex-1" onClick={()=>setShowRegisterModal(false)}>{text("Cancel","إلغاء")}</Button>
-                <Button type="submit" className="flex-1" disabled={regLoading}>
-                  {regLoading ? text("Registering...","جاري التسجيل...") : text("Register & Load","تسجيل واستدعاء")}
-                </Button>
-              </div>
-            </form>
+            )}
           </div>
         </div>
       )}
