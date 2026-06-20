@@ -5,7 +5,7 @@ import {
   User as UserIcon, Pill, FlaskConical, Building2, X, Stethoscope, CalendarDays,
   TrendingUp, TrendingDown, Minus, Brain, Bell, BellOff, CheckCheck,
   TriangleAlert, Zap, ArrowUpRight, ArrowDownRight, ChevronRight, Lightbulb,
-  Wifi, WifiOff, Sparkles, Send, RefreshCw, MessageSquare, Printer
+  Wifi, WifiOff, Sparkles, Send, RefreshCw, MessageSquare, Printer, UserPlus, Plus
 } from "lucide-react";
 import {
   LineChart, Line, ResponsiveContainer, Tooltip as RechartsTooltip,
@@ -139,6 +139,15 @@ export default function DoctorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [recordView, setRecordView] = useState<"timeline" | "medications" | "labs" | "visits">("timeline");
   const [showSsePanel, setShowSsePanel] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [regForm, setRegForm] = useState({
+    nationalId: "", fullName: "", dateOfBirth: "", gender: "male" as "male"|"female",
+    bloodType: "O+" as string, phone: "", chronicConditions: [] as string[], allergies: [] as string[],
+  });
+  const [regCondInput, setRegCondInput] = useState("");
+  const [regAllergyInput, setRegAllergyInput] = useState("");
+  const [regLoading, setRegLoading] = useState(false);
+  const [regError, setRegError] = useState("");
   const [narrativeText, setNarrativeText] = useState("");
   const [narrativeProvider, setNarrativeProvider] = useState("");
   const [narrativeLoading, setNarrativeLoading] = useState(false);
@@ -262,6 +271,32 @@ export default function DoctorDashboard() {
   const handlePrintNarrative = useCallback(() => {
     window.print();
   }, []);
+
+  const handleRegisterPatient = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegError("");
+    if (!/^\d{10}$/.test(regForm.nationalId)) { setRegError(text("National ID must be exactly 10 digits", "رقم الهوية يجب أن يكون 10 أرقام")); return; }
+    setRegLoading(true);
+    try {
+      const res = await apiFetch("/api/patients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(regForm),
+      });
+      const data = await res.json();
+      if (!res.ok) { setRegError(data.message ?? text("Registration failed", "فشل التسجيل")); return; }
+      setShowRegisterModal(false);
+      setSearchId(regForm.nationalId);
+      setSearchQuery(regForm.fullName);
+      setPatientId(regForm.nationalId);
+      setActiveTab("overview");
+      setRegForm({ nationalId: "", fullName: "", dateOfBirth: "", gender: "male", bloodType: "O+", phone: "", chronicConditions: [], allergies: [] });
+    } catch {
+      setRegError(text("Network error", "خطأ في الاتصال"));
+    } finally {
+      setRegLoading(false);
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -497,8 +532,106 @@ export default function DoctorDashboard() {
           </div>
           <Button type="submit" size="md">{text("Load", "استدعاء")}</Button>
         </form>
+        <button
+          type="button"
+          onClick={() => setShowRegisterModal(true)}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary/90 transition-colors"
+        >
+          <UserPlus className="w-4 h-4" />
+          {text("New Patient", "مريض جديد")}
+        </button>
         </div>
       </div>
+
+      {showRegisterModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowRegisterModal(false)}>
+          <div className="bg-card rounded-2xl border border-border w-full max-w-lg shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <div className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-primary" />
+                <span className="font-bold text-foreground">{text("Register New Patient", "تسجيل مريض جديد")}</span>
+              </div>
+              <button onClick={() => setShowRegisterModal(false)} className="text-muted-foreground hover:text-foreground"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={handleRegisterPatient} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("National ID (10 digits)", "رقم الهوية (10 أرقام)")}</label>
+                  <Input value={regForm.nationalId} onChange={e => setRegForm(f=>({...f,nationalId:e.target.value}))} placeholder="1000000051" maxLength={10} required dir="ltr" />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Full Name", "الاسم الكامل")}</label>
+                  <Input value={regForm.fullName} onChange={e => setRegForm(f=>({...f,fullName:e.target.value}))} placeholder={text("Ahmed Al-Ghamdi","أحمد الغامدي")} required />
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Date of Birth","تاريخ الميلاد")}</label>
+                  <Input type="date" value={regForm.dateOfBirth} onChange={e => setRegForm(f=>({...f,dateOfBirth:e.target.value}))} required />
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Gender","الجنس")}</label>
+                  <Select value={regForm.gender} onChange={e => setRegForm(f=>({...f,gender:e.target.value as "male"|"female"}))}>
+                    <option value="male">{text("Male","ذكر")}</option>
+                    <option value="female">{text("Female","أنثى")}</option>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Blood Type","فصيلة الدم")}</label>
+                  <Select value={regForm.bloodType} onChange={e => setRegForm(f=>({...f,bloodType:e.target.value}))}>
+                    {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(b=><option key={b} value={b}>{b}</option>)}
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Phone (optional)","الجوال (اختياري)")}</label>
+                  <Input value={regForm.phone} onChange={e => setRegForm(f=>({...f,phone:e.target.value}))} placeholder="+966 5x xxx xxxx" dir="ltr" />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Chronic Conditions","الأمراض المزمنة")}</label>
+                <div className="flex gap-2 mb-2">
+                  <Input value={regCondInput} onChange={e=>setRegCondInput(e.target.value)} placeholder={text("e.g. T2DM","مثال: السكري")}
+                    onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();if(regCondInput.trim()){setRegForm(f=>({...f,chronicConditions:[...f.chronicConditions,regCondInput.trim()]}));setRegCondInput("");}}} } />
+                  <button type="button" onClick={()=>{if(regCondInput.trim()){setRegForm(f=>({...f,chronicConditions:[...f.chronicConditions,regCondInput.trim()]}));setRegCondInput("");}}}
+                    className="px-3 py-2 rounded-xl bg-secondary border border-border hover:bg-border transition-colors"><Plus className="w-4 h-4"/></button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {regForm.chronicConditions.map((c,i)=>(
+                    <span key={i} className="flex items-center gap-1 px-2 py-1 bg-warning-bg text-warning rounded-lg text-[12px] font-medium">
+                      {c}<button type="button" onClick={()=>setRegForm(f=>({...f,chronicConditions:f.chronicConditions.filter((_,j)=>j!==i)}))}>
+                        <X className="w-3 h-3"/></button></span>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Allergies","الحساسية")}</label>
+                <div className="flex gap-2 mb-2">
+                  <Input value={regAllergyInput} onChange={e=>setRegAllergyInput(e.target.value)} placeholder={text("e.g. Penicillin","مثال: بنسيلين")}
+                    onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();if(regAllergyInput.trim()){setRegForm(f=>({...f,allergies:[...f.allergies,regAllergyInput.trim()]}));setRegAllergyInput("");}}} } />
+                  <button type="button" onClick={()=>{if(regAllergyInput.trim()){setRegForm(f=>({...f,allergies:[...f.allergies,regAllergyInput.trim()]}));setRegAllergyInput("");}}}
+                    className="px-3 py-2 rounded-xl bg-secondary border border-border hover:bg-border transition-colors"><Plus className="w-4 h-4"/></button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {regForm.allergies.map((a,i)=>(
+                    <span key={i} className="flex items-center gap-1 px-2 py-1 bg-danger-bg text-danger rounded-lg text-[12px] font-medium">
+                      {a}<button type="button" onClick={()=>setRegForm(f=>({...f,allergies:f.allergies.filter((_,j)=>j!==i)}))}>
+                        <X className="w-3 h-3"/></button></span>
+                  ))}
+                </div>
+              </div>
+
+              {regError && <p className="text-[13px] text-danger bg-danger-bg px-3 py-2 rounded-xl">{regError}</p>}
+
+              <div className="flex gap-2 pt-2">
+                <Button type="button" variant="outline" className="flex-1" onClick={()=>setShowRegisterModal(false)}>{text("Cancel","إلغاء")}</Button>
+                <Button type="submit" className="flex-1" disabled={regLoading}>
+                  {regLoading ? text("Registering...","جاري التسجيل...") : text("Register & Load","تسجيل واستدعاء")}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {!patientId && !isLoading && (
         <Card>
