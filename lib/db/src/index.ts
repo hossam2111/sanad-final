@@ -18,6 +18,13 @@ export const pool = new Pool({
   ssl: process.env.DB_SSL === "false" ? false : process.env.DATABASE_URL?.includes("sslmode=") ? undefined : { rejectUnauthorized: false },
 });
 
+// Without this handler, any idle-connection drop from Neon (which closes
+// connections after ~5 min inactivity in serverless mode) would emit an
+// uncaught 'error' event and crash the Node.js process.
+pool.on("error", (err) => {
+  console.error("[db-pool] idle client error (connection will be replaced):", err.message);
+});
+
 export function getDbPoolStats() {
   return {
     totalCount: pool.totalCount,

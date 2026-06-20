@@ -46,4 +46,12 @@ function gracefulShutdown(signal: string) {
 }
 
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGINT",  () => gracefulShutdown("SIGINT"));
+
+// Node 24 exits by default on unhandled rejections — log and survive instead.
+process.on("unhandledRejection", (reason) => {
+  logger.error({ reason }, "unhandledRejection — caught, server will not crash");
+});
+process.on("uncaughtException", (err) => {
+  logger.error({ err }, "uncaughtException — caught, server will not crash");
+});
