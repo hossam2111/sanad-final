@@ -388,8 +388,8 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
           <div className="flex items-start gap-3 mb-3">
             <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-success font-medium">Appointment Confirmed!</p>
-              <p className="text-xs text-success mt-0.5">Reference: <span className="font-mono font-bold">{booked.referenceNo}</span></p>
+              <p className="font-bold text-success font-medium">{text("Appointment Confirmed!", "تم تأكيد الموعد!")}</p>
+              <p className="text-xs text-success mt-0.5">{text("Reference:", "المرجع:")} <span className="font-mono font-bold">{booked.referenceNo}</span></p>
             </div>
             <button onClick={() => setBooked(null)} className="ml-auto text-muted-foreground hover:text-foreground">
               <X className="w-4 h-4" />
@@ -397,15 +397,15 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
           </div>
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div className="bg-card/70 rounded-xl p-2.5 text-center">
-              <p className="text-[9px] text-muted-foreground">Date</p>
+              <p className="text-[9px] text-muted-foreground">{text("Date", "التاريخ")}</p>
               <p className="text-xs font-bold text-foreground">{booked.date}</p>
             </div>
             <div className="bg-card/70 rounded-xl p-2.5 text-center">
-              <p className="text-[9px] text-muted-foreground">Time</p>
+              <p className="text-[9px] text-muted-foreground">{text("Time", "الوقت")}</p>
               <p className="text-xs font-bold text-foreground">{booked.time}</p>
             </div>
             <div className="bg-card/70 rounded-xl p-2.5 text-center">
-              <p className="text-[9px] text-muted-foreground">Department</p>
+              <p className="text-[9px] text-muted-foreground">{text("Department", "القسم")}</p>
               <p className="text-xs font-bold text-foreground">{booked.department}</p>
             </div>
           </div>

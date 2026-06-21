@@ -690,13 +690,13 @@ export default function AdminDashboard() {
               <table className="w-full data-table">
                 <thead>
                   <tr>
-                    <th>Region</th>
-                    <th>Population</th>
-                    <th>Total Patients</th>
-                    <th>Hospitals</th>
-                    <th>High Risk</th>
-                    <th>Risk Rate</th>
-                    <th>Network Coverage</th>
+                    <th>{text("Region", "المنطقة")}</th>
+                    <th>{text("Population", "عدد السكان")}</th>
+                    <th>{text("Total Patients", "إجمالي المرضى")}</th>
+                    <th>{text("Hospitals", "المستشفيات")}</th>
+                    <th>{text("High Risk", "خطورة مرتفعة")}</th>
+                    <th>{text("Risk Rate", "معدل الخطورة")}</th>
+                    <th>{text("Network Coverage", "تغطية الشبكة")}</th>
                   </tr>
                 </thead>
                 <tbody>

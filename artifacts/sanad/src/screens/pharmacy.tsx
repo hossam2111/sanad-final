@@ -199,10 +199,6 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
   const { text, dir, locale, toggleLocale } = useLanguage();
 
   const handlePrint = () => {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
-  
-
     const win = window.open("", "_blank");
     if (!win) return;
     win.document.write(`
@@ -235,20 +231,20 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
         <div class="ref">REF: ${receipt.refNo}</div>
         <div class="timestamp">${receipt.dispensedAt}</div>
       </div>
-      <div class="section-title">Patient Information</div>
+      <div class="section-title">${locale === "ar" ? "معلومات المريض" : "Patient Information"}</div>
       <div class="info-grid">
-        <div class="info-cell"><label>Full Name</label><p>${receipt.patient}</p></div>
-        <div class="info-cell"><label>National ID</label><p>${receipt.nationalId}</p></div>
-        <div class="info-cell"><label>Dispensed By</label><p>${receipt.pharmacist}</p></div>
-        <div class="info-cell"><label>AI Safety</label><p><span class="safe-badge ${receipt.safe ? "safe" : "warn"}">${receipt.safe ? "✓ CLEARED" : "⚠ OVERRIDE"}</span></p></div>
+        <div class="info-cell"><label>${locale === "ar" ? "الاسم الكامل" : "Full Name"}</label><p>${receipt.patient}</p></div>
+        <div class="info-cell"><label>${locale === "ar" ? "رقم الهوية" : "National ID"}</label><p>${receipt.nationalId}</p></div>
+        <div class="info-cell"><label>${locale === "ar" ? "صُرف بواسطة" : "Dispensed By"}</label><p>${receipt.pharmacist}</p></div>
+        <div class="info-cell"><label>${locale === "ar" ? "سلامة الذكاء الاصطناعي" : "AI Safety"}</label><p><span class="safe-badge ${receipt.safe ? "safe" : "warn"}">${receipt.safe ? (locale === "ar" ? "✓ مُجاز" : "✓ CLEARED") : (locale === "ar" ? "⚠ تجاوز" : "⚠ OVERRIDE")}</span></p></div>
       </div>
-      <div class="section-title">Medication Dispensed</div>
+      <div class="section-title">${locale === "ar" ? "الدواء المُصرَّف" : "Medication Dispensed"}</div>
       <div class="drug-box">
         <div class="drug-name">${receipt.drugName}</div>
         <div class="drug-detail">${receipt.dosage} · ${receipt.frequency}</div>
         ${receipt.insurance.eligible
           ? `<div class="ins-row"><span><b>${receipt.insurance.provider}</b> — ${receipt.insurance.coveragePercent}% covered</span><span>Copay: <b>SAR ${receipt.insurance.copay}</b></span></div>`
-          : `<div class="ins-row"><span>Insurance: Not eligible</span></div>`}
+          : `<div class="ins-row"><span>${locale === "ar" ? "التأمين: غير مؤهل" : "Insurance: Not eligible"}</span></div>`}
       </div>
       <div class="footer">
         <div>SANAD Pharmacy Portal · AI Safety Engine v1.5</div>
@@ -362,10 +358,6 @@ export default function PharmacyPortal() {
   });
 
   const handleSearch = (e: React.FormEvent) => {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
-  
-
     e.preventDefault();
     const id = searchId.trim();
     if (!id) return;
@@ -378,10 +370,6 @@ export default function PharmacyPortal() {
   };
 
   const handlePrintRx = () => {
-  const { text, dir, locale, toggleLocale } = useLanguage();
-
-  
-
     if (!data) return;
     const win = window.open("", "_blank");
     if (!win) return;
@@ -405,24 +393,24 @@ export default function PharmacyPortal() {
       </style></head><body>
       <div class="header"><h1>🏥 SANAD National Health Platform</h1>
         <p>Ministry of Health — Kingdom of Saudi Arabia</p>
-        <p>Active Prescription List — ${data.patient.nationalId} · ${new Date().toLocaleDateString("en-SA")}</p>
+        <p>${locale === "ar" ? "قائمة الوصفات الفعّالة" : "Active Prescription List"} — ${data.patient.nationalId} · ${new Date().toLocaleDateString("en-SA")}</p>
       </div>
-      ${data.patient.allergies?.length ? `<div class="allergy-bar">⚠ KNOWN ALLERGIES: ${data.patient.allergies.join(" · ")}</div>` : ""}
+      ${data.patient.allergies?.length ? `<div class="allergy-bar">⚠ ${locale === "ar" ? "حساسية معروفة" : "KNOWN ALLERGIES"}: ${data.patient.allergies.join(" · ")}</div>` : ""}
       <div class="patient-row">
-        <div><label>Patient Name</label><p>${data.patient.name}</p></div>
-        <div><label>National ID</label><p>${data.patient.nationalId}</p></div>
-        <div><label>Age</label><p>${data.patient.age} years</p></div>
-        <div><label>Blood Type</label><p>${data.patient.bloodType}</p></div>
+        <div><label>${locale === "ar" ? "اسم المريض" : "Patient Name"}</label><p>${data.patient.name}</p></div>
+        <div><label>${locale === "ar" ? "رقم الهوية" : "National ID"}</label><p>${data.patient.nationalId}</p></div>
+        <div><label>${locale === "ar" ? "العمر" : "Age"}</label><p>${data.patient.age} ${locale === "ar" ? "سنة" : "years"}</p></div>
+        <div><label>${locale === "ar" ? "فصيلة الدم" : "Blood Type"}</label><p>${data.patient.bloodType}</p></div>
       </div>
-      <h3 style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Active Prescriptions</h3>
+      <h3 style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">${locale === "ar" ? "الوصفات الفعّالة" : "Active Prescriptions"}</h3>
       ${(data.prescriptions || []).map((p: any) => `
         <div class="rx-item">
           <div class="rx-drug">${p.drugName}</div>
           <div class="rx-details">${p.dosage} · ${p.frequency}${p.prescribedBy ? ` · ${p.prescribedBy}` : ""}</div>
-          ${!p.dispenseCheck?.safe ? `<div class="rx-warn">⚠ AI Safety Flag: ${p.dispenseCheck?.warnings?.join(" | ") ?? ""}</div>` : ""}
+          ${!p.dispenseCheck?.safe ? `<div class="rx-warn">⚠ ${locale === "ar" ? "تنبيه الذكاء الاصطناعي" : "AI Safety Flag"}: ${p.dispenseCheck?.warnings?.join(" | ") ?? ""}</div>` : ""}
         </div>
       `).join("")}
-      <div class="footer"><span>Dispensed by: ${pharmacistName}</span><span>SANAD Pharmacy Portal · ${new Date().toISOString()}</span></div>
+      <div class="footer"><span>${locale === "ar" ? "صرف بواسطة" : "Dispensed by"}: ${pharmacistName}</span><span>SANAD Pharmacy Portal · ${new Date().toISOString()}</span></div>
       </body></html>
     `);
     win.document.close();
