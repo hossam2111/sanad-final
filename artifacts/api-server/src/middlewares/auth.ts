@@ -40,7 +40,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 };
 
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  if (req.path === "/healthz" || req.path === "/livez" || req.path === "/readyz" || req.path === "/" || req.path.startsWith("/events/stream") || req.path === "/auth/login") {
+  if (req.path === "/healthz" || req.path === "/livez" || req.path === "/readyz" || req.path === "/" || req.path.startsWith("/events/stream") || req.path === "/auth/login" || req.path === "/auth/refresh") {
     return next();
   }
 

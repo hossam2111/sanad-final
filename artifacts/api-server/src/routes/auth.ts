@@ -1,5 +1,5 @@
 import { Router } from "express";
-import jwt from "jsonwebtoken";
+import jwt, { type JwtPayload } from "jsonwebtoken";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
@@ -132,6 +132,40 @@ router.post("/login", validate(loginSchema), async (req, res) => {
       organization: user.organization,
     },
   });
+});
+
+router.post("/refresh", async (req, res) => {
+  const secret = process.env["JWT_SECRET"];
+  if (!secret) {
+    return res.status(500).json({ error: "SERVER_CONFIGURATION_ERROR", message: "Authentication service not configured" });
+  }
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice("Bearer ".length).trim() : null;
+  if (!token) {
+    return res.status(401).json({ error: "UNAUTHORIZED", message: "Bearer token required" });
+  }
+
+  let decoded: JwtPayload;
+  try {
+    const result = jwt.verify(token, secret);
+    if (typeof result === "string" || !result) throw new Error("invalid payload");
+    decoded = result;
+  } catch {
+    return res.status(401).json({ error: "TOKEN_EXPIRED", message: "Token expired or invalid — please log in again" });
+  }
+
+  const payload: Record<string, string> = {
+    role: decoded["role"] as string,
+    userId: decoded["userId"] as string,
+    userName: decoded["userName"] as string,
+    username: decoded["username"] as string,
+  };
+  if (decoded["nationalId"]) payload["nationalId"] = decoded["nationalId"] as string;
+
+  const newToken = jwt.sign(payload, secret, { expiresIn: EXPIRES_IN_SECONDS });
+
+  return res.json({ token: newToken, expiresIn: EXPIRES_IN_SECONDS });
 });
 
 export default router;

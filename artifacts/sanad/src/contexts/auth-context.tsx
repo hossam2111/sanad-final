@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useRef, useCallback } from "react";
 import { setAuthTokenGetter } from "@workspace/api-client-react";
 
 export type UserRole =
@@ -65,7 +65,19 @@ function isLoginResponse(value: unknown): value is LoginResponse {
   );
 }
 
+const REFRESH_BUFFER_MS = 60 * 1000; // refresh 60s before expiry
+
+function getTokenExpiry(token: string): number | null {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]!)) as { exp?: number };
+    return payload.exp ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [user, setUser] = useState<AuthUser | null>(() => {
     if (typeof window === "undefined") return null;
     try {
@@ -85,6 +97,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     }
   });
+
+  const clearRefreshTimer = useCallback(() => {
+    if (refreshTimerRef.current !== null) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleRefresh = useCallback((token: string) => {
+    clearRefreshTimer();
+    const expiry = getTokenExpiry(token);
+    if (!expiry) return;
+    const delay = expiry - Date.now() - REFRESH_BUFFER_MS;
+    if (delay <= 0) return;
+    refreshTimerRef.current = setTimeout(async () => {
+      try {
+        const currentToken = localStorage.getItem(TOKEN_KEY);
+        if (!currentToken) return;
+        const res = await fetch("/api/auth/refresh", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${currentToken}` },
+        });
+        if (!res.ok) {
+          // Token expired on server side — log out silently
+          logout();
+          return;
+        }
+        const data = await res.json() as { token: string; expiresIn: number };
+        localStorage.setItem(TOKEN_KEY, data.token);
+        setAuthTokenGetter(() => localStorage.getItem(TOKEN_KEY));
+        scheduleRefresh(data.token);
+      } catch {
+        // Network error — don't log out, let next API call handle it
+      }
+    }, delay);
+  }, [clearRefreshTimer]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Schedule refresh on mount if session is active
+  React.useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) scheduleRefresh(token);
+    return clearRefreshTimer;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = async (username: string, password: string): Promise<AuthUser> => {
     try {
@@ -120,6 +175,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(SESSION_KEY, JSON.stringify(authenticatedUser));
       setAuthTokenGetter(() => localStorage.getItem(TOKEN_KEY));
       setUser(authenticatedUser);
+      scheduleRefresh(data.token);
       return authenticatedUser;
     } catch (error) {
       localStorage.removeItem(TOKEN_KEY);
@@ -128,12 +184,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
+    clearRefreshTimer();
     setUser(null);
     localStorage.removeItem(SESSION_KEY);
     localStorage.removeItem(TOKEN_KEY);
     setAuthTokenGetter(null);
-  };
+  }, [clearRefreshTimer]);
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
