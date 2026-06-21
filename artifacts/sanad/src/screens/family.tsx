@@ -226,7 +226,7 @@ export default function FamilyPortal() {
               { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-danger" : data.heritabilityScore >= 40 ? "text-risk-high" : "text-success", bg: data.heritabilityScore >= 70 ? "bg-danger-bg" : "bg-secondary" },
               { label: text("Genetic Risk Factors", "عوامل الخطورة الوراثية"), value: data.geneticRisks?.length, suffix: text(" identified", " مُحدّد"), color: "text-violet-600", bg: "bg-violet-50" },
               { label: text("Family Members Linked", "أفراد الأسرة المرتبطون"), value: data.summary?.totalMembers, suffix: text(" members", " فرد"), color: "text-primary", bg: "bg-primary/5" },
-              { label: text("Patient Risk Score", "درجة خطورة المريض"), value: data.patient?.riskScore, suffix: "/100", color: data.patient?.riskScore >= 70 ? "text-danger" : "text-risk-high", bg: "bg-risk-high-bg" },
+              { label: text("Clinical Priority Index", "مؤشر الأولوية السريرية"), value: data.patient?.riskScore, suffix: "/100", color: data.patient?.riskScore >= 70 ? "text-danger" : "text-risk-high", bg: "bg-risk-high-bg" },
             ].map((kpi, i) => (
               <div key={i} className={`p-5 rounded-3xl ${kpi.bg}`}>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{kpi.label}</p>

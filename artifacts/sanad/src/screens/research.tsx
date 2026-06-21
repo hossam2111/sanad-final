@@ -364,7 +364,7 @@ export default function ResearchPortal() {
                         <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                         <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
-                        <Bar dataKey="avgRiskScore" fill="#f97316" radius={[6, 6, 0, 0]} barSize={50} name="Avg Risk Score" />
+                        <Bar dataKey="avgRiskScore" fill="#f97316" radius={[6, 6, 0, 0]} barSize={50} name="Avg Priority Index" />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
