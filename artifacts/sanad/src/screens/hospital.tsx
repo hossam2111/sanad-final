@@ -256,7 +256,7 @@ export default function HospitalPortal() {
             <CardHeader>
               <AlertTriangle className="w-4 h-4 text-risk-high" />
               <CardTitle>{text("AI Priority Patient Queue", "AI Priority Patient Queue")}</CardTitle>
-              <Badge variant="outline" className="ml-auto">{text("Sorted by AI Risk Score · High → Low", "Sorted by AI Risk Score · High → Low")}</Badge>
+              <Badge variant="outline" className="ml-auto">{text("Sorted by Clinical Priority · High → Low", "مُرتَّب حسب الأولوية السريرية · من الأعلى")}</Badge>
             </CardHeader>
             <table className="w-full data-table">
               <thead>
@@ -264,7 +264,7 @@ export default function HospitalPortal() {
                   <th>{text("Priority", "Priority")}</th>
                   <th>{text("Patient", "Patient")}</th>
                   <th>{text("Age", "Age")}</th>
-                  <th>{text("Risk Score", "Risk Score")}</th>
+                  <th>{text("Priority", "الأولوية")}</th>
                   <th>{text("Conditions", "Conditions")}</th>
                   <th>{text("Suggested Ward", "Suggested Ward")}</th>
                   <th>{text("Last Visit", "Last Visit")}</th>
@@ -338,7 +338,7 @@ export default function HospitalPortal() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className={`text-2xl font-bold ${alert.riskScore >= 90 ? "text-danger" : "text-risk-high"}`}>{alert.riskScore}</p>
-                    <p className="text-[10px] text-muted-foreground">{text("risk score", "risk score")}</p>
+                    <p className="text-[10px] text-muted-foreground">{text("priority index", "مؤشر الأولوية")}</p>
                   </div>
                 </div>
 

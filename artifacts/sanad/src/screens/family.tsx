@@ -240,7 +240,7 @@ export default function FamilyPortal() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2"><Users className="w-4 h-4 text-pink-600" /><CardTitle>{text("Family Tree — Risk Map", "شجرة العائلة — خريطة الخطورة")}</CardTitle></div>
-                <p className="text-xs text-muted-foreground ms-auto">{text("Colors indicate AI Risk Score", "الألوان تشير إلى درجة الخطورة")}</p>
+                <p className="text-xs text-muted-foreground ms-auto">{text("Colors indicate Clinical Priority", "الألوان تشير إلى الأولوية السريرية")}</p>
               </CardHeader>
               <CardBody>
                 <div className="space-y-6">

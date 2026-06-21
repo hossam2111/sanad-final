@@ -211,7 +211,7 @@ export default function EmergencyPage() {
               </div>
               <div className="flex shrink-0 items-center gap-8">
                 <div className="text-center">
-                  <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">{text("Risk Score", "درجة الخطورة")}</p>
+                  <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">{text("Priority Index", "مؤشر الأولوية")}</p>
                   <p className="text-4xl font-bold tabular-nums" dir="ltr">{(patient as unknown as EmergencyPatient).riskScore ?? "—"}</p>
                   <p className="text-[10px] text-white/60">/ 100</p>
                 </div>

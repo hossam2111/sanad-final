@@ -894,7 +894,7 @@ export default function DoctorDashboard() {
 
                 {riskScore && (
                   <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px] bg-secondary/40">
-                    <DataLabel label={text("AI Risk Score", "درجة الخطورة")}>
+                    <DataLabel label={text("Clinical Priority Index", "مؤشر الأولوية السريرية")}>
                       <p className="text-3xl font-bold tabular-nums text-foreground" dir="ltr">
                         {riskScore.riskScore}<span className="text-base font-normal text-muted-foreground">/100</span>
                       </p>
@@ -1023,7 +1023,7 @@ export default function DoctorDashboard() {
                           background: `hsl(var(--risk-${riskScore.riskLevel}-bg))`,
                           borderColor: `hsl(var(--risk-${riskScore.riskLevel}) / 0.2)`,
                         }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{text("Risk Score", "درجة الخطورة")}</p>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{text("Priority Index", "مؤشر الأولوية")}</p>
                         <p className="text-5xl font-bold tabular-nums leading-none" dir="ltr"
                           style={{ color: `hsl(var(--risk-${riskScore.riskLevel}))` }}>
                           {riskScore.riskScore}
@@ -1623,7 +1623,7 @@ export default function DoctorDashboard() {
                             }>{trajectoryLabel(aiDecision.digitalTwin.riskTrajectory, text)}</span></p>
                           </div>
                           <div className="text-end">
-                            <p className="text-xs text-muted-foreground">{text("Projected Risk Score", "درجة الخطورة المتوقعة")}</p>
+                            <p className="text-xs text-muted-foreground">{text("Projected Priority Index", "مؤشر الأولوية المتوقع")}</p>
                             <p className={`text-3xl font-bold tabular-nums ${
                               aiDecision.digitalTwin.projectedRiskScore >= 70 ? "text-danger" :
                               aiDecision.digitalTwin.projectedRiskScore >= 50 ? "text-risk-high" : "text-success"
@@ -1895,12 +1895,12 @@ export default function DoctorDashboard() {
                       background: `hsl(var(--risk-${riskScore.riskLevel}-bg))`,
                       borderColor: `hsl(var(--risk-${riskScore.riskLevel}) / 0.2)`,
                     }}>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">{text("AI Risk Score", "درجة الخطورة")}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">{text("Clinical Priority Index", "مؤشر الأولوية السريرية")}</p>
                     <p className="text-6xl font-bold tabular-nums leading-none" dir="ltr"
                       style={{ color: `hsl(var(--risk-${riskScore.riskLevel}))` }}>
                       {riskScore.riskScore}
                     </p>
-                    <p className="text-muted-foreground text-sm mt-1">{text("/ 100 risk score", "/ 100 درجة الخطورة")}</p>
+                    <p className="text-muted-foreground text-sm mt-1">{text("/ 100 priority index", "/ 100 مؤشر الأولوية")}</p>
                     <RiskBadge
                       level={riskScore.riskLevel as "critical" | "high" | "medium" | "low"}
                       className="mt-4"
