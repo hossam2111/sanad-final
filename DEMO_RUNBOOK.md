@@ -9,8 +9,8 @@ pnpm --filter "@workspace/scripts" seed
 # 2. Start both servers (if not already running)
 pnpm dev
 
-# 3. Optional: full gate verification
-.\verify-and-publish.ps1 -SkipSeed -DryRun
+# 3. Optional: full gate verification (seed is included — do NOT add -SkipSeed)
+.\verify-and-publish.ps1 -DryRun
 ```
 
 ### Why the seed step is mandatory
@@ -109,12 +109,15 @@ The "Demo Mode" badge is displayed on that tab.
 ## Verify Gate Reference
 
 ```
-85/85 PASS (last verified: 2026-06-21)
-  43/43 scenario-tests  (S1–S7 clinical scenarios)
+88/88 PASS (last verified: 2026-06-21)
+  46/46 scenario-tests  (S1–S7 clinical scenarios + JWT refresh)
   42/42 ownership-tests (BOLA + hospital scoping)
 ```
 
 Re-run anytime with:
 ```powershell
-.\verify-and-publish.ps1 -SkipSeed -DryRun
+.\verify-and-publish.ps1 -DryRun
 ```
+
+> **Note:** Never pass `-SkipSeed` when running verify. The seed runs immediately before
+> tests to warm Neon idle connections — skipping it causes ECONNRESET on the first DB call.

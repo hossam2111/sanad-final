@@ -95,8 +95,8 @@ if ($SkipSeed) {
   Pass "Seed completed"
 }
 
-# ── Step 4: scenario-tests (43 assertions) ─────────────────────────────────────
-Step "4/5" "scenario-tests.mjs  (43 assertions — S1–S7 demo scenarios)"
+# ── Step 4: scenario-tests (46 assertions) ─────────────────────────────────────
+Step "4/5" "scenario-tests.mjs  (46 assertions — S1–S7 + JWT refresh)"
 
 $scenarioScript = Join-Path $harnesses "scenario-tests.mjs"
 $s = Start-Process -FilePath "node" `
@@ -107,7 +107,7 @@ if ($s.ExitCode -ne 0) {
   Fail "scenario-tests had failures (exit $($s.ExitCode))"
   $allPassed = $false
 } else {
-  Pass "scenario-tests  43/43"
+  Pass "scenario-tests  46/46"
 }
 
 # ── Step 5: ownership-tests (42 assertions) ────────────────────────────────────

@@ -126,5 +126,15 @@ const exp = await (await get("/api/research/export?format=json", research)).json
 const expStr = JSON.stringify(exp);
 check("research export is de-identified", !expStr.includes("1000000001") && !expStr.includes("الغامدي"), "");
 
+console.log("\n══ Auth: JWT refresh ══");
+const refreshRes = await fetch(`${API}/api/auth/refresh`, { method: "POST", headers: { Authorization: `Bearer ${doctor}` } });
+const refreshData = await refreshRes.json();
+check("refresh issues new token for valid bearer", refreshRes.status === 200 && typeof refreshData.token === "string" && refreshData.expiresIn === 28800, `status=${refreshRes.status} expiresIn=${refreshData.expiresIn}`);
+const refreshedToken = refreshData.token;
+const afterRefresh = await get("/api/patients/national/1000000001", refreshedToken);
+check("refreshed token is immediately usable", afterRefresh.status === 200, `status=${afterRefresh.status}`);
+const expiredAttempt = await fetch(`${API}/api/auth/refresh`, { method: "POST", headers: { Authorization: "Bearer not.a.valid.token" } });
+check("refresh rejects invalid token with 401", expiredAttempt.status === 401, `status=${expiredAttempt.status}`);
+
 console.log(`\n══ ${pass} passed, ${fail} failed ══`);
 process.exitCode = fail ? 1 : 0; // let the event loop drain instead of hard-exiting
