@@ -355,7 +355,7 @@ export default function ResearchPortal() {
             )}
             {selectedConditions === "age" && (
               <Card className="col-span-12">
-                <CardHeader><div className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /><CardTitle>{text("Age Group × Average Risk Score", "Age Group × Average Risk Score")}</CardTitle></div></CardHeader>
+                <CardHeader><div className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /><CardTitle>{text("Age Group × Average Priority Index", "الفئة العمرية × متوسط مؤشر الأولوية")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">

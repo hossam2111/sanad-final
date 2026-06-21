@@ -776,7 +776,7 @@ export default function AdminDashboard() {
               />
               <KpiCard
                 title={text("SSE Clients","عملاء الأحداث المباشرة")}
-                value={sysHealth?.services?.sse?.activeClients ?? "—"}
+                value={sysHealth?.services?.sse?.connectedClients ?? "—"}
                 sub={text("Live event streams","بث الأحداث المباشر")}
                 icon={Radio} iconBg="bg-violet-100" iconColor="text-violet-600"
               />
@@ -810,14 +810,16 @@ export default function AdminDashboard() {
               {/* Audit */}
               <Card>
                 <CardHeader><Shield className="w-4 h-4 text-info"/><CardTitle>{text("Audit Engine","محرك التدقيق")}</CardTitle>
-                  <span className="ms-auto text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-bg text-success">LOGGING</span>
+                  <span className={`ms-auto text-[11px] font-bold px-2 py-0.5 rounded-full ${(sysHealth?.services?.audit?.failureCount ?? 0) === 0 ? "bg-success-bg text-success" : "bg-warning-bg text-warning"}`}>
+                    {(sysHealth?.services?.audit?.failureCount ?? 0) === 0 ? "HEALTHY" : "DEGRADED"}
+                  </span>
                 </CardHeader>
                 <CardBody className="space-y-2 text-sm">
                   {[
-                    [text("Total records","إجمالي السجلات"), sysHealth?.services?.audit?.totalRecords ?? "—"],
-                    [text("Last hour","آخر ساعة"), sysHealth?.services?.audit?.lastHour ?? "—"],
-                    [text("Last 24h","آخر 24 ساعة"), sysHealth?.services?.audit?.last24h ?? "—"],
-                    [text("Integrity hash","تجزئة النزاهة"), sysHealth?.services?.audit?.latestChainHash ? `${sysHealth.services.audit.latestChainHash.slice(0,8)}…` : "—"],
+                    [text("Total records","إجمالي السجلات"), (intelligence as Record<string,any>)?.auditRecords ?? "—"],
+                    [text("Write failures","أخطاء الكتابة"), sysHealth?.services?.audit?.failureCount ?? "0"],
+                    [text("Chain integrity","سلامة السلسلة"), (sysHealth?.services?.audit?.failureCount ?? 0) === 0 ? text("Intact","سليمة") : text("Check needed","تحتاج فحص")],
+                    [text("Server uptime","وقت التشغيل"), sysHealth ? `${Math.floor((sysHealth.uptimeSeconds ?? 0) / 60)} min` : "—"],
                   ].map(([k,v])=>(
                     <div key={String(k)} className="flex justify-between text-[13px]">
                       <span className="text-muted-foreground">{k}</span>
@@ -834,9 +836,9 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardBody className="space-y-2 text-sm">
                   {[
-                    [text("Active streams","البث النشط"), sysHealth?.services?.sse?.activeClients ?? "—"],
-                    [text("Total connected","إجمالي المتصلين"), sysHealth?.services?.sse?.totalConnected ?? "—"],
-                    [text("Server uptime","وقت تشغيل الخادم"), sysHealth ? `${Math.floor((sysHealth.uptimeSeconds ?? 0) / 60)} min` : "—"],
+                    [text("Connected clients","العملاء المتصلون"), sysHealth?.services?.sse?.connectedClients ?? "—"],
+                    [text("Messages sent","الرسائل المُرسَلة"), sysHealth?.services?.sse?.messagesSent ?? "—"],
+                    [text("Write failures","أخطاء الإرسال"), sysHealth?.services?.sse?.writeFailureCount ?? "0"],
                     [text("Drain mode","وضع الاستنزاف"), sysHealth?.draining ? text("ACTIVE","نشط") : text("OFF","معطّل")],
                   ].map(([k,v])=>(
                     <div key={String(k)} className="flex justify-between text-[13px]">
