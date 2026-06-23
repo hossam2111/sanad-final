@@ -109,7 +109,7 @@ The "Demo Mode" badge is displayed on that tab.
 ## Verify Gate Reference
 
 ```
-88/88 PASS (last verified: 2026-06-21)
+88/88 PASS (last verified: 2026-06-21 · tag demo-ready-v8)
   46/46 scenario-tests  (S1–S7 clinical scenarios + JWT refresh)
   42/42 ownership-tests (BOLA + hospital scoping)
 ```
