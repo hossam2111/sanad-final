@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANAD — Investor Pitch Deck 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@200;300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+/* ─── RESET ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:    #2563FF;
+  --blue-lg: #4F80FF;
+  --cyan:    #00D2FF;
+  --white:   #FFFFFF;
+  --off:     #F0EFEC;
+  --dim:     rgba(255,255,255,.45);
+  --dim2:    rgba(255,255,255,.18);
+  --black:   #060608;
+  --card:    rgba(255,255,255,.04);
+  --border:  rgba(255,255,255,.09);
+  --red:     #FF4444;
+  --green:   #00D68F;
+  --gold:    #F5C842;
+}
+
+html { background: #111; }
+
+body {
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  background: #111;
+  color: var(--white);
+}
+
+/* ─── SLIDE SHELL (16:9) ─────────────────────────────── */
+.deck {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.slide {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5% 7%;
+  background: var(--black);
+}
+
+/* ─── PRINT ──────────────────────────────────────────── */
+@media print {
+  html, body { background: white; margin: 0; padding: 0; }
+  .deck { gap: 0; padding: 0; max-width: none; }
+  .slide {
+    page-break-after: always;
+    break-after: page;
+    width: 100vw;
+    height: 100vh;
+    aspect-ratio: unset;
+  }
+}
+
+/* ─── SLIDE THEMES ───────────────────────────────────── */
+.dark  { background: var(--black); }
+.navy  { background: #06091A; }
+.light { background: #F4F3F0; color: var(--black); }
+.blue-slide { background: var(--blue); }
+
+/* ─── SLIDE CHROME ───────────────────────────────────── */
+.num-badge {
+  position: absolute;
+  top: 5%;
+  left: 7%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(9px, .8vw, 12px);
+  letter-spacing: .18em;
+  color: var(--dim2);
+  text-transform: uppercase;
+}
+.slide-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(8px, .75vw, 11px);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--blue-lg);
+  margin-bottom: clamp(8px,1.2vh,18px);
+}
+.light .slide-tag { color: var(--blue); }
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────── */
+.hero   { font-size: clamp(28px, 5.5vw, 72px); font-weight: 800; line-height: 1.08; letter-spacing: -.01em; }
+.h2     { font-size: clamp(18px, 3.2vw, 42px); font-weight: 700; line-height: 1.2; }
+.h3     { font-size: clamp(13px, 1.6vw, 21px); font-weight: 600; line-height: 1.3; }
+.body   { font-size: clamp(10px, 1.1vw, 15px); line-height: 1.75; }
+.small  { font-size: clamp(8px, .85vw, 12px); }
+.muted  { color: var(--dim); }
+.light .muted { color: rgba(0,0,0,.45); }
+.blue-slide .muted { color: rgba(255,255,255,.65); }
+
+.accent { color: var(--blue-lg); }
+.light .accent { color: var(--blue); }
+.c-green  { color: var(--green); }
+.c-red    { color: var(--red); }
+.c-gold   { color: var(--gold); }
+.c-blue   { color: var(--blue-lg); }
+.c-cyan   { color: var(--cyan); }
+
+/* ─── HUGE STAT ──────────────────────────────────────── */
+.stat-num {
+  font-size: clamp(36px, 7.5vw, 96px);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+
+/* ─── GRIDS ──────────────────────────────────────────── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(10px,1.5vw,24px); }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: clamp(8px,1.2vw,20px); }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: clamp(6px,1vw,16px); }
+
+/* ─── CARD ───────────────────────────────────────────── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: clamp(6px,.8vw,14px);
+  padding: clamp(12px,1.6vw,24px);
+}
+.card-red   { background: rgba(255,68,68,.07); border-color: rgba(255,68,68,.2); }
+.card-green { background: rgba(0,214,143,.07); border-color: rgba(0,214,143,.2); }
+.card-blue  { background: rgba(37,99,255,.1);  border-color: rgba(37,99,255,.25); }
+.card-gold  { background: rgba(245,200,66,.07);border-color: rgba(245,200,66,.2); }
+
+.light .card       { background: #fff; border-color: rgba(0,0,0,.09); box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.light .card-red   { background: #FFF0F0; border-color: rgba(200,0,0,.15); }
+.light .card-green { background: #F0FFF8; border-color: rgba(0,180,100,.2); }
+.light .card-blue  { background: #EEF4FF; border-color: rgba(37,99,255,.2); }
+
+/* ─── DIVIDER ────────────────────────────────────────── */
+.rule { border: none; border-top: 1px solid var(--border); margin: clamp(8px,.8vh,14px) 0; }
+.light .rule { border-top-color: rgba(0,0,0,.08); }
+
+/* ─── PILL ───────────────────────────────────────────── */
+.pill {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(7px,.65vw,10px);
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid currentColor;
+}
+.pill-blue  { color: var(--blue-lg); border-color: rgba(79,128,255,.4); background: rgba(37,99,255,.12); }
+.pill-green { color: var(--green);   border-color: rgba(0,214,143,.35); background: rgba(0,214,143,.1); }
+.pill-gold  { color: var(--gold);    border-color: rgba(245,200,66,.35); background: rgba(245,200,66,.1); }
+.pill-red   { color: var(--red);     border-color: rgba(255,68,68,.35); background: rgba(255,68,68,.1); }
+
+/* ─── CHECK / CROSS TABLE ────────────────────────────── */
+.comp { width: 100%; border-collapse: collapse; }
+.comp th {
+  padding: clamp(5px,.5vh,8px) clamp(8px,.8vw,14px);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(7px,.65vw,10px);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  text-align: center;
+  background: rgba(255,255,255,.05);
+  color: var(--dim);
+  border-bottom: 1px solid var(--border);
+}
+.comp th:first-child { text-align: right; }
+.comp td {
+  padding: clamp(6px,.6vh,10px) clamp(8px,.8vw,14px);
+  font-size: clamp(9px,.9vw,13px);
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  color: var(--dim);
+}
+.comp td:first-child { text-align: right; font-weight: 600; color: var(--white); }
+.comp tr.hl td { background: rgba(37,99,255,.12); }
+.comp tr.hl td:first-child { color: var(--blue-lg); }
+.ck { color: var(--green); font-size: 1.1em; }
+.cx { color: rgba(255,255,255,.18); }
+.cp { color: var(--gold); font-size: .9em; }
+
+/* ─── PROGRESS BAR ───────────────────────────────────── */
+.bar-wrap { background: rgba(255,255,255,.08); border-radius: 99px; height: clamp(3px,.3vh,6px); margin-top: clamp(4px,.4vh,8px); }
+.bar-fill { height: 100%; border-radius: 99px; background: var(--blue-lg); }
+
+/* ─── DECORATIVE BG ──────────────────────────────────── */
+.bg-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+.content { position: relative; z-index: 1; }
+
+/* ─── FOOTNOTE ───────────────────────────────────────── */
+.fn {
+  position: absolute;
+  bottom: 4%;
+  right: 7%;
+  left: 7%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(6px,.55vw,9px);
+  color: var(--dim2);
+  letter-spacing: .04em;
+  text-align: left;
+  direction: ltr;
+}
+
+/* ─── TIMELINE ───────────────────────────────────────── */
+.tl { display: flex; gap: 0; margin-top: clamp(10px,1.2vh,20px); }
+.tl-phase {
+  flex: 1;
+  padding: clamp(10px,1.2vw,18px);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.tl-phase:first-child { border-radius: 10px 0 0 10px; }
+.tl-phase:last-child  { border-radius: 0 10px 10px 0; }
+.tl-phase.now { background: rgba(37,99,255,.1); border-color: rgba(37,99,255,.4); }
+.tl-year {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(7px,.65vw,10px);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: clamp(4px,.5vh,8px);
+}
+.tl-phase.now .tl-year { color: var(--blue-lg); }
+.tl-title { font-size: clamp(11px,1.1vw,16px); font-weight: 700; margin-bottom: clamp(6px,.7vh,10px); }
+.tl-item  { font-size: clamp(8px,.8vw,12px); color: var(--dim); margin-bottom: 4px; display: flex; gap: 6px; }
+.tl-dot   { color: var(--blue-lg); flex-shrink: 0; }
+
+/* ─── ASK USE ────────────────────────────────────────── */
+.use-row { display: flex; align-items: center; gap: clamp(8px,.8vw,14px); margin-bottom: clamp(8px,.8vh,14px); }
+.use-pct { font-size: clamp(18px,2.5vw,34px); font-weight: 800; color: var(--blue-lg); min-width: clamp(42px,4vw,64px); }
+.use-bar-wrap { flex: 1; background: var(--border); height: 3px; border-radius: 99px; }
+.use-bar { height: 100%; border-radius: 99px; background: var(--blue-lg); }
+.use-desc { font-size: clamp(9px,.9vw,13px); color: var(--dim); min-width: clamp(100px,14vw,200px); text-align: right; }
+
+/* ─── NETWORK VIZ ────────────────────────────────────── */
+.net-node {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: clamp(8px,.75vw,11px); color: var(--dim);
+}
+.net-icon {
+  width: clamp(32px,3.5vw,52px); height: clamp(32px,3.5vw,52px);
+  border-radius: 50%; background: var(--card); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(14px,1.6vw,24px);
+}
+
+</style>
+</head>
+<body>
+<div class="deck">
+
+
+<!-- ══════════════════════════════════════════════════════
+     01 — COVER
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:60%;height:70%;top:-20%;right:-15%;background:rgba(37,99,255,.12);"></div>
+  <div class="bg-glow" style="width:30%;height:40%;bottom:0;left:0;background:rgba(0,210,255,.06);"></div>
+
+  <div class="content" style="display:flex;flex-direction:column;height:100%;justify-content:space-between;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:clamp(10px,.9vw,14px);font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.2);">SANAD HEALTH</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.2em;color:rgba(255,255,255,.18);text-transform:uppercase;">CONFIDENTIAL · SERIES SEED+ · 2026</div>
+    </div>
+
+    <div>
+      <div style="font-size:clamp(52px,10vw,140px);font-weight:800;line-height:.95;letter-spacing:-.02em;color:white;margin-bottom:clamp(8px,1vh,16px);">SANAD</div>
+      <div style="font-size:clamp(14px,1.8vw,26px);font-weight:300;color:rgba(255,255,255,.4);letter-spacing:.04em;margin-bottom:clamp(16px,2vh,32px);">
+        المنصة الوطنية للذكاء الصحي
+        <span style="color:rgba(255,255,255,.18);margin:0 8px;">·</span>
+        National AI Health Intelligence Platform
+      </div>
+      <div style="font-size:clamp(11px,1.1vw,16px);color:rgba(255,255,255,.25);letter-spacing:.06em;">لكل قرارٍ سند &nbsp;·&nbsp; Behind Every Decision</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.2vw,20px);">
+      <div>
+        <div style="font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.25);margin-bottom:4px;">سوق قابل للتخديم</div>
+        <div style="font-size:clamp(18px,2.5vw,34px);font-weight:800;color:white;">$2B</div>
+        <div style="font-size:clamp(8px,.75vw,11px);color:rgba(255,255,255,.35);">Health IT — KSA</div>
+      </div>
+      <div>
+        <div style="font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.25);margin-bottom:4px;">المستفيدون</div>
+        <div style="font-size:clamp(18px,2.5vw,34px);font-weight:800;color:white;">35M</div>
+        <div style="font-size:clamp(8px,.75vw,11px);color:rgba(255,255,255,.35);">Saudi citizen</div>
+      </div>
+      <div>
+        <div style="font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.25);margin-bottom:4px;">المرحلة</div>
+        <div style="font-size:clamp(18px,2.5vw,34px);font-weight:800;color:#4F80FF;">Seed+</div>
+        <div style="font-size:clamp(8px,.75vw,11px);color:rgba(255,255,255,.35);">Functional Prototype · Pre-Pilot</div>
+      </div>
+      <div>
+        <div style="font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.25);margin-bottom:4px;">الجولة</div>
+        <div style="font-size:clamp(18px,2.5vw,34px);font-weight:800;color:#F5C842;">$5M</div>
+        <div style="font-size:clamp(8px,.75vw,11px);color:rgba(255,255,255,.35);">Seed Round</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">01 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     02 — THE PROBLEM
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:40%;height:60%;top:-10%;left:10%;background:rgba(255,44,44,.07);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">02 · المشكلة</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.6vh,10px);">
+      النظام الصحي السعودي <span class="c-red">غير متصل.</span><br>والتكلفة تُقاس بأرواح وملايين.
+    </div>
+    <div class="body muted" style="max-width:55%;margin-bottom:clamp(10px,1.5vh,22px);">
+      مستشفى لا يرى ملف المريض. صيدلية لا تعرف الأدوية الحالية. تأمين ينتظر فاكس. نتيجة: تأخير، أخطاء، هدر مالي ضخم.
+    </div>
+
+    <div class="g4" style="margin-bottom:clamp(10px,1.5vh,20px);">
+      <div class="card card-red" style="text-align:center;">
+        <div class="stat-num c-red">45</div>
+        <div class="small muted" style="margin-top:4px;">يوم</div>
+        <hr class="rule" style="margin:8px 0;">
+        <div class="small muted">متوسط معالجة مطالبة تأمين</div>
+        <div class="small" style="color:rgba(255,68,68,.5);margin-top:3px;">ممكن تصير &lt;24 ساعة</div>
+      </div>
+      <div class="card card-red" style="text-align:center;">
+        <div class="stat-num c-red" style="font-size:clamp(22px,4vw,56px);">1/300</div>
+        <div class="small muted" style="margin-top:4px;">دخول مستشفى</div>
+        <hr class="rule" style="margin:8px 0;">
+        <div class="small muted">سببه خطأ دوائي قابل للوقاية</div>
+        <div class="small" style="color:rgba(255,255,255,.2);margin-top:3px;">WHO — موثق</div>
+      </div>
+      <div class="card card-red" style="text-align:center;">
+        <div class="stat-num c-red">30<span style="font-size:.45em;font-weight:400;">%</span></div>
+        <div class="small muted" style="margin-top:4px;">من الفحوصات</div>
+        <hr class="rule" style="margin:8px 0;">
+        <div class="small muted">مكررة بدون مبرر بسبب غياب مشاركة البيانات</div>
+        <div class="small" style="color:rgba(255,255,255,.2);margin-top:3px;">تقدير صناعي</div>
+      </div>
+      <div class="card card-red" style="text-align:center;">
+        <div class="stat-num c-red" style="font-size:clamp(20px,3.5vw,48px);">$2B+</div>
+        <div class="small muted" style="margin-top:4px;">سنوياً</div>
+        <hr class="rule" style="margin:8px 0;">
+        <div class="small muted">هدر إداري وتشغيلي مقدّر</div>
+        <div class="small" style="color:rgba(255,255,255,.2);margin-top:3px;">تقدير من نسبة WHO العالمية</div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card" style="display:flex;flex-direction:column;gap:clamp(6px,.7vh,10px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-bottom:2px;">بدون سند</div>
+        <div class="small muted" style="display:flex;gap:6px;"><span class="c-red">✕</span> طبيب الطوارئ لا يعرف أدوية المريض</div>
+        <div class="small muted" style="display:flex;gap:6px;"><span class="c-red">✕</span> الصيدلاني ينتظر فاكس من المختبر</div>
+        <div class="small muted" style="display:flex;gap:6px;"><span class="c-red">✕</span> شركة التأمين تطلب وثائق ورقية</div>
+        <div class="small muted" style="display:flex;gap:6px;"><span class="c-red">✕</span> بيانات المريض مشتتة على 4-5 أنظمة</div>
+      </div>
+      <div class="card card-blue" style="display:flex;flex-direction:column;gap:clamp(6px,.7vh,10px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:2px;">مع سند</div>
+        <div class="small muted" style="display:flex;gap:6px;"><span class="c-green">✓</span> السجل الكامل في ثوانٍ عند أي نقطة رعاية</div>
+        <div class="small muted" style="display:flex;gap:6px;"><span class="c-green">✓</span> تنبيه تلقائي لتفاعلات الدواء قبل الصرف</div>
+        <div class="small muted" style="display:flex;gap:6px;"><span class="c-green">✓</span> موافقة التأمين فورية عبر API</div>
+        <div class="small muted" style="display:flex;gap:6px;"><span class="c-green">✓</span> رؤية موحدة لكل أطراف المنظومة</div>
+      </div>
+    </div>
+  </div>
+  <div class="fn">* 1/300: WHO Patient Safety 2023 (موثق). 30% تكرار + $2B+ هدر: تقديرات مبنية على نسب OECD Health at a Glance 2023 مطبقة على حجم الإنفاق الصحي السعودي (MOH 2024: $55B+).</div>
+  <div class="num-badge">02 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     03 — WHY NOW
+══════════════════════════════════════════════════════ -->
+<div class="slide navy">
+  <div class="bg-glow" style="width:50%;height:50%;top:-5%;right:0;background:rgba(0,210,255,.05);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">03 · لماذا الآن؟</div>
+    <div class="h2" style="margin-bottom:clamp(14px,2vh,28px);">
+      رؤية 2030 تفتح النافذة.<br>
+      <span class="accent">سند جاهز للعبور منها.</span>
+    </div>
+
+    <div class="g3">
+      <div class="card" style="padding:clamp(14px,1.8vw,26px);">
+        <div style="font-size:clamp(22px,3vw,40px);margin-bottom:clamp(8px,.9vh,14px);">🏛️</div>
+        <div class="h3" style="margin-bottom:6px;color:white;">تفويض حكومي مباشر</div>
+        <div class="body muted">290 مستشفى حكومياً في مسار الخوصصة بحلول 2030. كل كيان جديد يحتاج بنية رقمية من يوم واحد.</div>
+        <hr class="rule" style="margin:10px 0;">
+        <div class="small" style="color:var(--blue-lg);font-family:'IBM Plex Mono',monospace;">MOH KSA — رقم رسمي</div>
+      </div>
+      <div class="card" style="padding:clamp(14px,1.8vw,26px);">
+        <div style="font-size:clamp(22px,3vw,40px);margin-bottom:clamp(8px,.9vh,14px);">📋</div>
+        <div class="h3" style="margin-bottom:6px;color:white;">إلزامية التأمين الصحي</div>
+        <div class="body muted">CCHI يوسّع التغطية لـ 35M مواطن ومقيم. شركات التأمين تحتاج تكاملاً فورياً مع مزودي الرعاية.</div>
+        <hr class="rule" style="margin:10px 0;">
+        <div class="small" style="color:var(--blue-lg);font-family:'IBM Plex Mono',monospace;">CCHI — إلزامي</div>
+      </div>
+      <div class="card" style="padding:clamp(14px,1.8vw,26px);">
+        <div style="font-size:clamp(22px,3vw,40px);margin-bottom:clamp(8px,.9vh,14px);">🤖</div>
+        <div class="h3" style="margin-bottom:6px;color:white;">استثمار وطني في AI</div>
+        <div class="body muted">المملكة ضخت $40B+ في مبادرات AI وطنية. الصحة أولوية في استراتيجية الذكاء الاصطناعي (SDAIA).</div>
+        <hr class="rule" style="margin:10px 0;">
+        <div class="small" style="color:var(--blue-lg);font-family:'IBM Plex Mono',monospace;">SDAIA — معلن رسمياً</div>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:clamp(10px,1.2vh,18px);">
+      <div class="card card-gold" style="display:flex;align-items:center;gap:clamp(12px,1.5vw,22px);">
+        <div class="stat-num c-gold" style="font-size:clamp(28px,4.5vw,60px);">0</div>
+        <div>
+          <div class="h3" style="color:white;margin-bottom:4px;">منافس محلي شامل</div>
+          <div class="body muted">لا يوجد حل واحد يربط 5+ قطاعات صحية في منظومة واحدة بالسوق السعودي</div>
+        </div>
+      </div>
+      <div class="card card-blue" style="display:flex;align-items:center;gap:clamp(12px,1.5vw,22px);">
+        <div class="stat-num c-blue" style="font-size:clamp(28px,4.5vw,60px);">18<span style="font-size:.4em;font-weight:400;">%</span></div>
+        <div>
+          <div class="h3" style="color:white;margin-bottom:4px;">نمو سوق Health IT السعودي</div>
+          <div class="body muted">CAGR سنوي — من $1.2B لـ $3.5B+ بحلول 2030</div>
+          <div class="small" style="color:rgba(255,255,255,.2);margin-top:3px;">Mordor Intelligence / IQVIA — تقديرات</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="num-badge">03 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     04 — THE SOLUTION
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:45%;height:60%;top:-15%;left:-5%;background:rgba(37,99,255,.08);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">04 · الحل</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      سند ليس نظام مستشفى.<br>
+      <span class="accent">سند الطبقة فوق كل الأنظمة.</span>
+    </div>
+    <div class="body muted" style="margin-bottom:clamp(12px,1.6vh,24px);max-width:60%;">
+      يقرأ البيانات من أي مصدر · يوجّه القرار الصحيح · للشخص الصحيح · في الثانية الصحيحة.
+    </div>
+
+    <div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:clamp(14px,1.8vw,26px);margin-bottom:clamp(10px,1.2vh,18px);display:flex;align-items:center;justify-content:space-around;gap:8px;">
+      <div class="net-node"><div class="net-icon">🚑</div><div>إسعاف</div></div>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(79,128,255,.1),rgba(79,128,255,.5));position:relative;"><div style="position:absolute;top:50%;right:50%;transform:translate(50%,-50%);width:6px;height:6px;border-radius:50%;background:var(--blue-lg);"></div></div>
+      <div class="net-node"><div class="net-icon">🔬</div><div>مختبر</div></div>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(79,128,255,.5),var(--blue-lg));"></div>
+      <div style="flex-shrink:0;width:clamp(60px,8vw,110px);height:clamp(60px,8vw,110px);border-radius:50%;background:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 clamp(20px,3vw,40px) rgba(37,99,255,.4);border:2px solid rgba(255,255,255,.2);">
+        <div style="font-size:clamp(9px,1vw,14px);font-weight:800;letter-spacing:.06em;color:white;">SANAD</div>
+        <div style="font-size:clamp(6px,.55vw,8px);color:rgba(255,255,255,.55);font-family:'IBM Plex Mono',monospace;letter-spacing:.1em;margin-top:2px;">AI LAYER</div>
+      </div>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,var(--blue-lg),rgba(79,128,255,.5));"></div>
+      <div class="net-node"><div class="net-icon">💊</div><div>صيدلية</div></div>
+      <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(79,128,255,.5),rgba(79,128,255,.1));"></div>
+      <div class="net-node"><div class="net-icon">🛡️</div><div>تأمين</div></div>
+    </div>
+
+    <div class="g3">
+      <div class="card card-blue">
+        <div style="font-size:clamp(18px,2vw,28px);margin-bottom:6px;">🧠</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">12 بوابة متخصصة</div>
+        <div class="small muted">طوارئ · طبيب · مختبر · صيدلية · تأمين · مواطن · أسرة · بحث · إمداد · AI Control · إدارة وطنية</div>
+      </div>
+      <div class="card card-blue">
+        <div style="font-size:clamp(18px,2vw,28px);margin-bottom:6px;">⚡</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">محرك AI قابل للتفسير</div>
+        <div class="small muted">مؤشر أولوية سريرية (0-100) · كشف تفاعلات الدواء · توأم رقمي · كل توصية مُبررة</div>
+      </div>
+      <div class="card card-blue">
+        <div style="font-size:clamp(18px,2vw,28px);margin-bottom:6px;">🔗</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">سلسلة تدقيق Isnād</div>
+        <div class="small muted">كل قرار سريري موثق بـ hash chain غير قابل للتزوير · امتثال PDPL كامل</div>
+      </div>
+    </div>
+  </div>
+  <div class="num-badge">04 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     05 — WHY NOT MOH? (NEW)
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:35%;height:55%;top:-10%;right:-5%;background:rgba(245,200,66,.05);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">05 · السؤال الذي يسأله الجميع</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      لماذا لن تبني وزارة الصحة<br>
+      <span class="c-gold">هذا بنفسها؟</span>
+    </div>
+    <div class="body muted" style="max-width:60%;margin-bottom:clamp(14px,1.8vh,26px);">
+      سؤال مشروع. والإجابة ليست "لأنهم لا يستطيعون" — بل "لأن هذا ليس دورهم، ولأن Nphies يثبت ذلك بالفعل."
+    </div>
+
+    <div class="g2">
+
+      <!-- left: MOH role -->
+      <div style="display:flex;flex-direction:column;gap:clamp(8px,.9vh,13px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:2px;">وزارة الصحة — دورها الحقيقي</div>
+
+        <div class="card card-gold" style="padding:clamp(10px,1.2vw,16px);display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:clamp(14px,1.6vw,22px);flex-shrink:0;">🏛️</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">المشترون لا يبنون</div>
+            <div class="small muted">MOH اشترى SAP وOracle وNphies — لم يبنِ أياً منها بنفسه. هذا هو نمطهم التاريخي ثم سيظل.</div>
+          </div>
+        </div>
+
+        <div class="card card-gold" style="padding:clamp(10px,1.2vw,16px);display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:clamp(14px,1.6vw,22px);flex-shrink:0;">📋</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">Nphies موجود منذ 2021 — والفجوة لا تزال مفتوحة</div>
+            <div class="small muted">وزارة الصحة بنت Nphies للتقارير الحكومية. بعد 4 سنوات: صيدلية خاصة لا تزال تستخدم الفاكس مع شركة التأمين. هذا يثبت أن الفجوة التي يملأها سند لم تُحل.</div>
+          </div>
+        </div>
+
+        <div class="card card-gold" style="padding:clamp(10px,1.2vw,16px);display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:clamp(14px,1.6vw,22px);flex-shrink:0;">⚡</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">السرعة — المقارنة لا تُحتمل</div>
+            <div class="small muted">مشروع حكومي تقني: 3–5 سنوات للإطلاق. سند Pilot: 6 أشهر. في هذا الوقت تتغير المنظومة كلها.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- right: SANAD moat -->
+      <div style="display:flex;flex-direction:column;gap:clamp(8px,.9vh,13px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:2px;">لماذا سند — وليس حكومة</div>
+
+        <div class="card card-blue" style="padding:clamp(10px,1.2vw,16px);display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:clamp(14px,1.6vw,22px);flex-shrink:0;">🤝</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">الحياد يبني الثقة</div>
+            <div class="small muted">شركات التأمين لن تتكامل بسهولة مع نظام تبنيه وزارة الصحة. سند مستقل — يثق به الجميع: مستشفيات، تأمين، صيادلة. الحياد هو الـ moat.</div>
+          </div>
+        </div>
+
+        <div class="card card-blue" style="padding:clamp(10px,1.2vw,16px);display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:clamp(14px,1.6vw,22px);flex-shrink:0;">💰</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">القطاع الخاص يستجيب للـ ROI لا للإلزام</div>
+            <div class="small muted">15,000 صيدلية + 25 شركة تأمين = قرارات تجارية. سند يقنعهم بتوفير الوقت والمال. الحكومة تحاول بالإلزام — وهو بطيء ومكلف.</div>
+          </div>
+        </div>
+
+        <div class="card card-blue" style="padding:clamp(10px,1.2vw,16px);display:flex;gap:10px;align-items:flex-start;">
+          <div style="font-size:clamp(14px,1.6vw,22px);flex-shrink:0;">🎯</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">سند يكمّل MOH — لا يُنافسه</div>
+            <div class="small muted">الهدف النهائي: شراكة مع وزارة الصحة، لا منافستها. سند هو الطبقة التجارية التي تجعل رؤية MOH قابلة للتنفيذ بسرعة.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">05 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     06 — MARKET SIZE
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:35%;height:55%;top:5%;right:5%;background:rgba(0,210,255,.05);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">06 · حجم السوق</div>
+    <div class="h2" style="margin-bottom:clamp(14px,2vh,28px);">سوق بالمليارات.<br><span class="accent">لم يُخدّم بعد.</span></div>
+
+    <div class="g2" style="align-items:center;">
+
+      <div style="position:relative;height:clamp(160px,22vw,280px);display:flex;align-items:center;justify-content:center;">
+        <div style="position:absolute;width:100%;height:100%;border-radius:50%;border:1.5px dashed rgba(79,128,255,.2);background:rgba(37,99,255,.04);display:flex;align-items:flex-start;justify-content:center;padding-top:6%;">
+          <div style="text-align:center;">
+            <div style="font-size:clamp(7px,.65vw,10px);font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:rgba(79,128,255,.4);">TAM</div>
+            <div style="font-size:clamp(14px,1.8vw,24px);font-weight:700;color:rgba(79,128,255,.5);">$8B</div>
+          </div>
+        </div>
+        <div style="position:absolute;width:66%;height:66%;border-radius:50%;border:1.5px solid rgba(79,128,255,.35);background:rgba(37,99,255,.08);display:flex;align-items:flex-start;justify-content:center;padding-top:6%;">
+          <div style="text-align:center;">
+            <div style="font-size:clamp(7px,.65vw,10px);font-family:'IBM Plex Mono',monospace;letter-spacing:.15em;text-transform:uppercase;color:rgba(79,128,255,.6);">SAM</div>
+            <div style="font-size:clamp(13px,1.6vw,22px);font-weight:700;color:var(--blue-lg);">$2B</div>
+          </div>
+        </div>
+        <div style="position:absolute;width:36%;height:36%;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(37,99,255,.4);">
+          <div style="text-align:center;">
+            <div style="font-size:clamp(6px,.6vw,9px);font-family:'IBM Plex Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);">SOM</div>
+            <div style="font-size:clamp(12px,1.5vw,20px);font-weight:700;color:white;">$300M</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:clamp(10px,1.2vh,18px);">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:8px;"><span class="pill pill-blue">TAM</span> <span class="body">السوق الكلي</span></div>
+            <div class="h3 c-blue">$8B</div>
+          </div>
+          <div class="small muted">Health IT — KSA + UAE + Kuwait + Bahrain · CAGR 18%</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:100%;background:rgba(79,128,255,.35);"></div></div>
+        </div>
+        <hr class="rule">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:8px;"><span class="pill pill-blue">SAM</span> <span class="body">السوق المخدوم</span></div>
+            <div class="h3 c-blue">$2B</div>
+          </div>
+          <div class="small muted">تكامل منظومي + AI سريري + BI صحي · السعودية فقط</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:25%;"></div></div>
+        </div>
+        <hr class="rule">
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:8px;"><span class="pill pill-green">SOM</span> <span class="body">الهدف الواقعي · 5 سنوات</span></div>
+            <div class="h3 c-green">$300M ARR</div>
+          </div>
+          <div class="small muted">15% من SAM · 80 مستشفى + 3K صيدلية + 5 شركات تأمين + عقد MOH</div>
+          <div class="bar-wrap"><div class="bar-fill" style="width:15%;background:var(--green);"></div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="fn">* أرقام السوق: Mordor Intelligence 2024 Healthcare IT MEA Report · IQVIA Institute · تقديرات الفريق. الأرقام تقريبية وقابلة للمراجعة مع وصول لبيانات CCHI الرسمية.</div>
+  <div class="num-badge">06 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     06 — REVENUE MODEL
+══════════════════════════════════════════════════════ -->
+<div class="slide light">
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">07 · نموذج الإيرادات</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">كل جهة في المنظومة تدفع.<br><span style="color:var(--blue);">إيرادات متعددة ومتكررة.</span></div>
+    <div class="body muted" style="margin-bottom:clamp(12px,1.6vh,22px);">SaaS سنوي + رسوم معاملات + عقود حكومية — 82%+ إيرادات متكررة.</div>
+
+    <div class="g4" style="margin-bottom:clamp(10px,1.2vh,18px);">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:clamp(20px,2.5vw,32px);margin-bottom:6px;">🏥</div>
+        <div class="h3" style="margin-bottom:4px;">مستشفيات</div>
+        <div style="font-size:clamp(14px,1.8vw,22px);font-weight:700;color:var(--blue);">$80K–300K</div>
+        <div class="small muted">/ سنة / مستشفى</div>
+        <hr class="rule">
+        <div class="small muted">150+ مستشفى خاص · MOH</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:clamp(20px,2.5vw,32px);margin-bottom:6px;">💊</div>
+        <div class="h3" style="margin-bottom:4px;">صيدليات</div>
+        <div style="font-size:clamp(14px,1.8vw,22px);font-weight:700;color:var(--blue);">$6K–15K</div>
+        <div class="small muted">/ سنة / صيدلية</div>
+        <hr class="rule">
+        <div class="small muted">15,000+ صيدلية · SFDA</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:clamp(20px,2.5vw,32px);margin-bottom:6px;">🛡️</div>
+        <div class="h3" style="margin-bottom:4px;">تأمين</div>
+        <div style="font-size:clamp(14px,1.8vw,22px);font-weight:700;color:var(--blue);">$500K–2M</div>
+        <div class="small muted">/ سنة / شركة</div>
+        <hr class="rule">
+        <div class="small muted">25 شركة مرخصة · CCHI</div>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:clamp(20px,2.5vw,32px);margin-bottom:6px;">🏛️</div>
+        <div class="h3" style="margin-bottom:4px;">MOH</div>
+        <div style="font-size:clamp(14px,1.8vw,22px);font-weight:700;color:var(--blue);">$50M–150M</div>
+        <div class="small muted">عقد وطني</div>
+        <hr class="rule">
+        <div class="small muted">النجاح في البيلوت يفتح الباب</div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div class="card card-green" style="text-align:center;">
+        <div class="stat-num c-green">82<span style="font-size:.4em;font-weight:400;">%</span></div>
+        <div class="small muted" style="margin-top:4px;">إيرادات متكررة (ARR)</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;">
+        <div class="stat-num" style="color:var(--blue);">14<span style="font-size:.3em;font-weight:400;"> شهر</span></div>
+        <div class="small muted" style="margin-top:4px;">CAC Payback مستهدف</div>
+      </div>
+      <div class="card card-gold" style="text-align:center;">
+        <div class="stat-num c-gold">5<span style="font-size:.45em;font-weight:400;">x</span></div>
+        <div class="small muted" style="margin-top:4px;">نسبة LTV:CAC · السنة الثالثة</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="fn">* أعداد المستشفيات والصيدليات: MOH / SFDA 2024. أعداد التأمين: CCHI 2024. نطاقات الأسعار: قياساً على Athenahealth / Veeva / Health Catalyst في أسواق مشابهة الحجم.</div>
+  <div class="num-badge">07 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     07 — COMPETITIVE LANDSCAPE (reframed)
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:30%;height:50%;top:0;right:0;background:rgba(245,200,66,.04);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">08 · الموقع التنافسي</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">ليس سؤال من الأفضل.<br><span class="accent">بل من يخدم ماذا.</span></div>
+    <div class="body muted" style="margin-bottom:clamp(14px,1.8vh,26px);">
+      Epic ممتاز داخل المستشفى. AWS ممتاز في البنية التحتية. Nphies يخدم التقارير الحكومية.<br>
+      <strong style="color:white;">SANAD يملأ الفراغ بينهم جميعاً — التكامل عبر المؤسسات.</strong>
+    </div>
+
+    <!-- positioning cards -->
+    <div class="g2" style="margin-bottom:clamp(10px,1.2vh,18px);">
+
+      <!-- existing players -->
+      <div style="display:flex;flex-direction:column;gap:clamp(8px,.9vh,14px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:var(--dim2);margin-bottom:2px;">الحلول القائمة — ماذا يفعلون جيداً</div>
+
+        <div class="card" style="display:flex;gap:clamp(10px,1.2vw,18px);align-items:flex-start;padding:clamp(10px,1.2vw,16px);">
+          <div style="font-size:clamp(16px,2vw,26px);flex-shrink:0;">🏥</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">Epic / Oracle Health</div>
+            <div class="small" style="color:var(--green);margin-bottom:3px;">✓ إدارة المستشفى الواحد — ممتاز</div>
+            <div class="small muted">✗ لا يتكامل مع صيدلية خارجية أو شركة تأمين منفصلة · لا يعمل بالسياق السعودي</div>
+          </div>
+        </div>
+
+        <div class="card" style="display:flex;gap:clamp(10px,1.2vw,18px);align-items:flex-start;padding:clamp(10px,1.2vw,16px);">
+          <div style="font-size:clamp(16px,2vw,26px);flex-shrink:0;">🏛️</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">Nphies (MOH)</div>
+            <div class="small" style="color:var(--green);margin-bottom:3px;">✓ تقارير حكومية وبيانات وطنية — ممتاز</div>
+            <div class="small muted">✗ لا AI سريري · لا بوابة مواطن · لا تكامل صيدلية/تأمين فوري</div>
+          </div>
+        </div>
+
+        <div class="card" style="display:flex;gap:clamp(10px,1.2vw,18px);align-items:flex-start;padding:clamp(10px,1.2vw,16px);">
+          <div style="font-size:clamp(16px,2vw,26px);flex-shrink:0;">☁️</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">AWS / Azure Health</div>
+            <div class="small" style="color:var(--green);margin-bottom:3px;">✓ بنية تحتية سحابية — ممتازة</div>
+            <div class="small muted">✗ لا workflow سريري · لا سياق محلي · لا تكامل مع CCHI أو SFDA</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SANAD gap -->
+      <div style="display:flex;flex-direction:column;gap:clamp(8px,.9vh,14px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:2px;">SANAD — الفراغ الذي لا يملأه أحد</div>
+
+        <div class="card card-blue" style="padding:clamp(14px,1.8vw,24px);flex:1;display:flex;flex-direction:column;gap:clamp(8px,.9vh,14px);">
+          <div class="small" style="font-weight:700;color:white;">الطبقة التي تجمعهم</div>
+          <div class="small muted">سند لا يحل محل Epic أو Nphies أو AWS. سند يجلس فوقهم ويجعلهم يتحدثون مع بعض.</div>
+
+          <hr class="rule">
+
+          <div class="small" style="font-weight:700;color:white;margin-bottom:4px;">ما لا يستطيع أحدهم منفرداً فعله:</div>
+          <div class="small muted" style="display:flex;gap:6px;"><span class="c-blue">→</span> طبيب الطوارئ يرى سجل مريض من مستشفى آخر</div>
+          <div class="small muted" style="display:flex;gap:6px;"><span class="c-blue">→</span> صيدلاني يتلقى تنبيه تفاعل دوائي قبل الصرف</div>
+          <div class="small muted" style="display:flex;gap:6px;"><span class="c-blue">→</span> شركة تأمين تحصل على موافقة فورية بدون فاكس</div>
+          <div class="small muted" style="display:flex;gap:6px;"><span class="c-blue">→</span> مواطن يرى كل سجله الصحي في مكان واحد</div>
+
+          <hr class="rule">
+
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.1em;text-transform:uppercase;color:var(--blue-lg);">هذا الفراغ لا يملأه Epic. ولا AWS. ولا Nphies.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">08 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     08 — GO TO MARKET
+══════════════════════════════════════════════════════ -->
+<div class="slide navy">
+  <div class="bg-glow" style="width:40%;height:50%;bottom:-10%;left:-5%;background:rgba(37,99,255,.07);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">09 · استراتيجية الدخول</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">ندخل من الباب الأعلى.<br><span class="accent">ثم نتوسع أفقياً بالبيانات.</span></div>
+    <div class="body muted" style="margin-bottom:clamp(12px,1.6vh,24px);">Anchor Client يفتح القطاع كله. كل مستشفى موقّع = دليل يجلب التالي.</div>
+
+    <div class="tl">
+      <div class="tl-phase now">
+        <div class="tl-year">▶ الآن — 2026 · فعّال</div>
+        <div class="tl-title" style="color:white;">Pilot Anchor</div>
+        <div class="tl-item"><div class="tl-dot">◆</div><div>مستشفى رائد واحد (Riyadh / Jeddah)</div></div>
+        <div class="tl-item"><div class="tl-dot">◆</div><div>شركة تأمين كبرى واحدة</div></div>
+        <div class="tl-item"><div class="tl-dot">◆</div><div>50 صيدلية ضمن شبكة الأنكر</div></div>
+        <div class="tl-item"><div class="tl-dot">◆</div><div>قياس وتوثيق ROI حقيقي</div></div>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-year">2027 · Scale KSA</div>
+        <div class="tl-title" style="color:white;">National Rollout</div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>20+ مستشفى · 3 شركات تأمين</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>2,000+ صيدلية في الشبكة</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>تقديم رسمي لوزارة الصحة</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>Series A بناءً على ARR موثق</div></div>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-year">2028+ · GCC & MENA</div>
+        <div class="tl-title" style="color:white;">Regional Expansion</div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>UAE · Kuwait · Bahrain</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>Egypt · Jordan (MENA)</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>نموذج الترخيص الوطني</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>Series B</div></div>
+      </div>
+    </div>
+
+    <div class="g3" style="margin-top:clamp(10px,1.2vh,18px);">
+      <div class="card" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div class="small muted" style="font-family:'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">سبب Anchor Strategy</div>
+        <div class="body" style="color:white;">مستشفى رائد = كل القطاع يرى النتيجة</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div class="small muted" style="font-family:'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">Metric التوسع</div>
+        <div class="body" style="color:white;">من 45 يوم → 24 ساعة معالجة تأمين</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div class="small muted" style="font-family:'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">حد الـ MOH Case</div>
+        <div class="body" style="color:white;">3 مستشفيات + بيانات = تقديم وطني</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">09 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     09 — TRACTION
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:40%;height:60%;bottom:-10%;right:-5%;background:rgba(0,214,143,.05);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">10 · ما بنيناه حتى الآن</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      Functional Prototype — مكتمل.<br>
+      <span class="c-green">Engineering Readiness: 100%.</span>
+    </div>
+    <div class="body muted" style="max-width:65%;margin-bottom:clamp(12px,1.6vh,22px);">
+      بنيناه بالكامل حتى يمكن اختباره وتقييمه فوراً. ما يأتي بعده هو Pilot مع مستخدمين حقيقيين — وهذا ما يتيحه التمويل.
+    </div>
+
+    <div class="g4" style="margin-bottom:clamp(10px,1.2vh,18px);">
+      <div class="card card-green" style="text-align:center;">
+        <div class="stat-num c-green">12</div>
+        <div class="small" style="color:var(--green);margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:clamp(6px,.6vw,9px);letter-spacing:.1em;">PORTALS BUILT</div>
+        <div class="small muted" style="margin-top:4px;">بوابة وظيفية مكتملة</div>
+      </div>
+      <div class="card card-green" style="text-align:center;">
+        <div class="stat-num c-green">88/88</div>
+        <div class="small" style="color:var(--green);margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:clamp(6px,.6vw,9px);letter-spacing:.1em;">TESTS PASS</div>
+        <div class="small muted" style="margin-top:4px;">سيناريوهات سريرية + BOLA security</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;">
+        <div class="stat-num c-blue">7</div>
+        <div class="small" style="color:var(--blue-lg);margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:clamp(6px,.6vw,9px);letter-spacing:.1em;">DEMO SCENARIOS</div>
+        <div class="small muted" style="margin-top:4px;">محاكاة سريرية مهندسة بالكامل</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;">
+        <div class="stat-num c-blue" style="font-size:clamp(20px,3.5vw,48px);">AR/EN</div>
+        <div class="small" style="color:var(--blue-lg);margin-top:2px;font-family:'IBM Plex Mono',monospace;font-size:clamp(6px,.6vw,9px);letter-spacing:.1em;">BILINGUAL</div>
+        <div class="small muted" style="margin-top:4px;">ثنائي اللغة — 15 شاشة</div>
+      </div>
+    </div>
+
+    <!-- honest milestone bar -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:clamp(12px,1.4vw,20px);margin-bottom:clamp(10px,1.2vh,16px);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:var(--dim2);margin-bottom:clamp(8px,.8vh,14px);">مسار التطوير — أين نحن الآن</div>
+      <div style="display:flex;gap:0;align-items:stretch;">
+        <div style="flex:1;padding:clamp(8px,1vw,14px);background:rgba(0,214,143,.1);border:1px solid rgba(0,214,143,.25);border-radius:8px 0 0 8px;text-align:center;">
+          <div class="small" style="color:var(--green);font-weight:700;margin-bottom:3px;">✓ مكتمل</div>
+          <div class="small muted">Functional Prototype<br>88/88 Tests</div>
+        </div>
+        <div style="flex:1;padding:clamp(8px,1vw,14px);background:rgba(37,99,255,.12);border:1px solid rgba(37,99,255,.35);border-top:2px solid var(--blue-lg);text-align:center;">
+          <div class="small" style="color:var(--blue-lg);font-weight:700;margin-bottom:3px;">▶ التالي بالتمويل</div>
+          <div class="small muted">Pilot — مستشفى حقيقي<br>مستخدمون فعليون</div>
+        </div>
+        <div style="flex:1;padding:clamp(8px,1vw,14px);border:1px solid rgba(255,255,255,.07);border-radius:0 8px 8px 0;text-align:center;opacity:.5;">
+          <div class="small muted" style="font-weight:700;margin-bottom:3px;">— مرحلة مستقبلية</div>
+          <div class="small muted">Scale KSA<br>Series A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card" style="padding:clamp(10px,1.2vw,18px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:clamp(6px,.6vh,10px);">Engineering Milestones ✓</div>
+        <div style="display:flex;flex-direction:column;gap:clamp(4px,.4vh,7px);">
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> AI decision engine حقيقي — لا mock data</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> PostgreSQL production DB + Drizzle ORM</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> JWT Auth + RBAC + Isnād Audit Chain</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> Real-time SSE alerts + Drug safety engine</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> Error boundaries + JWT auto-refresh</div>
+        </div>
+      </div>
+      <div class="card" style="padding:clamp(10px,1.2vw,18px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:rgba(255,200,50,.6);margin-bottom:clamp(6px,.6vh,10px);">Market Milestones — بعد التمويل</div>
+        <div style="display:flex;flex-direction:column;gap:clamp(4px,.4vh,7px);">
+          <div class="small muted" style="display:flex;gap:8px;"><span style="color:rgba(255,200,50,.5);">○</span> اتفاقية بيلوت مع مستشفى رائد</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span style="color:rgba(255,200,50,.5);">○</span> مستخدمون سريريون فعليون (أطباء + صيادلة)</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span style="color:rgba(255,200,50,.5);">○</span> بيانات ROI حقيقية وقابلة للنشر</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span style="color:rgba(255,200,50,.5);">○</span> Letter of Intent من شركة تأمين</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span style="color:rgba(255,200,50,.5);">○</span> تقديم رسمي لوزارة الصحة</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">10 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     10 — VALIDATION (NEW)
+══════════════════════════════════════════════════════ -->
+<div class="slide navy">
+  <div class="bg-glow" style="width:40%;height:50%;top:-10%;right:-5%;background:rgba(37,99,255,.07);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">11 · إشارات الطلب</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      نحن في مرحلة Pre-Pilot.<br>
+      <span class="accent">الصدق هنا أقوى من الادعاء.</span>
+    </div>
+    <div class="body muted" style="max-width:60%;margin-bottom:clamp(14px,1.8vh,26px);">
+      لا نملك عقوداً بعد — ولا نقول إننا نملكها. نملك منصة جاهزة، ومشكلة حقيقية، ونافذة زمنية نادرة. التمويل هو ما يحوّل هذا إلى عقود.
+    </div>
+
+    <div class="g2" style="margin-bottom:clamp(10px,1.2vh,18px);">
+
+      <!-- what we have -->
+      <div style="display:flex;flex-direction:column;gap:clamp(8px,.9vh,14px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:var(--green);margin-bottom:2px;">ما نملكه الآن</div>
+
+        <div class="card card-green" style="padding:clamp(10px,1.2vw,16px);">
+          <div class="small" style="font-weight:700;color:white;margin-bottom:6px;">🧪 التحقق التقني — مكتمل</div>
+          <div class="small muted">7 سيناريوهات سريرية حقيقية مُحاكاة بالكامل: Warfarin override، كشف سرطان، احتيال تأمين، تفاعل Serotonin، وأكثر. كل سيناريو قابل للعرض الآن أمام أي طبيب أو مدير مستشفى.</div>
+        </div>
+
+        <div class="card card-green" style="padding:clamp(10px,1.2vw,16px);">
+          <div class="small" style="font-weight:700;color:white;margin-bottom:6px;">📐 التحقق من المشكلة — موثق</div>
+          <div class="small muted">المشكلة التي يحلها سند موثقة في تقارير WHO وMOH وOECD — ليست افتراضاً. القطاع يعاني من الفجوة التي نملأها.</div>
+        </div>
+
+        <div class="card card-green" style="padding:clamp(10px,1.2vw,16px);">
+          <div class="small" style="font-weight:700;color:white;margin-bottom:6px;">⏱️ التوقيت — نادر</div>
+          <div class="small muted">رؤية 2030 + إلزامية CCHI + استراتيجية SDAIA = نافذة لم تُفتح من قبل ولن تبقى مفتوحة طويلاً.</div>
+        </div>
+      </div>
+
+      <!-- what funding unlocks -->
+      <div style="display:flex;flex-direction:column;gap:clamp(8px,.9vh,14px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:2px;">ما يفتحه التمويل — خلال 6 أشهر</div>
+
+        <div class="card card-blue" style="padding:clamp(10px,1.2vw,16px);">
+          <div class="small" style="font-weight:700;color:white;margin-bottom:6px;">🏥 Pilot مع Anchor Client</div>
+          <div class="small muted">مستشفى خاص رائد في الرياض أو جدة. Clinical Advisor في الفريق يفتح هذا الباب. الهدف: اتفاقية بيلوت موقّعة خلال 90 يوم من التمويل.</div>
+        </div>
+
+        <div class="card card-blue" style="padding:clamp(10px,1.2vw,16px);">
+          <div class="small" style="font-weight:700;color:white;margin-bottom:6px;">📄 LOI من شركة تأمين</div>
+          <div class="small muted">اتصالات مبدئية مع 2-3 شركات تأمين فور وجود نموذج Pilot يعمل. شركات التأمين لديها حافز واضح: تقليص وقت المطالبات من 45 يوماً.</div>
+        </div>
+
+        <div class="card card-blue" style="padding:clamp(10px,1.2vw,16px);">
+          <div class="small" style="font-weight:700;color:white;margin-bottom:6px;">📊 بيانات ROI حقيقية</div>
+          <div class="small muted">بعد 3-6 أشهر بيلوت: أرقام قابلة للنشر والدفاع عنها أمام أي مستثمر أو جهة حكومية. هذه هي قيمة التمويل الحقيقية.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- bottom honest statement -->
+    <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-right:3px solid var(--blue-lg);border-radius:0 8px 8px 0;padding:clamp(12px,1.4vw,20px);">
+      <div class="body" style="color:rgba(255,255,255,.8);line-height:1.6;">
+        "لا نطلب منكم الإيمان بأن SANAD ناجح بالفعل.<br>
+        نطلب منكم الاقتناع بأن <strong style="color:white;">SANAD حتميّ إذا تم تمويله وتنفيذه بالشكل الصحيح.</strong><br>
+        التمويل يحوّل الـ Prototype إلى دليل — والدليل يحوّل السوق."
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">11 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     11 — FINANCIAL PROJECTIONS
+══════════════════════════════════════════════════════ -->
+<div class="slide light">
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">12 · التوقعات المالية</div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:clamp(4px,.5vh,8px);">
+      <div class="h2">نموذج داخلي محافظ.<br><span style="color:var(--blue);">يُحدَّث بعد كل Milestone.</span></div>
+      <div style="flex-shrink:0;background:rgba(245,200,66,.12);border:1px solid rgba(245,200,66,.35);border-radius:8px;padding:6px 14px;margin-top:4px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:700;">Management Projection</div>
+        <div style="font-size:clamp(6px,.6vw,9px);color:rgba(245,200,66,.55);margin-top:2px;">Pre-Revenue · قابل للمراجعة بعد Pilot</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(6px,.8vw,12px);margin-bottom:clamp(12px,1.5vh,20px);">
+      <div class="card" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;color:rgba(0,0,0,.3);margin-bottom:6px;">2026 PILOT</div>
+        <div style="font-size:clamp(16px,2.2vw,28px);font-weight:800;color:var(--blue);">$0.5M</div>
+        <div class="small muted" style="margin-top:4px;">ARR</div>
+        <hr class="rule">
+        <div class="small muted">1-2 مستشفى · 50 صيدلية</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;color:rgba(0,0,0,.3);margin-bottom:6px;">2027</div>
+        <div style="font-size:clamp(16px,2.2vw,28px);font-weight:800;color:var(--blue);">$8M</div>
+        <div class="small muted" style="margin-top:4px;">ARR</div>
+        <hr class="rule">
+        <div class="small muted">20 مستشفى · 3 تأمين</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;color:rgba(0,0,0,.3);margin-bottom:6px;">2028</div>
+        <div style="font-size:clamp(16px,2.2vw,28px);font-weight:800;color:var(--blue);">$35M</div>
+        <div class="small muted" style="margin-top:4px;">ARR</div>
+        <hr class="rule">
+        <div class="small muted">40 مستشفى · GCC بداية</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;color:rgba(0,0,0,.3);margin-bottom:6px;">2029</div>
+        <div style="font-size:clamp(16px,2.2vw,28px);font-weight:800;color:var(--blue);">$90M</div>
+        <div class="small muted" style="margin-top:4px;">ARR</div>
+        <hr class="rule">
+        <div class="small muted">70 مستشفى · موات MOH</div>
+      </div>
+      <div class="card card-green" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;color:rgba(0,150,80,.5);margin-bottom:6px;">2030</div>
+        <div style="font-size:clamp(16px,2.2vw,28px);font-weight:800;color:var(--green);">$200M+</div>
+        <div class="small muted" style="margin-top:4px;">ARR</div>
+        <hr class="rule">
+        <div class="small muted">120 مستشفى · عقد وطني</div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div class="card card-blue" style="text-align:center;">
+        <div class="stat-num" style="color:var(--blue);font-size:clamp(24px,4vw,52px);">$200M</div>
+        <div class="small muted" style="margin-top:4px;">ARR · 2030 · المحافظ</div>
+        <div class="small" style="color:rgba(0,100,255,.4);margin-top:2px;">بدون عقد MOH وطني</div>
+      </div>
+      <div class="card card-gold" style="text-align:center;">
+        <div class="stat-num c-gold" style="font-size:clamp(24px,4vw,52px);">$400M</div>
+        <div class="small muted" style="margin-top:4px;">ARR · 2030 · التفاؤلي</div>
+        <div class="small" style="color:rgba(200,160,0,.4);margin-top:2px;">مع MOH + GCC expansion</div>
+      </div>
+      <div class="card card-green" style="text-align:center;">
+        <div class="stat-num c-green" style="font-size:clamp(24px,4vw,52px);">8–12x</div>
+        <div class="small muted" style="margin-top:4px;">Revenue Multiple مستهدف</div>
+        <div class="small" style="color:rgba(0,150,80,.4);margin-top:2px;">قياساً بـ Veeva / Athenahealth</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="fn">* Management Projection — Pre-Revenue. مبني على: ACV متوسط لكل قطاع × عدد الوحدات المستهدفة × معدل نمو 70% سنوياً (Year 1-3) → 40% (Year 4-5). مرجع: Athenahealth ~$4B ARR، Veeva ~$2B ARR في أسواق مشابهة. يجب مراجعة هذه الأرقام مع بيانات Pilot الفعلية في 2026.</div>
+  <div class="num-badge">12 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     11 — TEAM
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:50%;height:60%;top:-20%;right:-10%;background:rgba(37,99,255,.07);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">13 · الفريق</div>
+    <div class="h2" style="margin-bottom:clamp(14px,2vh,28px);">
+      بُني هذا من فريق مصغر.<br>
+      <span class="accent">التمويل يُكمل الصورة.</span>
+    </div>
+
+    <div class="g3" style="margin-bottom:clamp(12px,1.5vh,22px);">
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="width:clamp(44px,5vw,70px);height:clamp(44px,5vw,70px);border-radius:50%;background:rgba(37,99,255,.15);border:1.5px solid rgba(79,128,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(18px,2.2vw,30px);margin:0 auto clamp(10px,1.2vh,16px);">👤</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">[المؤسس / CEO]</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.12em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:8px;">CEO & Product</div>
+        <div class="small muted">رؤية المنتج · استراتيجية السوق · علاقات الشركاء الحكوميين</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="width:clamp(44px,5vw,70px);height:clamp(44px,5vw,70px);border-radius:50%;background:rgba(37,99,255,.15);border:1.5px solid rgba(79,128,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(18px,2.2vw,30px);margin:0 auto clamp(10px,1.2vh,16px);">👤</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">[CTO]</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.12em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:8px;">CTO & Architecture</div>
+        <div class="small muted">بنية تقنية كاملة · محرك AI · أمن البيانات · CI/CD</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="width:clamp(44px,5vw,70px);height:clamp(44px,5vw,70px);border-radius:50%;background:rgba(37,99,255,.15);border:1.5px solid rgba(79,128,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(18px,2.2vw,30px);margin:0 auto clamp(10px,1.2vh,16px);">👤</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">[BD / CMO]</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.12em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:8px;">Business Development</div>
+        <div class="small muted">علاقات المستشفيات · شركات التأمين · الجهات الحكومية</div>
+      </div>
+    </div>
+
+    <div class="card card-blue" style="padding:clamp(12px,1.5vw,20px);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:clamp(8px,.8vh,14px);">خطة التوظيف بعد التمويل · الأولويات الثلاث</div>
+      <div class="g3">
+        <div>
+          <div class="small" style="font-weight:700;color:white;margin-bottom:4px;">🏥 Clinical Advisor</div>
+          <div class="small muted">طبيب متخصص يُضفي مصداقية على المحرك السريري مع SFDA والجهات التنظيمية</div>
+        </div>
+        <div>
+          <div class="small" style="font-weight:700;color:white;margin-bottom:4px;">🔐 Security & Compliance Lead</div>
+          <div class="small muted">PDPL · ISO 27001 · penetration testing · موافقات NCA</div>
+        </div>
+        <div>
+          <div class="small" style="font-weight:700;color:white;margin-bottom:4px;">🤝 Government Relations</div>
+          <div class="small muted">القناة الرسمية مع MOH / CCHI / SDAIA — لازمة للعقد الوطني</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">13 — 14</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     13 — THE ASK
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:60%;height:70%;top:-20%;right:-10%;background:rgba(37,99,255,.1);"></div>
+  <div class="bg-glow" style="width:30%;height:40%;bottom:-10%;left:-5%;background:rgba(0,210,255,.05);"></div>
+
+  <div class="content" style="width:100%;display:flex;flex-direction:column;height:100%;justify-content:space-between;">
+
+    <div>
+      <div class="slide-tag">14 · الطلب</div>
+      <div style="display:flex;align-items:baseline;gap:clamp(10px,1.2vw,20px);margin-bottom:clamp(4px,.5vh,8px);">
+        <div style="font-size:clamp(48px,9vw,120px);font-weight:800;color:white;line-height:1;">$5M</div>
+        <div>
+          <div class="h3 muted">Seed Round</div>
+          <div class="small muted">18 شهر runway · Pilot → ARR → Series A</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:clamp(10px,1.2vh,18px);">استخدام التمويل</div>
+      <div class="use-row">
+        <div class="use-pct">35%</div>
+        <div class="use-bar-wrap"><div class="use-bar" style="width:35%;"></div></div>
+        <div class="use-desc">تشغيل البيلوت + cloud infrastructure + دعم العملاء</div>
+      </div>
+      <div class="use-row">
+        <div class="use-pct">25%</div>
+        <div class="use-bar-wrap"><div class="use-bar" style="width:25%;"></div></div>
+        <div class="use-desc">فريق: Clinical + Security + BD</div>
+      </div>
+      <div class="use-row">
+        <div class="use-pct">20%</div>
+        <div class="use-bar-wrap"><div class="use-bar" style="width:20%;"></div></div>
+        <div class="use-desc">تطوير: FHIR integration + LDAP/SAML + تقارير وزارية</div>
+      </div>
+      <div class="use-row">
+        <div class="use-pct">15%</div>
+        <div class="use-bar-wrap"><div class="use-bar" style="width:15%;"></div></div>
+        <div class="use-desc">امتثال: PDPL · ISO 27001 · CCHI approval</div>
+      </div>
+      <div class="use-row">
+        <div class="use-pct">5%</div>
+        <div class="use-bar-wrap"><div class="use-bar" style="width:5%;opacity:.5;"></div></div>
+        <div class="use-desc">احتياطي تشغيلي</div>
+      </div>
+    </div>
+
+    <div class="g4">
+      <div class="card card-blue" style="text-align:center;padding:clamp(10px,1.2vw,16px);">
+        <div style="font-size:clamp(16px,2vw,26px);margin-bottom:4px;">🎯</div>
+        <div class="small" style="font-weight:700;color:white;margin-bottom:2px;">Anchor Client</div>
+        <div class="small muted">مستشفى رائد + تأمين موقّعان</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;padding:clamp(10px,1.2vw,16px);">
+        <div style="font-size:clamp(16px,2vw,26px);margin-bottom:4px;">📊</div>
+        <div class="small" style="font-weight:700;color:white;margin-bottom:2px;">ROI موثق</div>
+        <div class="small muted">بيانات حقيقية قابلة للنشر</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;padding:clamp(10px,1.2vw,16px);">
+        <div style="font-size:clamp(16px,2vw,26px);margin-bottom:4px;">💰</div>
+        <div class="small" style="font-weight:700;color:white;margin-bottom:2px;">$2M+ ARR</div>
+        <div class="small muted">يفتح Series A بشروط جيدة</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;padding:clamp(10px,1.2vw,16px);">
+        <div style="font-size:clamp(16px,2vw,26px);margin-bottom:4px;">🏛️</div>
+        <div class="small" style="font-weight:700;color:white;margin-bottom:2px;">تقديم MOH</div>
+        <div class="small muted">رسمي بناءً على Pilot</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;border-top:1px solid var(--border);padding-top:clamp(10px,1.2vh,18px);">
+      <div style="font-size:clamp(18px,2.5vw,34px);font-weight:800;letter-spacing:.06em;color:white;">SANAD</div>
+      <div style="font-size:clamp(9px,.9vw,13px);color:rgba(255,255,255,.3);margin-top:4px;letter-spacing:.08em;">لكل قرارٍ سند &nbsp;·&nbsp; Behind Every Decision &nbsp;·&nbsp; CONFIDENTIAL 2026</div>
+    </div>
+
+  </div>
+  <div class="num-badge">14 — 14</div>
+</div>
+
+
+</div><!-- /deck -->
+</body>
+</html>

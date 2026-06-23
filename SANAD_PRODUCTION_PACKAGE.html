@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANAD — Production Package | Investor Cut</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --white: #f8f8f6;
+    --blue: #007AFF;
+    --blue-light: #e8f2ff;
+    --gold: #b8860b;
+    --gold-light: #faf6e8;
+    --red: #c0392b;
+    --green: #1a6b3a;
+    --gray: #6b6b6b;
+    --gray-light: #f2f2f0;
+    --border: #e0ddd6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IBM Plex Sans Arabic', 'Segoe UI', Arial, sans-serif;
+    background: var(--white);
+    color: var(--black);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* ── COVER PAGE ─────────────────────────────────────── */
+  .cover {
+    height: 100vh;
+    min-height: 700px;
+    background: var(--black);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    page-break-after: always;
+    padding: 60px;
+    position: relative;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 40%, rgba(0,122,255,.12) 0%, transparent 65%);
+  }
+  .cover-logo {
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: .04em;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .cover-tagline {
+    font-size: 16px;
+    color: rgba(255,255,255,.45);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 64px;
+    position: relative;
+  }
+  .cover-title {
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--white);
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .cover-subtitle {
+    font-size: 15px;
+    color: rgba(255,255,255,.5);
+    margin-bottom: 80px;
+    position: relative;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 48px;
+    position: relative;
+  }
+  .cover-meta-item { text-align: center; }
+  .cover-meta-label {
+    font-size: 9px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.3);
+    margin-bottom: 4px;
+  }
+  .cover-meta-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,.75);
+  }
+  .cover-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+  }
+
+  /* ── LAYOUT ─────────────────────────────────────────── */
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+
+  @media print {
+    .page { padding: 32px; }
+    .cover { height: 100vh; }
+    .page-break { page-break-before: always; }
+  }
+
+  /* ── SECTION HEADERS ────────────────────────────────── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 32px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--black);
+  }
+  .section-number {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    color: var(--blue);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--black);
+  }
+  .section-title-en {
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 2px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ── ACT DIVIDER ────────────────────────────────────── */
+  .act-divider {
+    background: var(--black);
+    color: var(--white);
+    padding: 20px 28px;
+    border-radius: 12px;
+    margin: 40px 0 28px;
+  }
+  .act-divider .act-label {
+    font-size: 9px;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--blue);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 4px;
+  }
+  .act-divider .act-title-ar {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .act-divider .act-title-en {
+    font-size: 11px;
+    color: rgba(255,255,255,.45);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .05em;
+  }
+  .act-divider .act-note {
+    font-size: 11px;
+    color: rgba(255,255,255,.55);
+    margin-top: 10px;
+    font-style: italic;
+    border-top: 1px solid rgba(255,255,255,.1);
+    padding-top: 10px;
+  }
+
+  /* ── CHARACTER CARD ─────────────────────────────────── */
+  .character-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 700px) { .character-grid { grid-template-columns: 1fr; } }
+
+  .character-card {
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .character-card.primary { border-color: var(--blue); }
+  .character-card.anchor { border-color: var(--gold); }
+
+  .char-header {
+    padding: 16px 20px 12px;
+    background: var(--gray-light);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .character-card.primary .char-header { background: var(--blue-light); border-color: #c5d9f5; }
+  .character-card.anchor .char-header { background: var(--gold-light); border-color: #e8dcb0; }
+
+  .char-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: white;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+  .char-name-ar { font-size: 15px; font-weight: 700; color: var(--black); }
+  .char-name-en { font-size: 10px; color: var(--gray); font-family: 'IBM Plex Mono', monospace; letter-spacing: .03em; }
+  .char-role { font-size: 10px; color: var(--blue); font-weight: 600; letter-spacing: .05em; margin-top: 2px; }
+  .character-card.anchor .char-role { color: var(--gold); }
+
+  .char-body { padding: 16px 20px; }
+  .char-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+  .char-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gray);
+    min-width: 80px;
+    padding-top: 1px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .char-value { font-size: 12px; color: var(--black); flex: 1; }
+
+  .char-prompt-box {
+    margin-top: 14px;
+    background: #1a1a1a;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .char-prompt-label {
+    font-size: 9px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--blue);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 6px;
+  }
+  .char-prompt-text {
+    font-size: 10.5px;
+    color: #c8d6e5;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.6;
+    direction: ltr;
+    text-align: left;
+  }
+
+  .char-scenes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .scene-tag {
+    font-size: 9px;
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--gray-light);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    color: var(--gray);
+  }
+
+  /* ── SHOT CARD ──────────────────────────────────────── */
+  .shot-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .shot-card.key-shot { border-color: var(--gold); }
+  .shot-card.silence-shot { border-color: #9b59b6; }
+
+  .shot-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    background: var(--gray-light);
+    border-bottom: 1px solid var(--border);
+  }
+  .shot-card.key-shot .shot-header { background: var(--gold-light); border-color: #e8dcb0; }
+  .shot-card.silence-shot .shot-header { background: #f5f0ff; border-color: #d4bfee; }
+
+  .shot-num {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--blue);
+    min-width: 32px;
+  }
+  .shot-card.key-shot .shot-num { color: var(--gold); }
+  .shot-card.silence-shot .shot-num { color: #9b59b6; }
+
+  .shot-dur {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--black);
+    color: var(--white);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .shot-badge {
+    font-size: 9px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .badge-world1 { background: #fee2e2; color: var(--red); }
+  .badge-world2 { background: #dcfce7; color: var(--green); }
+  .badge-key { background: #fef9c3; color: #854d0e; }
+  .badge-silence { background: #ede9fe; color: #6d28d9; }
+  .badge-network { background: #e0f2fe; color: #0369a1; }
+
+  .shot-body { padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 650px) { .shot-body { grid-template-columns: 1fr; } }
+
+  .shot-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .shot-visual { font-size: 12.5px; line-height: 1.65; }
+  .shot-vo {
+    font-size: 12px;
+    font-style: italic;
+    color: #333;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-right: 3px solid var(--blue);
+    background: var(--blue-light);
+    border-radius: 0 8px 8px 0;
+  }
+  .shot-sub {
+    font-size: 10.5px;
+    color: var(--gray);
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+    direction: ltr;
+    text-align: left;
+  }
+  .shot-dialogue {
+    font-size: 12px;
+    color: #333;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-right: 3px solid var(--gold);
+    background: var(--gold-light);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .shot-seedance-box {
+    grid-column: 1 / -1;
+    background: #0d1117;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 4px;
+  }
+  .seedance-label {
+    font-size: 9px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: #58a6ff;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .seedance-label::before { content: '▶'; font-size: 8px; }
+  .seedance-prompt {
+    font-size: 11px;
+    color: #cdd9e5;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1.65;
+    direction: ltr;
+    text-align: left;
+  }
+  .seedance-prompt .highlight { color: #79c0ff; }
+  .seedance-prompt .char-ref { color: #f8c332; }
+  .seedance-prompt .motion { color: #6bc46d; }
+
+  .shot-chars {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .shot-chars-label {
+    font-size: 9px;
+    color: var(--gray);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .char-tag {
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--black);
+    color: var(--white);
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── TEXT CARD (for silence shots) ─────────────────── */
+  .text-card {
+    background: var(--black);
+    border-radius: 16px;
+    padding: 40px 48px;
+    text-align: center;
+    margin: 20px 0;
+  }
+  .text-card .text-ar {
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--white);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .text-card .text-en {
+    font-size: 13px;
+    color: rgba(255,255,255,.4);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .05em;
+  }
+  .text-card .text-note {
+    font-size: 10px;
+    color: rgba(255,255,255,.25);
+    margin-top: 20px;
+    font-style: italic;
+  }
+
+  /* ── PRODUCTION NOTES ───────────────────────────────── */
+  .note-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 650px) { .note-grid { grid-template-columns: 1fr; } }
+
+  .note-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .note-card-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--black);
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .note-item { font-size: 12px; color: #333; margin-bottom: 6px; display: flex; gap: 8px; }
+  .note-dot { color: var(--blue); font-weight: 700; flex-shrink: 0; }
+
+  /* ── SUMMARY TABLE ───────────────────────────────────── */
+  .summary-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  .summary-table th {
+    background: var(--black);
+    color: var(--white);
+    padding: 10px 14px;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .summary-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .summary-table tr:last-child td { border-bottom: none; }
+  .summary-table tr:nth-child(even) td { background: var(--gray-light); }
+
+  .footer {
+    text-align: center;
+    padding: 32px;
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--gray);
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: .08em;
+    margin-top: 60px;
+  }
+
+  /* ── PRINT ───────────────────────────────────────────── */
+  @media print {
+    body { font-size: 11px; }
+    .page { padding: 24px; max-width: 100%; }
+    .shot-seedance-box { background: #111; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  COVER                                                 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-logo">SANAD</div>
+  <div class="cover-tagline">لكل قرارٍ سند · Behind Every Decision</div>
+  <div class="cover-title">حزمة الإنتاج — نسخة المستثمر</div>
+  <div class="cover-subtitle">Production Package — Investor Cut · Seedance Edition</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">المدة</div>
+      <div class="cover-meta-value">2:30 – 3:00</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">اللقطات</div>
+      <div class="cover-meta-value">25 Shot</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">الشخصيات</div>
+      <div class="cover-meta-value">9 Character</div>
+    </div>
+    <div class="cover-meta-item">
+      <div class="cover-meta-label">التاريخ</div>
+      <div class="cover-meta-value">2026</div>
+    </div>
+  </div>
+  <div class="cover-line"></div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  CHARACTER BIBLE                                        -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page page-break">
+
+  <div class="section-header">
+    <div>
+      <div class="section-number">01 / CHARACTER BIBLE</div>
+      <div class="section-title">دليل الشخصيات</div>
+      <div class="section-title-en">Character Descriptions + Seedance Reference Prompts</div>
+    </div>
+  </div>
+
+  <p style="font-size:12px;color:var(--gray);margin-bottom:28px;line-height:1.7;">
+    كل شخصية تحتوي على: الوصف البصري الكامل · الملابس · الحالة العاطفية لكل مشهد · وـ Seedance Character Lock Prompt جاهز للنسخ المباشر.
+  </p>
+
+  <!-- CHARACTER 1: HASSAN (THE FATHER) -->
+  <div class="character-card primary" style="margin-bottom:20px;">
+    <div class="char-header">
+      <div class="char-avatar">👨‍💼</div>
+      <div>
+        <div class="char-name-ar">حسن — الأب</div>
+        <div class="char-name-en">Hassan · The Father · PROTAGONIST</div>
+        <div class="char-role">★ الشخصية المحورية</div>
+      </div>
+    </div>
+    <div class="char-body">
+      <div class="char-row"><div class="char-label">العمر</div><div class="char-value">52–55 سنة</div></div>
+      <div class="char-row"><div class="char-label">الجنسية</div><div class="char-value">سعودي، بشرة قمحية دافئة</div></div>
+      <div class="char-row"><div class="char-label">البنية</div><div class="char-value">متوسط مع بدايات وزن ناعمة — رجل مؤسسة، لا رياضي</div></div>
+      <div class="char-row"><div class="char-label">الوجه</div><div class="char-value">ملامح كريمة، خطوط عمر واضحة حول العينين. لحية قصيرة رمادية تغلب عليها الشعرات البيضاء. عيون بنية داكنة تحمل إرهاق اليوم.</div></div>
+      <div class="char-row"><div class="char-label">الشعر</div><div class="char-value">أسود مشكّل، رمادي واضح في الصدغين. قصير وأنيق.</div></div>
+      <div class="char-row">
+        <div class="char-label">الملابس</div>
+        <div class="char-value">
+          بدلة رمادية غامقة، قميص أبيض، ربطة عنق مخففة — يوم عمل طويل تنتهي أدواته.<br>
+          <em>في المستشفى:</em> ثوب مستشفى أزرق فاتح + IV في يده اليسرى.<br>
+          <em>لحظة العودة:</em> بيجاما بيت رمادية، شبشب، تعب مريح.
+        </div>
+      </div>
+      <div class="char-row"><div class="char-label">الحضور</div><div class="char-value">رجل يبدو ثقيلاً من الخارج. الكرسي ينزل حين يجلس. التنهيدة تسبق الكلام. لكن في عينيه دفء واضح حين يرى ابنته.</div></div>
+      <div class="char-prompt-box">
+        <div class="char-prompt-label">🎬 Seedance Character Lock — Hassan</div>
+        <div class="char-prompt-text">
+A Saudi Arabian man, 52-55 years old, medium build with soft weight, warm olive-tan skin, short neatly trimmed salt-and-pepper beard predominantly white, dark brown tired eyes with pronounced crow's feet, short black hair graying heavily at temples. Wearing a dark charcoal business suit, white dress shirt, loosened tie — end of long workday appearance. Slightly hunched posture. Dignified but exhausted. <span class="highlight">Consistent character across all shots. Always the same man.</span>
+        </div>
+      </div>
+      <div class="char-scenes">
+        <span style="font-size:9px;color:var(--gray);font-family:monospace;">يظهر في:</span>
+        <span class="scene-tag">S02</span><span class="scene-tag">S03</span><span class="scene-tag">S04</span>
+        <span class="scene-tag">S05</span><span class="scene-tag">S08</span><span class="scene-tag">S10</span>
+        <span class="scene-tag">S12</span><span class="scene-tag">S13</span><span class="scene-tag">S17</span><span class="scene-tag">S18</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARACTER 2: REEM (THE DAUGHTER) -->
+  <div class="character-card anchor" style="margin-bottom:20px;">
+    <div class="char-header">
+      <div class="char-avatar">👧</div>
+      <div>
+        <div class="char-name-ar">ريم — البنت</div>
+        <div class="char-name-en">Reem · The Daughter · EMOTIONAL ANCHOR</div>
+        <div class="char-role">★★ القلب العاطفي للفيلم</div>
+      </div>
+    </div>
+    <div class="char-body">
+      <div class="char-row"><div class="char-label">العمر</div><div class="char-value">11–12 سنة</div></div>
+      <div class="char-row"><div class="char-label">الوجه</div><div class="char-value">وجه طفولي صافٍ. عيون واسعة بنية فاتحة — عيون تراقب أكثر مما تتكلم. أنف صغير، شفتان مغلقتان دائماً في لحظات الانتظار.</div></div>
+      <div class="char-row"><div class="char-label">الشعر</div><div class="char-value">ضفيرة واحدة أو شعر مسحوب للخلف. لا تفاصيل مبالغ بها.</div></div>
+      <div class="char-row">
+        <div class="char-label">الملابس</div>
+        <div class="char-value">
+          <em>غرفة الانتظار (S09):</em> فستان بيت بسيط — أزرق فاتح أو زيتي. تعكس أنها خرجت مسرعة.<br>
+          <em>لحظة العناق (S18):</em> نفس الملابس. لا تغيير. الزمن توقف في انتظاره.
+        </div>
+      </div>
+      <div class="char-row"><div class="char-label">التعبير</div><div class="char-value">لا تبكي في الانتظار — تحدّق فقط. لكن حين ترى أباها، وجهها يتحول قبل جسدها.</div></div>
+      <div class="char-row"><div class="char-label">الحضور</div><div class="char-value"><strong>المشهد الأكثر أهمية في الفيلم هو S18.</strong> لا تُظهر وجهها بالكامل. Medium shot. دعه المشاهد يُسقط وجه ابنته عليها.</div></div>
+      <div class="char-prompt-box">
+        <div class="char-prompt-label">🎬 Seedance Character Lock — Reem</div>
+        <div class="char-prompt-text">
+A Saudi Arabian girl, 11-12 years old, small and slight, warm olive skin, large wide light-brown eyes full of quiet observation, simple single braid or pulled-back hair, soft childlike facial features. Wearing a simple home dress in pale blue or olive green — casual, like she left home quickly. <span class="highlight">Do NOT show full face close-up in the hug scene — keep medium shot distance.</span> Expressive body language, not face.
+        </div>
+      </div>
+      <div class="char-scenes">
+        <span style="font-size:9px;color:var(--gray);font-family:monospace;">يظهر في:</span>
+        <span class="scene-tag">S09</span><span class="scene-tag">S17</span><span class="scene-tag">S18</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="character-grid">
+
+    <!-- CHARACTER 3: THE MOTHER -->
+    <div class="character-card">
+      <div class="char-header">
+        <div class="char-avatar">👩</div>
+        <div>
+          <div class="char-name-ar">فاطمة — الأم</div>
+          <div class="char-name-en">Fatima · The Mother</div>
+          <div class="char-role">الدعم الصامت</div>
+        </div>
+      </div>
+      <div class="char-body">
+        <div class="char-row"><div class="char-label">العمر</div><div class="char-value">45–50 سنة</div></div>
+        <div class="char-row"><div class="char-label">الوجه</div><div class="char-value">بشرة قمحية، ملامح هادئة تخفي قلقها بمحبة. تبتسم بعينيها لا بفمها.</div></div>
+        <div class="char-row"><div class="char-label">الملابس</div><div class="char-value">عباءة بيت داكنة أو لون محتشم. تقف في الباب — حارسة البيت.</div></div>
+        <div class="char-row"><div class="char-label">الدور</div><div class="char-value">لا تتكلم. تُكمل اللوحة العائلية. تراقب من الباب في S17 و S18.</div></div>
+        <div class="char-prompt-box">
+          <div class="char-prompt-label">🎬 Seedance Prompt</div>
+          <div class="char-prompt-text">Saudi woman 45-50, warm tan skin, calm dignified expression, dark abaya or modest house dress, standing in doorway. Quietly emotional without crying. Background presence only.</div>
+        </div>
+        <div class="char-scenes" style="margin-top:10px;">
+          <span class="scene-tag">S09</span><span class="scene-tag">S17</span><span class="scene-tag">S18</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARACTER 4: ER DOCTOR -->
+    <div class="character-card">
+      <div class="char-header">
+        <div class="char-avatar">👨‍⚕️</div>
+        <div>
+          <div class="char-name-ar">د. طارق — طبيب الطوارئ</div>
+          <div class="char-name-en">Dr. Tariq · ER Doctor</div>
+          <div class="char-role">نفس الطبيب — عالمان مختلفان</div>
+        </div>
+      </div>
+      <div class="char-body">
+        <div class="char-row"><div class="char-label">العمر</div><div class="char-value">35–40 سنة</div></div>
+        <div class="char-row"><div class="char-label">الوجه</div><div class="char-value">شاب متعب. لحية خفيفة. عيون تُقرأ منها المسؤولية الثقيلة.</div></div>
+        <div class="char-row"><div class="char-label">الملابس</div><div class="char-value">معطف أبيض + سكراب أخضر تحته.</div></div>
+        <div class="char-row">
+          <div class="char-label">العالم الأول</div>
+          <div class="char-value">يحمل ملف ورقي. ينظر محبطاً. يقلّب الصفحات بلا إجابة.</div>
+        </div>
+        <div class="char-row">
+          <div class="char-label">العالم الثاني</div>
+          <div class="char-value">ينظر للشاشة. صوته هادئ وحاسم. يُعطي أمراً واضحاً في ثانية.</div>
+        </div>
+        <div class="char-prompt-box">
+          <div class="char-prompt-label">🎬 Seedance Prompt</div>
+          <div class="char-prompt-text">
+<span class="char-ref">WORLD 1:</span> Saudi male doctor 35-40, white coat, green scrubs, holding paper file, looking frustrated and uncertain, fluorescent ER lighting, overwhelmed body language.<br><br>
+<span class="char-ref">WORLD 2:</span> <span class="highlight">SAME DOCTOR</span>, same white coat, but looking at a medical screen, calm decisive expression, pointing to data, confident posture.
+          </div>
+        </div>
+        <div class="char-scenes" style="margin-top:10px;">
+          <span class="scene-tag">S06</span><span class="scene-tag">S13</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARACTER 5: NURSE -->
+    <div class="character-card">
+      <div class="char-header">
+        <div class="char-avatar">👩‍⚕️</div>
+        <div>
+          <div class="char-name-ar">سارة — الممرضة</div>
+          <div class="char-name-en">Sara · Nurse</div>
+          <div class="char-role">التنسيق الميداني</div>
+        </div>
+      </div>
+      <div class="char-body">
+        <div class="char-row"><div class="char-label">العمر</div><div class="char-value">28–35 سنة</div></div>
+        <div class="char-row"><div class="char-label">الملابس</div><div class="char-value">سكراب أزرق، شعر تحت كاب أو حجاب أبيض محكم.</div></div>
+        <div class="char-row">
+          <div class="char-label">العالم الأول</div>
+          <div class="char-value">تحمل لوحة كليبورد. تنتظر نظام يحمّل. وجهها ضائق.</div>
+        </div>
+        <div class="char-row">
+          <div class="char-label">العالم الثاني</div>
+          <div class="char-value">عند شاشة. تُعطي بيانات للطبيب بثقة. إيقاع عملها منتظم.</div>
+        </div>
+        <div class="char-prompt-box">
+          <div class="char-prompt-label">🎬 Seedance Prompt</div>
+          <div class="char-prompt-text">Saudi/Arab female nurse 28-35, blue scrubs, white hijab or nursing cap, professional. <span class="char-ref">World 1</span>: holding clipboard, waiting, stressed. <span class="char-ref">World 2</span>: at computer screen, confident, data-focused.</div>
+        </div>
+        <div class="char-scenes" style="margin-top:10px;">
+          <span class="scene-tag">S08</span><span class="scene-tag">S13</span><span class="scene-tag">S14</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARACTER 6: PHARMACIST -->
+    <div class="character-card">
+      <div class="char-header">
+        <div class="char-avatar">💊</div>
+        <div>
+          <div class="char-name-ar">خالد — الصيدلاني</div>
+          <div class="char-name-en">Khaled · Pharmacist</div>
+          <div class="char-role">نقطة أمان الدواء</div>
+        </div>
+      </div>
+      <div class="char-body">
+        <div class="char-row"><div class="char-label">العمر</div><div class="char-value">30–38 سنة</div></div>
+        <div class="char-row"><div class="char-label">الملابس</div><div class="char-value">معطف أبيض، قميص داكن تحته. خلفيته: رفوف الدواء.</div></div>
+        <div class="char-row">
+          <div class="char-label">العالم الأول</div>
+          <div class="char-value">على التليفون يسأل عن نتيجة مختبر. ينتظر. وجهه مُحبط.</div>
+        </div>
+        <div class="char-row">
+          <div class="char-label">العالم الثاني</div>
+          <div class="char-value">شاشة تُظهر: AI Safety Check ✅. يُعطي الدواء بثقة وسرعة.</div>
+        </div>
+        <div class="char-prompt-box">
+          <div class="char-prompt-label">🎬 Seedance Prompt</div>
+          <div class="char-prompt-text">Arab male pharmacist 30-38, white lab coat, pharmacy shelves background. <span class="char-ref">World 1</span>: on phone, frustrated, waiting. <span class="char-ref">World 2</span>: reading approval screen, confident, dispensing medication efficiently.</div>
+        </div>
+        <div class="char-scenes" style="margin-top:10px;">
+          <span class="scene-tag">S07</span><span class="scene-tag">S15</span><span class="scene-tag">S22</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARACTER 7: LAB TECHNICIAN -->
+    <div class="character-card">
+      <div class="char-header">
+        <div class="char-avatar">🔬</div>
+        <div>
+          <div class="char-name-ar">نورة — فنية المختبر</div>
+          <div class="char-name-en">Nora · Lab Technician</div>
+          <div class="char-role">الدقة في الليل</div>
+        </div>
+      </div>
+      <div class="char-body">
+        <div class="char-row"><div class="char-label">العمر</div><div class="char-value">25–32 سنة</div></div>
+        <div class="char-row"><div class="char-label">الملابس</div><div class="char-value">معطف أبيض، قفازات، حجاب محكم. مختبر بألوان باردة ومضاءة بالفلورسنت.</div></div>
+        <div class="char-row"><div class="char-label">التعبير</div><div class="char-value">منسجمة مع العمل. وجهها يُعكس شاشة المجهر أو الحاسوب.</div></div>
+        <div class="char-prompt-box">
+          <div class="char-prompt-label">🎬 Seedance Prompt</div>
+          <div class="char-prompt-text">Saudi/Arab female lab technician 25-32, white coat, latex gloves, tight hijab, night-shift lab setting with cool fluorescent lighting. Looking at lab equipment or computer screen, focused and precise. Reflection of screen in glasses optional.</div>
+        </div>
+        <div class="char-scenes" style="margin-top:10px;"><span class="scene-tag">S15</span><span class="scene-tag">S22</span></div>
+      </div>
+    </div>
+
+    <!-- CHARACTER 8: PARAMEDIC -->
+    <div class="character-card">
+      <div class="char-header">
+        <div class="char-avatar">🚑</div>
+        <div>
+          <div class="char-name-ar">عمر — المسعف</div>
+          <div class="char-name-en">Omar · Paramedic</div>
+          <div class="char-role">الاستجابة المتحركة</div>
+        </div>
+      </div>
+      <div class="char-body">
+        <div class="char-row"><div class="char-label">العمر</div><div class="char-value">28–36 سنة</div></div>
+        <div class="char-row"><div class="char-label">الملابس</div><div class="char-value">زي الإسعاف السعودي — رداء أخضر داكن وأصفر عاكس، شارة الهلال الأحمر.</div></div>
+        <div class="char-row"><div class="char-label">المشهد</div><div class="char-value">في سيارة الإسعاف المتحركة. ينظر إلى تابلت — سجل المريض وصل قبل وصوله. وجهه: تركيز لا ذعر.</div></div>
+        <div class="char-prompt-box">
+          <div class="char-prompt-label">🎬 Seedance Prompt</div>
+          <div class="char-prompt-text">Saudi paramedic male 28-36, dark green and yellow reflective EMT uniform, Saudi Red Crescent patch. Inside moving ambulance, looking at medical tablet showing patient record, focused determined expression. Motion blur through ambulance window.</div>
+        </div>
+        <div class="char-scenes" style="margin-top:10px;"><span class="scene-tag">S22</span></div>
+      </div>
+    </div>
+
+    <!-- CHARACTER 9: INSURANCE OFFICER -->
+    <div class="character-card">
+      <div class="char-header">
+        <div class="char-avatar">🛡️</div>
+        <div>
+          <div class="char-name-ar">ليلى — موظفة التأمين</div>
+          <div class="char-name-en">Leila · Insurance Officer</div>
+          <div class="char-role">الموافقة في ثوانٍ</div>
+        </div>
+      </div>
+      <div class="char-body">
+        <div class="char-row"><div class="char-label">العمر</div><div class="char-value">30–40 سنة</div></div>
+        <div class="char-row"><div class="char-label">الملابس</div><div class="char-value">بدلة عمل رسمية، حجاب بلون هادئ. مكتب إضاءته أكثر دفئاً من المستشفى.</div></div>
+        <div class="char-row"><div class="char-label">المشهد</div><div class="char-value">تضغط زر موافقة على شاشتها. الخضرة تظهر فورية. ارتياح على وجهها — هذا ما كان يجب أن يحدث دائماً.</div></div>
+        <div class="char-prompt-box">
+          <div class="char-prompt-label">🎬 Seedance Prompt</div>
+          <div class="char-prompt-text">Arab female insurance officer 30-40, formal business suit, modest hijab in neutral color, warm office environment. Clicking approval on computer screen showing green "AUTHORIZED" status, relieved competent expression. Professional not clinical setting.</div>
+        </div>
+        <div class="char-scenes" style="margin-top:10px;"><span class="scene-tag">S15</span><span class="scene-tag">S22</span></div>
+      </div>
+    </div>
+
+  </div><!-- /character-grid -->
+</div><!-- /page -->
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  SHOT LIST                                              -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page page-break">
+
+  <div class="section-header">
+    <div>
+      <div class="section-number">02 / SHOT LIST</div>
+      <div class="section-title">قائمة اللقطات</div>
+      <div class="section-title-en">25 Shots · With Seedance Prompts</div>
+    </div>
+  </div>
+
+  <!-- ACT ONE -->
+  <div class="act-divider">
+    <div class="act-label">ACT ONE · الفصل الأول</div>
+    <div class="act-title-ar">الحادثة — العالم بدون سند</div>
+    <div class="act-title-en">The Incident — World Without SANAD</div>
+    <div class="act-note">الرجل ينجو. لكن بعد تأخير وتكلفة ومضاعفات. الفيلم لا يقتله.</div>
+  </div>
+
+  <!-- SHOT 01 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">01</div>
+      <div class="shot-dur">4s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">الإعداد الصوتي — قبل الصورة</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">شاشة سوداء كاملة. لا صورة. صوت فقط: باب سيارة يُغلق، مفاتيح تقع على طاولة.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Audio</div>
+        <div class="shot-visual">هدوء ليلي. أصوات حي سكني خافتة. لا موسيقى.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 01</div>
+        <div class="seedance-prompt">Pure black screen. No visuals. <span class="highlight">Audio only shot</span> — for editing context only. Duration: 4 seconds.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 02 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">02</div>
+      <div class="shot-dur">6s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">المطبخ — اللحظة الأولى</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">حسن في مطبخه. البدلة مرخاة. يصب ماء. يتوقف — يده على صدره. لا دراما. مجرد عدم راحة خفيف.</div>
+        <div class="shot-vo">لا شيء يُنبئ بما سيأتي.</div>
+        <div class="shot-sub">Nothing warned what was coming.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Medium shot. Steady. دافئ وخامد — إضاءة مطبخ عادية، مصابيح تنغستن.</div>
+        <div class="shot-section-label" style="margin-top:12px;">Music</div>
+        <div class="shot-visual">نوتة تشيلو واحدة — ممتدة. هادئة جداً.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 02</div>
+        <div class="seedance-prompt"><span class="char-ref">[Hassan]</span> Saudi businessman 52-55 in dark charcoal suit, loosened tie, standing in a modest modern Saudi home kitchen at night. <span class="motion">Pouring water from glass pitcher, pausing mid-action, placing left hand on chest.</span> Subtle expression of discomfort, not alarm. Warm tungsten kitchen lighting, slightly desaturated color grade. Medium shot, steady camera. Realistic cinematic style.</div>
+      </div>
+      <div class="shot-chars">
+        <span class="shot-chars-label">Characters:</span>
+        <span class="char-tag">Hassan</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 03 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">03</div>
+      <div class="shot-dur">5s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">يجلس — التوتر يبدأ</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">يجلس بثقل على كرسي المطبخ. يحاول أن يتنفس بعمق. وجهه يشتد.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Close-up على يده التي تمسك الطاولة. ثم تصعد للوجه.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 03</div>
+        <div class="seedance-prompt"><span class="char-ref">[Hassan]</span> sitting heavily on kitchen chair, <span class="motion">gripping table edge with right hand, taking slow deep breath, face tightening with pain.</span> Close-up on hand gripping table, camera slowly rises to face. Tense but controlled. Warm desaturated lighting. Cinematic, realistic.</div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Hassan</span></div>
+    </div>
+  </div>
+
+  <!-- SHOT 04 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">04</div>
+      <div class="shot-dur">3s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">الجوال</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">جواله على الطاولة. شاشة قفل. يده تمتد إليه ببطء.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Top-down على الجوال. يده تدخل الكادر. لقطة بسيطة وثقيلة.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 04</div>
+        <div class="seedance-prompt">Top-down overhead shot of smartphone with Arabic lock screen on kitchen table. <span class="char-ref">[Hassan's]</span> hand slowly reaching toward phone from frame edge. Dark warm lighting. Simple, heavy composition.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 05 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">05</div>
+      <div class="shot-dur">8s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">غرفة الطوارئ — العالم الأول يبدأ</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">طوارئ. ضوء فلورسنت. نقّالة تُدفع بسرعة. حسن عليها — وجهه مرتبك خائف. ممرضات يتكلمن فوق بعض.</div>
+        <div class="shot-vo">في العالم الذي نعرفه...</div>
+        <div class="shot-sub">In the world we know...</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">يسير بجانب النقّالة — following shot. إيقاع سريع غير منتظم. إضاءة قاسية.</div>
+        <div class="shot-section-label" style="margin-top:12px;">Music</div>
+        <div class="shot-visual">إيقاع توتر — مثل ساعة تدق بسرعة متزايدة.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 05</div>
+        <div class="seedance-prompt">Saudi hospital emergency room, harsh fluorescent overhead lighting, busy chaotic atmosphere. <span class="char-ref">[Hassan]</span> on gurney being wheeled fast, confused and scared expression, loosened suit visible. Nurses in blue scrubs moving quickly around him, overlapping Arabic speech. <span class="motion">Tracking camera alongside gurney, handheld slightly shaky.</span> Desaturated cool-harsh color grade. Cinematic documentary style.</div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Hassan</span><span class="char-tag">Sara (Nurse)</span></div>
+    </div>
+  </div>
+
+  <!-- SHOT 06 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">06</div>
+      <div class="shot-dur">7s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">الطبيب بلا معلومات</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">د. طارق يحمل ملفاً ورقياً. يقلّب صفحات. لا يجد ما يبحث عنه. يرفع رأسه محبطاً.</div>
+        <div class="shot-dialogue">محتاجين ملفه... مين طبيبه المعالج؟</div>
+        <div class="shot-sub">"We need his file... who is his doctor?"</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Medium shot على الطبيب. ثم Insert على الملف الفارغ من المعلومات المهمة.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 06</div>
+        <div class="seedance-prompt"><span class="char-ref">[Dr. Tariq]</span> Saudi male ER doctor 35-40, white coat over green scrubs, <span class="motion">flipping through paper medical file, pages showing incomplete records,</span> frustrated expression, looks up from file. Medium shot. Harsh fluorescent ER lighting. <span class="highlight">INSERT: close-up of paper file with missing/incomplete information fields.</span></div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Dr. Tariq</span></div>
+    </div>
+  </div>
+
+  <!-- SHOT 07 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">07</div>
+      <div class="shot-dur">6s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">الانتظار في كل مكان</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">ثلاث لقطات سريعة:<br>1. الصيدلاني على الهاتف — ينتظر نتيجة المختبر.<br>2. نتيجة التأمين — نموذج غير مكتمل على المكتب.<br>3. ممرضة أمام شاشة تحمّل ببطء.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Edit</div>
+        <div class="shot-visual">Quick cuts — 2 ثانية لكل لقطة. لا صوت موسيقى — فقط أصوات المكان.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 07 (3 quick cuts)</div>
+        <div class="seedance-prompt">
+<span class="char-ref">CUT A:</span> <span class="char-ref">[Khaled Pharmacist]</span> on phone in pharmacy, waiting expression, tapping fingers on counter, prescription forms in hand. Warm pharmacy lighting.<br><br>
+<span class="char-ref">CUT B:</span> Insurance form on office desk, important fields blank or unsigned. No character, just document. Overhead shot.<br><br>
+<span class="char-ref">CUT C:</span> <span class="char-ref">[Sara Nurse]</span> watching hospital computer screen with loading indicator, impatient. ER hallway background.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 08 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">08</div>
+      <div class="shot-dur">5s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">النظام المتشرذم</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">ثلاث لقطات بارعة عن الانفصال:<br>1. فاكس — الورق يعلق في الماكينة.<br>2. هاتف يرنّ — لا أحد يرد.<br>3. نموذج ورقي يُعبأ بالقلم في 2026.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Audio</div>
+        <div class="shot-visual">رنين الهاتف غير المُجاب + صوت الفاكس = صوت التشرذم.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 08</div>
+        <div class="seedance-prompt">
+<span class="char-ref">CUT A:</span> Vintage fax machine in hospital administrative office, paper jamming, blinking error light.<br><br>
+<span class="char-ref">CUT B:</span> Office phone ringing on empty desk, nobody answering. Hospital environment.<br><br>
+<span class="char-ref">CUT C:</span> Hand writing on paper medical form with pen in 2026 hospital setting. <span class="highlight">Irony of paper in digital age.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 09 -->
+  <div class="shot-card key-shot">
+    <div class="shot-header">
+      <div class="shot-num">09</div>
+      <div class="shot-dur">6s</div>
+      <span class="shot-badge badge-key">★ Key Shot</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">غرفة الانتظار — ريم</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">غرفة انتظار المستشفى. ريم وأمها جالستين. يدا ريم في حضنها. تنظر للباب. تنتظر فقط.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Medium shot. لا حركة. الهدوء هو المشهد. الموسيقى تسكت تماماً.</div>
+        <div class="shot-section-label" style="margin-top:12px;">Director Note</div>
+        <div class="shot-visual" style="color:var(--red);">هذه اللقطة تبيع الفيلم. لا تتسرع فيها.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 09</div>
+        <div class="seedance-prompt"><span class="char-ref">[Reem]</span> 11-12 year old Saudi girl in pale blue home dress, sitting on plastic hospital waiting room chair next to her mother <span class="char-ref">[Fatima]</span>. <span class="motion">Both still. Reem's hands folded in lap, eyes fixed on door.</span> Not crying. Just waiting. Quiet dignified worry. Fluorescent waiting room lighting, muted colors. Medium static shot. <span class="highlight">Silence — no movement in camera.</span></div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Reem</span><span class="char-tag">Fatima</span></div>
+    </div>
+  </div>
+
+  <!-- SHOT 10 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">10</div>
+      <div class="shot-dur">8s</div>
+      <span class="shot-badge badge-world1">World 1</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">نجا — لكن...</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">حسن في سرير المستشفى. IV في يده. عيناه مفتوحتان — متعب، ثقيل، لكن حي. وجهه يحمل وزن كل ما مر.</div>
+        <div class="shot-vo">نجا.</div>
+        <div class="shot-sub">He survived.</div>
+        <div style="height:8px;"></div>
+        <div class="shot-vo">لكن بعد ساعات من التأخير. مضاعفات لم تكن ضرورية. أيام إضافية في المستشفى. وتكلفة أثقلت الأسرة.</div>
+        <div class="shot-sub">But after hours of delay. Complications that weren't necessary. Extra days. A cost that burdened his family.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Slow push in على الوجه. يبدأ Medium وينتهي على العينين.</div>
+        <div class="shot-section-label" style="margin-top:12px;">Grade</div>
+        <div class="shot-visual">ذروة الـ desaturation في العالم الأول — أكثر شحوباً وثقلاً.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 10</div>
+        <div class="seedance-prompt"><span class="char-ref">[Hassan]</span> lying in hospital bed, IV drip in left hand, wearing hospital gown. Eyes open — exhausted, heavy, alive. <span class="motion">Slow camera push-in from medium shot to close-up on eyes.</span> Expression of a man who survived but at high cost. Hospital room soft lighting, heavily desaturated color grade — near monochrome. Quiet, heavy, cinematic.</div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Hassan</span></div>
+    </div>
+  </div>
+
+  <!-- ACT TWO -->
+  <div class="act-divider">
+    <div class="act-label">ACT TWO · الفصل الثاني</div>
+    <div class="act-title-ar">نفس الليلة — مع سند</div>
+    <div class="act-title-en">The Same Night — With SANAD</div>
+    <div class="act-note">نفس الرجل. نفس المشهد. بنية تحتية مختلفة. نتيجة مختلفة جذرياً.</div>
+  </div>
+
+  <!-- SHOT 11 -->
+  <div class="shot-card silence-shot">
+    <div class="shot-header">
+      <div class="shot-num">11</div>
+      <div class="shot-dur">2s</div>
+      <span class="shot-badge badge-silence">Transition</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">النقطة الفاصلة</div>
+    </div>
+    <div class="shot-body">
+      <div class="shot-seedance-box" style="grid-column:1/-1;">
+        <div class="seedance-label">Text Card — Shot 11</div>
+        <div class="seedance-prompt">Black screen. Centered white Arabic text appears:<br><br><span class="highlight">نفس الليلة.</span><br><span style="color:#8b949e;font-size:10px;">The same night.</span><br><br>2 seconds. No music. No animation.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-card">
+    <div class="text-ar">نفس الليلة.</div>
+    <div class="text-en">The same night.</div>
+    <div class="text-note">كادر ينتهي بعد ثانيتين — ثم نعود لنفس المطبخ</div>
+  </div>
+
+  <!-- SHOT 12 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">12</div>
+      <div class="shot-dur">4s</div>
+      <span class="shot-badge badge-world2">World 2</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">نفس المطبخ — سند كان يعرف</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">نفس المطبخ بالضبط. نفس اللحظة — حسن يضع يده على صدره. لكن جواله يضيء بإشعار هادئ. سند أرسل تنبيهاً لطبيبه قبل ساعة.</div>
+        <div class="shot-vo">لكن هذه المرة...</div>
+        <div class="shot-sub">But this time...</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Grade</div>
+        <div class="shot-visual">تدريجياً أكثر نقاءً — نفس الإضاءة الدافئة لكن أعلى وضوحاً.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 12</div>
+        <div class="seedance-prompt"><span class="char-ref">[Hassan]</span> same kitchen, same moment — hand on chest. <span class="motion">Smartphone on table lights up with a quiet notification pulse — Arabic SANAD health alert.</span> Slightly cleaner color grade than World 1 shots. Same medium framing. <span class="highlight">CONTINUITY: identical angle and setup as Shot 02 — this is the same moment, different world.</span></div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Hassan</span></div>
+    </div>
+  </div>
+
+  <!-- SHOT 13 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">13</div>
+      <div class="shot-dur">5s</div>
+      <span class="shot-badge badge-world2">World 2</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">طوارئ — الطبيب يقرأ بثقة</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">نفس الطوارئ. لكن الطبيب أمام شاشة. السجل الكامل: أدوية، حساسية، آخر ثلاثة مختبرات. يُعطي أمراً هادئاً حاسماً.</div>
+        <div class="shot-dialogue">عنده وارفارين — لا تعطوه أسبرين.</div>
+        <div class="shot-sub">"He's on Warfarin — no aspirin."</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Medium على الطبيب — ثم INSERT على الشاشة تُظهر سجل كامل ومنظّم.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 13</div>
+        <div class="seedance-prompt"><span class="char-ref">[Dr. Tariq]</span> same ER doctor, same white coat — but now standing at medical computer screen showing complete patient record (medications list, allergy alert highlighted in red, recent lab results). <span class="motion">Calm, decisive posture, pointing at screen, speaking clearly.</span> <span class="char-ref">[Sara Nurse]</span> beside him listening and acting. Cleaner lighting than World 1. <span class="highlight">INSERT: screen showing patient Hassan's complete SANAD record with Warfarin alert highlighted.</span></div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Dr. Tariq</span><span class="char-tag">Sara (Nurse)</span></div>
+    </div>
+  </div>
+
+  <!-- SHOT 14 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">14</div>
+      <div class="shot-dur">4s</div>
+      <span class="shot-badge badge-world2">World 2</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">الخضرة — الأمان المؤكد</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">الشاشة: AI Safety Check — ✅ CLEARED. Insurance Authorization — ✅ Pre-Approved. الفريق يتحرك بإيقاع مختلف.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Audio</div>
+        <div class="shot-visual">نغمة واحدة هادئة — حل، لا إنذار. الموسيقى تبدأ تتغير.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 14</div>
+        <div class="seedance-prompt">Close-up on medical screen showing two green checkmark approvals: "AI Safety Check ✓ CLEARED" and "Insurance Authorization ✓ Pre-Approved". Clean UI, Arabic/English bilingual labels. <span class="motion">Medical team visible in background moving purposefully, not chaotically.</span> Cooler, cleaner hospital color grade.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 15 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">15</div>
+      <div class="shot-dur">5s</div>
+      <span class="shot-badge badge-world2">World 2</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">المنظومة تعمل</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">
+          3 لقطات × 1.5 ثانية:<br>
+          1. نتيجة المختبر — وصلت في 90 ثانية.<br>
+          2. الصيدلاني يصرف الدواء — الشاشة خضراء.<br>
+          3. موظفة التأمين تضغط موافقة — تكتمل في ثوانٍ.
+        </div>
+      </div>
+      <div>
+        <div class="shot-section-label">Music</div>
+        <div class="shot-visual">نفس الإيقاع — لكن أخف. منتظم لا فوضوي. شيء ينحل.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 15 (3 cuts)</div>
+        <div class="seedance-prompt">
+<span class="char-ref">CUT A:</span> <span class="char-ref">[Nora Lab Tech]</span> sending lab result on computer, screen shows "Result Transmitted: 90 seconds". Focused confident expression.<br><br>
+<span class="char-ref">CUT B:</span> <span class="char-ref">[Khaled Pharmacist]</span> dispensing medication, screen behind shows green "CLEARED" status. Efficient, no hesitation.<br><br>
+<span class="char-ref">CUT C:</span> <span class="char-ref">[Leila Insurance]</span> clicking approval button, screen shows instant green authorization. Small satisfied expression.
+        </div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Nora</span><span class="char-tag">Khaled</span><span class="char-tag">Leila</span></div>
+    </div>
+  </div>
+
+  <!-- SHOT 16 - NETWORK -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">16</div>
+      <div class="shot-dur">8s</div>
+      <span class="shot-badge badge-network">★ Network</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">المنظومة الوطنية — بصرياً</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">
+          5 nodes تظهر واحداً تلو الآخر وتنبض:<br>
+          🚑 إسعاف &nbsp;·&nbsp; 🔬 مختبر &nbsp;·&nbsp; 💊 صيدلية &nbsp;·&nbsp; 🏥 مستشفى &nbsp;·&nbsp; 🛡️ تأمين<br><br>
+          خطوط تمتد بينها — تلتقي في مركز واحد يضيء.<br><br>
+          <strong>ليست خريطة. ليست رسومات ثلاثية الأبعاد. رسم خطي بسيط.</strong>
+        </div>
+        <div class="shot-vo">سند لا يستبدل الأطباء. سند يوصّل كل الأطراف باللحظة الحرجة.</div>
+        <div class="shot-sub">SANAD doesn't replace doctors. SANAD connects every party at the critical moment.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Style</div>
+        <div class="shot-visual">2D line-drawing aesthetic. أبيض على أسود أو رمادي داكن. بسيط ومصداقي — ليس إعلاناً تجارياً.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 16</div>
+        <div class="seedance-prompt">Abstract minimalist 2D animation on dark background. Five labeled nodes appear one by one with subtle pulse animation: ambulance icon "إسعاف", laboratory icon "مختبر", pharmacy icon "صيدلية", hospital icon "مستشفى", insurance shield "تأمين". <span class="motion">White connection lines draw between each node, all converging to a central glowing point.</span> Clean line-drawing style, not 3D render. Arabic labels. <span class="highlight">Simple credibility over spectacle.</span> Duration 8 seconds.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACT THREE -->
+  <div class="act-divider">
+    <div class="act-label">ACT THREE · الفصل الثالث</div>
+    <div class="act-title-ar">العودة للمنزل — اكسب المشاعر</div>
+    <div class="act-title-en">The Return — Earn The Emotion</div>
+    <div class="act-note">لا تتسرع. هذا المشهد هو سبب وجود الفيلم.</div>
+  </div>
+
+  <!-- SHOT 17 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">17</div>
+      <div class="shot-dur">5s</div>
+      <span class="shot-badge badge-world2">World 2</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">الأب يعود</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">خارج المنزل. نهاراً. سيارة تتوقف. حسن ينزل — أبطأ من قبل، لكن قائم. حي. في بيته.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Wide shot على المنزل. ثم Medium على حسن يخطو للأمام. لا حركة كاميرا مبالغة.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 17</div>
+        <div class="seedance-prompt">Exterior of modest modern Saudi home, daytime, warm golden hour light. <span class="char-ref">[Hassan]</span> getting out of car — <span class="motion">slower than before, using car door for support,</span> but upright and walking. Wearing comfortable home clothes, not hospital gown. Expression of quiet relief. Wide establishing shot then medium. Warm natural lighting, full color restored.</div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Hassan</span></div>
+    </div>
+  </div>
+
+  <!-- SHOT 18 - KEY SHOT -->
+  <div class="shot-card key-shot">
+    <div class="shot-header">
+      <div class="shot-num">18</div>
+      <div class="shot-dur">8s</div>
+      <span class="shot-badge badge-key">★★ Centerpiece</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">العناق — لا تُغلق الكادر</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">
+          الباب يُفتح قبل أن يصله.<br>
+          ريم تركض.<br>
+          تتوقف خطوة واحدة قبله — تنظر لأعلى.<br>
+          العناق هادئ. حقيقي. لا دراما.<br>
+          فاطمة في الباب. تراقب.
+        </div>
+      </div>
+      <div>
+        <div class="shot-section-label">Director Note</div>
+        <div class="shot-visual" style="color:var(--red);font-weight:600;">
+          Medium shot. لا Close-up على الوجوه.<br>
+          المشاهد يُسقط وجه ابنته على ريم.<br>
+          نغمة بيانو واحدة — ثم أخرى. لا أكثر.
+        </div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 18</div>
+        <div class="seedance-prompt"><span class="char-ref">[Reem]</span> running from house door toward <span class="char-ref">[Hassan]</span>, <span class="motion">stopping one step before him, looking up.</span> He bends slightly, she hugs him. Quiet, not dramatic. <span class="char-ref">[Fatima]</span> visible in doorway background watching. <span class="highlight">CRITICAL: MEDIUM SHOT ONLY — do not show close-up of faces during hug. Keep viewer distance. The silence between them carries the moment.</span> Warm golden afternoon light. Full warm color grade. Still camera, no movement.</div>
+      </div>
+      <div class="shot-chars"><span class="shot-chars-label">Characters:</span><span class="char-tag">Hassan</span><span class="char-tag">Reem ★</span><span class="char-tag">Fatima</span></div>
+    </div>
+  </div>
+
+  <!-- ACT FOUR: THE TURN -->
+  <div class="act-divider">
+    <div class="act-label">ACT FOUR · الفصل الرابع</div>
+    <div class="act-title-ar">الانعطافة — من فرد إلى ملايين</div>
+    <div class="act-title-en">The Turn — Personal to National</div>
+    <div class="act-note">هذا هو ضربة المستثمر. الصمت يُباع.</div>
+  </div>
+
+  <!-- SHOT 19 -->
+  <div class="shot-card silence-shot">
+    <div class="shot-header">
+      <div class="shot-num">19</div>
+      <div class="shot-dur">3s</div>
+      <span class="shot-badge badge-silence">Silence</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">Fade to Black — ثانية صامتة كاملة</div>
+    </div>
+    <div class="shot-body">
+      <div class="shot-seedance-box" style="grid-column:1/-1;">
+        <div class="seedance-label">Direction</div>
+        <div class="seedance-prompt">Slow fade from Shot 18 to complete black. Hold black for 1 full second of complete silence. No music, no ambient sound. Total silence. This silence IS the transition.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOTS 20-21: THE KEY TEXT -->
+  <div class="shot-card silence-shot">
+    <div class="shot-header">
+      <div class="shot-num">20–21</div>
+      <div class="shot-dur">4s + 3s</div>
+      <span class="shot-badge badge-silence">★★★ The Line</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">الجملة التي تبيع الفيلم</div>
+    </div>
+    <div class="shot-body">
+      <div class="shot-seedance-box" style="grid-column:1/-1;">
+        <div class="seedance-label">Text Cards — No Music, No VO, No Animation</div>
+        <div class="seedance-prompt">
+SHOT 20 — 4 seconds:<br>
+Black screen. White centered Arabic text appears:<br>
+<span class="highlight" style="font-size:16px;">اليوم تُم إنقاذ مريض.</span><br>
+<span style="color:#8b949e;">Today, one patient was saved.</span><br><br>
+SHOT 21 — 3 seconds:<br>
+Previous text fades. New text:<br>
+<span class="highlight" style="font-size:16px;">وغدًا يمكن إنقاذ ملايين.</span><br>
+<span style="color:#8b949e;">Tomorrow, millions can be.</span><br><br>
+<span style="color:#e8805a;">NO MUSIC. NO VO. THE WORDS STAND ALONE.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-card">
+    <div class="text-ar">اليوم تُم إنقاذ مريض.</div>
+    <div class="text-en">Today, one patient was saved.</div>
+    <div class="text-note">صمت</div>
+  </div>
+  <div class="text-card" style="margin-top:8px;">
+    <div class="text-ar">وغدًا يمكن إنقاذ ملايين.</div>
+    <div class="text-en">Tomorrow, millions can be.</div>
+  </div>
+
+  <!-- SHOT 22 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">22</div>
+      <div class="shot-dur">10s</div>
+      <span class="shot-badge badge-network">National</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">مونتاج المنظومة الوطنية</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">
+          6 لقطات × ~1.5 ثانية — سينمائي لا stock footage:<br>
+          1. نورة — المختبر في الليل، تُرسل نتيجة<br>
+          2. خالد — يتحقق من تفاعل دوائي → أحمر → يُجاز بأمان<br>
+          3. عمر — في الإسعاف يتسلم ملف مريض على تابلت<br>
+          4. د. طارق — ممر المستشفى، يراجع dashboard<br>
+          5. ليلى — توافق على مطالبة في ثوانٍ<br>
+          6. مريضة كبيرة — تتحدث برأس مرتفع مع طبيب عبر الفيديو
+        </div>
+        <div class="shot-vo">في كل مستشفى. في كل صيدلية. في كل غرفة طوارئ. في كل منزل.</div>
+        <div class="shot-sub">In every hospital. Every pharmacy. Every ER. Every home.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Music</div>
+        <div class="shot-visual">الموسيقى ترتفع — وترية، هادفة. ليست نصراً — بل رسالة.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 22 (6 cuts)</div>
+        <div class="seedance-prompt">
+<span class="char-ref">CUT 1:</span> <span class="char-ref">[Nora]</span> lab at night, sending results, screen confirms transmission.<br>
+<span class="char-ref">CUT 2:</span> <span class="char-ref">[Khaled]</span> checking drug interaction screen — red warning, then approves safe alternative with confidence.<br>
+<span class="char-ref">CUT 3:</span> <span class="char-ref">[Omar Paramedic]</span> in moving ambulance, receiving patient file on tablet, focused expression, city lights through window.<br>
+<span class="char-ref">CUT 4:</span> <span class="char-ref">[Dr. Tariq]</span> walking hospital corridor reviewing SANAD dashboard on tablet, decisive.<br>
+<span class="char-ref">CUT 5:</span> <span class="char-ref">[Leila]</span> clicking insurance approval, instant green confirmation.<br>
+<span class="char-ref">CUT 6:</span> Elderly Saudi woman, dignified, video-calling doctor from home — screen shows doctor clearly, connection is strong. <span class="highlight">Each shot: full color, warm-cool balance, cinematic not stock.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 23 -->
+  <div class="shot-card">
+    <div class="shot-header">
+      <div class="shot-num">23</div>
+      <div class="shot-dur">5s</div>
+      <span class="shot-badge badge-network">National</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">المملكة — من الأعلى</div>
+    </div>
+    <div class="shot-body">
+      <div>
+        <div class="shot-section-label">Visual</div>
+        <div class="shot-visual">Aerial — مدينة سعودية في الليل. أضواء. حياة. حركة.</div>
+        <div class="shot-vo">المملكة العربية السعودية تستحق منظومة صحية تعمل كما ينبغي.</div>
+        <div class="shot-sub">Saudi Arabia deserves a health system that works as it should.</div>
+      </div>
+      <div>
+        <div class="shot-section-label">Camera</div>
+        <div class="shot-visual">Slow drone pull-back. المدينة تكبر. الأضواء تمتد.</div>
+      </div>
+      <div class="shot-seedance-box">
+        <div class="seedance-label">Seedance Prompt — Shot 23</div>
+        <div class="seedance-prompt">Cinematic aerial drone shot over Saudi Arabian city at night — Riyadh or Jeddah, city lights stretching to horizon. <span class="motion">Slow camera pull-back revealing scale of city.</span> Warm gold and white city lights below. Orchestral music peak. Sense of possibility and scale, not nationalism.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 24 -->
+  <div class="shot-card silence-shot">
+    <div class="shot-header">
+      <div class="shot-num">24</div>
+      <div class="shot-dur">4s</div>
+      <span class="shot-badge badge-silence">Fade</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">Fade to White — نهاية الأوركسترا</div>
+    </div>
+    <div class="shot-body">
+      <div class="shot-seedance-box" style="grid-column:1/-1;">
+        <div class="seedance-label">Direction</div>
+        <div class="seedance-prompt">Slow fade from city aerial to pure white (not black). Music holds final orchestral note — then fades. 4 seconds.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOT 25 -->
+  <div class="shot-card key-shot">
+    <div class="shot-header">
+      <div class="shot-num">25</div>
+      <div class="shot-dur">5s</div>
+      <span class="shot-badge badge-key">★ Logo</span>
+      <div style="flex:1;font-size:12px;font-weight:600;">SANAD</div>
+    </div>
+    <div class="shot-body">
+      <div class="shot-seedance-box" style="grid-column:1/-1;">
+        <div class="seedance-label">Logo Card — Final Frame</div>
+        <div class="seedance-prompt">White background. SANAD wordmark centered, clean sans-serif, black. Below it smaller text:<br><br>
+<span class="highlight">لكل قرارٍ سند.</span><br>
+<span style="color:#8b949e;font-size:10px;">Behind Every Decision.</span><br><br>
+No animation. No fade-in effect. Logo appears at frame start. 5 seconds hold. Subtle ambient music fade-out. Silence at end.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /shot list page -->
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!--  PRODUCTION NOTES                                       -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page page-break">
+
+  <div class="section-header">
+    <div>
+      <div class="section-number">03 / PRODUCTION NOTES</div>
+      <div class="section-title">ملاحظات الإنتاج</div>
+      <div class="section-title-en">Director · Grade · Audio · Seedance Settings</div>
+    </div>
+  </div>
+
+  <div class="note-grid">
+    <div class="note-card">
+      <div class="note-card-title">🎬 Color Grade Strategy</div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>العالم الأول (S1–S10):</strong> Desaturated, tungsten-warm, أعلى contrast. Shadows ثقيلة. Highlights مكبوحة.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>العالم الثاني (S12+):</strong> تدريجياً أكثر نقاءً وأعلى saturation. Cooler tone. نفس المكان — عالم مختلف.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S17–S18 (العودة):</strong> Full warm color — أعلى saturation في الفيلم. البيت = الحياة.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div>الانتقال بين العالمين يجب أن يُحسَّ لا يُعلَن عنه.</div></div>
+    </div>
+
+    <div class="note-card">
+      <div class="note-card-title">🎵 Music Architecture</div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S1–S4:</strong> نوتة تشيلو واحدة ممتدة — هادئة مشؤومة.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S5–S10:</strong> إيقاع توتر كساعة متسارعة.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S9 (ريم):</strong> صمت كامل.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S11:</strong> صمت كامل.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S18 (العناق):</strong> نوتتا بيانو فقط.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S19–S21 (النص):</strong> صمت مطلق — أهم لحظة صامتة في الفيلم.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S22–S23:</strong> وترية أوركسترالية — هادفة، ليست انتصارية.</div></div>
+    </div>
+
+    <div class="note-card">
+      <div class="note-card-title">🎭 Director Principles</div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>الرجل لا يموت في أي عالم.</strong> الفرق = تكلفة + مضاعفات + وقت.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S18:</strong> Medium shot دائماً. لا close-up على الوجوه أثناء العناق.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>S20–S21:</strong> لا موسيقى، لا VO، لا animation. النص وحده.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div>SANAD لا يُذكر حتى S16. أول ساعتين = إنسان فقط.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div>S16 (الشبكة) = رسم خطي بسيط، ليس تأثيرات ثلاثية الأبعاد.</div></div>
+    </div>
+
+    <div class="note-card">
+      <div class="note-card-title">🤖 Seedance Settings</div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>Character Consistency:</strong> أدخل Character Lock Prompt لكل شخصية قبل البدء في لقطاتها.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>Style Prompt (Global):</strong> "Cinematic photorealistic, Saudi Arabia 2026, warm but not oversaturated, professional film production quality, no stock footage aesthetic"</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>Negative Prompt:</strong> "animation, cartoon, CGI characters, western faces, stock photo style, drone stock footage, news aesthetic"</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>Aspect Ratio:</strong> 16:9 — 1920×1080 minimum.</div></div>
+      <div class="note-item"><div class="note-dot">◆</div><div><strong>للقطات الصامتة (S19–S21):</strong> أنتجها كـ Text Card في برنامج المونتاج مباشرة.</div></div>
+    </div>
+  </div>
+
+  <!-- SHOT SUMMARY TABLE -->
+  <div style="margin-top:40px;">
+    <div class="section-header">
+      <div>
+        <div class="section-number">04 / SUMMARY</div>
+        <div class="section-title">ملخص اللقطات</div>
+      </div>
+    </div>
+    <table class="summary-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>العالم</th>
+          <th>المدة</th>
+          <th>الشخصيات</th>
+          <th>الملاحظة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="font-family:monospace;font-weight:700;">01–04</td><td><span class="shot-badge badge-world1">W1</span></td><td>18s</td><td>Hassan</td><td>الإعداد — المطبخ والحادثة</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">05–08</td><td><span class="shot-badge badge-world1">W1</span></td><td>26s</td><td>Hassan, Dr.Tariq, Sara, Khaled</td><td>فوضى المنظومة المتشرذمة</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">09</td><td><span class="shot-badge badge-key">★ KEY</span></td><td>6s</td><td>Reem, Fatima</td><td>القلب العاطفي — غرفة الانتظار</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">10</td><td><span class="shot-badge badge-world1">W1</span></td><td>8s</td><td>Hassan</td><td>نجا — لكن بتكلفة عالية</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">11</td><td><span class="shot-badge badge-silence">TEXT</span></td><td>2s</td><td>—</td><td>نفس الليلة / The same night</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">12–15</td><td><span class="shot-badge badge-world2">W2</span></td><td>18s</td><td>Hassan, Dr.Tariq, Sara, Khaled, Nora, Leila</td><td>نفس الليلة مع سند — الفرق</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">16</td><td><span class="shot-badge badge-network">NET</span></td><td>8s</td><td>—</td><td>تصوير الشبكة الوطنية</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">17–18</td><td><span class="shot-badge badge-key">★ KEY</span></td><td>13s</td><td>Hassan, Reem, Fatima</td><td>العودة + العناق — المركز العاطفي</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">19–21</td><td><span class="shot-badge badge-silence">★★★</span></td><td>10s</td><td>—</td><td>الجملة التي تبيع الفيلم — صمت مطلق</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">22–23</td><td><span class="shot-badge badge-network">NAT</span></td><td>15s</td><td>جميع الشخصيات + aerial</td><td>مونتاج المنظومة الوطنية</td></tr>
+        <tr><td style="font-family:monospace;font-weight:700;">24–25</td><td><span class="shot-badge badge-silence">END</span></td><td>9s</td><td>—</td><td>Fade to White + Logo</td></tr>
+        <tr style="font-weight:700;background:#f8f8f6;">
+          <td colspan="2">الإجمالي</td>
+          <td>~153s ≈ 2:33</td>
+          <td>9 شخصيات</td>
+          <td>25 لقطة</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="footer">
+  SANAD HEALTH · PRODUCTION PACKAGE v1.0 · INVESTOR CUT · 2026<br>
+  Confidential — For Internal Production Use Only
+</div>
+
+</body>
+</html>

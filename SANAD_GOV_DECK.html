@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANAD — Government Briefing Deck 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@200;300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --blue:    #1A4FD6;
+  --blue-lg: #3D6FFF;
+  --white:   #FFFFFF;
+  --dim:     rgba(255,255,255,.5);
+  --dim2:    rgba(255,255,255,.2);
+  --black:   #050507;
+  --card:    rgba(255,255,255,.05);
+  --border:  rgba(255,255,255,.1);
+  --green:   #00C47A;
+  --gold:    #E8B932;
+  --navy:    #07102A;
+}
+
+html { background: #0a0a14; }
+
+body {
+  font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  background: #0a0a14;
+  color: var(--white);
+}
+
+.deck {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 3px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.slide {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5% 7%;
+}
+
+@media print {
+  html, body { background: white; margin: 0; padding: 0; }
+  .deck { gap: 0; padding: 0; max-width: none; }
+  .slide { page-break-after: always; break-after: page; width:100vw; height:100vh; aspect-ratio:unset; }
+}
+
+/* themes */
+.dark  { background: var(--black); }
+.navy  { background: var(--navy); }
+.film  { background: #000; }
+.light { background: #F2F1EE; color: var(--black); }
+
+/* badge */
+.num-badge {
+  position: absolute; top: 5%; left: 7%;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(9px,.8vw,12px); letter-spacing:.18em;
+  color: var(--dim2); text-transform: uppercase;
+}
+.slide-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: clamp(8px,.75vw,11px); letter-spacing:.22em;
+  text-transform: uppercase; color: var(--blue-lg);
+  margin-bottom: clamp(8px,1.2vh,18px);
+}
+.light .slide-tag { color: var(--blue); }
+
+/* type */
+.h1 { font-size: clamp(32px,6vw,82px); font-weight: 800; line-height: 1.05; letter-spacing: -.01em; }
+.h2 { font-size: clamp(18px,3.2vw,44px); font-weight: 700; line-height: 1.2; }
+.h3 { font-size: clamp(13px,1.6vw,22px); font-weight: 600; line-height: 1.3; }
+.body { font-size: clamp(10px,1.1vw,16px); line-height: 1.8; }
+.small { font-size: clamp(8px,.85vw,12px); }
+.muted { color: var(--dim); }
+.light .muted { color: rgba(0,0,0,.5); }
+
+.stat-num { font-size: clamp(36px,7.5vw,96px); font-weight: 800; line-height: 1; letter-spacing: -.02em; }
+.c-green { color: var(--green); }
+.c-gold  { color: var(--gold); }
+.c-blue  { color: var(--blue-lg); }
+.accent  { color: var(--blue-lg); }
+
+/* grid */
+.g2 { display: grid; grid-template-columns:1fr 1fr; gap: clamp(10px,1.5vw,24px); }
+.g3 { display: grid; grid-template-columns:1fr 1fr 1fr; gap: clamp(8px,1.2vw,20px); }
+
+/* card */
+.card {
+  background: var(--card); border:1px solid var(--border);
+  border-radius: clamp(6px,.8vw,14px); padding: clamp(12px,1.6vw,24px);
+}
+.card-blue  { background: rgba(37,99,255,.1);  border-color: rgba(37,99,255,.25); }
+.card-green { background: rgba(0,196,122,.08); border-color: rgba(0,196,122,.2); }
+.card-gold  { background: rgba(232,185,50,.08);border-color: rgba(232,185,50,.2); }
+
+.light .card { background:#fff; border-color:rgba(0,0,0,.09); box-shadow:0 2px 10px rgba(0,0,0,.06); }
+
+/* bg glow */
+.bg-glow { position:absolute; border-radius:50%; filter:blur(80px); pointer-events:none; z-index:0; }
+.content  { position:relative; z-index:1; }
+
+/* divider */
+.rule { border:none; border-top:1px solid var(--border); margin:clamp(8px,.8vh,14px) 0; }
+
+/* fn */
+.fn {
+  position:absolute; bottom:4%; right:7%; left:7%;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:clamp(6px,.55vw,9px); color:var(--dim2);
+  letter-spacing:.04em; direction:ltr; text-align:left;
+}
+
+/* pill */
+.pill {
+  display:inline-block; font-family:'IBM Plex Mono',monospace;
+  font-size:clamp(7px,.65vw,10px); font-weight:600;
+  letter-spacing:.12em; text-transform:uppercase;
+  padding:3px 10px; border-radius:20px; border:1px solid currentColor;
+}
+.pill-blue  { color:var(--blue-lg); border-color:rgba(61,111,255,.4); background:rgba(26,79,214,.15); }
+.pill-green { color:var(--green);   border-color:rgba(0,196,122,.35); background:rgba(0,196,122,.1); }
+.pill-gold  { color:var(--gold);    border-color:rgba(232,185,50,.35); background:rgba(232,185,50,.1); }
+
+/* timeline */
+.tl { display:flex; gap:0; }
+.tl-phase {
+  flex:1; padding:clamp(10px,1.2vw,18px);
+  border:1px solid var(--border);
+}
+.tl-phase:first-child { border-radius:10px 0 0 10px; }
+.tl-phase:last-child  { border-radius:0 10px 10px 0; }
+.tl-phase.now { background:rgba(26,79,214,.12); border-color:rgba(61,111,255,.4); }
+.tl-year { font-family:'IBM Plex Mono',monospace; font-size:clamp(7px,.65vw,10px); letter-spacing:.18em; text-transform:uppercase; color:var(--dim); margin-bottom:clamp(4px,.5vh,8px); }
+.tl-phase.now .tl-year { color:var(--blue-lg); }
+.tl-title { font-size:clamp(11px,1.1vw,16px); font-weight:700; margin-bottom:clamp(6px,.7vh,10px); }
+.tl-item  { font-size:clamp(8px,.8vw,12px); color:var(--dim); margin-bottom:4px; display:flex; gap:6px; }
+.tl-dot   { color:var(--blue-lg); flex-shrink:0; }
+
+</style>
+</head>
+<body>
+<div class="deck">
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 00 — FILM INSTRUCTION (Pre-Roll)
+══════════════════════════════════════════════════════ -->
+<div class="slide film" style="align-items:center;justify-content:center;text-align:center;">
+
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(26,79,214,.08) 0%,transparent 70%);"></div>
+
+  <div style="position:relative;z-index:1;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(8px,.75vw,11px);letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.2);margin-bottom:clamp(24px,3vh,48px);">قبل البدء</div>
+
+    <!-- play circle -->
+    <div style="width:clamp(64px,8vw,110px);height:clamp(64px,8vw,110px);border-radius:50%;border:1.5px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;margin:0 auto clamp(20px,2.5vh,36px);">
+      <div style="width:0;height:0;border-top:clamp(10px,1.2vw,18px) solid transparent;border-bottom:clamp(10px,1.2vw,18px) solid transparent;border-right:clamp(16px,2vw,28px) solid rgba(255,255,255,.5);margin-right:-4px;transform:scaleX(-1);"></div>
+    </div>
+
+    <div style="font-size:clamp(22px,3.5vw,48px);font-weight:700;color:white;margin-bottom:clamp(8px,1vh,16px);">شغّل الفيلم.</div>
+    <div style="font-size:clamp(14px,1.8vw,24px);font-weight:300;color:rgba(255,255,255,.4);margin-bottom:clamp(24px,3vh,48px);">لا تتكلم. فقط شغّل.</div>
+
+    <div style="width:1px;height:clamp(40px,5vh,70px);background:linear-gradient(to bottom,rgba(255,255,255,.2),transparent);margin:0 auto clamp(20px,2.5vh,36px);"></div>
+
+    <div style="font-size:clamp(10px,1.1vw,16px);color:rgba(255,255,255,.2);line-height:1.8;">
+      3 دقائق · بدون مقاطعة<br>
+      <span style="font-size:clamp(8px,.85vw,12px);letter-spacing:.1em;">SANAD_INVESTOR_FILM.mp4</span>
+    </div>
+
+    <!-- after film instruction -->
+    <div style="margin-top:clamp(24px,3vh,48px);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:clamp(12px,1.5vw,22px);max-width:clamp(300px,45vw,600px);margin-left:auto;margin-right:auto;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:10px;">بعد انتهاء الفيلم — قل هذه الجملة فقط</div>
+      <div style="font-size:clamp(13px,1.5vw,22px);color:white;font-weight:300;line-height:1.6;">
+        "ما شاهدتموه ليس المستقبل.<br>
+        <strong style="font-weight:700;">إنه SANAD — وهو جاهز الآن.</strong>"
+      </div>
+    </div>
+  </div>
+
+  <div class="num-badge">00 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 01 — COVER (GOV)
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:55%;height:65%;top:-15%;right:-10%;background:rgba(26,79,214,.1);"></div>
+  <div class="bg-glow" style="width:25%;height:35%;bottom:0;left:5%;background:rgba(0,196,122,.05);"></div>
+
+  <div class="content" style="display:flex;flex-direction:column;height:100%;justify-content:space-between;">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:clamp(10px,.9vw,14px);font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.2);">SANAD HEALTH</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.2em;color:rgba(255,255,255,.18);text-transform:uppercase;">إحاطة حكومية سرية · 2026</div>
+    </div>
+
+    <div>
+      <div style="font-size:clamp(52px,10vw,140px);font-weight:800;line-height:.95;letter-spacing:-.02em;color:white;margin-bottom:clamp(8px,1vh,16px);">SANAD</div>
+      <div style="font-size:clamp(16px,2vw,28px);font-weight:300;color:rgba(255,255,255,.5);letter-spacing:.04em;margin-bottom:clamp(8px,1vh,16px);">
+        المنصة الوطنية للذكاء الصحي
+      </div>
+      <div style="font-size:clamp(13px,1.4vw,20px);color:rgba(255,255,255,.3);letter-spacing:.04em;margin-bottom:clamp(20px,2.5vh,36px);">طبقة التنسيق الذكي للمنظومة الصحية السعودية</div>
+
+      <div style="max-width:clamp(300px,55vw,700px);">
+        <div style="font-size:clamp(16px,2vw,30px);font-weight:300;color:rgba(255,255,255,.7);line-height:1.6;border-right:3px solid var(--blue-lg);padding-right:clamp(12px,1.5vw,22px);">
+          "نحن لا نبني نظام مستشفى جديد.<br>
+          نبني الطبقة التي تجعل كل الأنظمة الموجودة<br>
+          <strong style="color:white;">تعمل معاً — لأول مرة."</strong>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,1.2vw,20px);">
+      <div>
+        <div style="font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.25);margin-bottom:4px;">المنظومة</div>
+        <div style="font-size:clamp(16px,2.2vw,30px);font-weight:800;color:white;">5</div>
+        <div style="font-size:clamp(8px,.75vw,11px);color:rgba(255,255,255,.35);">قطاعات متكاملة</div>
+      </div>
+      <div>
+        <div style="font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.25);margin-bottom:4px;">المستفيدون</div>
+        <div style="font-size:clamp(16px,2.2vw,30px);font-weight:800;color:white;">35M</div>
+        <div style="font-size:clamp(8px,.75vw,11px);color:rgba(255,255,255,.35);">مواطن ومقيم</div>
+      </div>
+      <div>
+        <div style="font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.25);margin-bottom:4px;">الجاهزية</div>
+        <div style="font-size:clamp(16px,2.2vw,30px);font-weight:800;color:var(--green);">Pilot</div>
+        <div style="font-size:clamp(8px,.75vw,11px);color:rgba(255,255,255,.35);">جاهز للانطلاق فوراً</div>
+      </div>
+      <div>
+        <div style="font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;font-family:'IBM Plex Mono',monospace;color:rgba(255,255,255,.25);margin-bottom:4px;">التوافق</div>
+        <div style="font-size:clamp(16px,2.2vw,30px);font-weight:800;color:var(--gold);">2030</div>
+        <div style="font-size:clamp(8px,.75vw,11px);color:rgba(255,255,255,.35);">رؤية المملكة</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">01 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 02 — THE HUMAN STORY (بدل الأرقام الجافة)
+══════════════════════════════════════════════════════ -->
+<div class="slide navy">
+  <div class="bg-glow" style="width:40%;height:60%;top:-10%;right:-5%;background:rgba(26,79,214,.08);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">02 · القصة الحقيقية</div>
+    <div class="h2" style="margin-bottom:clamp(14px,2vh,28px);">
+      رجل. ليلة واحدة. نظامان.<br>
+      <span class="accent">النتيجة مختلفة تماماً.</span>
+    </div>
+
+    <div class="g2">
+
+      <div class="card" style="padding:clamp(16px,2vw,28px);border-right:3px solid rgba(220,50,50,.4);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.2em;text-transform:uppercase;color:rgba(220,50,50,.7);margin-bottom:clamp(10px,1.2vh,18px);">العالم بدون سند</div>
+
+        <div class="body muted" style="line-height:2;margin-bottom:clamp(10px,1.2vh,18px);">
+          رجل في الخمسين. ألم في الصدر. طوارئ.<br>
+          الطبيب لا يعرف أدويته. الصيدلية لا تعرف تاريخه الطبي. شركة التأمين تنتظر ورقة فاكس.
+        </div>
+
+        <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:clamp(10px,1.2vh,16px);">
+          <div style="font-size:clamp(14px,1.8vw,24px);font-weight:700;color:rgba(220,50,50,.8);margin-bottom:4px;">نجا.</div>
+          <div class="small muted">لكن بعد 8 ساعات تأخير · مضاعفات غير ضرورية · أيام إضافية · تكلفة أثقلت الأسرة.</div>
+        </div>
+      </div>
+
+      <div class="card card-blue" style="padding:clamp(16px,2vw,28px);border-right:3px solid var(--blue-lg);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.2em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:clamp(10px,1.2vh,18px);">نفس الليلة — مع سند</div>
+
+        <div class="body muted" style="line-height:2;margin-bottom:clamp(10px,1.2vh,18px);">
+          نفس الرجل. نفس الأعراض. نفس المستشفى.<br>
+          لكن الطبيب يرى السجل الكامل في ثوانٍ. تنبيه: "وارفارين — لا تعطه أسبرين." التأمين: مُعتمد فورياً.
+        </div>
+
+        <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:clamp(10px,1.2vh,16px);">
+          <div style="font-size:clamp(14px,1.8vw,24px);font-weight:700;color:var(--green);margin-bottom:4px;">نجا أيضاً.</div>
+          <div class="small muted">لكن في 90 دقيقة · بدون مضاعفات · يوم واحد في المستشفى · تكلفة أقل بـ 70%.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:clamp(14px,1.8vh,24px);text-align:center;">
+      <div style="font-size:clamp(14px,1.8vw,26px);font-weight:300;color:rgba(255,255,255,.6);line-height:1.8;">
+        الفرق بين العالمين ليس تقنية.<br>
+        <strong style="color:white;font-weight:700;">الفرق هو ما إذا كانت المنظومة الصحية تعمل كوحدة واحدة أم كجزر منفصلة.</strong>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">02 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 03 — STRATEGIC ALIGNMENT (رؤية 2030)
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:50%;height:60%;top:-15%;left:-5%;background:rgba(232,185,50,.05);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">03 · التوافق الاستراتيجي</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      سند ليس مشروعاً تقنياً.<br>
+      <span class="c-gold">سند أداة تنفيذ لرؤية 2030.</span>
+    </div>
+    <div class="body muted" style="max-width:60%;margin-bottom:clamp(14px,1.8vh,28px);">
+      كل هدف صحي في رؤية 2030 يتطلب تكاملاً بين المؤسسات. سند هو الطبقة التي تُمكّن هذا التكامل.
+    </div>
+
+    <div class="g3" style="margin-bottom:clamp(12px,1.5vh,22px);">
+      <div class="card card-gold" style="padding:clamp(12px,1.4vw,20px);">
+        <div style="font-size:clamp(20px,2.5vw,34px);margin-bottom:8px;">🎯</div>
+        <div class="h3" style="color:white;margin-bottom:6px;">رفع كفاءة القطاع الصحي</div>
+        <div class="small muted">هدف رؤية 2030: رفع نسبة القطاع الخاص في الصحة إلى 35%. سند يربط هذا القطاع الخاص بمنظومة موحدة تحت إشراف مركزي.</div>
+        <hr class="rule" style="margin:8px 0;">
+        <div class="small c-gold" style="font-family:'IBM Plex Mono',monospace;">هدف رؤية 2030 — مباشر</div>
+      </div>
+      <div class="card card-gold" style="padding:clamp(12px,1.4vw,20px);">
+        <div style="font-size:clamp(20px,2.5vw,34px);margin-bottom:8px;">🛡️</div>
+        <div class="h3" style="color:white;margin-bottom:6px;">التوسع في التأمين الصحي</div>
+        <div class="small muted">CCHI يُلزم بتوسيع التغطية. شركات التأمين تحتاج تكاملاً فورياً مع مزودي الرعاية. سند هو الجسر التقني الذي يجعل الإلزام قابلاً للتطبيق.</div>
+        <hr class="rule" style="margin:8px 0;">
+        <div class="small c-gold" style="font-family:'IBM Plex Mono',monospace;">CCHI — إلزامي</div>
+      </div>
+      <div class="card card-gold" style="padding:clamp(12px,1.4vw,20px);">
+        <div style="font-size:clamp(20px,2.5vw,34px);margin-bottom:8px;">🤖</div>
+        <div class="h3" style="color:white;margin-bottom:6px;">استراتيجية الذكاء الاصطناعي</div>
+        <div class="small muted">SDAIA تُريد AI محلياً في القطاع الصحي. سند يُشغّل محرك AI سريري قابل للتفسير والتدقيق — مصمم للسياق السعودي.</div>
+        <hr class="rule" style="margin:8px 0;">
+        <div class="small c-gold" style="font-family:'IBM Plex Mono',monospace;">SDAIA — أولوية قصوى</div>
+      </div>
+    </div>
+
+    <div class="card" style="display:flex;align-items:center;gap:clamp(16px,2vw,28px);padding:clamp(14px,1.8vw,24px);">
+      <div style="font-size:clamp(28px,4vw,54px);flex-shrink:0;">🇸🇦</div>
+      <div>
+        <div class="h3" style="color:white;margin-bottom:6px;">سند شريك — لا منافس</div>
+        <div class="body muted">سند يعمل فوق Nphies، لا بدلاً منه. يستخدم البنية التحتية التي بنتها وزارة الصحة ويضيف إليها طبقة التنسيق الذكي بين القطاع الخاص والعام. <strong style="color:white;">الهدف النهائي: شراكة وطنية.</strong></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">03 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 04 — THE SOLUTION (GOV ANGLE)
+══════════════════════════════════════════════════════ -->
+<div class="slide navy">
+  <div class="bg-glow" style="width:40%;height:55%;bottom:-10%;right:-5%;background:rgba(26,79,214,.08);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">04 · الحل</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      طبقة التنسيق الوطنية.<br>
+      <span class="accent">5 قطاعات · شبكة واحدة · قرار واحد.</span>
+    </div>
+    <div class="body muted" style="max-width:60%;margin-bottom:clamp(14px,1.8vh,24px);">
+      سند لا يستبدل أي نظام قائم. يضع نفسه فوقها جميعاً ويجعلها تتحدث مع بعض.
+    </div>
+
+    <!-- network -->
+    <div style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:14px;padding:clamp(16px,2vw,28px);margin-bottom:clamp(10px,1.2vh,18px);">
+      <div style="display:flex;align-items:center;justify-content:space-around;gap:8px;">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:clamp(36px,4vw,58px);height:clamp(36px,4vw,58px);border-radius:50%;background:rgba(26,79,214,.15);border:1px solid rgba(61,111,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.8vw,26px);">🚑</div>
+          <div style="font-size:clamp(8px,.8vw,12px);color:var(--dim);">إسعاف</div>
+        </div>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(61,111,255,.1),rgba(61,111,255,.5));"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:clamp(36px,4vw,58px);height:clamp(36px,4vw,58px);border-radius:50%;background:rgba(26,79,214,.15);border:1px solid rgba(61,111,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.8vw,26px);">🔬</div>
+          <div style="font-size:clamp(8px,.8vw,12px);color:var(--dim);">مختبر</div>
+        </div>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(61,111,255,.5),var(--blue-lg));"></div>
+        <div style="flex-shrink:0;width:clamp(64px,8vw,110px);height:clamp(64px,8vw,110px);border-radius:50%;background:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 0 clamp(20px,3vw,40px) rgba(26,79,214,.5);border:2px solid rgba(255,255,255,.2);">
+          <div style="font-size:clamp(9px,1vw,14px);font-weight:800;letter-spacing:.06em;color:white;">SANAD</div>
+          <div style="font-size:clamp(6px,.55vw,8px);color:rgba(255,255,255,.55);font-family:'IBM Plex Mono',monospace;letter-spacing:.1em;margin-top:2px;">طبقة التنسيق</div>
+        </div>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,var(--blue-lg),rgba(61,111,255,.5));"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:clamp(36px,4vw,58px);height:clamp(36px,4vw,58px);border-radius:50%;background:rgba(26,79,214,.15);border:1px solid rgba(61,111,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.8vw,26px);">💊</div>
+          <div style="font-size:clamp(8px,.8vw,12px);color:var(--dim);">صيدلية</div>
+        </div>
+        <div style="flex:1;height:1px;background:linear-gradient(90deg,rgba(61,111,255,.5),rgba(61,111,255,.1));"></div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+          <div style="width:clamp(36px,4vw,58px);height:clamp(36px,4vw,58px);border-radius:50%;background:rgba(26,79,214,.15);border:1px solid rgba(61,111,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.8vw,26px);">🛡️</div>
+          <div style="font-size:clamp(8px,.8vw,12px);color:var(--dim);">تأمين</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div class="card card-blue">
+        <div style="font-size:clamp(18px,2vw,28px);margin-bottom:8px;">🧠</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">AI سريري قابل للتفسير</div>
+        <div class="small muted">كل توصية مُبررة. لا صناديق سوداء. مؤشر أولوية سريرية (0-100) يشرح سبب كل قرار.</div>
+      </div>
+      <div class="card card-blue">
+        <div style="font-size:clamp(18px,2vw,28px);margin-bottom:8px;">🔗</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">Isnād — سلسلة التدقيق</div>
+        <div class="small muted">كل قرار سريري موثق بـ hash chain لا يُمحى. الامتثال كامل. التدقيق الحكومي فوري في أي وقت.</div>
+      </div>
+      <div class="card card-blue">
+        <div style="font-size:clamp(18px,2vw,28px);margin-bottom:8px;">🏛️</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">رؤية مركزية كاملة</div>
+        <div class="small muted">لوحة تحكم وطنية لصانع القرار: KPIs صحية وطنية · مناطق · مستشفيات · مخاطر · اتجاهات.</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">04 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 05 — IMPACT (الأثر الوطني)
+══════════════════════════════════════════════════════ -->
+<div class="slide light">
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">05 · الأثر المتوقع</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      أرواح. وقت. مليارات.<br>
+      <span style="color:var(--blue);">كلها قابلة للقياس.</span>
+    </div>
+    <div class="body muted" style="margin-bottom:clamp(14px,1.8vh,26px);">
+      الأثر مبني على افتراضات قابلة للتحقق — وستصبح أرقاماً حقيقية بعد Pilot.
+    </div>
+
+    <div class="g3" style="margin-bottom:clamp(12px,1.5vh,20px);">
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="font-size:clamp(28px,5vw,64px);font-weight:800;color:var(--blue);line-height:1;margin-bottom:6px;">
+          45→1
+        </div>
+        <div style="font-size:clamp(10px,1.1vw,15px);font-weight:600;margin-bottom:6px;">يوم → يوم</div>
+        <div class="small muted">تقليص وقت معالجة مطالبات التأمين</div>
+        <hr class="rule">
+        <div class="small" style="color:var(--blue);font-family:'IBM Plex Mono',monospace;">تقدير من بيانات قطاعية</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="font-size:clamp(28px,5vw,64px);font-weight:800;color:var(--green);line-height:1;margin-bottom:6px;">
+          70%
+        </div>
+        <div style="font-size:clamp(10px,1.1vw,15px);font-weight:600;margin-bottom:6px;">تقليص أخطاء الدواء القابلة للوقاية</div>
+        <div class="small muted">بواسطة التنبيه التلقائي للتفاعلات الدوائية</div>
+        <hr class="rule">
+        <div class="small" style="color:var(--green);font-family:'IBM Plex Mono',monospace;">بناءً على دراسات تطبيقات مماثلة</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="font-size:clamp(28px,5vw,64px);font-weight:800;line-height:1;margin-bottom:6px;color:#c9a227;">
+          $2B+
+        </div>
+        <div style="font-size:clamp(10px,1.1vw,15px);font-weight:600;margin-bottom:6px;">هدر تشغيلي سنوي قابل للتقليص</div>
+        <div class="small muted">في الإجراءات الإدارية والفحوصات المكررة</div>
+        <hr class="rule">
+        <div class="small" style="color:#c9a227;font-family:'IBM Plex Mono',monospace;">تقدير — يُراجع بعد Pilot</div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card card-blue" style="padding:clamp(12px,1.4vw,20px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--blue);margin-bottom:8px;">الأثر على صانع القرار</div>
+        <div class="small muted" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;gap:8px;"><span style="color:var(--blue);">→</span> رؤية فورية لأزمات الصحة العامة قبل انتشارها</div>
+          <div style="display:flex;gap:8px;"><span style="color:var(--blue);">→</span> بيانات حقيقية لصياغة السياسات الصحية</div>
+          <div style="display:flex;gap:8px;"><span style="color:var(--blue);">→</span> قياس KPIs رؤية 2030 الصحية بدقة وآنية</div>
+        </div>
+      </div>
+      <div class="card card-green" style="padding:clamp(12px,1.4vw,20px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:8px;">الأثر على المواطن</div>
+        <div class="small muted" style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;gap:8px;"><span style="color:var(--green);">→</span> سجل طبي موحد في أي مستشفى في المملكة</div>
+          <div style="display:flex;gap:8px;"><span style="color:var(--green);">→</span> لا ورق · لا انتظار · لا معلومة ضائعة</div>
+          <div style="display:flex;gap:8px;"><span style="color:var(--green);">→</span> حماية من أخطاء الدواء قبل حدوثها</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="fn">* الأرقام تقديرية مبنية على: WHO Patient Safety 2023 · OECD Health at a Glance 2023 · تقارير MOH. تُراجع وتُحدَّث بعد Pilot فعلي.</div>
+  <div class="num-badge">05 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 06 — WHAT WE BUILT
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:40%;height:55%;bottom:-10%;right:-5%;background:rgba(0,196,122,.05);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">06 · ما بنيناه</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      Prototype مكتمل.<br>
+      <span class="c-green">جاهز للعرض والتقييم فوراً.</span>
+    </div>
+    <div class="body muted" style="max-width:60%;margin-bottom:clamp(14px,1.8vh,24px);">
+      ليس PowerPoint. البنية التقنية الكاملة مبنية ومختبرة. يمكن العرض أمامكم الآن.
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,1vw,14px);margin-bottom:clamp(12px,1.5vh,20px);">
+      <div class="card card-green" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-size:clamp(24px,4vw,52px);font-weight:800;color:var(--green);line-height:1;">12</div>
+        <div class="small muted" style="margin-top:4px;">بوابة وظيفية</div>
+      </div>
+      <div class="card card-green" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-size:clamp(24px,4vw,52px);font-weight:800;color:var(--green);line-height:1;">88</div>
+        <div class="small muted" style="margin-top:4px;">اختبار / 88 Pass</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-size:clamp(24px,4vw,52px);font-weight:800;color:var(--blue-lg);line-height:1;">7</div>
+        <div class="small muted" style="margin-top:4px;">سيناريو سريري مهندَس</div>
+      </div>
+      <div class="card card-blue" style="text-align:center;padding:clamp(10px,1.2vw,18px);">
+        <div style="font-size:clamp(20px,3.2vw,44px);font-weight:800;color:var(--blue-lg);line-height:1;">AR/EN</div>
+        <div class="small muted" style="margin-top:4px;">ثنائي اللغة كامل</div>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card" style="padding:clamp(12px,1.4vw,20px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:10px;">✓ جاهز الآن للعرض</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> محرك AI حقيقي — كشف تفاعلات دوائية</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> لوحة تحكم وطنية · Admin Control Center</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> سلسلة تدقيق Isnād · Audit Trail كامل</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-green">✓</span> بوابة مواطن · سجل طبي موحد</div>
+        </div>
+      </div>
+      <div class="card" style="padding:clamp(12px,1.4vw,20px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:10px;">الخطوة التالية بشراكة حكومية</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-blue">→</span> Pilot مع مستشفى حكومي أو شبه حكومي</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-blue">→</span> تكامل مع Nphies · بيانات MOH</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-blue">→</span> امتثال PDPL · NCA · SFDA</div>
+          <div class="small muted" style="display:flex;gap:8px;"><span class="c-blue">→</span> تقرير ROI بعد 6 أشهر للمراجعة</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">06 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 07 — ROADMAP
+══════════════════════════════════════════════════════ -->
+<div class="slide navy">
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">07 · خريطة الطريق</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      من البيلوت إلى المنظومة الوطنية.<br>
+      <span class="accent">خطوات واضحة وقابلة للقياس.</span>
+    </div>
+    <div class="body muted" style="margin-bottom:clamp(14px,1.8vh,24px);">كل مرحلة تُقدّم نتائج قابلة للتحقق قبل الانتقال للمرحلة التالية.</div>
+
+    <div class="tl" style="margin-bottom:clamp(12px,1.5vh,20px);">
+      <div class="tl-phase now">
+        <div class="tl-year">▶ المرحلة الأولى · 2026</div>
+        <div class="tl-title" style="color:white;">Pilot مُثبَت</div>
+        <div class="tl-item"><div class="tl-dot">◆</div><div>مستشفى رائد واحد · اتفاقية رسمية</div></div>
+        <div class="tl-item"><div class="tl-dot">◆</div><div>شركة تأمين واحدة · تكامل مباشر</div></div>
+        <div class="tl-item"><div class="tl-dot">◆</div><div>50 صيدلية · شبكة تجريبية</div></div>
+        <div class="tl-item"><div class="tl-dot">◆</div><div>تقرير ROI بعد 6 أشهر</div></div>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-year">المرحلة الثانية · 2027</div>
+        <div class="tl-title" style="color:white;">التوسع الوطني</div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>20+ مستشفى · شبكة وطنية</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>تكامل Nphies + MOH data</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>لوحة تحكم وطنية للوزارة</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>شراكة استراتيجية رسمية</div></div>
+      </div>
+      <div class="tl-phase">
+        <div class="tl-year">المرحلة الثالثة · 2028+</div>
+        <div class="tl-title" style="color:white;">البنية التحتية الوطنية</div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>تغطية 80%+ من المستشفيات</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>كل صيدلية + كل شركة تأمين</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>منصة بيانات صحية وطنية</div></div>
+        <div class="tl-item"><div class="tl-dot" style="color:rgba(255,255,255,.3);">◆</div><div>نموذج GCC للتوسع</div></div>
+      </div>
+    </div>
+
+    <div class="card card-blue" style="display:flex;align-items:center;gap:clamp(14px,1.8vw,24px);padding:clamp(12px,1.4vw,20px);">
+      <div style="font-size:clamp(22px,3vw,40px);flex-shrink:0;">🔑</div>
+      <div>
+        <div class="h3" style="color:white;margin-bottom:4px;">شرط الانتقال بين المراحل</div>
+        <div class="body muted">كل مرحلة تبدأ فقط بعد تقديم نتائج المرحلة السابقة ومراجعتها. لا توسع بدون دليل. هذا النهج يحمي الاستثمار الحكومي ويضمن المساءلة.</div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">07 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 08 — PARTNERSHIP MODEL
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:40%;height:55%;top:-10%;left:-5%;background:rgba(26,79,214,.08);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">08 · نموذج الشراكة</div>
+    <div class="h2" style="margin-bottom:clamp(4px,.5vh,8px);">
+      لسنا طالبي عقد.<br>
+      <span class="accent">نحن طالبو شراكة استراتيجية.</span>
+    </div>
+    <div class="body muted" style="max-width:60%;margin-bottom:clamp(14px,1.8vh,26px);">
+      الشراكة مع الجهات الحكومية ليست خياراً — هي الشرط الذي يجعل سند يعمل بكامل طاقته.
+    </div>
+
+    <div class="g3" style="margin-bottom:clamp(12px,1.5vh,20px);">
+      <div class="card" style="padding:clamp(12px,1.4vw,20px);border-top:2px solid var(--blue-lg);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:10px;">ما نطلبه من الشركاء</div>
+        <div class="small muted" style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;gap:8px;"><span class="c-blue">◆</span> تصريح لبيلوت في مستشفى رائد</div>
+          <div style="display:flex;gap:8px;"><span class="c-blue">◆</span> وصول لبيانات مجانونة تقنياً</div>
+          <div style="display:flex;gap:8px;"><span class="c-blue">◆</span> مشاركة Clinical Advisor حكومي</div>
+          <div style="display:flex;gap:8px;"><span class="c-blue">◆</span> مسار سريع للامتثال (PDPL/NCA)</div>
+        </div>
+      </div>
+      <div class="card" style="padding:clamp(12px,1.4vw,20px);border-top:2px solid var(--green);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--green);margin-bottom:10px;">ما نقدمه للشركاء</div>
+        <div class="small muted" style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;gap:8px;"><span class="c-green">◆</span> Prototype جاهز — لا انتظار لبناء</div>
+          <div style="display:flex;gap:8px;"><span class="c-green">◆</span> تقرير ROI خلال 6 أشهر من البيلوت</div>
+          <div style="display:flex;gap:8px;"><span class="c-green">◆</span> بيانات وطنية لصانع القرار</div>
+          <div style="display:flex;gap:8px;"><span class="c-green">◆</span> نموذج قابل للتوسع الوطني الكامل</div>
+        </div>
+      </div>
+      <div class="card" style="padding:clamp(12px,1.4vw,20px);border-top:2px solid var(--gold);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;">ضمانات وإطار عمل</div>
+        <div class="small muted" style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;gap:8px;"><span class="c-gold">◆</span> البيانات تبقى في المملكة · local hosting</div>
+          <div style="display:flex;gap:8px;"><span class="c-gold">◆</span> الكود مفتوح للمراجعة الحكومية</div>
+          <div style="display:flex;gap:8px;"><span class="c-gold">◆</span> امتثال PDPL كامل من اليوم الأول</div>
+          <div style="display:flex;gap:8px;"><span class="c-gold">◆</span> حق الاطلاع على خوارزميات AI</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="display:flex;align-items:center;gap:clamp(14px,1.8vw,24px);padding:clamp(12px,1.4vw,20px);border-right:3px solid var(--blue-lg);">
+      <div>
+        <div class="body" style="color:rgba(255,255,255,.8);line-height:1.6;">
+          "نحن لا نطلب اعتمادات ضخمة قبل إثبات النتائج.<br>
+          نطلب فقط: <strong style="color:white;">فرصة لنثبت أن سند يعمل — ثم نتحدث عن التوسع.</strong>"
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">08 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 09 — THE TEAM
+══════════════════════════════════════════════════════ -->
+<div class="slide navy">
+  <div class="bg-glow" style="width:40%;height:55%;top:-10%;right:-5%;background:rgba(26,79,214,.07);"></div>
+  <div class="content" style="width:100%;">
+
+    <div class="slide-tag">09 · الفريق</div>
+    <div class="h2" style="margin-bottom:clamp(14px,2vh,28px);">
+      بُني هذا بفريق مصغر.<br>
+      <span class="accent">الشراكة تُكمل الصورة.</span>
+    </div>
+
+    <div class="g3" style="margin-bottom:clamp(14px,1.8vh,26px);">
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="width:clamp(44px,5vw,70px);height:clamp(44px,5vw,70px);border-radius:50%;background:rgba(26,79,214,.15);border:1.5px solid rgba(61,111,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(18px,2.2vw,30px);margin:0 auto clamp(10px,1.2vh,16px);">👤</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">[المؤسس / CEO]</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.12em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:8px;">CEO & Product</div>
+        <div class="small muted">رؤية المنتج · استراتيجية السوق · علاقات القطاعين العام والخاص</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="width:clamp(44px,5vw,70px);height:clamp(44px,5vw,70px);border-radius:50%;background:rgba(26,79,214,.15);border:1.5px solid rgba(61,111,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(18px,2.2vw,30px);margin:0 auto clamp(10px,1.2vh,16px);">👤</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">[CTO]</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.12em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:8px;">CTO & Architecture</div>
+        <div class="small muted">البنية التقنية الكاملة · محرك AI · أمن البيانات · امتثال PDPL</div>
+      </div>
+      <div class="card" style="text-align:center;padding:clamp(14px,1.8vw,26px);">
+        <div style="width:clamp(44px,5vw,70px);height:clamp(44px,5vw,70px);border-radius:50%;background:rgba(26,79,214,.15);border:1.5px solid rgba(61,111,255,.3);display:flex;align-items:center;justify-content:center;font-size:clamp(18px,2.2vw,30px);margin:0 auto clamp(10px,1.2vh,16px);">👤</div>
+        <div class="h3" style="color:white;margin-bottom:4px;">[BD / المستشار السريري]</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.12em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:8px;">Clinical & Government</div>
+        <div class="small muted">علاقات المستشفيات · الجهات الحكومية · المصداقية السريرية</div>
+      </div>
+    </div>
+
+    <div class="card card-blue" style="padding:clamp(12px,1.4vw,20px);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.15em;text-transform:uppercase;color:var(--blue-lg);margin-bottom:10px;">ما تضيفه الشراكة الحكومية للفريق</div>
+      <div class="g3">
+        <div>
+          <div class="small" style="font-weight:700;color:white;margin-bottom:4px;">🏥 Clinical Advisor حكومي</div>
+          <div class="small muted">يضمن أن المحرك السريري يلبي متطلبات SFDA والممارسة الطبية السعودية</div>
+        </div>
+        <div>
+          <div class="small" style="font-weight:700;color:white;margin-bottom:4px;">🔐 NCA / PDPL Pathway</div>
+          <div class="small muted">مسار امتثال مُعجَّل بدل انتظار قوائم الانتظار القياسية</div>
+        </div>
+        <div>
+          <div class="small" style="font-weight:700;color:white;margin-bottom:4px;">🤝 Network Effect فوري</div>
+          <div class="small muted">تصريح حكومي = ثقة فورية من المستشفيات والمستثمرين والقطاع الخاص</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">09 — 10</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     SLIDE 10 — NEXT STEP (الخطوة التالية)
+══════════════════════════════════════════════════════ -->
+<div class="slide dark">
+  <div class="bg-glow" style="width:55%;height:65%;top:-20%;right:-10%;background:rgba(26,79,214,.1);"></div>
+  <div class="bg-glow" style="width:25%;height:40%;bottom:-10%;left:-5%;background:rgba(0,196,122,.05);"></div>
+
+  <div class="content" style="width:100%;display:flex;flex-direction:column;height:100%;justify-content:space-between;">
+
+    <div>
+      <div class="slide-tag">10 · الخطوة التالية</div>
+      <div class="h1" style="margin-bottom:clamp(8px,1vh,16px);">خطوة واحدة.</div>
+      <div style="font-size:clamp(18px,2.8vw,38px);font-weight:300;color:rgba(255,255,255,.5);margin-bottom:clamp(16px,2vh,32px);">
+        بيلوت واحد · 6 أشهر · نتائج قابلة للتحقق.
+      </div>
+    </div>
+
+    <div class="g2">
+      <div style="display:flex;flex-direction:column;gap:clamp(10px,1.2vh,18px);">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:2px;">ما يحدث خلال 30 يوم</div>
+
+        <div class="card card-blue" style="display:flex;gap:12px;align-items:flex-start;padding:clamp(10px,1.2vw,16px);">
+          <div style="font-size:clamp(16px,2vw,26px);flex-shrink:0;">📋</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">اتفاقية MOU</div>
+            <div class="small muted">توقيع مذكرة تفاهم مع الجهة الحكومية الراعية · تحديد مستشفى الأنكر</div>
+          </div>
+        </div>
+        <div class="card card-blue" style="display:flex;gap:12px;align-items:flex-start;padding:clamp(10px,1.2vw,16px);">
+          <div style="font-size:clamp(16px,2vw,26px);flex-shrink:0;">🔒</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">مسار الامتثال</div>
+            <div class="small muted">تفعيل مسار PDPL/NCA المُعجَّل · تحديد متطلبات البيانات</div>
+          </div>
+        </div>
+        <div class="card card-blue" style="display:flex;gap:12px;align-items:flex-start;padding:clamp(10px,1.2vw,16px);">
+          <div style="font-size:clamp(16px,2vw,26px);flex-shrink:0;">🚀</div>
+          <div>
+            <div class="small" style="font-weight:700;color:white;margin-bottom:3px;">انطلاق البيلوت</div>
+            <div class="small muted">نشر Prototype في البيئة الحقيقية · تدريب الفريق الطبي · بدء جمع البيانات</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;justify-content:center;gap:clamp(14px,1.8vh,24px);">
+        <div class="card" style="padding:clamp(14px,1.8vw,26px);border-right:3px solid var(--blue-lg);">
+          <div class="body" style="color:rgba(255,255,255,.75);line-height:1.8;margin-bottom:10px;">
+            "اليوم تُم إنقاذ مريض.<br>
+            وغداً يمكن إنقاذ ملايين."<br><br>
+            <strong style="color:white;">هذا ليس شعاراً. هذا وصف حرفي لما سيحدث إذا عملنا معاً.</strong>
+          </div>
+        </div>
+
+        <div style="text-align:center;padding:clamp(14px,1.8vw,26px);background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:12px;">
+          <div style="font-size:clamp(24px,4vw,52px);font-weight:800;letter-spacing:.06em;color:white;margin-bottom:4px;">SANAD</div>
+          <div style="font-size:clamp(10px,1vw,14px);color:rgba(255,255,255,.3);letter-spacing:.08em;">لكل قرارٍ سند · Behind Every Decision</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(7px,.65vw,10px);color:rgba(255,255,255,.15);margin-top:8px;letter-spacing:.12em;">إحاطة حكومية سرية · 2026</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="num-badge">10 — 10</div>
+</div>
+
+
+</div><!-- /deck -->
+</body>
+</html>
