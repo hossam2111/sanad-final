@@ -239,8 +239,8 @@ export default function ResearchPortal() {
           {/* AI Clinical Findings */}
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2"><Lightbulb className="w-4 h-4 text-risk-high" /><CardTitle>{text("AI Clinical Findings — Population Level", "AI Clinical Findings — Population Level")}</CardTitle></div>
-              <Badge variant="warning">{data?.clinicalFindings?.length} {text("insights", "insights")}</Badge>
+              <div className="flex items-center gap-2"><Lightbulb className="w-4 h-4 text-risk-high" /><CardTitle>{text("AI Clinical Findings — Population Level", "نتائج الذكاء الاصطناعي السريرية — مستوى السكان")}</CardTitle></div>
+              <Badge variant="warning">{data?.clinicalFindings?.length} {text("insights", "رؤية")}</Badge>
             </CardHeader>
             <CardBody className="space-y-3">
               {data?.clinicalFindings?.map((f: any, i: number) => (
@@ -262,13 +262,13 @@ export default function ResearchPortal() {
           {/* Data Charts */}
           <div className="flex items-center gap-2 mb-3">
             {([
-              { id: "conditions", label: "Disease Prevalence" },
-              { id: "labs", label: "Lab Abnormality Rates" },
-              { id: "drugs", label: "Drug Utilization" },
-              { id: "age", label: "Age × Risk" },
+              { id: "conditions", label: "Disease Prevalence", labelAr: "انتشار الأمراض" },
+              { id: "labs", label: "Lab Abnormality Rates", labelAr: "معدلات شذوذ المختبر" },
+              { id: "drugs", label: "Drug Utilization", labelAr: "استخدام الأدوية" },
+              { id: "age", label: "Age × Risk", labelAr: "العمر × الخطر" },
             ] as const).map(tab => (
               <button key={tab.id} onClick={() => setSelectedConditions(tab.id)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${selectedConditions === tab.id ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
-                {tab.label}
+                {locale === "ar" ? tab.labelAr : tab.label}
               </button>
             ))}
           </div>
@@ -277,7 +277,7 @@ export default function ResearchPortal() {
             {selectedConditions === "conditions" && (
               <>
                 <Card className="col-span-7">
-                  <CardHeader><div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Disease Prevalence by Condition", "Disease Prevalence by Condition")}</CardTitle></div></CardHeader>
+                  <CardHeader><div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Disease Prevalence by Condition", "انتشار المرض حسب الحالة")}</CardTitle></div></CardHeader>
                   <CardBody>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
@@ -317,7 +317,7 @@ export default function ResearchPortal() {
             )}
             {selectedConditions === "labs" && (
               <Card className="col-span-12">
-                <CardHeader><div className="flex items-center gap-2"><FlaskConical className="w-4 h-4 text-violet-600" /><CardTitle>{text("Lab Test Abnormality Rates", "Lab Test Abnormality Rates")}</CardTitle></div></CardHeader>
+                <CardHeader><div className="flex items-center gap-2"><FlaskConical className="w-4 h-4 text-violet-600" /><CardTitle>{text("Lab Test Abnormality Rates", "معدلات شذوذ اختبارات المختبر")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">
@@ -337,7 +337,7 @@ export default function ResearchPortal() {
             )}
             {selectedConditions === "drugs" && (
               <Card className="col-span-12">
-                <CardHeader><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Top Drug Utilization Patterns", "Top Drug Utilization Patterns")}</CardTitle></div></CardHeader>
+                <CardHeader><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Top Drug Utilization Patterns", "أبرز أنماط استخدام الأدوية")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
                     <ResponsiveContainer width="100%" height="100%">

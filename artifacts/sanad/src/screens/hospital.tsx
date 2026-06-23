@@ -240,8 +240,8 @@ export default function HospitalPortal() {
           <Card className="col-span-12">
             <CardHeader>
               <Brain className="w-4 h-4 text-violet-600" />
-              <CardTitle>{text("AI Capacity Intelligence", "AI Capacity Intelligence")}</CardTitle>
-              <Badge variant="outline" className="ml-auto">{text("Predictive Analysis", "Predictive Analysis")}</Badge>
+              <CardTitle>{text("AI Capacity Intelligence", "ذكاء استيعاب المرضى")}</CardTitle>
+              <Badge variant="outline" className="ml-auto">{text("Predictive Analysis", "تحليل تنبؤي")}</Badge>
             </CardHeader>
             <CardBody>
               <div className="grid grid-cols-2 gap-3">
@@ -258,7 +258,7 @@ export default function HospitalPortal() {
           <Card className="col-span-12">
             <CardHeader>
               <AlertTriangle className="w-4 h-4 text-risk-high" />
-              <CardTitle>{text("AI Priority Patient Queue", "AI Priority Patient Queue")}</CardTitle>
+              <CardTitle>{text("AI Priority Patient Queue", "قائمة انتظار المرضى — الأولوية السريرية")}</CardTitle>
               <Badge variant="outline" className="ml-auto">{text("Sorted by Clinical Priority · High → Low", "مُرتَّب حسب الأولوية السريرية · من الأعلى")}</Badge>
             </CardHeader>
             <table className="w-full data-table">

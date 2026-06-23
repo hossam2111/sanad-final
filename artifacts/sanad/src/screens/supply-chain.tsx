@@ -228,13 +228,20 @@ export default function SupplyChainPortal() {
         <div className="space-y-4">
           <div className="grid grid-cols-12 gap-5">
             <Card className="col-span-8">
-              <CardHeader><Package className="w-4 h-4 text-lime-700" /><CardTitle>{text("Drug Inventory — All Lines", "Drug Inventory — All Lines")}</CardTitle></CardHeader>
+              <CardHeader><Package className="w-4 h-4 text-lime-700" /><CardTitle>{text("Drug Inventory — All Lines", "مخزون الأدوية — جميع البنود")}</CardTitle></CardHeader>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="bg-secondary/50 border-b border-border">
-                      {["Drug", "Category", "Stock", "Min Required", "Days Remaining", "Status"].map(h => (
-                        <th key={h} className="px-4 py-2.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{h}</th>
+                      {([
+                        { en: "Drug", ar: "الدواء" },
+                        { en: "Category", ar: "الفئة" },
+                        { en: "Stock", ar: "المخزون" },
+                        { en: "Min Required", ar: "الحد الأدنى" },
+                        { en: "Days Remaining", ar: "أيام متبقية" },
+                        { en: "Status", ar: "الحالة" },
+                      ]).map(h => (
+                        <th key={h.en} className="px-4 py-2.5 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{locale === "ar" ? h.ar : h.en}</th>
                       ))}
                     </tr>
                   </thead>
@@ -262,7 +269,7 @@ export default function SupplyChainPortal() {
                               <div className="w-16 bg-secondary rounded-full h-1.5">
                                 <div className={`h-full rounded-full ${item.daysOfStock < 14 ? "bg-danger" : item.daysOfStock < 30 ? "bg-risk-high" : "bg-success"}`} style={{ width: `${Math.min((item.daysOfStock / 90) * 100, 100)}%` }} />
                               </div>
-                              <span className={`text-xs font-bold ${item.daysOfStock < 14 ? "text-danger" : item.daysOfStock < 30 ? "text-risk-high" : "text-foreground"}`}>{item.daysOfStock}{text("d", "d")}</span>
+                              <span className={`text-xs font-bold ${item.daysOfStock < 14 ? "text-danger" : item.daysOfStock < 30 ? "text-risk-high" : "text-foreground"}`}>{item.daysOfStock}{text("d", "ي")}</span>
                             </div>
                           </td>
                           <td className="px-4 py-3">
@@ -279,7 +286,7 @@ export default function SupplyChainPortal() {
             <div className="col-span-4 space-y-4">
               {/* Distribution Centers */}
               <Card>
-                <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>{text("Distribution Centers", "Distribution Centers")}</CardTitle></CardHeader>
+                <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>{text("Distribution Centers", "مراكز التوزيع")}</CardTitle></CardHeader>
                 <CardBody className="space-y-2.5">
                   {data?.distributionCenters?.map((dc: any, i: number) => {
                     const cfg = STATUS_CFG[dc.stock] ?? STATUS_CFG.adequate;
