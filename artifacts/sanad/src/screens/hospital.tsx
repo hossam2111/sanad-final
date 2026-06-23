@@ -124,11 +124,11 @@ export default function HospitalPortal() {
       {/* Tabs */}
       <div className="flex items-center gap-2 mb-5">
         {([
-          { id: "overview", label: "Bed Overview" },
-          { id: "icu", label: `ICU Alerts ${icuCritical > 0 ? `(${icuCritical} critical)` : ""}` },
-          { id: "or", label: "OR Schedule" },
-          { id: "readmission", label: "Readmission Risk" },
-        ] as { id: TabId; label: string }[]).map(tab => (
+          { id: "overview", label: "Bed Overview", labelAr: "نظرة عامة على الأسرة" },
+          { id: "icu", label: `ICU Alerts${icuCritical > 0 ? ` (${icuCritical} critical)` : ""}`, labelAr: `تنبيهات العناية المركزة${icuCritical > 0 ? ` (${icuCritical} حرج)` : ""}` },
+          { id: "or", label: "OR Schedule", labelAr: "جدول غرف العمليات" },
+          { id: "readmission", label: "Readmission Risk", labelAr: "خطر الإعادة للمستشفى" },
+        ] as { id: TabId; label: string; labelAr: string }[]).map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -140,7 +140,7 @@ export default function HospitalPortal() {
                 : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
           >
-            {tab.label}
+            {locale === "ar" ? tab.labelAr : tab.label}
           </button>
         ))}
       </div>

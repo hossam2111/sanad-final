@@ -114,7 +114,7 @@ export default function InsurancePortal() {
   });
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
-    { id: "dashboard", label: "Operations Dashboard", icon: <BarChart2 className="w-3.5 h-3.5" /> },
+    { id: "dashboard", label: text("Operations Dashboard", "لوحة عمليات التأمين"), icon: <BarChart2 className="w-3.5 h-3.5" /> },
     { id: "patient", label: text("Policy Lookup", "بحث الوثائق"), icon: <Search className="w-3.5 h-3.5" /> },
     { id: "portfolio", label: text("Portfolio Risk", "خطورة المحفظة"), icon: <Activity className="w-3.5 h-3.5" /> },
   ];
