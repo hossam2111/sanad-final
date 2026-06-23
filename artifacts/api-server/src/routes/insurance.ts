@@ -235,6 +235,10 @@ router.get("/dashboard", async (req, res) => {
 });
 
 router.post("/claim/:claimId/review", validate(claimReviewSchema), async (req, res) => {
+  if (req.role !== "insurance" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Insurance role required" });
+    return;
+  }
   const claimId = String(req.params["claimId"]);
   const { action, notes, reviewedBy } = req.body as z.infer<typeof claimReviewSchema>;
   const statusMap: Record<string, "approved" | "rejected" | "under_review"> = { approve: "approved", reject: "rejected", flag: "under_review" };
@@ -266,6 +270,10 @@ router.post("/claim/:claimId/review", validate(claimReviewSchema), async (req, r
 });
 
 router.patch("/claims/:claimId", async (req, res) => {
+  if (req.role !== "insurance" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Insurance role required" });
+    return;
+  }
   const claimId = req.params["claimId"]!;
   const { decision, reason } = req.body as { decision: "approved" | "denied"; reason?: string };
 

@@ -165,6 +165,10 @@ router.get("/stock-check/:drugName", async (req, res) => {
 });
 
 router.post("/reorder", validate(reorderSchema), async (req, res) => {
+  if (req.role !== "supply-chain" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Supply Chain role required" });
+    return;
+  }
   const { drugName, quantity, supplier, requestedBy } = req.body as z.infer<typeof reorderSchema>;
   const drug = DRUG_INVENTORY.find(d => d.drugName === drugName);
   const orderId = `PO-${Date.now()}`;
@@ -278,6 +282,10 @@ router.get("/regional-distribution", async (_req, res) => {
 
 // POST /api/supply-chain/orders
 router.post("/orders", async (req, res) => {
+  if (req.role !== "supply-chain" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Supply Chain role required" });
+    return;
+  }
   const { drugName, quantity, supplier } = req.body as {
     drugName: string; quantity: number; supplier: string;
   };
@@ -292,6 +300,10 @@ router.post("/orders", async (req, res) => {
 
 // PATCH /api/supply-chain/orders/:id/approve
 router.patch("/orders/:id/approve", async (req, res) => {
+  if (req.role !== "supply-chain" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Supply Chain role required" });
+    return;
+  }
   const id = req.params["id"]!;
   const [order] = await db.update(purchaseOrdersTable)
     .set({ status: "confirmed", updatedAt: new Date() })
@@ -303,6 +315,10 @@ router.patch("/orders/:id/approve", async (req, res) => {
 
 // PATCH /api/supply-chain/orders/:id/reject
 router.patch("/orders/:id/reject", async (req, res) => {
+  if (req.role !== "supply-chain" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Supply Chain role required" });
+    return;
+  }
   const id = req.params["id"]!;
   const [order] = await db.update(purchaseOrdersTable)
     .set({ status: "cancelled", updatedAt: new Date() })

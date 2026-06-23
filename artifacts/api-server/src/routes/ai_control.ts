@@ -21,6 +21,10 @@ router.get("/features", (req, res) => {
 });
 
 router.patch("/features/:feature", (req, res) => {
+  if (req.role !== "ai-control" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
+    return;
+  }
   const { feature } = req.params;
   if (!(feature in featureToggles)) {
     res.status(404).json({ error: "UNKNOWN_FEATURE" });
@@ -123,6 +127,10 @@ router.get("/retrain-jobs", async (req, res) => {
 
 // POST /api/ai-control/retrain-jobs — queue a new retrain
 router.post("/retrain-jobs", async (req, res) => {
+  if (req.role !== "ai-control" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
+    return;
+  }
   const { model, reason } = req.body as { model: string; reason: string };
   const [job] = await db.insert(aiRetrainJobsTable).values({
     id: `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
@@ -134,6 +142,10 @@ router.post("/retrain-jobs", async (req, res) => {
 });
 
 router.post("/engines/:engineName/retrain", async (req, res) => {
+  if (req.role !== "ai-control" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
+    return;
+  }
   const { engineName } = req.params;
   const { triggeredBy } = req.body as { triggeredBy?: string };
   const jobId = `RETRAIN-${engineName}-${Date.now()}`;

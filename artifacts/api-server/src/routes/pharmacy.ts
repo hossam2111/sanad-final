@@ -282,6 +282,10 @@ router.get("/patient/:nationalId", async (req, res) => {
 });
 
 router.post("/dispense/:medicationId", validate(dispenseSchema), async (req, res) => {
+  if (req.role !== "pharmacy" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Pharmacy role required" });
+    return;
+  }
   const medicationId = String(req.params["medicationId"]);
   const { pharmacistName, notes } = req.body as z.infer<typeof dispenseSchema>;
 
