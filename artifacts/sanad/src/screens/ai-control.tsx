@@ -314,7 +314,7 @@ export default function AIControlCenter() {
                       <span className="text-xs font-bold text-foreground w-8">{engine.accuracy}%</span>
                       {driftInfo && (
                         <span className={`text-[10px] font-bold ${driftInfo.driftScore > 5 ? "text-danger bg-danger-bg border-danger/30" : driftInfo.driftScore > 3 ? "text-risk-high bg-risk-high-bg border-risk-high/20" : "text-success bg-success-bg border-success/30"} px-2 py-0.5 rounded-full border`}>
-                          {text("Drift:", "انحراف:")} {driftInfo.driftScore}
+                          {text("Drift:", "انحراف:")} {driftInfo.driftScore}<span className="opacity-50">/10</span>
                         </span>
                       )}
                       <Badge variant={statusCfg.badge} className="text-[9px] shrink-0">{hasDrift ? text("Drift", "انحراف") : engine.status === "operational" ? text("operational", "يعمل") : engine.status}</Badge>

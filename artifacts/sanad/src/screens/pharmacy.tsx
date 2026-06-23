@@ -97,8 +97,8 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
     return (
       <div className="py-12 text-center">
         <Grid3X3 className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-        <p className="font-bold text-foreground mb-1">{text("2+ Active Medications Required", "2+ Active Medications Required")}</p>
-        <p className="text-sm text-muted-foreground">{text("The interaction matrix compares all active drugs simultaneously.", "The interaction matrix compares all active drugs simultaneously.")}</p>
+        <p className="font-bold text-foreground mb-1">{text("2+ Active Medications Required", "يلزم دواءان نشطان أو أكثر")}</p>
+        <p className="text-sm text-muted-foreground">{text("The interaction matrix compares all active drugs simultaneously.", "مصفوفة التداخلات تقارن جميع الأدوية النشطة في آنٍ واحد.")}</p>
       </div>
     );
   }
@@ -107,13 +107,13 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
     <div className="p-5">
       <div className="flex items-center gap-2 mb-4 px-4 py-3 bg-violet-50 border border-violet-100 rounded-2xl text-xs text-violet-700">
         <Grid3X3 className="w-3.5 h-3.5 shrink-0" />
-        <span className="font-semibold">{text("Full Drug-Drug Interaction Matrix", "Full Drug-Drug Interaction Matrix")}</span>
-        <span className="text-violet-500 ml-1">{text("— Click any cell for clinical details", "— Click any cell for clinical details")}</span>
+        <span className="font-semibold">{text("Full Drug-Drug Interaction Matrix", "مصفوفة التداخلات الدوائية الكاملة")}</span>
+        <span className="text-violet-500 ml-1">{text("— Click any cell for clinical details", "— اضغط على أي خلية للتفاصيل السريرية")}</span>
         <div className="ml-auto flex items-center gap-2 flex-wrap">
           {(["CONTRAINDICATED", "MAJOR", "MODERATE"] as const).map((s) => (
             <span key={s} className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[s]}`}>{s}</span>
           ))}
-          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-success-bg text-success">{text("SAFE", "SAFE")}</span>
+          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-success-bg text-success">{text("SAFE", "آمن")}</span>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
         <table className="w-full text-xs">
           <thead>
             <tr>
-              <th className="bg-secondary text-muted-foreground font-bold px-3 py-2.5 text-left border-r border-border min-w-[140px]">{text("Drug ↓ vs →", "Drug ↓ vs →")}</th>
+              <th className="bg-secondary text-muted-foreground font-bold px-3 py-2.5 text-left border-r border-border min-w-[140px]">{text("Drug ↓ vs →", "الدواء ↓ مقابل →")}</th>
               {drugs.map((d) => (
                 <th key={d} className="bg-secondary text-muted-foreground font-semibold px-2 py-2.5 text-center border-r border-border min-w-[110px]">
                   {d.split(" ")[0]}
@@ -179,8 +179,8 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[w.severity] ?? "bg-muted"}`}>{w.severity}</span>
                 <p className="text-xs font-bold text-foreground">{w.text ?? `${w.drugA} ↔ ${w.drugB}`}</p>
               </div>
-              <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "Mechanism:")} </span>{w.mechanism}</p>
-              <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "Clinical basis:")} </span>{w.clinicalBasis}</p>
+              <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "الآلية:")}</span>{w.mechanism}</p>
+              <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "الأساس السريري:")}</span>{w.clinicalBasis}</p>
               <p className="text-[11px] font-semibold text-danger mb-2">{w.recommendation}</p>
               <div className="flex flex-wrap gap-1">
                 {(w.sources ?? [w.source]).filter(Boolean).map((src: string, si: number) => (
@@ -262,23 +262,23 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
       <div className="bg-card rounded-3xl shadow-2xl w-full max-w-md overflow-hidden">
         <div className="bg-success text-white p-5 text-center">
           <CheckCircle2 className="w-10 h-10 mx-auto mb-2" />
-          <p className="font-bold text-lg">{text("Medication Dispensed", "Medication Dispensed")}</p>
+          <p className="font-bold text-lg">{text("Medication Dispensed", "تم صرف الدواء")}</p>
           <p className="text-white/80 text-sm font-mono mt-1">{receipt.refNo}</p>
         </div>
         <div className="p-5 space-y-3">
           <div className="bg-secondary rounded-2xl p-4 space-y-2">
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Patient", "Patient")}</span><span className="font-bold">{receipt.patient}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("National ID", "National ID")}</span><span className="font-mono font-bold">{receipt.nationalId}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Patient", "المريض")}</span><span className="font-bold">{receipt.patient}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("National ID", "رقم الهوية")}</span><span className="font-mono font-bold">{receipt.nationalId}</span></div>
             <div className="h-px bg-border" />
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Medication", "Medication")}</span><span className="font-bold">{receipt.drugName}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Dosage", "Dosage")}</span><span className="font-mono">{receipt.dosage} · {receipt.frequency}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Medication", "الدواء")}</span><span className="font-bold">{receipt.drugName}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">{text("Dosage", "الجرعة")}</span><span className="font-mono">{receipt.dosage} · {receipt.frequency}</span></div>
             <div className="h-px bg-border" />
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{text("AI Safety", "AI Safety")}</span>
+              <span className="text-muted-foreground">{text("AI Safety", "سلامة الذكاء الاصطناعي")}</span>
               <Badge variant={receipt.safe ? "success" : "warning"} className="text-[10px]">{receipt.safe ? "✓ Cleared" : "⚠ Override"}</Badge>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">{text("Insurance", "Insurance")}</span>
+              <span className="text-muted-foreground">{text("Insurance", "التأمين")}</span>
               <span className="font-bold text-sm">{receipt.insurance.eligible ? `${receipt.insurance.coveragePercent}% · SAR ${receipt.insurance.copay} copay` : "Not covered"}</span>
             </div>
             {receipt.supplyChainStatus?.warning && (
@@ -289,9 +289,9 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
             )}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose} className="flex-1">{text("Close", "Close")}</Button>
+            <Button variant="outline" onClick={onClose} className="flex-1">{text("Close", "إغلاق")}</Button>
             <Button onClick={handlePrint} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white">
-              <Printer className="w-3.5 h-3.5 mr-1.5" /> {text("Print Receipt", "Print Receipt")}
+              <Printer className="w-3.5 h-3.5 mr-1.5" /> {text("Print Receipt", "طباعة الإيصال")}
             </Button>
           </div>
         </div>
@@ -536,7 +536,7 @@ export default function PharmacyPortal() {
           {/* Queue strip */}
           {queue.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-border">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Queue:", "Queue:")}</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Queue:", "قائمة الانتظار:")}</span>
               {queue.map((q) => (
                 <div
                   key={q.id}
@@ -574,7 +574,7 @@ export default function PharmacyPortal() {
       {isLoading && (
         <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
           <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600" />
-          <span className="text-sm font-medium">{text("Loading prescriptions...", "Loading prescriptions...")}</span>
+          <span className="text-sm font-medium">{text("Loading prescriptions...", "جارٍ تحميل الوصفات...")}</span>
         </div>
       )}
 
@@ -582,8 +582,8 @@ export default function PharmacyPortal() {
         <Card>
           <CardBody className="py-10 text-center">
             <AlertTriangle className="w-8 h-8 text-risk-high mx-auto mb-3" />
-            <p className="font-bold text-foreground">{text("Patient Not Found", "Patient Not Found")}</p>
-            <p className="text-sm text-muted-foreground mt-1">{text("No records for National ID:", "No records for National ID:")} {nationalId}</p>
+            <p className="font-bold text-foreground">{text("Patient Not Found", "المريض غير موجود")}</p>
+            <p className="text-sm text-muted-foreground mt-1">{text("No records for National ID:", "لا توجد سجلات لرقم الهوية:")} {nationalId}</p>
           </CardBody>
         </Card>
       )}
@@ -593,8 +593,8 @@ export default function PharmacyPortal() {
           <div className="w-16 h-16 rounded-3xl bg-purple-100 flex items-center justify-center mx-auto mb-5">
             <Pill className="w-8 h-8 text-purple-600" />
           </div>
-          <p className="text-xl font-bold text-foreground mb-2">{text("Pharmacy Portal", "Pharmacy Portal")}</p>
-          <p className="text-sm text-muted-foreground max-w-sm">{text("Enter a patient National ID to retrieve active prescriptions and begin the AI-verified dispensing workflow.", "Enter a patient National ID to retrieve active prescriptions and begin the AI-verified dispensing workflow.")}</p>
+          <p className="text-xl font-bold text-foreground mb-2">{text("Pharmacy Portal", "بوابة الصيدلية")}</p>
+          <p className="text-sm text-muted-foreground max-w-sm">{text("Enter a patient National ID to retrieve active prescriptions and begin the AI-verified dispensing workflow.", "أدخل رقم هوية المريض لاستدعاء وصفاته النشطة وبدء سير عمل الصرف المعتمد بالذكاء الاصطناعي.")}</p>
         </div>
       )}
 
@@ -605,16 +605,16 @@ export default function PharmacyPortal() {
             data.summary.interactions > 0 ? "bg-danger" : "bg-gradient-to-br from-violet-600 to-purple-700"
           } text-white`}>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Patient Record", "Patient Record")}</p>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Patient Record", "سجل المريض")}</p>
               <p className="text-xl font-bold">{data.patient.name}</p>
               <div className="flex items-center gap-4 mt-1.5 text-sm text-white/80">
                 <span className="font-mono">{data.patient.nationalId}</span>
                 <span>·</span>
-                <span>{data.patient.age}{text("y", "y")}</span>
+                <span>{data.patient.age}{text("y", "سنة")}</span>
                 <span>·</span>
                 <span>{data.patient.bloodType}</span>
                 <span>·</span>
-                <span>{text("Risk", "Risk")} {data.patient.riskScore ?? "—"}/100</span>
+                <span>{text("Risk", "الخطر")} {data.patient.riskScore ?? "—"}/100</span>
               </div>
               {data.patient.chronicConditions?.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
@@ -626,21 +626,21 @@ export default function PharmacyPortal() {
               {data.patient.allergies?.length > 0 && (
                 <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-card/20 rounded-xl w-fit">
                   <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                  <p className="text-xs font-bold">{text("ALLERGIES:", "ALLERGIES:")} {data.patient.allergies.join(", ")}</p>
+                  <p className="text-xs font-bold">{text("ALLERGIES:", "الحساسية:")} {data.patient.allergies.join(", ")}</p>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-5 shrink-0">
               <div className="text-center">
-                <p className="text-[10px] text-white/70">{text("Active Rx", "Active Rx")}</p>
+                <p className="text-[10px] text-white/70">{text("Active Rx", "وصفات نشطة")}</p>
                 <p className="text-3xl font-bold">{data.summary.active}</p>
               </div>
               <div className="text-center">
-                <p className="text-[10px] text-white/70">{text("Conflicts", "Conflicts")}</p>
+                <p className="text-[10px] text-white/70">{text("Conflicts", "تعارضات")}</p>
                 <p className={`text-3xl font-bold ${data.summary.interactions > 0 ? "text-warning" : ""}`}>{data.summary.interactions}</p>
               </div>
               <div className="text-center">
-                <p className="text-[10px] text-white/70">{text("Insured", "Insured")}</p>
+                <p className="text-[10px] text-white/70">{text("Insured", "مؤمَّن")}</p>
                 <p className="text-3xl font-bold">{data.summary.insuranceCovered}</p>
               </div>
               <Button
@@ -649,7 +649,7 @@ export default function PharmacyPortal() {
                 onClick={handlePrintRx}
                 className="bg-card/20 text-white border-border/30 hover:bg-card/30 text-xs"
               >
-                <Printer className="w-3.5 h-3.5 mr-1.5" /> {text("Print Rx", "Print Rx")}
+                <Printer className="w-3.5 h-3.5 mr-1.5" /> {text("Print Rx", "طباعة الوصفة")}
               </Button>
             </div>
           </div>
@@ -685,7 +685,7 @@ export default function PharmacyPortal() {
                 {data.prescriptions.length === 0 ? (
                   <div className="py-12 text-center">
                     <Pill className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-                    <p className="font-bold text-foreground">{text("No active prescriptions", "No active prescriptions")}</p>
+                    <p className="font-bold text-foreground">{text("No active prescriptions", "لا توجد وصفات نشطة")}</p>
                   </div>
                 ) : (
                   data.prescriptions.map((presc: any) => {
@@ -698,16 +698,16 @@ export default function PharmacyPortal() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-bold text-base text-foreground">{presc.drugName}</p>
-                              {!check.safe && <Badge variant="destructive" className="text-[9px]">{text("⚠ CONFLICT", "⚠ CONFLICT")}</Badge>}
-                              {check.safe && <Badge variant="success" className="text-[9px]">{text("✓ SAFE", "✓ SAFE")}</Badge>}
-                              {isDispensed && <Badge variant="info" className="text-[9px]">{text("DISPENSED", "DISPENSED")}</Badge>}
+                              {!check.safe && <Badge variant="destructive" className="text-[9px]">{text("⚠ CONFLICT", "⚠ تعارض")}</Badge>}
+                              {check.safe && <Badge variant="success" className="text-[9px]">{text("✓ SAFE", "✓ آمن")}</Badge>}
+                              {isDispensed && <Badge variant="info" className="text-[9px]">{text("DISPENSED", "تم الصرف")}</Badge>}
                             </div>
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                               <span className="font-mono font-bold text-foreground">{presc.dosage}</span>
                               <span>·</span>
                               <span>{presc.frequency}</span>
-                              {presc.prescribedBy && <><span>·</span><span>{text("Rx:", "Rx:")} {presc.prescribedBy}</span></>}
-                              {presc.startDate && <><span>·</span><span>{text("Since", "Since")} {presc.startDate}</span></>}
+                              {presc.prescribedBy && <><span>·</span><span>{text("Rx:", "وصفة:")} {presc.prescribedBy}</span></>}
+                              {presc.startDate && <><span>·</span><span>{text("Since", "منذ")} {presc.startDate}</span></>}
                             </div>
                           </div>
                           {!isDispensed ? (
@@ -718,12 +718,12 @@ export default function PharmacyPortal() {
                               className={`shrink-0 ${check.safe ? "bg-violet-600 hover:bg-violet-700 text-white" : "border-danger/30 text-danger hover:bg-danger-bg"}`}
                             >
                               <Zap className="w-3.5 h-3.5" />
-                              {dispensingId === presc.id && dispenseMutation.isPending ? "Dispensing..." : check.safe ? "Dispense" : "Override & Dispense"}
+                              {dispensingId === presc.id && dispenseMutation.isPending ? text("Dispensing...", "جارٍ الصرف...") : check.safe ? text("Dispense", "صرف") : text("Override & Dispense", "تجاوز وصرف")}
                             </Button>
                           ) : (
                             <div className="flex items-center gap-2 text-xs font-bold text-success shrink-0">
                               <CheckCircle2 className="w-4 h-4" />
-                              {text("Dispensed", "Dispensed")}
+                              {text("Dispensed", "تم الصرف")}
                             </div>
                           )}
                         </div>
@@ -732,8 +732,8 @@ export default function PharmacyPortal() {
                         <div className={`px-3.5 py-3 rounded-2xl border mb-2 ${!check.safe ? "bg-danger-bg border-danger/30" : "bg-success-bg border-success/30"}`}>
                           <div className="flex items-center gap-2 mb-1.5">
                             <Brain className="w-3.5 h-3.5 text-violet-600" />
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("AI Dispense Safety Check", "AI Dispense Safety Check")}</p>
-                            <span className="text-[10px] font-mono text-muted-foreground ml-auto">{text("Confidence:", "Confidence:")} {Math.round(check.confidenceScore * 100)}%</span>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("AI Dispense Safety Check", "فحص سلامة الصرف بالذكاء الاصطناعي")}</p>
+                            <span className="text-[10px] font-mono text-muted-foreground ml-auto">{text("Confidence:", "الثقة:")} {Math.round(check.confidenceScore * 100)}%</span>
                           </div>
                           {check.warnings.map((w: string, i: number) => (
                             <p key={i} className="text-xs font-semibold text-foreground mb-1">{w}</p>
@@ -745,7 +745,7 @@ export default function PharmacyPortal() {
                                 className="flex items-center gap-1.5 text-[10px] font-bold text-violet-700 hover:text-violet-900 transition-colors"
                               >
                                 <BookOpen className="w-3 h-3" />
-                                {expandedWarnings[presc.id] ? "Hide" : "Show"} {text("Clinical References (", "Clinical References (")}{check.detailedWarnings.length})
+                                {expandedWarnings[presc.id] ? text("Hide", "إخفاء") : text("Show", "عرض")} {text("Clinical References (", "المراجع السريرية (")}{check.detailedWarnings.length})
                                 {expandedWarnings[presc.id] ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                               </button>
                               {expandedWarnings[presc.id] && (
@@ -759,8 +759,8 @@ export default function PharmacyPortal() {
                                         </div>
                                         <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0 ${SEVERITY_COLOR[dw.severity] ?? "bg-muted"}`}>{dw.severity}</span>
                                       </div>
-                                      <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "Mechanism:")} </span>{dw.mechanism}</p>
-                                      <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "Clinical basis:")} </span>{dw.clinicalBasis}</p>
+                                      <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Mechanism:", "الآلية:")}</span>{dw.mechanism}</p>
+                                      <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "الأساس السريري:")}</span>{dw.clinicalBasis}</p>
                                       <p className="text-[11px] font-semibold text-danger mb-2">{dw.recommendation}</p>
                                       <div className="flex flex-wrap gap-1">
                                         {(dw.sources ?? [dw.source]).filter(Boolean).map((src: string, si: number) => (
@@ -779,20 +779,20 @@ export default function PharmacyPortal() {
                         <div className="flex items-center gap-4 px-3.5 py-2.5 bg-secondary rounded-2xl border border-border">
                           <CreditCard className="w-3.5 h-3.5 text-primary shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">{text("Insurance ·", "Insurance ·")} {ins.provider}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">{text("Insurance ·", "التأمين ·")} {ins.provider}</p>
                             <p className="text-xs text-foreground truncate">{ins.notes}</p>
                           </div>
                           <div className="flex items-center gap-3 shrink-0 text-xs">
                             <div className="text-center">
-                              <p className="text-[10px] text-muted-foreground">{text("Coverage", "Coverage")}</p>
+                              <p className="text-[10px] text-muted-foreground">{text("Coverage", "التغطية")}</p>
                               <p className="font-bold text-foreground">{ins.eligible ? `${ins.coveragePercent}%` : "None"}</p>
                             </div>
                             <div className="text-center">
-                              <p className="text-[10px] text-muted-foreground">{text("Copay", "Copay")}</p>
-                              <p className="font-bold text-foreground">{text("SAR", "SAR")} {ins.copay}</p>
+                              <p className="text-[10px] text-muted-foreground">{text("Copay", "المشاركة")}</p>
+                              <p className="font-bold text-foreground">{text("SAR", "ر.س")} {ins.copay}</p>
                             </div>
-                            {ins.preAuthRequired && <Badge variant="warning" className="text-[9px]">{text("Pre-Auth", "Pre-Auth")}</Badge>}
-                            <Badge variant={ins.eligible ? "success" : "destructive"} className="text-[9px]">{ins.eligible ? "Eligible" : "Not Eligible"}</Badge>
+                            {ins.preAuthRequired && <Badge variant="warning" className="text-[9px]">{text("Pre-Auth", "موافقة مسبقة")}</Badge>}
+                            <Badge variant={ins.eligible ? "success" : "destructive"} className="text-[9px]">{ins.eligible ? text("Eligible", "مؤهل") : text("Not Eligible", "غير مؤهل")}</Badge>
                           </div>
                         </div>
                       </div>
@@ -824,8 +824,8 @@ export default function PharmacyPortal() {
                         <p className="text-[11px] text-muted-foreground">{med.dosage} · {med.frequency}{med.prescribedBy ? ` · ${med.prescribedBy}` : ""}</p>
                       </div>
                       <div className="text-right shrink-0">
-                        <Badge variant={med.isActive ? "success" : "outline"} className="text-[10px] mb-1">{med.isActive ? "Active" : "Discontinued"}</Badge>
-                        {med.startDate && <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{text("Since", "Since")} {med.startDate}</p>}
+                        <Badge variant={med.isActive ? "success" : "outline"} className="text-[10px] mb-1">{med.isActive ? text("Active", "نشط") : text("Discontinued", "موقوف")}</Badge>
+                        {med.startDate && <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{text("Since", "منذ")} {med.startDate}</p>}
                       </div>
                     </div>
                   ))}

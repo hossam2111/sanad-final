@@ -35,9 +35,9 @@ const PRIORITY_COLORS = {
 };
 
 const OR_STATUS = {
-  in_progress: { bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, label: "In Progress", dot: "bg-success animate-pulse" },
-  scheduled: { bg: "bg-info-bg", border: "border-info/20", badge: "info" as const, label: "Scheduled", dot: "bg-info" },
-  emergency: { bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, label: "Emergency", dot: "bg-danger animate-pulse" },
+  in_progress: { bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, label: "In Progress", labelAr: "قيد التنفيذ", dot: "bg-success animate-pulse" },
+  scheduled: { bg: "bg-info-bg", border: "border-info/20", badge: "info" as const, label: "Scheduled", labelAr: "مجدوَل", dot: "bg-info" },
+  emergency: { bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, label: "Emergency", labelAr: "طارئ", dot: "bg-danger animate-pulse" },
 };
 
 type TabId = "overview" | "icu" | "or" | "readmission";
@@ -150,8 +150,8 @@ export default function HospitalPortal() {
           <Card className="col-span-8">
             <CardHeader>
               <BedDouble className="w-4 h-4 text-primary" />
-              <CardTitle>{text("Bed Occupancy by Unit", "Bed Occupancy by Unit")}</CardTitle>
-              <span className="ml-auto text-[10px] font-mono text-muted-foreground">{text("Live data", "Live data")}</span>
+              <CardTitle>{text("Bed Occupancy by Unit", "إشغال الأسرّة حسب القسم")}</CardTitle>
+              <span className="ml-auto text-[10px] font-mono text-muted-foreground">{text("Live data", "بيانات مباشرة")}</span>
             </CardHeader>
             <CardBody>
               <div className="grid grid-cols-3 gap-3">
@@ -170,17 +170,20 @@ export default function HospitalPortal() {
                           unit.status === "high" ? "warning" :
                           unit.status === "moderate" ? "info" : "success"
                         } className="text-[9px]">
-                          {unit.status}
+                          {text(
+                            unit.status === "critical" ? "Critical" : unit.status === "high" ? "High" : unit.status === "moderate" ? "Moderate" : "Normal",
+                            unit.status === "critical" ? "حرج" : unit.status === "high" ? "مرتفع" : unit.status === "moderate" ? "متوسط" : "طبيعي"
+                          )}
                         </Badge>
                       </div>
                       <div className="flex items-end justify-between mb-2">
                         <div>
                           <p className="text-3xl font-bold tabular-nums" style={{ color }}>{unit.occupancyPct}%</p>
-                          <p className="text-[10px] text-muted-foreground">{text("occupancy", "occupancy")}</p>
+                          <p className="text-[10px] text-muted-foreground">{text("occupancy", "إشغال")}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-xs font-bold text-foreground">{unit.occupied} / {unit.total}</p>
-                          <p className="text-[10px] text-muted-foreground">{unit.available} {text("available", "available")}</p>
+                          <p className="text-[10px] text-muted-foreground">{unit.available} {text("available", "متاح")}</p>
                         </div>
                       </div>
                       <div className="w-full bg-background rounded-full h-2">
@@ -199,16 +202,16 @@ export default function HospitalPortal() {
           <Card className="col-span-4">
             <CardHeader>
               <Users className="w-4 h-4 text-primary" />
-              <CardTitle>{text("Staff Allocation", "Staff Allocation")}</CardTitle>
+              <CardTitle>{text("Staff Allocation", "توزيع الكوادر")}</CardTitle>
             </CardHeader>
             <CardBody>
               <div className="space-y-3">
                 {[
-                  { label: "Total Doctors", value: data?.staffKPIs?.doctors, icon: Stethoscope },
-                  { label: "Total Nurses", value: data?.staffKPIs?.nurses, icon: Activity },
-                  { label: "Specialists", value: data?.staffKPIs?.specialists, icon: Brain },
-                  { label: "Currently On Duty", value: data?.staffKPIs?.onDuty, icon: CheckCircle2 },
-                  { label: "Available for Call", value: data?.staffKPIs?.available, icon: Phone },
+                  { label: text("Total Doctors", "إجمالي الأطباء"), value: data?.staffKPIs?.doctors, icon: Stethoscope },
+                  { label: text("Total Nurses", "إجمالي الممرضين"), value: data?.staffKPIs?.nurses, icon: Activity },
+                  { label: text("Specialists", "الأخصائيون"), value: data?.staffKPIs?.specialists, icon: Brain },
+                  { label: text("Currently On Duty", "في الخدمة الآن"), value: data?.staffKPIs?.onDuty, icon: CheckCircle2 },
+                  { label: text("Available for Call", "متاح للنداء"), value: data?.staffKPIs?.available, icon: Phone },
                 ].map(item => {
                   const Icon = item.icon;
                   return (
@@ -222,11 +225,11 @@ export default function HospitalPortal() {
                 )})}
                 <div className="pt-1 space-y-1.5">
                   <div className="flex items-center justify-between px-3.5 py-2 bg-primary/5 border border-primary/15 rounded-xl">
-                    <p className="text-[10px] font-bold text-muted-foreground">{text("Doctor : Patient", "Doctor : Patient")}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground">{text("Doctor : Patient", "طبيب : مريض")}</p>
                     <p className="text-xs font-bold text-primary font-mono">{data?.staffKPIs?.doctorPatientRatio}</p>
                   </div>
                   <div className="flex items-center justify-between px-3.5 py-2 bg-primary/5 border border-primary/15 rounded-xl">
-                    <p className="text-[10px] font-bold text-muted-foreground">{text("Nurse : Patient", "Nurse : Patient")}</p>
+                    <p className="text-[10px] font-bold text-muted-foreground">{text("Nurse : Patient", "ممرض : مريض")}</p>
                     <p className="text-xs font-bold text-primary font-mono">{data?.staffKPIs?.nursePatientRatio}</p>
                   </div>
                 </div>
@@ -261,13 +264,13 @@ export default function HospitalPortal() {
             <table className="w-full data-table">
               <thead>
                 <tr>
-                  <th>{text("Priority", "Priority")}</th>
-                  <th>{text("Patient", "Patient")}</th>
-                  <th>{text("Age", "Age")}</th>
-                  <th>{text("Priority", "الأولوية")}</th>
-                  <th>{text("Conditions", "Conditions")}</th>
-                  <th>{text("Suggested Ward", "Suggested Ward")}</th>
-                  <th>{text("Last Visit", "Last Visit")}</th>
+                  <th>{text("Triage", "الفرز")}</th>
+                  <th>{text("Patient", "المريض")}</th>
+                  <th>{text("Age", "العمر")}</th>
+                  <th>{text("Priority Index", "مؤشر الأولوية")}</th>
+                  <th>{text("Conditions", "الحالات")}</th>
+                  <th>{text("Suggested Ward", "الجناح المقترح")}</th>
+                  <th>{text("Last Visit", "آخر زيارة")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -283,7 +286,7 @@ export default function HospitalPortal() {
                       <td className="tabular-nums">{p.age}</td>
                       <td>
                         <div className="flex items-center gap-2">
-                          <span className={`text-sm font-bold tabular-nums ${p.riskScore >= 70 ? "text-danger" : p.riskScore >= 50 ? "text-risk-high" : "text-foreground"}`}>{p.riskScore}</span>
+                          <span className={`text-sm font-bold tabular-nums ${p.riskScore >= 70 ? "text-danger" : p.riskScore >= 50 ? "text-risk-high" : "text-foreground"}`}>{p.riskScore}<span className="text-[10px] font-normal opacity-40">/100</span></span>
                           <div className="w-16 bg-secondary rounded-full h-1.5">
                             <div className={`h-full rounded-full ${p.riskScore >= 70 ? "bg-danger" : p.riskScore >= 50 ? "bg-risk-high" : "bg-success"}`} style={{ width: `${p.riskScore}%` }} />
                           </div>
@@ -317,8 +320,8 @@ export default function HospitalPortal() {
           <div className="flex items-center gap-3 p-4 bg-danger-bg border-2 border-danger/30 rounded-2xl">
             <HeartPulse className="w-5 h-5 text-danger shrink-0" />
             <div>
-              <p className="text-sm font-bold text-danger">{text("ICU Alert System — Real-time Patient Monitoring", "ICU Alert System — Real-time Patient Monitoring")}</p>
-              <p className="text-xs text-danger mt-0.5">{(data?.icuAlerts ?? []).length} {text("patients flagged ·", "patients flagged ·")} {icuCritical} {text("require immediate action", "require immediate action")}</p>
+              <p className="text-sm font-bold text-danger">{text("ICU Alert System — Real-time Patient Monitoring", "نظام تنبيهات العناية المركزة — مراقبة المرضى لحظياً")}</p>
+              <p className="text-xs text-danger mt-0.5">{(data?.icuAlerts ?? []).length} {text("patients flagged ·", "مرضى مُعلَّمون ·")} {icuCritical} {text("require immediate action", "يستوجبون تدخلاً فورياً")}</p>
             </div>
           </div>
 
@@ -337,7 +340,7 @@ export default function HospitalPortal() {
                     <p className="text-[10px] font-mono text-muted-foreground">{alert.nationalId}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className={`text-2xl font-bold ${alert.riskScore >= 90 ? "text-danger" : "text-risk-high"}`}>{alert.riskScore}</p>
+                    <p className={`text-2xl font-bold ${alert.riskScore >= 90 ? "text-danger" : "text-risk-high"}`}>{alert.riskScore}<span className="text-[11px] font-normal opacity-40">/100</span></p>
                     <p className="text-[10px] text-muted-foreground">{text("priority index", "مؤشر الأولوية")}</p>
                   </div>
                 </div>
@@ -346,7 +349,7 @@ export default function HospitalPortal() {
                   <p className={`text-xs font-bold ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`}>{alert.alertType}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <Clock className={`w-3 h-3 ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`} />
-                    <p className={`text-[11px] font-bold ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`}>{text("Time window:", "Time window:")} {alert.timeWindow}</p>
+                    <p className={`text-[11px] font-bold ${alert.severity === "critical" ? "text-danger" : "text-risk-high"}`}>{text("Time window:", "النافذة الزمنية:")} {alert.timeWindow}</p>
                   </div>
                 </div>
 
@@ -366,16 +369,16 @@ export default function HospitalPortal() {
           <div className="flex items-center gap-3 p-4 bg-info-bg border border-info/20 rounded-2xl">
             <Stethoscope className="w-5 h-5 text-info shrink-0" />
             <div>
-              <p className="text-sm font-bold text-info">{text("Operating Room Schedule — Today", "Operating Room Schedule — Today")}</p>
-              <p className="text-xs text-info mt-0.5">{(data?.orSchedule ?? []).length} {text("procedures ·", "procedures ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} {text("in progress ·", "in progress ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "emergency").length} {text("emergency", "emergency")}</p>
+              <p className="text-sm font-bold text-info">{text("Operating Room Schedule — Today", "جدول غرف العمليات — اليوم")}</p>
+              <p className="text-xs text-info mt-0.5">{(data?.orSchedule ?? []).length} {text("procedures ·", "إجراء ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} {text("in progress ·", "قيد التنفيذ ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "emergency").length} {text("emergency", "طارئ")}</p>
             </div>
           </div>
 
           <Card>
             <CardHeader>
               <Stethoscope className="w-4 h-4 text-info" />
-              <CardTitle>{text("OR Schedule", "OR Schedule")}</CardTitle>
-              <Badge variant="outline" className="ml-auto">{(data?.orSchedule ?? []).length} {text("procedures today", "procedures today")}</Badge>
+              <CardTitle>{text("OR Schedule", "جدول العمليات")}</CardTitle>
+              <Badge variant="outline" className="ml-auto">{(data?.orSchedule ?? []).length} {text("procedures today", "إجراء اليوم")}</Badge>
             </CardHeader>
             <div className="divide-y divide-border">
               {(data?.orSchedule ?? []).map((op: any, i: number) => {
@@ -389,7 +392,7 @@ export default function HospitalPortal() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <p className="text-sm font-bold text-foreground">{op.procedure}</p>
-                          <Badge variant={cfg.badge} className="text-[9px]">{cfg.label}</Badge>
+                          <Badge variant={cfg.badge} className="text-[9px]">{locale === "ar" ? cfg.labelAr : cfg.label}</Badge>
                         </div>
                         <p className="text-xs text-muted-foreground">{op.patient} · {op.surgeon}</p>
                       </div>
@@ -414,16 +417,16 @@ export default function HospitalPortal() {
           <div className="flex items-center gap-3 p-4 bg-violet-50 border border-violet-200 rounded-2xl">
             <Brain className="w-5 h-5 text-violet-600 shrink-0" />
             <div>
-              <p className="text-sm font-bold text-violet-800">{text("AI Readmission Risk Analysis", "AI Readmission Risk Analysis")}</p>
-              <p className="text-xs text-violet-600 mt-0.5">{text("Patients with highest 30-day readmission probability — AI-calculated from clinical history", "Patients with highest 30-day readmission probability — AI-calculated from clinical history")}</p>
+              <p className="text-sm font-bold text-violet-800">{text("AI Readmission Risk Analysis", "تحليل الذكاء الاصطناعي — خطر الإعادة للمستشفى")}</p>
+              <p className="text-xs text-violet-600 mt-0.5">{text("Patients with highest 30-day readmission probability — AI-calculated from clinical history", "المرضى الأعلى احتمالاً للعودة خلال 30 يوماً — محسوب بالذكاء الاصطناعي من السجل السريري")}</p>
             </div>
           </div>
 
           <Card>
             <CardHeader>
               <TrendingUp className="w-4 h-4 text-violet-600" />
-              <CardTitle>{text("Readmission Risk — Top Patients", "Readmission Risk — Top Patients")}</CardTitle>
-              <Badge variant="outline" className="ml-auto">{text("Sorted by risk %", "Sorted by risk %")}</Badge>
+              <CardTitle>{text("Readmission Risk — Top Patients", "خطر الإعادة — أعلى المرضى")}</CardTitle>
+              <Badge variant="outline" className="ml-auto">{text("Sorted by risk %", "مرتب حسب نسبة الخطر")}</Badge>
             </CardHeader>
             <div className="divide-y divide-border">
               {(data?.readmissionRisks ?? []).map((p: any, i: number) => (
@@ -431,14 +434,14 @@ export default function HospitalPortal() {
                   <div className="flex items-center gap-4">
                     <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shrink-0 ${p.readmissionRisk >= 80 ? "bg-danger-bg" : p.readmissionRisk >= 60 ? "bg-risk-high-bg" : "bg-secondary"}`}>
                       <p className={`text-lg font-bold tabular-nums ${p.readmissionRisk >= 80 ? "text-danger" : p.readmissionRisk >= 60 ? "text-risk-high" : "text-foreground"}`}>{p.readmissionRisk}%</p>
-                      <p className="text-[9px] text-muted-foreground">{text("risk", "risk")}</p>
+                      <p className="text-[9px] text-muted-foreground">{text("risk", "خطر")}</p>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-foreground">{p.name}</p>
                       <p className="text-[10px] font-mono text-muted-foreground mb-1">{p.nationalId}</p>
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-semibold bg-secondary px-2 py-0.5 rounded-full text-foreground">{p.primaryReason}</span>
-                        <span className="text-[10px] text-muted-foreground">{text("Last discharge:", "Last discharge:")} {p.lastDischarge}</span>
+                        <span className="text-[10px] text-muted-foreground">{text("Last discharge:", "آخر خروج:")} {p.lastDischarge}</span>
                       </div>
                     </div>
                     <div className="shrink-0 max-w-[200px] text-right">

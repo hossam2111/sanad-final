@@ -38,6 +38,27 @@ const TEST_NAMES = [
   "ALT", "AST", "TSH", "Uric Acid", "Vitamin D", "Sodium", "Potassium",
 ];
 
+const TEST_DEFAULTS: Record<string, { unit: string; referenceRange: string }> = {
+  "HbA1c":            { unit: "%",            referenceRange: "< 7.0 (diabetic target)" },
+  "Fasting Glucose":  { unit: "mg/dL",        referenceRange: "70–99" },
+  "Total Cholesterol":{ unit: "mmol/L",       referenceRange: "< 5.2" },
+  "LDL Cholesterol":  { unit: "mmol/L",       referenceRange: "< 2.6 (< 1.8 if CAD)" },
+  "HDL Cholesterol":  { unit: "mmol/L",       referenceRange: "> 1.0 (M) / > 1.3 (F)" },
+  "Triglycerides":    { unit: "mmol/L",       referenceRange: "< 1.7" },
+  "Creatinine":       { unit: "umol/L",       referenceRange: "62–106" },
+  "eGFR":             { unit: "mL/min/1.73m²",referenceRange: "> 60" },
+  "Hemoglobin":       { unit: "g/dL",         referenceRange: "13.5–17.5 (M) / 12–16 (F)" },
+  "WBC Count":        { unit: "×10³/µL",      referenceRange: "4.5–11.0" },
+  "Platelet Count":   { unit: "×10³/µL",      referenceRange: "150–400" },
+  "ALT":              { unit: "U/L",          referenceRange: "7–56" },
+  "AST":              { unit: "U/L",          referenceRange: "10–40" },
+  "TSH":              { unit: "mIU/L",        referenceRange: "0.4–4.0" },
+  "Uric Acid":        { unit: "mg/dL",        referenceRange: "3.5–7.2 (M) / 2.6–6.0 (F)" },
+  "Vitamin D":        { unit: "ng/mL",        referenceRange: "30–100" },
+  "Sodium":           { unit: "mmol/L",       referenceRange: "136–145" },
+  "Potassium":        { unit: "mmol/L",       referenceRange: "3.5–5.0" },
+};
+
 export default function LabPortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [searchId, setSearchId] = useState("");
@@ -358,7 +379,16 @@ export default function LabPortal() {
                     <select
                       className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                       value={form.testName}
-                      onChange={e => setForm(f => ({ ...f, testName: e.target.value }))}
+                      onChange={e => {
+                        const name = e.target.value;
+                        const def = TEST_DEFAULTS[name];
+                        setForm(f => ({
+                          ...f,
+                          testName: name,
+                          unit: def?.unit ?? f.unit,
+                          referenceRange: def?.referenceRange ?? f.referenceRange,
+                        }));
+                      }}
                     >
                       <option value="">{text("Select test...", "اختر الفحص...")}</option>
                       {TEST_NAMES.map(t => <option key={t} value={t}>{t}</option>)}
@@ -381,12 +411,19 @@ export default function LabPortal() {
                     />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Reference Range", "النطاق المرجعي")}</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+                      {text("Reference Range", "النطاق المرجعي")}
+                      {form.status !== "normal" && <span className="text-danger ms-1">*</span>}
+                    </p>
                     <Input
                       placeholder={text("e.g. 70–99 mg/dL", "مثال: 70–99 mg/dL")}
                       value={form.referenceRange}
                       onChange={e => setForm(f => ({ ...f, referenceRange: e.target.value }))}
+                      className={form.status !== "normal" && !form.referenceRange ? "border-danger/60 focus:ring-danger/40" : ""}
                     />
+                    {form.status !== "normal" && !form.referenceRange && (
+                      <p className="text-[10px] text-danger mt-1">{text("Required when status is Abnormal/Critical", "مطلوب عند الحالة غير طبيعي/حرج")}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Status *", "الحالة *")}</p>
@@ -419,7 +456,7 @@ export default function LabPortal() {
                 <div className="flex items-center gap-3">
                   <Button
                     onClick={() => submitMutation.mutate(form as Record<string, string>)}
-                    disabled={!form.testName || !form.result || !form.status || submitMutation.isPending}
+                    disabled={!form.testName || !form.result || !form.status || (form.status !== "normal" && !form.referenceRange) || submitMutation.isPending}
                     className="flex-1"
                   >
                     <Zap className="w-4 h-4" />

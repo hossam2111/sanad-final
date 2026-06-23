@@ -23,9 +23,9 @@ async function fetchResearchInsights() {
 }
 
 const TREND_CONFIG = {
-  rising: { color: "text-danger", bg: "bg-danger-bg", border: "border-danger/30", label: "Rising ↑", dot: "bg-danger" },
-  stable: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "Stable →", dot: "bg-risk-high" },
-  declining: { color: "text-success", bg: "bg-success-bg", border: "border-success/30", label: "Declining ↓", dot: "bg-success" },
+  rising: { color: "text-danger", bg: "bg-danger-bg", border: "border-danger/30", label: "Rising ↑", labelAr: "ارتفاع ↑", dot: "bg-danger" },
+  stable: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "Stable →", labelAr: "مستقر →", dot: "bg-risk-high" },
+  declining: { color: "text-success", bg: "bg-success-bg", border: "border-success/30", label: "Declining ↓", labelAr: "تراجع ↓", dot: "bg-success" },
 };
 
 const CLINICAL_STUDIES = [
@@ -126,11 +126,11 @@ const COHORT_RADAR = [
   { metric: "Heart Disease", A: 22, B: 10 },
 ];
 
-const STATUS_CONFIG: Record<string, { bg: string; border: string; badge: any; dot: string; label: string }> = {
-  active: { bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, dot: "bg-success animate-pulse", label: "Active" },
-  recruiting: { bg: "bg-info-bg", border: "border-info/20", badge: "info" as const, dot: "bg-info animate-pulse", label: "Recruiting" },
-  completed: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground", label: "Completed" },
-  paused: { bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high", label: "Paused" },
+const STATUS_CONFIG: Record<string, { bg: string; border: string; badge: any; dot: string; label: string; labelAr: string }> = {
+  active: { bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, dot: "bg-success animate-pulse", label: "Active", labelAr: "نشط" },
+  recruiting: { bg: "bg-info-bg", border: "border-info/20", badge: "info" as const, dot: "bg-info animate-pulse", label: "Recruiting", labelAr: "في طور التجنيد" },
+  completed: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground", label: "Completed", labelAr: "مكتمل" },
+  paused: { bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high", label: "Paused", labelAr: "موقوف" },
 };
 
 type ViewTab = "overview" | "studies" | "trends" | "correlations" | "cohorts";
@@ -293,7 +293,7 @@ export default function ResearchPortal() {
                   </CardBody>
                 </Card>
                 <Card className="col-span-5">
-                  <CardHeader><CardTitle>{text("Condition Trend Analysis", "Condition Trend Analysis")}</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>{text("Condition Trend Analysis", "تحليل اتجاهات الحالات")}</CardTitle></CardHeader>
                   <CardBody className="space-y-2 max-h-72 overflow-y-auto">
                     {data?.conditionInsights?.map((c: any, i: number) => {
                       const cfg = TREND_CONFIG[c.trend as keyof typeof TREND_CONFIG] ?? TREND_CONFIG.stable;
@@ -302,11 +302,11 @@ export default function ResearchPortal() {
                           <div className={`w-2 h-2 rounded-full ${cfg.dot} shrink-0`} />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-foreground truncate">{c.condition}</p>
-                            <p className="text-xs text-muted-foreground">{c.patientCount} {text("patients · Risk:", "patients · Risk:")} {c.avgRiskScore}</p>
+                            <p className="text-xs text-muted-foreground">{c.patientCount} {text("patients · Avg Priority Index:", "مريض · متوسط مؤشر الأولوية:")} {c.avgRiskScore}<span className="opacity-50">/100</span></p>
                           </div>
                           <div className="text-right shrink-0">
                             <p className={`text-xs font-bold ${cfg.color}`}>{c.prevalence}%</p>
-                            <p className={`text-[10px] font-medium ${cfg.color}`}>{cfg.label}</p>
+                            <p className={`text-[10px] font-medium ${cfg.color}`}>{locale === "ar" ? cfg.labelAr : cfg.label}</p>
                           </div>
                         </div>
                       );
@@ -403,12 +403,12 @@ export default function ResearchPortal() {
                         <div className="flex items-center gap-2 mb-1">
                           <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} shrink-0`} />
                           <span className="font-mono text-[10px] text-muted-foreground">{study.id}</span>
-                          <Badge variant={cfg.badge} className="text-[10px]">{cfg.label}</Badge>
+                          <Badge variant={cfg.badge} className="text-[10px]">{locale === "ar" ? cfg.labelAr : cfg.label}</Badge>
                           <span className="text-[10px] font-semibold text-muted-foreground bg-card/60 border border-border px-2 py-0.5 rounded-full">{study.phase}</span>
                         </div>
                         <h3 className="text-sm font-bold text-foreground leading-snug">{study.title}</h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {text("Lead:", "Lead:")} <span className="font-semibold text-foreground">{study.lead}</span> · {study.sponsor}
+                          {text("Lead:", "قائد:")} <span className="font-semibold text-foreground">{study.lead}</span> · {study.sponsor}
                         </p>
                       </div>
                       <div className="text-right shrink-0">

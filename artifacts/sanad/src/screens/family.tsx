@@ -75,7 +75,7 @@ function FamilyMemberCard({ member, isPatient = false }: { member: any; isPatien
       <div className={`flex items-center justify-between px-3 py-2 rounded-xl ${riskBg}`}>
         <div>
           <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">AI Risk</p>
-          <p className={`text-xl font-bold ${riskColor}`}>{member.riskScore}</p>
+          <p className={`text-xl font-bold ${riskColor}`}>{member.riskScore}<span className="text-[11px] font-normal opacity-50">/100</span></p>
         </div>
         <div className="text-right">
           <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Conditions</p>
@@ -568,8 +568,9 @@ export default function FamilyPortal() {
                             {m.chronicConditions?.length > 3 && <span className="text-[9px] text-muted-foreground self-center">+{m.chronicConditions.length - 3}</span>}
                             {m.chronicConditions?.length === 0 && <span className="text-[9px] text-success font-semibold">No chronic conditions</span>}
                           </div>
-                          <div className={`flex items-center justify-center w-12 h-10 rounded-xl text-sm font-bold shrink-0 ${riskColor}`}>
-                            {m.riskScore}
+                          <div className={`flex flex-col items-center justify-center w-12 h-10 rounded-xl shrink-0 ${riskColor}`}>
+                            <span className="text-sm font-bold leading-none">{m.riskScore}</span>
+                            <span className="text-[8px] opacity-50 leading-none">/100</span>
                           </div>
                         </div>
                       );

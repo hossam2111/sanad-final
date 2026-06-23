@@ -155,7 +155,7 @@ export default function EmergencyPage() {
                   <span className="block truncate text-sm font-semibold text-foreground">{criticalPatient.fullName}</span>
                   <span className="block font-mono text-xs text-muted-foreground" dir="ltr">{criticalPatient.nationalId}</span>
                 </span>
-                <Badge variant="destructive" className="shrink-0">{text("Risk", "خطورة")} {criticalPatient.riskScore}</Badge>
+                <Badge variant="destructive" className="shrink-0">{text("Risk", "خطورة")} {criticalPatient.riskScore}<span className="opacity-60">/100</span></Badge>
                 <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground rtl:-scale-x-100" />
               </button>
             ))}

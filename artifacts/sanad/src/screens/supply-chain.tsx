@@ -38,6 +38,15 @@ const STATUS_CFG: Record<string, { bg: string; border: string; text: string; bad
   Low: { bg: "bg-danger-bg", border: "border-danger/30", text: "text-danger", badge: "destructive" as const, dot: "bg-danger" },
 };
 
+const STATUS_LABEL_AR: Record<string, string> = {
+  critical: "حرج", low: "منخفض", adequate: "كافٍ",
+  High: "مرتفع", Medium: "متوسط", Low: "منخفض",
+};
+const STATUS_LABEL_EN: Record<string, string> = {
+  critical: "Critical", low: "Low", adequate: "Adequate",
+  High: "High", Medium: "Medium", Low: "Low",
+};
+
 type ShortagePrediction = { drug: string; day30: number; day60: number; day90: number; current: number; min: number };
 
 async function fetchRegionalDistribution() {
@@ -257,7 +266,7 @@ export default function SupplyChainPortal() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <Badge variant={cfg.badge} className="text-[9px]">{item.status}</Badge>
+                            <Badge variant={cfg.badge} className="text-[9px]">{text(STATUS_LABEL_EN[item.status] ?? item.status, STATUS_LABEL_AR[item.status] ?? item.status)}</Badge>
                           </td>
                         </tr>
                       );
@@ -278,12 +287,12 @@ export default function SupplyChainPortal() {
                       <div key={i} className={`px-3.5 py-3 ${cfg.bg} border ${cfg.border} rounded-2xl`}>
                         <div className="flex items-center justify-between mb-1.5">
                           <p className="text-xs font-bold text-foreground">{dc.name}</p>
-                          <Badge variant={cfg.badge} className="text-[9px]">{dc.stock}</Badge>
+                          <Badge variant={cfg.badge} className="text-[9px]">{text(STATUS_LABEL_EN[dc.stock] ?? dc.stock, STATUS_LABEL_AR[dc.stock] ?? dc.stock)}</Badge>
                         </div>
                         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                          <span>{text("Capacity:", "Capacity:")} <span className="font-bold text-foreground">{dc.capacity}</span></span>
+                          <span>{text("Capacity:", "الطاقة:")} <span className="font-bold text-foreground">{dc.capacity}</span></span>
                           <span>·</span>
-                          <span>{text("Next delivery:", "Next delivery:")} <span className="font-bold text-foreground">{dc.nextDelivery}</span></span>
+                          <span>{text("Next delivery:", "التسليم القادم:")} <span className="font-bold text-foreground">{dc.nextDelivery}</span></span>
                         </div>
                       </div>
                     );
@@ -324,10 +333,10 @@ export default function SupplyChainPortal() {
             <div className="flex-1">
               <p className="text-sm font-bold text-violet-800">{text("AI Supply Forecasting Engine v2.1", "AI Supply Forecasting Engine v2.1")}</p>
               <p className="text-xs text-violet-600 mt-0.5">
-                {text("Machine learning demand prediction using 24-month historical consumption, prescription trends, disease prevalence, and seasonal patterns. Predictions recalculated daily at 02:00 AST.", "Machine learning demand prediction using 24-month historical consumption, prescription trends, disease prevalence, and seasonal patterns. Predictions recalculated daily at 02:00 AST.")}
+                {text("Machine learning demand prediction using 24-month historical consumption, prescription trends, disease prevalence, and seasonal patterns. Predictions recalculated daily at 02:00 AST.", "تنبؤ الطلب بالتعلم الآلي باستخدام 24 شهراً من بيانات الاستهلاك والوصفات الطبية وانتشار الأمراض والأنماط الموسمية. يُعاد الحساب يومياً الساعة 02:00.")}
               </p>
             </div>
-            <Badge variant="info">{text("Updated Today", "Updated Today")}</Badge>
+            <Badge variant="info">{text("Updated Today", "محدَّث اليوم")}</Badge>
           </div>
 
           {/* AI Predictions from backend */}
@@ -348,7 +357,7 @@ export default function SupplyChainPortal() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="text-sm font-bold text-violet-700">{pred.confidence}%</p>
-                    <p className="text-[10px] text-muted-foreground">{text("confidence", "confidence")}</p>
+                    <p className="text-[10px] text-muted-foreground">{text("confidence", "ثقة")}</p>
                   </div>
                 </div>
               ))}
@@ -388,14 +397,14 @@ export default function SupplyChainPortal() {
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot} shrink-0`} />
                         <p className="text-xs font-bold text-foreground">{item.drugName}</p>
-                        <Badge variant={cfg.badge} className="text-[9px]">{item.status}</Badge>
+                        <Badge variant={cfg.badge} className="text-[9px]">{text(STATUS_LABEL_EN[item.status] ?? item.status, STATUS_LABEL_AR[item.status] ?? item.status)}</Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">{text("Stock:", "Stock:")} {item.stock.toLocaleString()} {item.unit} {text("· Min:", "· Min:")} {item.minStock.toLocaleString()}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{text("Supplier:", "Supplier:")} {item.supplier} {text("· Lead time:", "· Lead time:")} {item.leadTimeDays}{text("d", "d")}</p>
+                      <p className="text-xs text-muted-foreground">{text("Stock:", "المخزون:")} {item.stock.toLocaleString()} {item.unit} {text("· Min:", "· الحد الأدنى:")} {item.minStock.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{text("Supplier:", "المورد:")} {item.supplier} {text("· Lead time:", "· وقت التوريد:")} {item.leadTimeDays}{text("d", "ي")}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className={`text-2xl font-bold ${item.daysOfStock < 14 ? "text-danger" : "text-risk-high"}`}>{item.daysOfStock}{text("d", "d")}</p>
-                      <p className="text-[10px] text-muted-foreground">{text("stock left", "stock left")}</p>
+                      <p className={`text-2xl font-bold ${item.daysOfStock < 14 ? "text-danger" : "text-risk-high"}`}>{item.daysOfStock}<span className="text-xs font-normal opacity-60"> {text("d", "ي")}</span></p>
+                      <p className="text-[10px] text-muted-foreground">{text("stock left", "متبقية")}</p>
                     </div>
                   </div>
                   <button
@@ -403,7 +412,7 @@ export default function SupplyChainPortal() {
                     disabled={reorderMutation.isPending || !!reorderResults[item.drugName]}
                     className={`mt-3 w-full text-xs font-semibold py-1.5 rounded-xl transition-colors ${reorderResults[item.drugName] ? "bg-success-bg text-success border border-success/30" : "bg-danger hover:bg-danger text-white"}`}
                   >
-                    {reorderResults[item.drugName] ? `✓ Order Placed: ${reorderResults[item.drugName]?.orderId}` : "Issue Emergency Order"}
+                    {reorderResults[item.drugName] ? text(`✓ Order Placed: ${reorderResults[item.drugName]?.orderId}`, `✓ تم الطلب: ${reorderResults[item.drugName]?.orderId}`) : text("Issue Emergency Order", "إصدار أمر شراء عاجل")}
                   </button>
                 </div>
               );

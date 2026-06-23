@@ -16,20 +16,20 @@ const COLORS = ["#007AFF", "#34C759", "#FF9500", "#FF3B30", "#5856D6", "#32ADE6"
 const RISK_COLORS = { Low: "#22c55e", Medium: "#f59e0b", High: "#f97316", Critical: "#ef4444" };
 
 // KSA Region approximate SVG coordinates (simplified polygon centroids)
-const KSA_REGIONS: Record<string, { cx: number; cy: number; label: string; r: number }> = {
-  "Riyadh":           { cx: 300, cy: 210, label: "Riyadh",           r: 28 },
-  "Makkah":           { cx: 140, cy: 250, label: "Makkah",           r: 24 },
-  "Eastern Province": { cx: 400, cy: 170, label: "Eastern",          r: 22 },
-  "Madinah":          { cx: 165, cy: 185, label: "Madinah",          r: 18 },
-  "Asir":             { cx: 175, cy: 320, label: "Asir",             r: 16 },
-  "Qassim":           { cx: 265, cy: 155, label: "Qassim",           r: 15 },
-  "Jazan":            { cx: 148, cy: 370, label: "Jazan",            r: 14 },
-  "Hail":             { cx: 240, cy: 115, label: "Hail",             r: 13 },
-  "Tabuk":            { cx: 130, cy: 110, label: "Tabuk",            r: 13 },
-  "Najran":           { cx: 240, cy: 370, label: "Najran",           r: 12 },
-  "Al Bahah":         { cx: 170, cy: 295, label: "Al Bahah",         r: 10 },
-  "Al Jouf":          { cx: 215, cy: 65,  label: "Al Jouf",          r: 10 },
-  "Northern Borders": { cx: 265, cy: 48,  label: "N. Borders",       r: 10 },
+const KSA_REGIONS: Record<string, { cx: number; cy: number; label: string; labelAr: string; r: number }> = {
+  "Riyadh":           { cx: 300, cy: 210, label: "Riyadh",      labelAr: "الرياض",          r: 28 },
+  "Makkah":           { cx: 140, cy: 250, label: "Makkah",      labelAr: "مكة",             r: 24 },
+  "Eastern Province": { cx: 400, cy: 170, label: "Eastern",     labelAr: "الشرقية",         r: 22 },
+  "Madinah":          { cx: 165, cy: 185, label: "Madinah",     labelAr: "المدينة",         r: 18 },
+  "Asir":             { cx: 175, cy: 320, label: "Asir",        labelAr: "عسير",            r: 16 },
+  "Qassim":           { cx: 265, cy: 155, label: "Qassim",      labelAr: "القصيم",          r: 15 },
+  "Jazan":            { cx: 148, cy: 370, label: "Jazan",       labelAr: "جازان",           r: 14 },
+  "Hail":             { cx: 240, cy: 115, label: "Hail",        labelAr: "حائل",            r: 13 },
+  "Tabuk":            { cx: 130, cy: 110, label: "Tabuk",       labelAr: "تبوك",            r: 13 },
+  "Najran":           { cx: 240, cy: 370, label: "Najran",      labelAr: "نجران",           r: 12 },
+  "Al Bahah":         { cx: 170, cy: 295, label: "Al Bahah",    labelAr: "الباحة",          r: 10 },
+  "Al Jouf":          { cx: 215, cy: 65,  label: "Al Jouf",     labelAr: "الجوف",           r: 10 },
+  "Northern Borders": { cx: 265, cy: 48,  label: "N. Borders",  labelAr: "الحدود الشمالية", r: 10 },
 };
 
 const RISK_FILL: Record<string, string> = {
@@ -114,7 +114,7 @@ function KSAHeatmap({ regions }: { regions: any[] }) {
                 fontSize="7.5"
                 fontWeight="600"
               >
-                {pos.label}
+                {locale === "ar" ? pos.labelAr : pos.label}
               </text>
 
               {/* Hover tooltip */}
@@ -236,19 +236,19 @@ async function fetchSystemHealth() {
   return res.json();
 }
 
-const ROLE_BADGE: Record<string, { label: string; cls: string }> = {
-  admin:        { label: "Admin",        cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
-  doctor:       { label: "Doctor",       cls: "bg-primary/10 text-primary" },
-  emergency:    { label: "Emergency",    cls: "bg-danger-bg text-danger" },
-  lab:          { label: "Lab",          cls: "bg-info-bg text-info" },
-  pharmacy:     { label: "Pharmacy",     cls: "bg-success-bg text-success" },
-  hospital:     { label: "Hospital",     cls: "bg-warning-bg text-warning" },
-  insurance:    { label: "Insurance",    cls: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" },
-  "ai-control": { label: "AI Control",  cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
-  research:     { label: "Research",     cls: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300" },
-  citizen:      { label: "Citizen",      cls: "bg-secondary text-muted-foreground" },
-  family:       { label: "Family",       cls: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300" },
-  "supply-chain":{ label: "Supply Chain",cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
+const ROLE_BADGE: Record<string, { label: string; labelAr: string; cls: string }> = {
+  admin:        { label: "Admin",        labelAr: "مدير النظام",    cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
+  doctor:       { label: "Doctor",       labelAr: "طبيب",           cls: "bg-primary/10 text-primary" },
+  emergency:    { label: "Emergency",    labelAr: "طوارئ",          cls: "bg-danger-bg text-danger" },
+  lab:          { label: "Lab",          labelAr: "مختبر",          cls: "bg-info-bg text-info" },
+  pharmacy:     { label: "Pharmacy",     labelAr: "صيدلية",         cls: "bg-success-bg text-success" },
+  hospital:     { label: "Hospital",     labelAr: "مستشفى",         cls: "bg-warning-bg text-warning" },
+  insurance:    { label: "Insurance",    labelAr: "تأمين",          cls: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" },
+  "ai-control": { label: "AI Control",  labelAr: "تحكم ذكي",       cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
+  research:     { label: "Research",     labelAr: "بحث",            cls: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300" },
+  citizen:      { label: "Citizen",      labelAr: "مواطن",          cls: "bg-secondary text-muted-foreground" },
+  family:       { label: "Family",       labelAr: "أسرة",           cls: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300" },
+  "supply-chain":{ label: "Supply Chain",labelAr: "سلسلة التوريد", cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
 };
 
 const DEMO_USERS = [
@@ -967,7 +967,7 @@ export default function AdminDashboard() {
                   </thead>
                   <tbody>
                     {DEMO_USERS.map(u => {
-                      const badge = ROLE_BADGE[u.role] ?? { label: u.role, cls: "bg-secondary text-muted-foreground" };
+                      const badge = ROLE_BADGE[u.role] ?? { label: u.role, labelAr: u.role, cls: "bg-secondary text-muted-foreground" };
                       const enabled = userEnabled[u.id] ?? true;
                       return (
                         <tr key={u.id} className={`border-b border-border last:border-0 transition-colors ${!enabled ? "opacity-50" : "hover:bg-secondary/30"}`}>
@@ -984,7 +984,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3 font-mono text-[12px] text-muted-foreground" dir="ltr">{u.username}</td>
                           <td className="px-4 py-3">
-                            <span className={`text-[11px] font-bold px-2 py-1 rounded-lg ${badge.cls}`}>{badge.label}</span>
+                            <span className={`text-[11px] font-bold px-2 py-1 rounded-lg ${badge.cls}`}>{locale === "ar" ? badge.labelAr : badge.label}</span>
                           </td>
                           <td className="px-4 py-3 text-[12px] text-muted-foreground hidden md:table-cell">{u.org}</td>
                           <td className="px-4 py-3 text-center">
