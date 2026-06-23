@@ -1,6 +1,7 @@
 import React from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useLanguage } from "@/contexts/language-context";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -75,6 +76,7 @@ export function Button({
     md: "h-9 px-4.5 text-sm gap-2 rounded-[12px]",
     lg: "h-11 px-6 text-sm font-semibold gap-2 rounded-[14px]",
   };
+  const { text } = useLanguage();
   return (
     <button
       className={cn(
@@ -93,7 +95,7 @@ export function Button({
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
           </svg>
-          Processing...
+          {text("Processing...", "جارٍ المعالجة...")}
         </span>
       ) : children}
     </button>
@@ -316,6 +318,7 @@ export function SkeletonCard({ rows = 3 }: { rows?: number }) {
 
 /* ─── Error state ──────────────────────────────────────── */
 export function ErrorBanner({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  const { text } = useLanguage();
   return (
     <Card className="border-red-200 bg-destructive/10">
       <CardBody className="flex flex-col items-center justify-center py-10 text-center">
@@ -326,11 +329,11 @@ export function ErrorBanner({ message, onRetry }: { message: string; onRetry?: (
           {message}
         </h3>
         <p className="text-sm text-red-700/80 mb-6 max-w-[300px]">
-          We couldn't reach the backend. Please check your connection or try again.
+          {text("Unable to reach the server. Check your connection or try again.", "تعذّر الاتصال بالخادم. تحقق من اتصالك أو أعد المحاولة.")}
         </p>
         {onRetry && (
           <Button variant="destructive" onClick={onRetry} size="sm">
-            Retry Connection
+            {text("Retry", "إعادة المحاولة")}
           </Button>
         )}
       </CardBody>
