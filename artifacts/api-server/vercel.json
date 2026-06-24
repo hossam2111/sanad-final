@@ -1,0 +1,7 @@
+{
+  "name": "sanad-api",
+  "version": 2,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/api" }
+  ]
+}

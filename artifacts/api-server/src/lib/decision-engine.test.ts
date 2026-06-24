@@ -236,9 +236,9 @@ describe("explainability", () => {
     expect(result.explainability.clinicalBasis.length).toBeGreaterThan(0);
   });
 
-  it("source is clinical_rules_v3", () => {
+  it("source is clinical_rules_v4", () => {
     const result = runDecisionEngine(healthyYoung);
-    expect(result.source).toBe("clinical_rules_v3");
+    expect(result.source).toBe("clinical_rules_v4");
   });
 });
 

@@ -16,7 +16,7 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const server = app.listen(port, () => {
+const server = app.listen(port, "0.0.0.0", () => {
   logger.info({ port }, "SANAD API server started");
 });
 
