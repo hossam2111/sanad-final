@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 
 /* ─── Card ─────────────────────────────────────────────── */
 export function Card({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
@@ -264,14 +264,20 @@ export function Tabs({ tabs, active, onChange }: {
 }
 
 /* ─── Alert Banner ──────────────────────────────────────── */
-export function AlertBanner({ children, variant = "warning" }: {
+export function AlertBanner({ children, variant = "warning", onDismiss }: {
   children: React.ReactNode;
   variant?: "warning" | "destructive" | "info";
+  onDismiss?: () => void;
 }) {
   const styles = {
     warning:     "bg-risk-high-bg border-risk-high/20/60 text-risk-high",
     destructive: "bg-red-50 border-red-200/60 text-red-900",
     info:        "bg-sky-50 border-sky-200/60 text-sky-900",
+  };
+  const dismissStyles = {
+    warning:     "hover:bg-risk-high/10 text-risk-high",
+    destructive: "hover:bg-red-100 text-red-700",
+    info:        "hover:bg-sky-100 text-sky-700",
   };
   return (
     <div className={cn(
@@ -279,6 +285,15 @@ export function AlertBanner({ children, variant = "warning" }: {
       styles[variant]
     )}>
       {children}
+      {onDismiss && (
+        <button
+          onClick={onDismiss}
+          className={cn("ml-auto shrink-0 rounded-lg p-1 transition-colors", dismissStyles[variant])}
+          aria-label="Dismiss"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
 }

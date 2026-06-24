@@ -139,6 +139,8 @@ export default function DoctorDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [recordView, setRecordView] = useState<"timeline" | "medications" | "labs" | "visits">("timeline");
   const [showSsePanel, setShowSsePanel] = useState(false);
+  const [labBannerDismissed, setLabBannerDismissed] = useState(false);
+  const [aiBannerDismissed, setAiBannerDismissed] = useState(false);
   const [showAiExplanation, setShowAiExplanation] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [regForm, setRegForm] = useState({
@@ -368,7 +370,7 @@ export default function DoctorDashboard() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchId.trim()) { setPatientId(searchId.trim()); setActiveTab("overview"); setShowDropdown(false); setNarrativeText(""); setNarrativeProvider(""); setChatAnswer(""); setChatQuestion(""); }
+    if (searchId.trim()) { setPatientId(searchId.trim()); setActiveTab("overview"); setShowDropdown(false); setNarrativeText(""); setNarrativeProvider(""); setChatAnswer(""); setChatQuestion(""); setLabBannerDismissed(false); setAiBannerDismissed(false); }
   };
 
   const handleSelectPatient = (nationalId: string, name: string) => {
@@ -381,6 +383,8 @@ export default function DoctorDashboard() {
     setNarrativeProvider("");
     setChatAnswer("");
     setChatQuestion("");
+    setLabBannerDismissed(false);
+    setAiBannerDismissed(false);
   };
 
   const activeMeds = useMemo(() => patient?.medications?.filter(m => m.isActive) ?? [], [patient?.medications]);
@@ -461,8 +465,8 @@ export default function DoctorDashboard() {
 
   return (
     <Layout role="doctor" localized>
-      {criticalLabs > 0 && (
-        <AlertBanner variant="destructive">
+      {patient && criticalLabs > 0 && !labBannerDismissed && (
+        <AlertBanner variant="destructive" onDismiss={() => setLabBannerDismissed(true)}>
           <AlertCircle className="w-4 h-4 text-danger shrink-0" />
           <span>
             <strong>{text("Critical Lab Alert:", "تنبيه مختبر حرج:")}</strong>{" "}
@@ -471,11 +475,11 @@ export default function DoctorDashboard() {
               `${criticalLabs} ${criticalLabs > 1 ? "نتائج مختبرية تتطلب" : "نتيجة مختبرية تتطلب"} مراجعة سريرية فورية.`,
             )}
           </span>
-          <Badge variant="destructive" className="ml-auto shrink-0">{text(`${criticalLabs} critical`, `${criticalLabs} حرجة`)}</Badge>
+          <Badge variant="destructive" className="shrink-0">{text(`${criticalLabs} critical`, `${criticalLabs} حرجة`)}</Badge>
         </AlertBanner>
       )}
-      {criticalPredictions > 0 && (
-        <AlertBanner variant="warning">
+      {patient && criticalPredictions > 0 && !aiBannerDismissed && (
+        <AlertBanner variant="warning" onDismiss={() => setAiBannerDismissed(true)}>
           <Brain className="w-4 h-4 text-risk-high shrink-0" />
           <span>
             <strong>{text("AI Warning:", "إنذار ذكاء اصطناعي:")}</strong>{" "}
@@ -484,7 +488,7 @@ export default function DoctorDashboard() {
               `${criticalPredictions} ${criticalPredictions > 1 ? "تنبؤات سريرية عالية الأولوية تتطلب" : "تنبؤ سريري عالي الأولوية يتطلب"} الانتباه.`,
             )}
           </span>
-          <Badge variant="warning" className="ml-auto shrink-0">{text(`${criticalPredictions} flagged`, `${criticalPredictions} موسومة`)}</Badge>
+          <Badge variant="warning" className="shrink-0">{text(`${criticalPredictions} flagged`, `${criticalPredictions} موسومة`)}</Badge>
         </AlertBanner>
       )}
 
