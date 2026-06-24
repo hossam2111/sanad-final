@@ -1,4 +1,5 @@
 {
+  "name": "sanad-final",
   "buildCommand": "pnpm --filter @workspace/sanad build",
   "outputDirectory": "artifacts/sanad/.next",
   "installCommand": "pnpm install",
