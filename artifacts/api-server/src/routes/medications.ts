@@ -33,7 +33,8 @@ router.get("/", async (req, res) => {
     .select()
     .from(medicationsTable)
     .where(eq(medicationsTable.patientId, patientId))
-    .orderBy(desc(medicationsTable.createdAt));
+    .orderBy(desc(medicationsTable.createdAt))
+    .limit(100);
 
   res.json({ medications });
 });

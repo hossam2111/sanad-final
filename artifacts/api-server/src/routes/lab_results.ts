@@ -32,7 +32,8 @@ router.get("/", async (req, res) => {
     .select()
     .from(labResultsTable)
     .where(eq(labResultsTable.patientId, patientId))
-    .orderBy(desc(labResultsTable.testDate));
+    .orderBy(desc(labResultsTable.testDate))
+    .limit(100);
 
   res.json({ labResults });
 });

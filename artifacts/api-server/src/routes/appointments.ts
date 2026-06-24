@@ -80,7 +80,8 @@ router.get("/patient/:patientId", async (req, res) => {
   const appointments = await db.select()
     .from(appointmentsTable)
     .where(eq(appointmentsTable.patientId, patientId))
-    .orderBy(desc(appointmentsTable.createdAt));
+    .orderBy(desc(appointmentsTable.createdAt))
+    .limit(100);
 
   res.json({ appointments });
 });

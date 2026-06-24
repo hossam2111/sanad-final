@@ -18,7 +18,8 @@ router.get("/", async (req, res) => {
     .select()
     .from(alertsTable)
     .where(eq(alertsTable.patientId, patientId))
-    .orderBy(desc(alertsTable.createdAt));
+    .orderBy(desc(alertsTable.createdAt))
+    .limit(100);
 
   res.json({ alerts });
 });
