@@ -157,7 +157,7 @@ router.post("/engines/:engineName/retrain", validate(engineRetrainSchema), async
     res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
     return;
   }
-  const { engineName } = req.params;
+  const engineName = String(req.params["engineName"]);
   const { triggeredBy } = req.body as z.infer<typeof engineRetrainSchema>;
   const jobId = `RETRAIN-${engineName}-${Date.now()}`;
   const triggeredByName = triggeredBy ?? "AI Control Center";

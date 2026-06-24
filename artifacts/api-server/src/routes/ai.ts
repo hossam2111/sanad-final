@@ -392,7 +392,7 @@ router.post("/chat/:patientId", validate(chatSchema), async (req, res) => {
     return;
   }
 
-  const patientId = parseInt(req.params["patientId"]!);
+  const patientId = parseInt(String(req.params["patientId"]));
   if (isNaN(patientId)) {
     res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patientId" });
     return;
