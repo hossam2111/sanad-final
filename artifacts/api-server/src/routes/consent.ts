@@ -4,6 +4,16 @@ import { consentTable, patientsTable } from "@workspace/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { requireOwnNationalId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { z } from "zod";
+import { validate } from "../middlewares/validate.js";
+
+const grantConsentSchema = z.object({
+  nationalId: z.string().min(1).max(50),
+  consentType: z.string().min(1).max(100),
+  granted: z.boolean(),
+  expiryDays: z.number().int().positive().optional(),
+  notes: z.string().max(1000).optional()
+});
 
 const router = Router();
 
@@ -145,12 +155,8 @@ router.get("/patient/:nationalId", async (req, res) => {
 });
 
 // POST /api/consent/grant — grant or update a consent
-router.post("/grant", async (req, res) => {
-  const { nationalId, consentType, granted, expiryDays, notes } = req.body;
-
-  if (!nationalId || !consentType || granted === undefined) {
-    return res.status(400).json({ error: "INVALID_PARAMS", message: "nationalId, consentType, and granted are required" });
-  }
+router.post("/grant", validate(grantConsentSchema), async (req, res) => {
+  const { nationalId, consentType, granted, expiryDays, notes } = req.body as z.infer<typeof grantConsentSchema>;
 
   // Consent is a patient-only act — nobody may grant or revoke on behalf of
   // another record, so the body's nationalId must match the token's.

@@ -281,7 +281,7 @@ router.get("/regional-distribution", async (_req, res) => {
 });
 
 // POST /api/supply-chain/orders
-router.post("/orders", async (req, res) => {
+router.post("/orders", validate(reorderSchema), async (req, res) => {
   if (req.role !== "supply-chain" && req.role !== "admin") {
     res.status(403).json({ error: "FORBIDDEN", message: "Supply Chain role required" });
     return;

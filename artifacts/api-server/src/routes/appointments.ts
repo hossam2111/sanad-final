@@ -4,6 +4,18 @@ import { patientsTable, appointmentsTable } from "@workspace/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { requireOwnPatient, resolveOwnPatientId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { z } from "zod";
+import { validate } from "../middlewares/validate.js";
+
+const createAppointmentSchema = z.object({
+  patientId: z.number().int().positive(),
+  hospital: z.string().min(1).max(200),
+  department: z.string().min(1).max(200),
+  service: z.string().max(200).optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  time: z.string().regex(/^\d{2}:\d{2}$/),
+  notes: z.string().max(1000).optional()
+});
 
 const router = Router();
 
@@ -86,13 +98,10 @@ router.get("/patient/:patientId", async (req, res) => {
   res.json({ appointments });
 });
 
-router.post("/", async (req, res) => {
-  const { patientId, hospital, department, service, date, time, notes } = req.body;
+router.post("/", validate(createAppointmentSchema), async (req, res) => {
+  const { patientId, hospital, department, service, date, time, notes } = req.body as z.infer<typeof createAppointmentSchema>;
 
-  if (!patientId || !hospital || !department || !date || !time) {
-    return res.status(400).json({ error: "patientId, hospital, department, date and time are required" });
-  }
-  if (!(await requireOwnPatient(req, res, Number(patientId)))) return;
+  if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const patient = await db.select().from(patientsTable).where(eq(patientsTable.id, patientId)).limit(1);
   if (patient.length === 0) return res.status(404).json({ error: "Patient not found" });
