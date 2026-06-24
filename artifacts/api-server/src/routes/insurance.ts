@@ -15,7 +15,7 @@ const claimReviewSchema = z.object({
 const router = Router();
 
 async function getClaimOverrides(): Promise<Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }>> {
-  const reviews = await db.select().from(claimReviewsTable);
+  const reviews = await db.select().from(claimReviewsTable).orderBy(desc(claimReviewsTable.reviewedAt)).limit(1000);
   const map: Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }> = {};
   for (const r of reviews) {
     map[r.claimId] = { status: r.status, reviewedBy: r.reviewedBy, reviewedAt: r.reviewedAt.toISOString(), notes: r.notes ?? "", aiReason: r.aiReason ?? undefined };

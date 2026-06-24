@@ -25,8 +25,8 @@ router.get("/:nationalId", async (req, res) => {
   const p = patient[0]!;
 
   const [medications, alerts, labResults, visits] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)),
-    db.select().from(alertsTable).where(eq(alertsTable.patientId, p.id)),
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(50),
+    db.select().from(alertsTable).where(eq(alertsTable.patientId, p.id)).orderBy(desc(alertsTable.createdAt)).limit(50),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(10),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(20),
   ]);
