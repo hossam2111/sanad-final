@@ -85,7 +85,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
   const allowedPaths = ROLE_PERMISSIONS[role] ?? [];
   const requestPath = `/api${req.path}`;
 
-  const isAllowed = allowedPaths.some(p => requestPath.startsWith(p));
+  const isAllowed = allowedPaths.some(p => requestPath === p || requestPath.startsWith(`${p}/`));
 
   if (!isAllowed) {
     return res.status(403).json({
