@@ -787,7 +787,7 @@ export default function DoctorDashboard() {
                                                           "bg-secondary border-border"
                     }`}>
                       <div className="shrink-0">
-                        <RiskBadge level={aiResult.riskLevel as "critical"|"high"|"medium"|"low"} label={`${aiResult.riskScore}`} />
+                        <RiskBadge level={aiResult.riskLevel as "critical"|"high"|"medium"|"low"} `} />
                       </div>
                       <div>
                         <p className="font-bold text-foreground text-sm">{aiResult.urgency}</p>
@@ -887,14 +887,14 @@ export default function DoctorDashboard() {
                 </div>
 
                 <div className="px-6 py-4 flex flex-col items-center justify-center bg-destructive/10 min-w-[90px]">
-                  <DataLabel label={text("Blood Type", "فصيلة الدم")}>
+                  <DataLabel >
                     <p className="text-3xl font-bold text-danger" dir="ltr">{patient.bloodType}</p>
                   </DataLabel>
                 </div>
 
                 {riskScore && (
                   <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px] bg-secondary/40">
-                    <DataLabel label={text("Clinical Priority Index", "مؤشر الأولوية السريرية")}>
+                    <DataLabel >
                       <p className="text-3xl font-bold tabular-nums text-foreground" dir="ltr">
                         {riskScore.riskScore}<span className="text-base font-normal text-muted-foreground">/100</span>
                       </p>
@@ -1246,7 +1246,7 @@ export default function DoctorDashboard() {
                         </div>
                       </div>
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height={120}>
-                        <AreaChart data={hba1cData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+                        <AreaChart data={hba1cData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                           <defs>
                             <linearGradient id="hba1cGrad" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor={areaColor} stopOpacity={0.3} />
@@ -1273,8 +1273,8 @@ export default function DoctorDashboard() {
                               return null;
                             }}
                           />
-                          <ReferenceLine y={6.5} stroke="#ef4444" strokeDasharray="4 2" label={{ value: "6.5% DM threshold", fontSize: 9, fill: "#ef4444", position: "insideTopLeft" }} />
-                          <ReferenceLine y={5.7} stroke="#f59e0b" strokeDasharray="4 2" label={{ value: "5.7% Pre-DM", fontSize: 9, fill: "#f59e0b", position: "insideTopLeft" }} />
+                          <ReferenceLine y={6.5} stroke="#ef4444" strokeDasharray="4 2" } />
+                          <ReferenceLine y={5.7} stroke="#f59e0b" strokeDasharray="4 2" } />
                           <Area type="monotone" dataKey="val" stroke={areaColor} strokeWidth={2.5} fill="url(#hba1cGrad)" dot={{ r: 4, fill: areaColor, strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
                         </AreaChart>
                       </ResponsiveContainer></div>
@@ -1316,7 +1316,7 @@ export default function DoctorDashboard() {
                         <div className="w-28 h-10 shrink-0">
                           {hasChart ? (
                             <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                              <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+                              <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                                 <RechartsTooltip
                                   content={({ active, payload }) => {
                                     if (active && payload?.length) {

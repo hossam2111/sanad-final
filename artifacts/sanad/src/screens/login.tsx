@@ -266,7 +266,7 @@ export default function PortalAccess() {
                   type="button"
                   onClick={() => setShowPass((v) => !v)}
                   className="absolute end-3 top-1/2 -translate-y-1/2 rounded-md p-1.5 text-white/45 outline-none hover:text-white/80 focus-visible:ring-2 focus-visible:ring-[#4D9FFF]"
-                  aria-label={showPass ? text("Hide password", "إخفاء كلمة المرور") : text("Show password", "إظهار كلمة المرور")}
+                  aria-
                 >
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>

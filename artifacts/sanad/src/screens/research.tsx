@@ -279,9 +279,9 @@ export default function ResearchPortal() {
                 <Card className="col-span-7">
                   <CardHeader><div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Disease Prevalence by Condition", "انتشار المرض حسب الحالة")}</CardTitle></div></CardHeader>
                   <CardBody>
-                    <div className="h-64">
+                    <div className="min-h-[320px] h-full w-full py-4">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data?.conditionInsights?.slice(0, 8)} layout="vertical" margin={{ top: 0, right: 40, left: 160, bottom: 0 }}>
+                        <BarChart data={data?.conditionInsights?.slice(0, 8)} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                           <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                           <XAxis type="number" hide />
                           <YAxis dataKey="condition" type="category" axisLine={false} tickLine={false} tick={{ fill: "#374151", fontSize: 10, fontWeight: 500 }} width={155} />
@@ -319,9 +319,9 @@ export default function ResearchPortal() {
               <Card className="col-span-12">
                 <CardHeader><div className="flex items-center gap-2"><FlaskConical className="w-4 h-4 text-violet-600" /><CardTitle>{text("Lab Test Abnormality Rates", "معدلات شذوذ اختبارات المختبر")}</CardTitle></div></CardHeader>
                 <CardBody>
-                  <div className="h-64">
+                  <div className="min-h-[320px] h-full w-full py-4">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data?.labInsights} margin={{ top: 5, right: 30, bottom: 20, left: 0 }}>
+                      <BarChart data={data?.labInsights} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                         <XAxis dataKey="test" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} angle={-20} textAnchor="end" dy={8} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -339,9 +339,9 @@ export default function ResearchPortal() {
               <Card className="col-span-12">
                 <CardHeader><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Top Drug Utilization Patterns", "أبرز أنماط استخدام الأدوية")}</CardTitle></div></CardHeader>
                 <CardBody>
-                  <div className="h-64">
+                  <div className="min-h-[320px] h-full w-full py-4">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data?.drugPatterns} layout="vertical" margin={{ top: 0, right: 30, left: 180, bottom: 0 }}>
+                      <BarChart data={data?.drugPatterns} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                         <XAxis type="number" hide />
                         <YAxis dataKey="drug" type="category" axisLine={false} tickLine={false} tick={{ fill: "#374151", fontSize: 11, fontWeight: 500 }} width={175} />
@@ -357,9 +357,9 @@ export default function ResearchPortal() {
               <Card className="col-span-12">
                 <CardHeader><div className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /><CardTitle>{text("Age Group × Average Priority Index", "الفئة العمرية × متوسط مؤشر الأولوية")}</CardTitle></div></CardHeader>
                 <CardBody>
-                  <div className="h-64">
+                  <div className="min-h-[320px] h-full w-full py-4">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data?.ageRiskData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                      <BarChart data={data?.ageRiskData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                         <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -474,9 +474,9 @@ export default function ResearchPortal() {
               <span className="text-[11px] text-muted-foreground font-mono ml-auto">{text("% of total patient population", "% of total patient population")}</span>
             </CardHeader>
             <CardBody>
-              <div className="h-72">
+              <div className="min-h-[350px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={POPULATION_TRENDS} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                  <AreaChart data={POPULATION_TRENDS} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <defs>
                       <linearGradient id="colorDiabetes" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
@@ -634,7 +634,7 @@ export default function ResearchPortal() {
                 <span className="text-[10px] text-muted-foreground ml-auto">{text("% prevalence", "% prevalence")}</span>
               </CardHeader>
               <CardBody>
-                <div className="h-72">
+                <div className="min-h-[350px] h-full w-full py-4">
                   <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={COHORT_RADAR}>
                       <PolarGrid stroke="#E2E8F0" />

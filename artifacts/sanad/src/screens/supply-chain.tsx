@@ -313,7 +313,7 @@ export default function SupplyChainPortal() {
                 <CardBody>
                   <div className="h-48">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={CONSUMPTION_TREND} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
+                      <LineChart data={CONSUMPTION_TREND} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 9 }} />
@@ -375,9 +375,9 @@ export default function SupplyChainPortal() {
           <Card>
             <CardHeader><Calendar className="w-4 h-4 text-primary" /><CardTitle>{text("30/60/90-Day Stock Forecast", "30/60/90-Day Stock Forecast")}</CardTitle><span className="ml-auto text-[11px] text-muted-foreground">{text("Units remaining", "Units remaining")}</span></CardHeader>
             <CardBody>
-              <div className="h-72">
+              <div className="min-h-[350px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={(data?.shortagePredictions ?? []) as ShortagePrediction[]} layout="vertical" margin={{ top: 0, right: 30, left: 140, bottom: 0 }}>
+                  <BarChart data={(data?.shortagePredictions ?? []) as ShortagePrediction[]} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                     <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                     <YAxis dataKey="drug" type="category" axisLine={false} tickLine={false} tick={{ fill: "#374151", fontSize: 10, fontWeight: 500 }} width={135} />
@@ -449,14 +449,14 @@ export default function SupplyChainPortal() {
                 )}
               </CardHeader>
               <CardBody>
-                <div className="h-72">
+                <div className="min-h-[350px] h-full w-full py-4">
                   {loadingRegional ? (
                      <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2" /> {text("Loading regional data...", "Loading regional data...")}
                     </div>
                   ) : (
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={regionalDistribution} margin={{ top: 5, right: 15, bottom: 5, left: 0 }}>
+                      <BarChart data={regionalDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                         <XAxis dataKey="region" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />

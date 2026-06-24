@@ -327,12 +327,12 @@ export default function EmergencyPage() {
 
               <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl bg-secondary p-3.5">
-                  <DataLabel label={text("Age / Sex", "العمر / الجنس")}>
+                  <DataLabel >
                     <p className="text-lg font-bold text-foreground">{patient.age ?? "—"} <span className="text-muted-foreground font-normal text-sm">{patient.gender === "male" ? text("M", "ذكر") : text("F", "أنثى")}</span></p>
                   </DataLabel>
                 </div>
                 <div className="rounded-2xl bg-secondary p-3.5 sm:col-span-2">
-                  <DataLabel label={text("Emergency Contact", "جهة الاتصال للطوارئ")}>
+                  <DataLabel >
                     {patient.emergencyContact ? (
                       <div className="flex flex-wrap items-baseline gap-x-3">
                         <p className="text-sm font-bold text-foreground">{patient.emergencyContact}</p>

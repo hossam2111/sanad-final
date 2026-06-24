@@ -168,7 +168,7 @@ export default function InsurancePortal() {
                   <CardBody>
                     <div className="h-56">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={dashboard.trendData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+                        <AreaChart data={dashboard.trendData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                           <defs>
                             <linearGradient id="gClaims" x1="0" y1="0" x2="0" y2="1">
                               <stop offset="5%" stopColor="#007AFF" stopOpacity={0.15} />
@@ -237,9 +237,9 @@ export default function InsurancePortal() {
                     <div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Claims by Type", "المطالبات حسب النوع")}</CardTitle></div>
                   </CardHeader>
                   <CardBody>
-                    <div className="h-44">
+                    <div className="min-h-[280px] h-full w-full py-4">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={dashboard.claimsByType} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+                        <BarChart data={dashboard.claimsByType} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                           <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                           <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -369,18 +369,18 @@ export default function InsurancePortal() {
                       <AnomalyGauge score={patient.anomalyScore ?? 0} />
                     </div>
                     <div className={`px-6 py-4 flex flex-col items-center justify-center min-w-[130px] ${patient.fraudRisk === "high" ? "bg-danger-bg" : patient.fraudRisk === "medium" ? "bg-risk-high-bg" : "bg-success-bg/50"}`}>
-                      <DataLabel label={text("Fraud Risk", "خطر الاحتيال")}>
+                      <DataLabel >
                         <p className={`text-2xl font-bold ${patient.fraudRisk === "high" ? "text-danger" : patient.fraudRisk === "medium" ? "text-risk-high" : "text-success"}`}>{patient.fraudRisk?.toUpperCase()}</p>
                       </DataLabel>
                     </div>
                     <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[150px] bg-violet-50">
-                      <DataLabel label={text("Monthly Premium", "القسط الشهري")}>
+                      <DataLabel >
                         <p className="text-2xl font-bold text-violet-700">{text("SAR", "ر.س")} {patient.monthlyPremium?.toLocaleString()}</p>
                       </DataLabel>
                       <p className="text-xs text-muted-foreground mt-1">{patient.riskMultiplier}{text("× risk factor", "× معامل الخطورة")}</p>
                     </div>
                     <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px]">
-                      <DataLabel label={text("Total Claims", "إجمالي المطالبات")}>
+                      <DataLabel >
                         <p className="text-2xl font-bold text-foreground">{patient.totalClaims}</p>
                       </DataLabel>
                       <p className="text-xs text-muted-foreground mt-1">{text("SAR", "ر.س")} {patient.totalClaimValue?.toLocaleString()}</p>
@@ -445,7 +445,7 @@ export default function InsurancePortal() {
                     <CardBody>
                       <div className="h-36">
                         <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={patient.premiumBreakdown} layout="vertical" margin={{ top: 0, right: 40, bottom: 0, left: 0 }}>
+                          <BarChart data={patient.premiumBreakdown} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                             <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
                             <YAxis type="category" dataKey="factor" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 10 }} width={160} />
                             <RechartsTooltip contentStyle={{ borderRadius: "10px", fontSize: 11 }} formatter={(v: any) => [`SAR ${v}`, "Amount"]} />

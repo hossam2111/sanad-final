@@ -298,7 +298,7 @@ export default function LabPortal() {
                           </div>
                         </div>
                         <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height={140}>
-                          <LineChart data={points} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                          <LineChart data={points} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
                             <XAxis
                               dataKey="date"
@@ -311,10 +311,10 @@ export default function LabPortal() {
                               formatter={(val: any) => [`${val} ${range?.unit ?? ""}`, testName]}
                             />
                             {range && range.max > 0 && (
-                              <ReferenceLine y={range.max} stroke="#f59e0b" strokeDasharray="4 2" strokeWidth={1.5} label={{ value: "Max", fill: "#f59e0b", fontSize: 9 }} />
+                              <ReferenceLine y={range.max} stroke="#f59e0b" strokeDasharray="4 2" strokeWidth={1.5} } />
                             )}
                             {range && range.min > 0 && (
-                              <ReferenceLine y={range.min} stroke="#10b981" strokeDasharray="4 2" strokeWidth={1.5} label={{ value: "Min", fill: "#10b981", fontSize: 9 }} />
+                              <ReferenceLine y={range.min} stroke="#10b981" strokeDasharray="4 2" strokeWidth={1.5} } />
                             )}
                             <Line
                               type="monotone"

@@ -301,7 +301,7 @@ export default function FamilyPortal() {
                       </p>
                       <div className="h-36">
                         <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                          <LineChart data={data.familyRiskTrend} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+                          <LineChart data={data.familyRiskTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                             <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                             <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} domain={[0, 100]} />
@@ -424,9 +424,9 @@ export default function FamilyPortal() {
                     <p className="text-xs text-muted-foreground">{text("Family load = % of members affected", "حِمل الأسرة = نسبة الأفراد المصابين")}</p>
                   </CardHeader>
                   <CardBody>
-                    <div className="h-64">
+                    <div className="min-h-[320px] h-full w-full py-4">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={data.conditionBurden} layout="vertical" margin={{ top: 0, right: 60, bottom: 0, left: 0 }}>
+                        <BarChart data={data.conditionBurden} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                           <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} domain={[0, 100]} />
                           <YAxis type="category" dataKey="condition" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 10 }} width={170} />
                           <RechartsTooltip contentStyle={{ borderRadius: "12px", fontSize: 11 }} formatter={(v: any, n: string) => [n === "familyLoad" ? `${v}%` : v, n === "familyLoad" ? "Family Load" : "Count"]} />
@@ -473,7 +473,7 @@ export default function FamilyPortal() {
                   <CardBody>
                     <div className="h-52">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={data.familyRiskTrend} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                        <LineChart data={data.familyRiskTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                           <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                           <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} domain={[0, 100]} />

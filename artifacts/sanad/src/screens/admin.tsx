@@ -403,9 +403,9 @@ export default function AdminDashboard() {
               </div>
             </CardHeader>
             <CardBody>
-              <div className="h-60">
+              <div className="min-h-[300px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={popHealth.monthlyVisitTrend} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+                  <LineChart data={popHealth.monthlyVisitTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -422,7 +422,7 @@ export default function AdminDashboard() {
           <Card className="col-span-4">
             <CardHeader><CardTitle>{text("Blood Type Distribution", "توزيع فصائل الدم")}</CardTitle></CardHeader>
             <CardBody>
-              <div className="h-44">
+              <div className="min-h-[280px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={popHealth.bloodTypeDistribution} innerRadius={50} outerRadius={70} paddingAngle={3} dataKey="count" nameKey="bloodType">
@@ -469,9 +469,9 @@ export default function AdminDashboard() {
               <Badge variant="default">{text(`${popHealth.conditionBreakdown?.length} tracked`, `${popHealth.conditionBreakdown?.length} متابَع`)}</Badge>
             </CardHeader>
             <CardBody>
-              <div className="h-72">
+              <div className="min-h-[350px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={popHealth.conditionBreakdown} layout="vertical" margin={{ top: 0, right: 20, left: 140, bottom: 0 }}>
+                  <BarChart data={popHealth.conditionBreakdown} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                     <XAxis type="number" hide />
                     <YAxis dataKey="condition" type="category" axisLine={false} tickLine={false} tick={{ fill: "#374151", fontSize: 11, fontWeight: 500 }} width={130} />
@@ -487,9 +487,9 @@ export default function AdminDashboard() {
           <Card className="col-span-6">
             <CardHeader><CardTitle>{text("Population Age Distribution", "التوزيع العمري للسكان")}</CardTitle></CardHeader>
             <CardBody>
-              <div className="h-64">
+              <div className="min-h-[320px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={popHealth.ageDistribution} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}>
+                  <BarChart data={popHealth.ageDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} dy={8} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -509,11 +509,11 @@ export default function AdminDashboard() {
                 <Badge variant="warning">{text(`${stats.highRiskPatients} high/critical`, `${stats.highRiskPatients} مرتفعة/حرجة`)}</Badge>
               </CardHeader>
               <CardBody>
-                <div className="h-44">
+                <div className="min-h-[280px] h-full w-full py-4">
                   <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={stats.riskDistribution} innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="count" nameKey="level"
-                        label={({ level, percent }) => percent > 0.15 ? `${(percent * 100).toFixed(0)}%` : ""} labelLine={false}>
+                        ) => percent > 0.15 ? `${(percent * 100).toFixed(0)}%` : ""} labelLine={false}>
                         {stats.riskDistribution.map((entry: any, i: number) => (
                           <Cell key={i} fill={RISK_COLORS[entry.level as keyof typeof RISK_COLORS] || "#94a3b8"} />
                         ))}
