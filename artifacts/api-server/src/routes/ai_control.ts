@@ -4,6 +4,17 @@ import { db } from "@workspace/db";
 import { aiDecisionsTable, eventsTable, auditLogTable, aiRetrainJobsTable } from "@workspace/db/schema";
 import { desc, count, eq, sql } from "drizzle-orm";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { z } from "zod";
+import { validate } from "../middlewares/validate.js";
+
+const retrainJobSchema = z.object({
+  model: z.string().min(1).max(200),
+  reason: z.string().min(1).max(1000)
+});
+
+const engineRetrainSchema = z.object({
+  triggeredBy: z.string().max(200).optional()
+});
 
 const router = Router();
 
@@ -126,12 +137,12 @@ router.get("/retrain-jobs", async (req, res) => {
 });
 
 // POST /api/ai-control/retrain-jobs — queue a new retrain
-router.post("/retrain-jobs", async (req, res) => {
+router.post("/retrain-jobs", validate(retrainJobSchema), async (req, res) => {
   if (req.role !== "ai-control" && req.role !== "admin") {
     res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
     return;
   }
-  const { model, reason } = req.body as { model: string; reason: string };
+  const { model, reason } = req.body as z.infer<typeof retrainJobSchema>;
   const [job] = await db.insert(aiRetrainJobsTable).values({
     id: `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
     engine: model,
@@ -141,13 +152,13 @@ router.post("/retrain-jobs", async (req, res) => {
   res.status(201).json(job);
 });
 
-router.post("/engines/:engineName/retrain", async (req, res) => {
+router.post("/engines/:engineName/retrain", validate(engineRetrainSchema), async (req, res) => {
   if (req.role !== "ai-control" && req.role !== "admin") {
     res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
     return;
   }
   const { engineName } = req.params;
-  const { triggeredBy } = req.body as { triggeredBy?: string };
+  const { triggeredBy } = req.body as z.infer<typeof engineRetrainSchema>;
   const jobId = `RETRAIN-${engineName}-${Date.now()}`;
   const triggeredByName = triggeredBy ?? "AI Control Center";
 

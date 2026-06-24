@@ -7,17 +7,30 @@ import { runDecisionEngine } from "../lib/decision-engine.js";
 import { streamClinicalNarrative, askClinicalQuestion, type PatientContext } from "../lib/claude-brain.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { requireOwnPatient } from "../lib/ownership.js";
+import { z } from "zod";
+import { validate } from "../middlewares/validate.js";
+
+const checkInteractionSchema = z.object({
+  patientId: z.number().int().positive(),
+  newDrug: z.string().min(1).max(200)
+});
+
+const chatSchema = z.object({
+  question: z.string().min(1).max(1000)
+});
 
 const router = Router();
 
-router.post("/check-interaction", async (req, res) => {
-  const { patientId, newDrug } = req.body;
-  if (!(await requireOwnPatient(req, res, Number(patientId)))) return;
+router.post("/check-interaction", validate(checkInteractionSchema), async (req, res) => {
+  const { patientId, newDrug } = req.body as z.infer<typeof checkInteractionSchema>;
+  if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const medications = await db
     .select()
     .from(medicationsTable)
-    .where(eq(medicationsTable.patientId, patientId));
+    .where(eq(medicationsTable.patientId, patientId))
+    .orderBy(desc(medicationsTable.createdAt))
+    .limit(100);
 
   const activeMedNames = medications.filter(m => m.isActive).map(m => m.drugName);
   const warnings = checkDrugInteractions(newDrug, activeMedNames);
@@ -373,7 +386,7 @@ router.get("/narrative/:patientId", async (req, res) => {
 
 // ─── Claude AI Brain — Clinical Q&A ──────────────────────────────────────────
 // POST /api/ai/chat/:patientId   body: { question: string }
-router.post("/chat/:patientId", async (req, res) => {
+router.post("/chat/:patientId", validate(chatSchema), async (req, res) => {
   if (!process.env["OPENAI_API_KEY"]) {
     res.status(503).json({ error: "AI_UNAVAILABLE", message: "OPENAI_API_KEY not configured" });
     return;
@@ -386,12 +399,7 @@ router.post("/chat/:patientId", async (req, res) => {
   }
   if (!(await requireOwnPatient(req, res, patientId))) return;
 
-  const { question } = req.body as { question?: string };
-
-  if (!question?.trim()) {
-    res.status(400).json({ error: "INVALID_REQUEST", message: "question is required" });
-    return;
-  }
+  const { question } = req.body as z.infer<typeof chatSchema>;
 
   const [patient] = await db
     .select()
