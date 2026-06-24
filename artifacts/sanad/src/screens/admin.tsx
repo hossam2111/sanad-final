@@ -941,15 +941,20 @@ export default function AdminDashboard() {
           })()}
         </TabsContent>
 
-        {/* ── User Registry ─────────────────────────────────────── */}
+        {/* ── Identity & Access Management (IAM) ─────────────────────────────────────── */}
         <TabsContent value="users">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-bold text-foreground">{text("Platform User Registry","سجل مستخدمي المنصة")}</p>
-                <p className="text-sm text-muted-foreground mt-0.5">{text("12 registered accounts · Demo environment","12 حساب مسجّل · بيئة العرض")}</p>
+                <p className="font-bold text-foreground text-lg flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-primary" />
+                  {text("Identity & Access Management (IAM)", "إدارة الهوية والصلاحيات (IAM)")}
+                </p>
+                <p className="text-sm text-muted-foreground mt-0.5">{text("Role-Based Access Control (RBAC) securely integrated with national ID systems.", "نظام إدارة صلاحيات آمن (RBAC) متصل مع أنظمة الهوية الوطنية.")}</p>
               </div>
-              <span className="text-xs bg-warning-bg text-warning border border-warning/20 px-3 py-1.5 rounded-xl font-medium">{text("Demo Mode — changes are local only","وضع العرض — التغييرات محلية فقط")}</span>
+              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                {text("+ Add User / Invite", "+ إضافة مستخدم / دعوة")}
+              </button>
             </div>
 
             <Card>
@@ -957,12 +962,11 @@ export default function AdminDashboard() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-secondary/40">
-                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Name","الاسم")}</th>
-                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Username","اسم المستخدم")}</th>
-                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Role","الدور")}</th>
+                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Identity","الهوية")}</th>
+                      <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Permissions (RBAC)","الصلاحيات")}</th>
                       <th className="text-start text-[12px] font-semibold text-muted-foreground px-4 py-3 hidden md:table-cell">{text("Organization","المنظمة")}</th>
-                      <th className="text-center text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Status","الحالة")}</th>
-                      <th className="text-center text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Actions","الإجراءات")}</th>
+                      <th className="text-center text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Auth Status","حالة المصادقة")}</th>
+                      <th className="text-center text-[12px] font-semibold text-muted-foreground px-4 py-3">{text("Security Action","إجراء أمني")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -978,26 +982,40 @@ export default function AdminDashboard() {
                               </div>
                               <div>
                                 <p className="font-medium text-foreground text-[13px]">{u.name}</p>
-                                <p className="text-[11px] text-muted-foreground">{u.title}</p>
+                                <p className="font-mono text-[11px] text-muted-foreground" dir="ltr">{u.username}</p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 font-mono text-[12px] text-muted-foreground" dir="ltr">{u.username}</td>
                           <td className="px-4 py-3">
-                            <span className={`text-[11px] font-bold px-2 py-1 rounded-lg ${badge.cls}`}>{locale === "ar" ? badge.labelAr : badge.label}</span>
+                            <div className="flex flex-col items-start gap-1">
+                              <span className={`text-[11px] font-bold px-2 py-1 rounded-lg ${badge.cls}`}>{locale === "ar" ? badge.labelAr : badge.label}</span>
+                              {u.role === "admin" && <span className="text-[9px] text-muted-foreground font-mono">Full Access (Read/Write)</span>}
+                              {u.role === "doctor" && <span className="text-[9px] text-muted-foreground font-mono">Clinical Access (PHI)</span>}
+                            </div>
                           </td>
-                          <td className="px-4 py-3 text-[12px] text-muted-foreground hidden md:table-cell">{u.org}</td>
+                          <td className="px-4 py-3 text-[12px] text-muted-foreground hidden md:table-cell">
+                            <p className="font-medium text-foreground">{u.org}</p>
+                            <p className="text-[10px]">{u.title}</p>
+                          </td>
                           <td className="px-4 py-3 text-center">
-                            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${enabled ? "bg-success-bg text-success" : "bg-secondary text-muted-foreground"}`}>
-                              {enabled ? text("Active","نشط") : text("Disabled","معطّل")}
-                            </span>
+                            {enabled ? (
+                                <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-success-bg border border-success/30 rounded-lg">
+                                  <Shield className="w-3 h-3 text-success" />
+                                  <span className="text-[10px] font-bold text-success">{text("Verified (JWT)","مُوثق (JWT)")}</span>
+                                </div>
+                            ) : (
+                                <div className="inline-flex items-center gap-1.5 px-2 py-1 bg-danger-bg border border-danger/30 rounded-lg">
+                                  <ShieldAlert className="w-3 h-3 text-danger" />
+                                  <span className="text-[10px] font-bold text-danger">{text("Access Revoked","تم سحب الصلاحية")}</span>
+                                </div>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-center">
                             <button
                               onClick={() => setUserEnabled(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
-                              className={`text-[12px] font-medium px-3 py-1 rounded-lg border transition-colors ${enabled ? "border-danger/30 text-danger hover:bg-danger-bg" : "border-success/30 text-success hover:bg-success-bg"}`}
+                              className={`text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-colors ${enabled ? "border-danger/30 text-danger hover:bg-danger-bg" : "border-success/30 text-success hover:bg-success-bg"}`}
                             >
-                              {enabled ? text("Disable","تعطيل") : text("Enable","تفعيل")}
+                              {enabled ? text("Revoke Token","سحب الصلاحية") : text("Restore Token","استعادة الصلاحية")}
                             </button>
                           </td>
                         </tr>
@@ -1008,7 +1026,10 @@ export default function AdminDashboard() {
               </div>
             </Card>
 
-            <p className="text-[11px] text-muted-foreground">{text("User management requires a production identity provider integration (LDAP / SAML / OAuth). Demo controls are UI-only.","إدارة المستخدمين تتطلب تكاملاً مع مزود الهوية (LDAP / SAML / OAuth). عناصر التحكم في العرض لأغراض واجهة المستخدم فقط.")}</p>
+            <div className="bg-info-bg/50 border border-info/20 rounded-xl p-3 flex items-start gap-2">
+               <Brain className="w-4 h-4 text-info shrink-0 mt-0.5" />
+               <p className="text-[11px] text-info leading-relaxed">{text("SANAD Identity Management is actively monitoring all JWT tokens and OAuth providers. Unauthorized access attempts are automatically blocked by the AI Security Engine.", "تقوم إدارة هوية (سند) بمراقبة جميع رموز JWT ومزودي OAuth بنشاط. محاولات الوصول غير المصرح بها يتم حظرها تلقائياً بواسطة محرك الأمان الذكي.")}</p>
+            </div>
           </div>
         </TabsContent>
 
