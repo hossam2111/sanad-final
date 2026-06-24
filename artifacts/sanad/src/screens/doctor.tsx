@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { apiFetch } from "@/lib/api";
 import {
   Search, Shield, Activity, AlertCircle, Syringe, Clock,
@@ -383,23 +383,23 @@ export default function DoctorDashboard() {
     setChatQuestion("");
   };
 
-  const activeMeds = patient?.medications?.filter(m => m.isActive) ?? [];
-  const labResults = patient?.labResults ?? [];
-  const criticalLabs = labResults.filter(l => l.status === "critical").length;
-  const abnormalLabs = labResults.filter(l => l.status === "abnormal").length;
+  const activeMeds = useMemo(() => patient?.medications?.filter(m => m.isActive) ?? [], [patient?.medications]);
+  const labResults = useMemo(() => patient?.labResults ?? [], [patient?.labResults]);
+  const criticalLabs = useMemo(() => labResults.filter(l => l.status === "critical").length, [labResults]);
+  const abnormalLabs = useMemo(() => labResults.filter(l => l.status === "abnormal").length, [labResults]);
 
-  const alerts = alertsData?.alerts ?? [];
-  const unreadAlerts = alerts.filter(a => !a.isRead).length;
+  const alerts = useMemo(() => alertsData?.alerts ?? [], [alertsData?.alerts]);
+  const unreadAlerts = useMemo(() => alerts.filter(a => !a.isRead).length, [alerts]);
 
-  const predictions: PredictionWarning[] = (predictionsData as { predictions?: PredictionWarning[] })?.predictions ?? [];
-  const criticalPredictions = predictions.filter(p => p.severity === "critical" || p.severity === "high").length;
+  const predictions: PredictionWarning[] = useMemo(() => (predictionsData as { predictions?: PredictionWarning[] })?.predictions ?? [], [predictionsData]);
+  const criticalPredictions = useMemo(() => predictions.filter(p => p.severity === "critical" || p.severity === "high").length, [predictions]);
 
   const handleMarkRead = async (alertId: number) => {
     await markReadMutation.mutateAsync({ id: alertId });
     refetchAlerts();
   };
 
-  const timeline: TimelineEvent[] = [
+  const timeline: TimelineEvent[] = useMemo(() => [
     ...(patient?.visits?.map(v => ({
       id: v.id,
       type: "visit" as const,
@@ -428,7 +428,7 @@ export default function DoctorDashboard() {
       badge: m.isActive ? "active" : "completed",
       badgeVariant: medicationBadgeVariant(m.isActive),
     })) ?? []),
-  ].sort((a, b) => b.date.getTime() - a.date.getTime());
+  ].sort((a, b) => b.date.getTime() - a.date.getTime()), [patient?.visits, patient?.labResults, patient?.medications, text]);
 
   const timelineIconMap = {
     visit: { icon: Building2, bg: "bg-info-bg", color: "text-info" },
@@ -437,12 +437,15 @@ export default function DoctorDashboard() {
     alert: { icon: AlertCircle, bg: "bg-danger-bg", color: "text-danger" },
   };
 
-  const labsByName: Record<string, typeof labResults> = {};
-  for (const lab of [...labResults].sort((a, b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime())) {
-    const k = lab.testName;
-    if (!labsByName[k]) labsByName[k] = [];
-    labsByName[k].push(lab);
-  }
+  const labsByName: Record<string, typeof labResults> = useMemo(() => {
+    const grouped: Record<string, typeof labResults> = {};
+    for (const lab of [...labResults].sort((a, b) => new Date(b.testDate).getTime() - new Date(a.testDate).getTime())) {
+      const k = lab.testName;
+      if (!grouped[k]) grouped[k] = [];
+      grouped[k].push(lab);
+    }
+    return grouped;
+  }, [labResults]);
 
   const getTrend = (labGroup: typeof labResults) => {
     if (labGroup.length < 2) return "stable";
@@ -454,7 +457,7 @@ export default function DoctorDashboard() {
     return diff > 0 ? "rising" : "falling";
   };
 
-  const topPredictions = predictions.filter(p => p.severity === "critical" || p.severity === "high").slice(0, 3);
+  const topPredictions = useMemo(() => predictions.filter(p => p.severity === "critical" || p.severity === "high").slice(0, 3), [predictions]);
 
   return (
     <Layout role="doctor" localized>
