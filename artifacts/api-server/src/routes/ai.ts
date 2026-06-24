@@ -69,9 +69,9 @@ router.get("/risk-score/:patientId", async (req, res) => {
   }
 
   const [medications, labResults, visits] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)),
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)).orderBy(desc(medicationsTable.createdAt)).limit(50),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, patientId)).orderBy(desc(labResultsTable.testDate)).limit(10),
-    db.select().from(visitsTable).where(eq(visitsTable.patientId, patientId)),
+    db.select().from(visitsTable).where(eq(visitsTable.patientId, patientId)).orderBy(desc(visitsTable.visitDate)).limit(50),
   ]);
 
   const abnormalLabs = labResults.filter(l => l.status !== "normal").length;
@@ -110,7 +110,7 @@ router.get("/predictions/:patientId", async (req, res) => {
   }
 
   const [medications, labResults, visits] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)),
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)).orderBy(desc(medicationsTable.createdAt)).limit(50),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, patientId)).orderBy(desc(labResultsTable.testDate)).limit(20),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, patientId)).orderBy(desc(visitsTable.visitDate)).limit(20),
   ]);
@@ -154,7 +154,7 @@ router.get("/decision/:patientId", async (req, res) => {
   }
 
   const [medications, labResults, visits] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)),
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)).orderBy(desc(medicationsTable.createdAt)).limit(50),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, patientId)).orderBy(desc(labResultsTable.testDate)).limit(20),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, patientId)).orderBy(desc(visitsTable.visitDate)).limit(20),
   ]);
@@ -278,7 +278,7 @@ async function buildPatientContext(
   patient: typeof patientsTable.$inferSelect,
 ): Promise<PatientContext> {
   const [medications, labResults, visits] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)),
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)).orderBy(desc(medicationsTable.createdAt)).limit(50),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, patientId)).orderBy(desc(labResultsTable.testDate)).limit(10),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, patientId)).orderBy(desc(visitsTable.visitDate)).limit(5),
   ]);
