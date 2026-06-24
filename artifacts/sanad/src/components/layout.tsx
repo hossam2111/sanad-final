@@ -384,7 +384,7 @@ export function Layout({ children, role, localized = false }: { children: React.
               {showAlerts && (
                 <div
                   ref={dropdownRef}
-                  className="absolute end-0 top-10 z-50 w-[min(340px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+                  className="fixed end-4 top-[64px] z-[9999] w-[min(340px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
                 >
                   <div className="flex items-center justify-between border-b border-border px-4 py-3">
                     <div>
