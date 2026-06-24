@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -207,7 +207,7 @@ export default function ResearchPortal() {
       />
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <KpiCard title={text("Anonymized Records", "سجلات مجهّلة")} value={data?.totalAnonymizedRecords?.toLocaleString()} sub={text("Fully de-identified", "مجهّلة الهوية بالكامل")} icon={Users} iconBg="bg-teal-100" iconColor="text-teal-600" />
         <KpiCard title={text("Active Studies", "الدراسات النشطة")} value={CLINICAL_STUDIES.filter(s => s.status === "active").length} sub={text(`${CLINICAL_STUDIES.length} total registered`, `${CLINICAL_STUDIES.length} مُسجّلة إجمالًا`)} icon={BookOpen} iconBg="bg-violet-100" iconColor="text-violet-600" />
         <KpiCard title={text("AI Decisions Analyzed", "قرارات ذكاء مُحلّلة")} value={data?.aiMetrics?.totalDecisions?.toLocaleString()} sub={text(`${data?.aiMetrics?.avgConfidence}% avg confidence`, `${data?.aiMetrics?.avgConfidence}% متوسط الثقة`)} icon={Brain} iconBg="bg-risk-high-bg" iconColor="text-risk-high" />
@@ -273,10 +273,10 @@ export default function ResearchPortal() {
             ))}
           </div>
 
-          <div className="grid grid-cols-12 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             {selectedConditions === "conditions" && (
               <>
-                <Card className="col-span-7">
+                <Card className="col-span-full lg:col-span-7">
                   <CardHeader><div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Disease Prevalence by Condition", "انتشار المرض حسب الحالة")}</CardTitle></div></CardHeader>
                   <CardBody>
                     <div className="min-h-[320px] h-full w-full py-4">
@@ -292,7 +292,7 @@ export default function ResearchPortal() {
                     </div>
                   </CardBody>
                 </Card>
-                <Card className="col-span-5">
+                <Card className="col-span-full lg:col-span-5">
                   <CardHeader><CardTitle>{text("Condition Trend Analysis", "تحليل اتجاهات الحالات")}</CardTitle></CardHeader>
                   <CardBody className="space-y-2 max-h-72 overflow-y-auto">
                     {data?.conditionInsights?.map((c: any, i: number) => {
@@ -568,8 +568,8 @@ export default function ResearchPortal() {
             </CardBody>
           </Card>
 
-          <div className="grid grid-cols-12 gap-5">
-            <Card className="col-span-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <Card className="col-span-full lg:col-span-6">
               <CardHeader><div className="flex items-center gap-2"><Zap className="w-4 h-4 text-risk-high" /><CardTitle>{text("Top Clinical Associations", "Top Clinical Associations")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-3">
                 {[
@@ -593,7 +593,7 @@ export default function ResearchPortal() {
               </CardBody>
             </Card>
 
-            <Card className="col-span-6">
+            <Card className="col-span-full lg:col-span-6">
               <CardHeader><div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Policy Recommendations", "AI Policy Recommendations")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-3">
                 {[
@@ -627,8 +627,8 @@ export default function ResearchPortal() {
             </div>
           </div>
 
-          <div className="grid grid-cols-12 gap-5">
-            <Card className="col-span-5">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <Card className="col-span-full lg:col-span-5">
               <CardHeader>
                 <div className="flex items-center gap-2"><Microscope className="w-4 h-4 text-primary" /><CardTitle>{text("Condition Burden Comparison", "Condition Burden Comparison")}</CardTitle></div>
                 <span className="text-[10px] text-muted-foreground ml-auto">{text("% prevalence", "% prevalence")}</span>
@@ -650,7 +650,7 @@ export default function ResearchPortal() {
               </CardBody>
             </Card>
 
-            <Card className="col-span-7">
+            <Card className="col-span-full lg:col-span-7">
               <CardHeader><div className="flex items-center gap-2"><Target className="w-4 h-4 text-success" /><CardTitle>{text("Outcome Metrics — AI vs. Standard Care", "Outcome Metrics — AI vs. Standard Care")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-4">
                 {[
@@ -699,7 +699,7 @@ export default function ResearchPortal() {
                 <Badge variant="success">{text("PDPL Compliant", "PDPL Compliant")}</Badge>
               </CardHeader>
               <CardBody>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
                     { title: "Full Anonymized Dataset", desc: `${data?.totalAnonymizedRecords?.toLocaleString()} records · All conditions · Risk scores`, format: "JSON", size: "~2.4 MB", onclick: () => handleExport("json") },
                     { title: "Population Summary CSV", desc: "Age groups · Gender breakdown · Condition prevalence · Risk distribution", format: "CSV", size: "~180 KB", onclick: () => handleExport("csv") },

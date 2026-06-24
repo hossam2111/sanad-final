@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
@@ -93,7 +93,7 @@ export default function HospitalPortal() {
       />
 
       {/* KPI row */}
-      <div className="grid grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         <KpiCard
           title={text("Total Beds", "إجمالي الأسرّة")}
           value={data?.totalBeds?.toLocaleString() ?? "—"}
@@ -146,8 +146,8 @@ export default function HospitalPortal() {
       </div>
 
       {activeTab === "overview" && (
-        <div className="grid grid-cols-12 gap-4">
-          <Card className="col-span-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <Card className="col-span-full lg:col-span-8">
             <CardHeader>
               <BedDouble className="w-4 h-4 text-primary" />
               <CardTitle>{text("Bed Occupancy by Unit", "إشغال الأسرّة حسب القسم")}</CardTitle>
@@ -199,7 +199,7 @@ export default function HospitalPortal() {
             </CardBody>
           </Card>
 
-          <Card className="col-span-4">
+          <Card className="col-span-full lg:col-span-4">
             <CardHeader>
               <Users className="w-4 h-4 text-primary" />
               <CardTitle>{text("Staff Allocation", "توزيع الكوادر")}</CardTitle>

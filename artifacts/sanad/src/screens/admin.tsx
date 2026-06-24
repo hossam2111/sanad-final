@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody, KpiCard, Badge, AlertBanner , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -381,7 +381,7 @@ export default function AdminDashboard() {
 
       {/* KPI Row */}
       {stats && (
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <KpiCard title={text("Registered Patients", "المرضى المسجّلون")} value={(stats.totalPatients ?? 0).toLocaleString()} sub={text("Active national records", "سجلات وطنية نشطة")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
           <KpiCard title={text("Visits Today", "زيارات اليوم")} value={(stats.totalVisitsToday ?? 0).toLocaleString()} sub={text("Across all facilities", "في جميع المنشآت")} icon={Activity} iconBg="bg-info-bg" iconColor="text-info" />
           <KpiCard title={text("Drug Conflicts Prevented", "تداخلات دوائية مُنعت")} value={(stats.drugInteractionsBlocked ?? 0).toLocaleString()} sub={text("Blocked by interaction screening", "حُجبت عبر فحص التداخلات")} icon={ShieldAlert} iconBg="bg-success-bg" iconColor="text-success" />
@@ -391,10 +391,10 @@ export default function AdminDashboard() {
 
       {/* Charts Grid */}
       {popHealth && (
-        <div className="grid grid-cols-12 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
           {/* Monthly Trend */}
-          <Card className="col-span-8">
+          <Card className="col-span-full lg:col-span-8">
             <CardHeader>
               <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>{text("Monthly Visit Trend", "اتجاه الزيارات الشهري")}</CardTitle></div>
               <div className="flex items-center gap-4">
@@ -419,7 +419,7 @@ export default function AdminDashboard() {
           </Card>
 
           {/* Blood Type Pie */}
-          <Card className="col-span-4">
+          <Card className="col-span-full lg:col-span-4">
             <CardHeader><CardTitle>{text("Blood Type Distribution", "توزيع فصائل الدم")}</CardTitle></CardHeader>
             <CardBody>
               <div className="min-h-[280px] h-full w-full py-4">
@@ -445,7 +445,7 @@ export default function AdminDashboard() {
 
           {/* === KSA GEOGRAPHIC RISK HEATMAP === */}
           {stats?.regionalStats && stats.regionalStats.length > 0 && (
-            <Card className="col-span-7">
+            <Card className="col-span-full lg:col-span-7">
               <CardHeader>
                 <MapPin className="w-4 h-4 text-primary" />
                 <CardTitle>{text("National Risk Heatmap — KSA", "خريطة الخطورة الوطنية — المملكة")}</CardTitle>
@@ -463,7 +463,7 @@ export default function AdminDashboard() {
           )}
 
           {/* Conditions Bar */}
-          <Card className="col-span-5">
+          <Card className="col-span-full lg:col-span-5">
             <CardHeader>
               <CardTitle>{text("Top Chronic Conditions", "أبرز الأمراض المزمنة")}</CardTitle>
               <Badge variant="default">{text(`${popHealth.conditionBreakdown?.length} tracked`, `${popHealth.conditionBreakdown?.length} متابَع`)}</Badge>
@@ -484,7 +484,7 @@ export default function AdminDashboard() {
           </Card>
 
           {/* Age Distribution */}
-          <Card className="col-span-6">
+          <Card className="col-span-full lg:col-span-6">
             <CardHeader><CardTitle>{text("Population Age Distribution", "التوزيع العمري للسكان")}</CardTitle></CardHeader>
             <CardBody>
               <div className="min-h-[320px] h-full w-full py-4">
@@ -503,7 +503,7 @@ export default function AdminDashboard() {
 
           {/* Risk Distribution */}
           {stats?.riskDistribution && (
-            <Card className="col-span-6">
+            <Card className="col-span-full lg:col-span-6">
               <CardHeader>
                 <div className="flex items-center gap-2"><PieIcon className="w-4 h-4 text-risk-high" /><CardTitle>{text("Patient Risk Distribution", "توزيع خطورة المرضى")}</CardTitle></div>
                 <Badge variant="warning">{text(`${stats.highRiskPatients} high/critical`, `${stats.highRiskPatients} مرتفعة/حرجة`)}</Badge>
@@ -513,7 +513,7 @@ export default function AdminDashboard() {
                   <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={stats.riskDistribution} innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="count" nameKey="level"
-                        ) => percent > 0.15 ? `${(percent * 100).toFixed(0)}%` : ""} labelLine={false}>
+                        label={({ percent }) => percent > 0.15 ? `${(percent * 100).toFixed(0)}%` : ""} labelLine={false}>
                         {stats.riskDistribution.map((entry: any, i: number) => (
                           <Cell key={i} fill={RISK_COLORS[entry.level as keyof typeof RISK_COLORS] || "#94a3b8"} />
                         ))}
@@ -661,7 +661,7 @@ export default function AdminDashboard() {
                 )}
 
                 {/* National Metrics Footer */}
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     { label: text("AI Decisions Today", "قرارات اليوم"), value: ((intelligence as Record<string, any>))?.aiDecisionsToday ?? "0", icon: Brain },
                     { label: text("Event Bus Throughput", "إنتاجية ناقل الأحداث"), value: ((intelligence as Record<string, any>))?.eventBusThroughput ?? "—", icon: Zap },
@@ -753,7 +753,7 @@ export default function AdminDashboard() {
             )}
 
             {/* KPI cards */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <KpiCard
                 title={text("API Uptime","وقت تشغيل الـ API")}
                 value={sysHealth ? `${Math.floor((sysHealth.uptimeSeconds ?? 0) / 60)}m` : "—"}
@@ -783,7 +783,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Service detail cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Database */}
               <Card>
                 <CardHeader><Database className="w-4 h-4 text-primary"/><CardTitle>{text("Database","قاعدة البيانات")}</CardTitle>
@@ -870,7 +870,7 @@ export default function AdminDashboard() {
             return (
               <div className="space-y-5">
                 {/* KPI row */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <KpiCard title={text("Total AI Decisions","إجمالي قرارات الذكاء")} value={total.toLocaleString()} sub={text("All time","منذ البداية")} icon={Brain} iconBg="bg-violet-100" iconColor="text-violet-600" />
                   <KpiCard title={text("Decisions Today","قرارات اليوم")} value={todayDec.toLocaleString()} sub={text("Since midnight","منذ منتصف الليل")} icon={Clock} iconBg="bg-info-bg" iconColor="text-info" />
                   <KpiCard title={text("Avg Confidence","متوسط الثقة")} value={`${confidence}%`} sub={text("AI model performance","أداء نموذج الذكاء")} icon={Target} iconBg="bg-success-bg" iconColor="text-success" />
@@ -1074,10 +1074,10 @@ export default function AdminDashboard() {
             </Card>
 
             {/* System Info */}
-            <Card className="col-span-2">
+            <Card className="col-span-full lg:col-span-2">
               <CardHeader><Wrench className="w-4 h-4 text-muted-foreground"/><CardTitle>{text("System Information","معلومات النظام")}</CardTitle></CardHeader>
               <CardBody>
-                <div className="grid grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   {[
                     [text("API Version","إصدار الـ API"), sysHealth?.version ?? "—"],
                     [text("Build SHA","رقم البناء"), (sysHealth?.buildSha ?? "—").slice(0,8)],

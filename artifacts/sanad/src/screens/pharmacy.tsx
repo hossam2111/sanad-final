@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from "react";
+﻿import React, { useState, useRef, useMemo } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
@@ -501,7 +501,7 @@ export default function PharmacyPortal() {
       )}
 
       {/* KPI Row */}
-      <div className="grid grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         <KpiCard title={text("Dispensed Today", "صُرف اليوم")} value={String(todayLog.length)} sub={text("Medications issued", "أدوية مصروفة")} icon={Receipt} iconBg="bg-violet-100" iconColor="text-violet-600" />
         <KpiCard title={text("Queue", "قائمة الانتظار")} value={String(queue.length)} sub={text("Patients waiting", "مرضى منتظرون")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
         <KpiCard

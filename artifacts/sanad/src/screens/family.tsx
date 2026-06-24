@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Input, Button, Badge, PageHeader, DataLabel , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -221,7 +221,7 @@ export default function FamilyPortal() {
           )}
 
           {/* Summary KPIs */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-danger" : data.heritabilityScore >= 40 ? "text-risk-high" : "text-success", bg: data.heritabilityScore >= 70 ? "bg-danger-bg" : "bg-secondary" },
               { label: text("Genetic Risk Factors", "عوامل الخطورة الوراثية"), value: data.geneticRisks?.length, suffix: text(" identified", " مُحدّد"), color: "text-violet-600", bg: "bg-violet-50" },
@@ -417,8 +417,8 @@ export default function FamilyPortal() {
           {/* ─── CONDITION BURDEN TAB ─── */}
           {activeTab === "burden" && (
             <div className="space-y-5">
-              <div className="grid grid-cols-12 gap-5">
-                <Card className="col-span-7">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <Card className="col-span-full lg:col-span-7">
                   <CardHeader>
                     <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Condition Burden Across Family", "عبء الأمراض عبر الأسرة")}</CardTitle></div>
                     <p className="text-xs text-muted-foreground">{text("Family load = % of members affected", "حِمل الأسرة = نسبة الأفراد المصابين")}</p>
@@ -441,7 +441,7 @@ export default function FamilyPortal() {
                   </CardBody>
                 </Card>
 
-                <Card className="col-span-5">
+                <Card className="col-span-full lg:col-span-5">
                   <CardHeader>
                     <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("Condition Details", "تفاصيل الأمراض")}</CardTitle></div>
                   </CardHeader>

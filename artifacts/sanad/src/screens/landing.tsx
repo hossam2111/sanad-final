@@ -201,7 +201,7 @@ function DecisionTrace() {
                   key={tc.id}
                   type="button"
                   onClick={() => setCaseIdx(i)}
-                  aria- ${i + 1}`}
+                  aria-label={`Case ${i + 1}`}
                   className={`h-1.5 rounded-full transition-all ${FOCUS} ${
                     i === caseIdx ? "w-4 bg-[#7CB9FF]" : "w-1.5 bg-card/20 hover:bg-card/40"
                   }`}

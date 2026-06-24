@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+﻿import React, { useState, useRef, useEffect, useCallback } from "react";
 import { apiFetch } from "@/lib/api";
 import {
   Search, Shield, Activity, AlertCircle, Syringe, Clock,
@@ -644,11 +644,11 @@ export default function DoctorDashboard() {
             {wizardStep === 1 && (
               <form onSubmit={handleRegisterPatient} className="p-6 space-y-4 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
+                  <div className="col-span-full lg:col-span-2">
                     <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("National ID (10 digits)", "رقم الهوية (10 أرقام)")}</label>
                     <Input value={regForm.nationalId} onChange={e => setRegForm(f=>({...f,nationalId:e.target.value}))} placeholder="1000000051" maxLength={10} required dir="ltr" />
                   </div>
-                  <div className="col-span-2">
+                  <div className="col-span-full lg:col-span-2">
                     <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("Full Name", "الاسم الكامل")}</label>
                     <Input value={regForm.fullName} onChange={e => setRegForm(f=>({...f,fullName:e.target.value}))} placeholder={text("Ahmed Al-Ghamdi","أحمد الغامدي")} required />
                   </div>
@@ -788,7 +788,7 @@ export default function DoctorDashboard() {
                                                           "bg-secondary border-border"
                     }`}>
                       <div className="shrink-0">
-                        <RiskBadge level={aiResult.riskLevel as "critical"|"high"|"medium"|"low"} `} />
+                        <RiskBadge level={aiResult.riskLevel as "critical"|"high"|"medium"|"low"} />
                       </div>
                       <div>
                         <p className="font-bold text-foreground text-sm flex items-center gap-1.5">
@@ -891,14 +891,14 @@ export default function DoctorDashboard() {
                 </div>
 
                 <div className="px-6 py-4 flex flex-col items-center justify-center bg-destructive/10 min-w-[90px]">
-                  <DataLabel >
+                  <DataLabel label={text("Blood Type", "فصيلة الدم")}>
                     <p className="text-3xl font-bold text-danger" dir="ltr">{patient.bloodType}</p>
                   </DataLabel>
                 </div>
 
                 {riskScore && (
                   <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px] bg-secondary/40">
-                    <DataLabel >
+                    <DataLabel label={text("Clinical Priority Index", "مؤشر الأولوية السريرية")}>
                       <p className="text-3xl font-bold tabular-nums text-foreground" dir="ltr">
                         {riskScore.riskScore}<span className="text-base font-normal text-muted-foreground">/100</span>
                       </p>
@@ -1280,8 +1280,8 @@ export default function DoctorDashboard() {
                               return null;
                             }}
                           />
-                          <ReferenceLine y={6.5} stroke="#ef4444" strokeDasharray="4 2" } />
-                          <ReferenceLine y={5.7} stroke="#f59e0b" strokeDasharray="4 2" } />
+                          <ReferenceLine y={6.5} stroke="#ef4444" strokeDasharray="4 2" />
+                          <ReferenceLine y={5.7} stroke="#f59e0b" strokeDasharray="4 2" />
                           <Area type="monotone" dataKey="val" stroke={areaColor} strokeWidth={2.5} fill="url(#hba1cGrad)" dot={{ r: 4, fill: areaColor, strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
                         </AreaChart>
                       </ResponsiveContainer></div>
@@ -1970,6 +1970,7 @@ function PrescribeModal({ patientId }: { patientId: number }) {
 
   
   const [isOpen, setIsOpen] = useState(false);
+  const [showAiExplanation, setShowAiExplanation] = useState(false);
   const [drugName, setDrugName] = useState("");
   const [dosage, setDosage] = useState("");
   const [frequency, setFrequency] = useState("");

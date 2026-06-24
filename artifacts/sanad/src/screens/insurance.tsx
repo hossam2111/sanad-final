@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Input, Button, Badge, PageHeader, KpiCard, DataLabel , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -151,16 +151,16 @@ export default function InsurancePortal() {
             </div>
           ) : dashboard && (
             <>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <KpiCard title={text("Active Policies", "الوثائق النشطة")} value={dashboard.totalPolicies?.toLocaleString()} sub={text("National coverage", "تغطية وطنية")} icon={Users} iconBg="bg-violet-100" iconColor="text-violet-600" />
                 <KpiCard title={text("Total Claims", "إجمالي المطالبات")} value={dashboard.totalClaims?.toLocaleString()} sub={text(`${dashboard.pendingClaims} awaiting review`, `${dashboard.pendingClaims} بانتظار المراجعة`)} icon={Shield} iconBg="bg-primary/10" iconColor="text-primary" />
                 <KpiCard title={text("Total Payout", "إجمالي المدفوعات")} value={`${text("SAR", "ر.س")} ${(dashboard.totalPayout / 1000).toFixed(0)}K`} sub={text(`Avg SAR ${dashboard.avgClaimValue?.toLocaleString()} per claim`, `متوسط ${dashboard.avgClaimValue?.toLocaleString()} ر.س للمطالبة`)} icon={DollarSign} iconBg="bg-success-bg" iconColor="text-success" />
                 <KpiCard title={text("Fraud Flagged", "حالات احتيال موسومة")} value={dashboard.fraudSuspected} sub={text(`${dashboard.fraudRate}% fraud rate`, `معدّل الاحتيال ${dashboard.fraudRate}%`)} icon={ShieldAlert} iconBg="bg-danger-bg" iconColor="text-danger" />
               </div>
 
-              <div className="grid grid-cols-12 gap-5">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 {/* Claims Trend */}
-                <Card className="col-span-8">
+                <Card className="col-span-full lg:col-span-8">
                   <CardHeader>
                     <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>{text("Claims & Fraud Trend — 2025", "اتجاه المطالبات والاحتيال — 2025")}</CardTitle></div>
                     <Badge variant="outline">{dashboard.approvalRate}{text("% approval rate", "% معدل اعتماد")}</Badge>
@@ -193,7 +193,7 @@ export default function InsurancePortal() {
                 </Card>
 
                 {/* Fraud Alerts Panel */}
-                <Card className="col-span-4">
+                <Card className="col-span-full lg:col-span-4">
                   <CardHeader>
                     <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-danger" /><CardTitle>{text("AI Fraud Intelligence", "ذكاء الاحتيال بالذكاء الاصطناعي")}</CardTitle></div>
                     <Badge variant="destructive">{dashboard.fraudSuspected} {text("active", "نشط")}</Badge>
@@ -231,8 +231,8 @@ export default function InsurancePortal() {
               </div>
 
               {/* Claims by Type */}
-              <div className="grid grid-cols-12 gap-5">
-                <Card className="col-span-5">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <Card className="col-span-full lg:col-span-5">
                   <CardHeader>
                     <div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Claims by Type", "المطالبات حسب النوع")}</CardTitle></div>
                   </CardHeader>
@@ -255,7 +255,7 @@ export default function InsurancePortal() {
                   </CardBody>
                 </Card>
 
-                <Card className="col-span-4">
+                <Card className="col-span-full lg:col-span-4">
                   <CardHeader>
                     <div className="flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /><CardTitle>{text("Claim Status", "حالة المطالبات")}</CardTitle></div>
                   </CardHeader>
@@ -279,7 +279,7 @@ export default function InsurancePortal() {
                   </CardBody>
                 </Card>
 
-                <Card className="col-span-3">
+                <Card className="col-span-full lg:col-span-3">
                   <CardHeader>
                     <div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Quick Stats", "إحصاءات سريعة")}</CardTitle></div>
                   </CardHeader>
@@ -369,18 +369,18 @@ export default function InsurancePortal() {
                       <AnomalyGauge score={patient.anomalyScore ?? 0} />
                     </div>
                     <div className={`px-6 py-4 flex flex-col items-center justify-center min-w-[130px] ${patient.fraudRisk === "high" ? "bg-danger-bg" : patient.fraudRisk === "medium" ? "bg-risk-high-bg" : "bg-success-bg/50"}`}>
-                      <DataLabel >
+                      <DataLabel label={text("Fraud Risk", "خطر الاحتيال")}>
                         <p className={`text-2xl font-bold ${patient.fraudRisk === "high" ? "text-danger" : patient.fraudRisk === "medium" ? "text-risk-high" : "text-success"}`}>{patient.fraudRisk?.toUpperCase()}</p>
                       </DataLabel>
                     </div>
                     <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[150px] bg-violet-50">
-                      <DataLabel >
+                      <DataLabel label={text("Monthly Premium", "القسط الشهري")}>
                         <p className="text-2xl font-bold text-violet-700">{text("SAR", "ر.س")} {patient.monthlyPremium?.toLocaleString()}</p>
                       </DataLabel>
                       <p className="text-xs text-muted-foreground mt-1">{patient.riskMultiplier}{text("× risk factor", "× معامل الخطورة")}</p>
                     </div>
                     <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px]">
-                      <DataLabel >
+                      <DataLabel label={text("Total Claims", "إجمالي المطالبات")}>
                         <p className="text-2xl font-bold text-foreground">{patient.totalClaims}</p>
                       </DataLabel>
                       <p className="text-xs text-muted-foreground mt-1">{text("SAR", "ر.س")} {patient.totalClaimValue?.toLocaleString()}</p>
@@ -389,9 +389,9 @@ export default function InsurancePortal() {
                 </CardBody>
               </Card>
 
-              <div className="grid grid-cols-12 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                 {/* Anomaly Breakdown */}
-                <Card className="col-span-5">
+                <Card className="col-span-full lg:col-span-5">
                   <CardHeader>
                     <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("Neural Fraud Analysis", "تحليل الاحتيال العصبي")}</CardTitle></div>
                     <Badge variant={patient.anomalyScore >= 50 ? "destructive" : patient.anomalyScore >= 25 ? "warning" : "success"}>
@@ -616,7 +616,7 @@ export default function InsurancePortal() {
           <PageHeader title={text("Portfolio Risk Intelligence", "ذكاء خطورة المحفظة")} subtitle={text("National insurance portfolio risk distribution, pricing bands, and actuarial overview.", "توزيع خطورة محفظة التأمين الوطنية، ونطاقات التسعير، والنظرة الاكتوارية.")} />
           {dashboard && (
             <>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: text("Low Risk", "خطر منخفض"), value: dashboard.portfolioRisk?.low, color: "text-success", bg: "bg-success-bg", border: "border-success/30" },
                   { label: text("Medium Risk", "خطر متوسط"), value: dashboard.portfolioRisk?.medium, color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20" },
@@ -635,8 +635,8 @@ export default function InsurancePortal() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-12 gap-5">
-                <Card className="col-span-6">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <Card className="col-span-full lg:col-span-6">
                   <CardHeader>
                     <div className="flex items-center gap-2"><PieChart className="w-4 h-4 text-primary" /><CardTitle>{text("Portfolio Risk Distribution", "توزيع خطورة المحفظة")}</CardTitle></div>
                   </CardHeader>
@@ -660,7 +660,7 @@ export default function InsurancePortal() {
                   </CardBody>
                 </Card>
 
-                <Card className="col-span-6">
+                <Card className="col-span-full lg:col-span-6">
                   <CardHeader>
                     <div className="flex items-center gap-2"><TrendingUp className="w-4 h-4 text-primary" /><CardTitle>{text("Regional Risk Pricing", "التسعير الإقليمي القائم على الخطورة")}</CardTitle></div>
                   </CardHeader>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -172,7 +172,7 @@ export default function AIControlCenter() {
       />
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <KpiCard
           title={text("Model Confidence", "ثقة النموذج")} value={`${metrics?.avgConfidence}%`}
           sub={metrics?.modelStatus === "optimal" ? text("Optimal performance", "أداء مثالي") : metrics?.modelStatus === "needs_retraining" ? text("Retraining required", "يتطلب إعادة تدريب") : text(`Status: ${metrics?.modelStatus}`, `الحالة: ${metrics?.modelStatus}`)}
@@ -222,7 +222,7 @@ export default function AIControlCenter() {
       {/* ─── OVERVIEW ─── */}
       {activeTab === "overview" && (
         <div className="space-y-5">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="col-span-1">
               <CardHeader><Cpu className="w-4 h-4 text-primary" /><CardTitle>{text("Platform Health", "صحة المنصّة")}</CardTitle></CardHeader>
               <CardBody className="space-y-3">
@@ -258,7 +258,7 @@ export default function AIControlCenter() {
               </CardBody>
             </Card>
 
-            <Card className="col-span-2">
+            <Card className="col-span-full lg:col-span-2">
               <CardHeader>
                 <Activity className="w-4 h-4 text-danger" />
                 <CardTitle>{text("Model Confidence History — 12 Months", "سجل ثقة النموذج — 12 شهرًا")}</CardTitle>
@@ -278,7 +278,7 @@ export default function AIControlCenter() {
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
                       <YAxis domain={[60, 100]} axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} unit="%" />
                       <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} formatter={(v: any) => [`${v}%`, text("Confidence", "الثقة")]} />
-                      <ReferenceLine y={85} stroke="#ef4444" strokeDasharray="4 2" strokeWidth={1.5} } />
+                      <ReferenceLine y={85} stroke="#ef4444" strokeDasharray="4 2" strokeWidth={1.5} />
                       <Area type="monotone" dataKey="confidence" stroke="#007AFF" fill="url(#confGrad)" strokeWidth={2.5} dot={{ fill: "#007AFF", r: 3 }} />
                     </AreaChart>
                   </ResponsiveContainer></div>
@@ -330,7 +330,7 @@ export default function AIControlCenter() {
       {/* ─── ENGINE MONITOR ─── */}
       {activeTab === "engines" && (
         <div className="space-y-5">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {metrics?.engines?.map((engine: any, i: number) => {
               const driftInfo = driftEngines.find((d: any) => d.engine === engine.name);
               const hasDrift = driftInfo?.status === "drift_detected";
@@ -651,8 +651,8 @@ export default function AIControlCenter() {
       {/* ─── DECISION ANALYSIS ─── */}
       {activeTab === "decisions" && (
         <div className="space-y-5">
-          <div className="grid grid-cols-12 gap-5">
-            <Card className="col-span-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <Card className="col-span-full lg:col-span-6">
               <CardHeader><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Decision Urgency Breakdown", "توزيع استعجال القرارات")}</CardTitle></CardHeader>
               <CardBody>
                 <div className="space-y-4">
@@ -676,7 +676,7 @@ export default function AIControlCenter() {
               </CardBody>
             </Card>
 
-            <Card className="col-span-6">
+            <Card className="col-span-full lg:col-span-6">
               <CardHeader><Shield className="w-4 h-4 text-primary" /><CardTitle>{text("Risk Level Distribution", "توزيع مستويات الخطورة")}</CardTitle></CardHeader>
               <CardBody className="space-y-3">
                 {[

@@ -311,10 +311,10 @@ export default function LabPortal() {
                               formatter={(val: any) => [`${val} ${range?.unit ?? ""}`, testName]}
                             />
                             {range && range.max > 0 && (
-                              <ReferenceLine y={range.max} stroke="#f59e0b" strokeDasharray="4 2" strokeWidth={1.5} } />
+                              <ReferenceLine y={range.max} stroke="#f59e0b" strokeDasharray="4 2" strokeWidth={1.5} />
                             )}
                             {range && range.min > 0 && (
-                              <ReferenceLine y={range.min} stroke="#10b981" strokeDasharray="4 2" strokeWidth={1.5} } />
+                              <ReferenceLine y={range.min} stroke="#10b981" strokeDasharray="4 2" strokeWidth={1.5} />
                             )}
                             <Line
                               type="monotone"

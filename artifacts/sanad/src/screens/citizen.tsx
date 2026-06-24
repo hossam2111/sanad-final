@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+﻿import React, { useState, useMemo, useEffect } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
@@ -735,8 +735,8 @@ export default function CitizenPortal() {
       )}
 
       {/* Identity + Score Row */}
-      <div className="grid grid-cols-12 gap-4 mb-5">
-        <Card className="col-span-7">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-5">
+        <Card className="col-span-full lg:col-span-7">
           <CardBody className="flex items-center gap-4 p-5">
             <div className="w-14 h-14 rounded-3xl bg-risk-high-bg flex items-center justify-center shrink-0">
               <User className="w-7 h-7 text-risk-high" />
@@ -786,7 +786,7 @@ export default function CitizenPortal() {
           </Card>
         )}
 
-        <Card className="col-span-2">
+        <Card className="col-span-full lg:col-span-2">
           <CardBody className="flex flex-col gap-3 justify-center h-full py-5 px-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Pill className="w-3.5 h-3.5 text-risk-high" /> {text("Active Meds", "الأدوية الفعّالة")}</div>

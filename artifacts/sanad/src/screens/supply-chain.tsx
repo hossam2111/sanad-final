@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -188,7 +188,7 @@ export default function SupplyChainPortal() {
       />
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <KpiCard title={text("Total Drug Lines", "إجمالي أصناف الأدوية")} value={data?.summary?.totalDrugs} sub={text("Tracked nationally", "متابَعة وطنيًا")} icon={Package} iconBg="bg-lime-100" iconColor="text-lime-700" />
         <KpiCard
           title={text("Critical Shortages", "النقص الحرج")} value={data?.summary?.criticalShortages}
@@ -226,8 +226,8 @@ export default function SupplyChainPortal() {
       {/* ─── INVENTORY ─── */}
       {activeTab === "inventory" && (
         <div className="space-y-4">
-          <div className="grid grid-cols-12 gap-5">
-            <Card className="col-span-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <Card className="col-span-full lg:col-span-8">
               <CardHeader><Package className="w-4 h-4 text-lime-700" /><CardTitle>{text("Drug Inventory — All Lines", "مخزون الأدوية — جميع البنود")}</CardTitle></CardHeader>
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -439,8 +439,8 @@ export default function SupplyChainPortal() {
             </div>
           </div>
 
-          <div className="grid grid-cols-12 gap-5">
-            <Card className="col-span-7">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <Card className="col-span-full lg:col-span-7">
               <CardHeader><Globe className="w-4 h-4 text-primary" /><CardTitle>{text("Regional Stock vs. Demand", "Regional Stock vs. Demand")}</CardTitle>
                 {regionalSummary && (
                   <Badge variant={regionalSummary.shortageRegions > 3 ? "destructive" : "warning"} className="ml-auto text-[10px]">
@@ -482,7 +482,7 @@ export default function SupplyChainPortal() {
               </CardBody>
             </Card>
 
-            <Card className="col-span-5">
+            <Card className="col-span-full lg:col-span-5">
               <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>{text("Gap Analysis by Region", "Gap Analysis by Region")}</CardTitle></CardHeader>
               <CardBody className="space-y-2.5">
                 {loadingRegional ? (
