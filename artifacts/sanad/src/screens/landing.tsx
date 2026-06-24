@@ -188,7 +188,7 @@ function DecisionTrace() {
       <div
         dir={dir}
         role="img"
-        aria-
+        aria-label="Decision Trace Visualization"
         className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#070B12] text-left shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
       >
         <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3 font-mono text-[10.5px] tracking-[0.12em] text-white/45">
@@ -482,7 +482,7 @@ function BrokenTrace() {
       <div
         dir={dir}
         role="img"
-        aria-
+        aria-label="Timeline without a trace"
         className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#06090F] text-left"
       >
         <div aria-hidden className="flex items-center justify-between border-b border-white/[0.05] px-5 py-3 font-mono text-[10.5px] tracking-[0.12em] text-white/35">
@@ -740,7 +740,7 @@ function IsnadChain() {
       <div
         dir={dir}
         role="img"
-        aria-
+        aria-label="ISNAD Case Trace"
         className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#070B12] text-left"
       >
         <div aria-hidden className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3 font-mono text-[10.5px] tracking-[0.12em]">
