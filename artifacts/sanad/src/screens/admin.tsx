@@ -546,7 +546,7 @@ export default function AdminDashboard() {
                 <CardTitle>{text("National Appointments — Upcoming Confirmed", "المواعيد الوطنية — المؤكّدة القادمة")}</CardTitle>
                 <Badge variant="info" className="ms-auto">{text(`${appointments.filter((a: any) => a.status === "confirmed").length} total`, `${appointments.filter((a: any) => a.status === "confirmed").length} الإجمالي`)}</Badge>
               </CardHeader>
-              <table className="w-full data-table">
+              <div className="overflow-x-auto"><table className="w-full data-table">
                 <thead>
                   <tr>
                     <th>{text("Reference", "المرجع")}</th>
@@ -571,7 +571,7 @@ export default function AdminDashboard() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </Card>
           )}
 
@@ -687,7 +687,7 @@ export default function AdminDashboard() {
                 <CardTitle>Regional Health Overview — All 13 Regions</CardTitle>
                 <Badge variant="outline">{stats.regionalStats.length} regions</Badge>
               </CardHeader>
-              <table className="w-full data-table">
+              <div className="overflow-x-auto"><table className="w-full data-table">
                 <thead>
                   <tr>
                     <th>{text("Region", "المنطقة")}</th>
@@ -723,7 +723,7 @@ export default function AdminDashboard() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             </Card>
           )}
         </div>

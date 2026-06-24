@@ -309,7 +309,7 @@ export default function SupplyChainPortal() {
 
               {/* Consumption Trend */}
               <Card>
-                <CardHeader><TrendingUp className="w-4 h-4 text-lime-700" /><CardTitle>{text("6-Month Consumption", "6-Month Consumption")}</CardTitle></CardHeader>
+                <CardHeader><TrendingUp className="w-4 h-4 text-lime-700" /><CardTitle>{text("6-Month Consumption", "الاستهلاك لـ 6 أشهر")}</CardTitle></CardHeader>
                 <CardBody>
                   <div className="h-48">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
@@ -338,7 +338,7 @@ export default function SupplyChainPortal() {
           <div className="flex items-start gap-4 px-5 py-4 bg-violet-50 border border-violet-200 rounded-2xl">
             <Brain className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm font-bold text-violet-800">{text("AI Supply Forecasting Engine v2.1", "AI Supply Forecasting Engine v2.1")}</p>
+              <p className="text-sm font-bold text-violet-800">{text("AI Supply Forecasting Engine v2.1", "محرك التنبؤ بالإمدادات v2.1")}</p>
               <p className="text-xs text-violet-600 mt-0.5">
                 {text("Machine learning demand prediction using 24-month historical consumption, prescription trends, disease prevalence, and seasonal patterns. Predictions recalculated daily at 02:00 AST.", "تنبؤ الطلب بالتعلم الآلي باستخدام 24 شهراً من بيانات الاستهلاك والوصفات الطبية وانتشار الأمراض والأنماط الموسمية. يُعاد الحساب يومياً الساعة 02:00.")}
               </p>
@@ -348,7 +348,7 @@ export default function SupplyChainPortal() {
 
           {/* AI Predictions from backend */}
           <Card>
-            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Demand Predictions", "AI Demand Predictions")}</CardTitle></CardHeader>
+            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Demand Predictions", "تنبؤات الطلب بالذكاء الاصطناعي")}</CardTitle></CardHeader>
             <CardBody className="space-y-3">
               {data?.aiPredictions?.map((pred: any, i: number) => (
                 <div key={i} className="flex items-start gap-4 px-4 py-3.5 bg-violet-50 border border-violet-100 rounded-2xl">
@@ -373,7 +373,7 @@ export default function SupplyChainPortal() {
 
           {/* 30/60/90 Day Forecast */}
           <Card>
-            <CardHeader><Calendar className="w-4 h-4 text-primary" /><CardTitle>{text("30/60/90-Day Stock Forecast", "30/60/90-Day Stock Forecast")}</CardTitle><span className="ml-auto text-[11px] text-muted-foreground">{text("Units remaining", "Units remaining")}</span></CardHeader>
+            <CardHeader><Calendar className="w-4 h-4 text-primary" /><CardTitle>{text("30/60/90-Day Stock Forecast", "توقعات المخزون 30/60/90 يوم")}</CardTitle><span className="ml-auto text-[11px] text-muted-foreground">{text("Units remaining", "Units remaining")}</span></CardHeader>
             <CardBody>
               <div className="min-h-[350px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
@@ -434,17 +434,17 @@ export default function SupplyChainPortal() {
           <div className="flex items-center gap-3 px-4 py-3 bg-info-bg border border-info/20 rounded-2xl">
             <Globe className="w-4 h-4 text-info shrink-0" />
             <div>
-              <p className="text-xs font-bold text-foreground">{text("National Drug Distribution Optimization", "National Drug Distribution Optimization")}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{text("AI redistribution model identifies supply-demand gaps per region — redistribution recommendations updated every 6 hours", "AI redistribution model identifies supply-demand gaps per region — redistribution recommendations updated every 6 hours")}</p>
+              <p className="text-xs font-bold text-foreground">{text("National Drug Distribution Optimization", "تحسين التوزيع الوطني للأدوية")}</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">{text("AI redistribution model identifies supply-demand gaps per region — redistribution recommendations updated every 6 hours", "نموذج الذكاء يحدد فجوات العرض والطلب إقليمياً — التوصيات تُحدَّث كل 6 ساعات")}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             <Card className="col-span-full lg:col-span-7">
-              <CardHeader><Globe className="w-4 h-4 text-primary" /><CardTitle>{text("Regional Stock vs. Demand", "Regional Stock vs. Demand")}</CardTitle>
+              <CardHeader><Globe className="w-4 h-4 text-primary" /><CardTitle>{text("Regional Stock vs. Demand", "المخزون الإقليمي مقابل الطلب")}</CardTitle>
                 {regionalSummary && (
                   <Badge variant={regionalSummary.shortageRegions > 3 ? "destructive" : "warning"} className="ml-auto text-[10px]">
-                    {regionalSummary.shortageRegions} {text("shortage regions", "shortage regions")}
+                    {regionalSummary.shortageRegions} {text("shortage regions", "منطقة نقص")}
                   </Badge>
                 )}
               </CardHeader>
@@ -452,7 +452,7 @@ export default function SupplyChainPortal() {
                 <div className="min-h-[350px] h-full w-full py-4">
                   {loadingRegional ? (
                      <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2" /> {text("Loading regional data...", "Loading regional data...")}
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2" /> {text("Loading regional data...", "جارٍ تحميل البيانات الإقليمية...")}
                     </div>
                   ) : (
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
@@ -472,10 +472,10 @@ export default function SupplyChainPortal() {
                 </div>
                 {regionalSummary && (
                   <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border">
-                    <div className="text-xs"><span className="font-bold text-foreground">{regionalSummary.totalStock.toLocaleString()}</span><span className="text-muted-foreground ml-1">{text("total stock units", "total stock units")}</span></div>
-                    <div className="text-xs"><span className="font-bold text-foreground">{regionalSummary.totalDemand.toLocaleString()}</span><span className="text-muted-foreground ml-1">{text("monthly demand", "monthly demand")}</span></div>
+                    <div className="text-xs"><span className="font-bold text-foreground">{regionalSummary.totalStock.toLocaleString()}</span><span className="text-muted-foreground ml-1">{text("total stock units", "وحدة مخزون إجمالية")}</span></div>
+                    <div className="text-xs"><span className="font-bold text-foreground">{regionalSummary.totalDemand.toLocaleString()}</span><span className="text-muted-foreground ml-1">{text("monthly demand", "الطلب الشهري")}</span></div>
                     <Badge variant={regionalSummary.nationalGapPct > 0 ? "destructive" : "success"} className="ml-auto text-[10px]">
-                      {text("National gap:", "National gap:")} {regionalSummary.nationalGapPct > 0 ? "+" : ""}{regionalSummary.nationalGapPct}%
+                      {text("National gap:", "الفجوة الوطنية:")} {regionalSummary.nationalGapPct > 0 ? "+" : ""}{regionalSummary.nationalGapPct}%
                     </Badge>
                   </div>
                 )}
@@ -483,11 +483,11 @@ export default function SupplyChainPortal() {
             </Card>
 
             <Card className="col-span-full lg:col-span-5">
-              <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>{text("Gap Analysis by Region", "Gap Analysis by Region")}</CardTitle></CardHeader>
+              <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>{text("Gap Analysis by Region", "تحليل الفجوات حسب المنطقة")}</CardTitle></CardHeader>
               <CardBody className="space-y-2.5">
                 {loadingRegional ? (
                   <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" /> {text("Loading...", "Loading...")}
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" /> {text("Loading...", "جارٍ التحميل...")}
                   </div>
                 ) : regionalDistribution.map((r: any, i: number) => (
                   <div key={i} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border ${r.gap < 0 ? "bg-danger-bg border-danger/30" : "bg-success-bg border-success/30"}`}>
@@ -495,8 +495,8 @@ export default function SupplyChainPortal() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-bold text-foreground">{r.region}</p>
                       <p className="text-[10px] text-muted-foreground">
-                        {text("Stock", "Stock")} {r.stock.toLocaleString()} {text("· Demand", "· Demand")} {r.demand.toLocaleString()}
-                        {r.criticalDrugs > 0 && <span className="text-danger font-bold"> · {r.criticalDrugs} {text("critical drugs", "critical drugs")}</span>}
+                        {text("Stock", "المخزون")} {r.stock.toLocaleString()} {text("· Demand", "· Demand")} {r.demand.toLocaleString()}
+                        {r.criticalDrugs > 0 && <span className="text-danger font-bold"> · {r.criticalDrugs} {text("critical drugs", "دواء حرج")}</span>}
                       </p>
                     </div>
                     <div className="text-right shrink-0">
@@ -515,11 +515,11 @@ export default function SupplyChainPortal() {
 
           {/* AI Redistribution Recommendations */}
           <Card>
-            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Redistribution Recommendations", "AI Redistribution Recommendations")}</CardTitle><Badge variant="info">{text("Live · computed from inventory", "Live · computed from inventory")}</Badge></CardHeader>
+            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Redistribution Recommendations", "توصيات إعادة التوزيع")}</CardTitle><Badge variant="info">{text("Live · computed from inventory", "Live · computed from inventory")}</Badge></CardHeader>
             <CardBody className="space-y-3">
               {loadingRegional ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600" /> {text("Computing recommendations...", "Computing recommendations...")}
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600" /> {text("Computing recommendations...", "جارٍ حساب التوصيات...")}
                 </div>
               ) : regionalRecs.length > 0 ? regionalRecs.map((rec: any, i: number) => (
                 <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
@@ -527,19 +527,19 @@ export default function SupplyChainPortal() {
                   <div className="flex-1">
                     <p className="text-sm font-bold text-foreground">{rec.region} — {rec.action}</p>
                     {rec.criticalDrugs > 0 && (
-                      <p className="text-xs text-danger font-semibold mt-0.5">{rec.criticalDrugs} {text("critical drug(s) below minimum threshold in this region", "critical drug(s) below minimum threshold in this region")}</p>
+                      <p className="text-xs text-danger font-semibold mt-0.5">{rec.criticalDrugs} {text("critical drug(s) below minimum threshold in this region", "دواء حرج تحت الحد الأدنى في هذه المنطقة")}</p>
                     )}
                     <Badge variant={rec.urgency === "critical" ? "destructive" : "warning"} className="text-[9px] mt-1">{rec.urgency.toUpperCase()}</Badge>
                   </div>
                 </div>
               )) : (
                 <div className="flex items-center gap-2 text-sm text-success bg-success-bg px-4 py-3 rounded-2xl border border-success/30">
-                  <CheckCircle2 className="w-4 h-4" /> {text("All regions within acceptable supply thresholds — no redistribution needed.", "All regions within acceptable supply thresholds — no redistribution needed.")}
+                  <CheckCircle2 className="w-4 h-4" /> {text("All regions within acceptable supply thresholds — no redistribution needed.", "جميع المناطق ضمن حدود الإمداد المقبولة — لا حاجة لإعادة التوزيع.")}
                 </div>
               )}
               {/* Static historical recs if API has none yet */}
               {!loadingRegional && regionalRecs.length === 0 && (
-                <div className="text-[11px] text-muted-foreground mt-1">{text("Last computed:", "Last computed:")} {new Date().toLocaleString()}</div>
+                <div className="text-[11px] text-muted-foreground mt-1">{text("Last computed:", "آخر حساب:")} {new Date().toLocaleString()}</div>
               )}
             </CardBody>
           </Card>
@@ -621,7 +621,7 @@ export default function SupplyChainPortal() {
           {/* Critical alerts */}
           {data?.criticalAlerts?.length > 0 && (
             <Card>
-              <CardHeader><AlertTriangle className="w-4 h-4 text-danger" /><CardTitle>{text("Emergency Purchase Orders Required", "Emergency Purchase Orders Required")}</CardTitle><Badge variant="destructive">{data.criticalAlerts.length} {text("critical", "critical")}</Badge></CardHeader>
+              <CardHeader><AlertTriangle className="w-4 h-4 text-danger" /><CardTitle>{text("Emergency Purchase Orders Required", "أوامر شراء طارئة مطلوبة")}</CardTitle><Badge variant="destructive">{data.criticalAlerts.length} {text("critical", "critical")}</Badge></CardHeader>
               <div className="divide-y divide-border">
                 {data.criticalAlerts.map((alert: any, i: number) => {
                   const result = reorderResults[alert.drug];
@@ -631,13 +631,13 @@ export default function SupplyChainPortal() {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-foreground">{alert.drug}</p>
                         <p className="text-xs text-muted-foreground">
-                          {text("Current:", "Current:")} {alert.currentStock.toLocaleString()} {text("· Required:", "· Required:")} {alert.minRequired.toLocaleString()} {text("· Deficit:", "· Deficit:")} <span className="font-bold text-danger">{alert.deficit.toLocaleString()}</span>
+                          {text("Current:", "الحالي:")} {alert.currentStock.toLocaleString()} {text("· Required:", "· Required:")} {alert.minRequired.toLocaleString()} {text("· Deficit:", "· Deficit:")} <span className="font-bold text-danger">{alert.deficit.toLocaleString()}</span>
                         </p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{text("Supplier:", "Supplier:")} {alert.supplier} {text("· Lead time:", "· Lead time:")} {alert.leadTimeDays} {text("days", "days")}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">{text("Supplier:", "المورّد:")} {alert.supplier} {text("· Lead time:", "· Lead time:")} {alert.leadTimeDays} {text("days", "days")}</p>
                       </div>
                       {result ? (
                         <div className="text-right shrink-0">
-                          <p className="text-xs font-bold text-success flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> {text("Order Placed", "Order Placed")}</p>
+                          <p className="text-xs font-bold text-success flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5" /> {text("Order Placed", "تم إرسال الطلب")}</p>
                           <p className="font-mono text-[10px] text-muted-foreground">{result.orderId}</p>
                         </div>
                       ) : (
@@ -650,7 +650,7 @@ export default function SupplyChainPortal() {
                           className="flex items-center gap-1.5 text-xs font-bold bg-danger hover:bg-danger text-white px-3 py-1.5 rounded-xl transition-colors shrink-0"
                         >
                           <ShoppingCart className="w-3 h-3" />
-                          {text("Issue Order", "Issue Order")}
+                          {text("Issue Order", "إصدار طلب")}
                         </button>
                       )}
                     </div>
@@ -662,7 +662,7 @@ export default function SupplyChainPortal() {
 
           {/* All reorder alerts */}
           <Card>
-            <CardHeader><ShoppingCart className="w-4 h-4 text-primary" /><CardTitle>{text("All Reorder Recommendations", "All Reorder Recommendations")}</CardTitle><Badge variant="warning">{data?.summary?.reorderAlerts} {text("items", "items")}</Badge></CardHeader>
+            <CardHeader><ShoppingCart className="w-4 h-4 text-primary" /><CardTitle>{text("All Reorder Recommendations", "جميع توصيات إعادة الطلب")}</CardTitle><Badge variant="warning">{data?.summary?.reorderAlerts} {text("items", "items")}</Badge></CardHeader>
             <div className="divide-y divide-border">
               {data?.inventory?.filter((i: any) => i.reorderNeeded).map((item: any, idx: number) => {
                 const cfg = STATUS_CFG[item.status] ?? STATUS_CFG.low;
@@ -672,12 +672,12 @@ export default function SupplyChainPortal() {
                     <div className={`w-2 h-2 rounded-full ${cfg.dot} shrink-0`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground">{item.drugName}</p>
-                      <p className="text-xs text-muted-foreground">{item.category} · {item.daysOfStock} {text("days stock · SAR", "days stock · SAR")} {(item.avgMonthlyDemand * item.price * 3).toFixed(0)} {text("estimated order value", "estimated order value")}</p>
+                      <p className="text-xs text-muted-foreground">{item.category} · {item.daysOfStock} {text("days stock · SAR", "يوم مخزون · ر.س")} {(item.avgMonthlyDemand * item.price * 3).toFixed(0)} {text("estimated order value", "estimated order value")}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       <div className="text-right">
                         <p className="text-xs font-bold text-foreground">{item.stock.toLocaleString()} / {item.minStock.toLocaleString()}</p>
-                        <p className="text-[10px] text-muted-foreground">{text("Current / Min", "Current / Min")}</p>
+                        <p className="text-[10px] text-muted-foreground">{text("Current / Min", "الحالي / الأدنى")}</p>
                       </div>
                       <Badge variant={cfg.badge} className="text-[9px]">{item.status}</Badge>
                       {result ? (
@@ -689,7 +689,7 @@ export default function SupplyChainPortal() {
                           className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-colors ${item.status === "critical" ? "bg-danger hover:bg-danger text-white" : "bg-risk-high-bg hover:bg-risk-high/30 text-risk-high"}`}
                         >
                           <ShoppingCart className="w-3 h-3" />
-                          {text("Order", "Order")}
+                          {text("Order", "طلب")}
                         </button>
                       )}
                     </div>

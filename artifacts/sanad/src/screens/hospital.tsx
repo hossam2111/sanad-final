@@ -261,7 +261,7 @@ export default function HospitalPortal() {
               <CardTitle>{text("AI Priority Patient Queue", "قائمة انتظار المرضى — الأولوية السريرية")}</CardTitle>
               <Badge variant="outline" className="ml-auto">{text("Sorted by Clinical Priority · High → Low", "مُرتَّب حسب الأولوية السريرية · من الأعلى")}</Badge>
             </CardHeader>
-            <table className="w-full data-table">
+            <div className="overflow-x-auto"><table className="w-full data-table">
               <thead>
                 <tr>
                   <th>{text("Triage", "الفرز")}</th>
@@ -310,7 +310,7 @@ export default function HospitalPortal() {
                   );
                 })}
               </tbody>
-            </table>
+            </table></div>
           </Card>
         </div>
       )}

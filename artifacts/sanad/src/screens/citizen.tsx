@@ -1099,7 +1099,7 @@ export default function CitizenPortal() {
         )}
 
         {activeTab === "record" && recordView === "medications" && (
-          <table className="w-full data-table">
+          <div className="overflow-x-auto"><table className="w-full data-table">
             <thead><tr>
               <th>{text("Drug Name", "اسم الدواء")}</th><th>{text("Dosage", "الجرعة")}</th><th>{text("Frequency", "التكرار")}</th><th>{text("Prescribed By", "الطبيب الواصف")}</th><th>{text("Facility", "المنشأة")}</th><th>{text("Status", "الحالة")}</th>
             </tr></thead>
@@ -1115,11 +1115,11 @@ export default function CitizenPortal() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
 
         {activeTab === "record" && recordView === "labs" && (
-          <table className="w-full data-table">
+          <div className="overflow-x-auto"><table className="w-full data-table">
             <thead><tr>
               <th>{text("Test Name", "اسم الفحص")}</th><th>{text("Result", "النتيجة")}</th><th>{text("Reference Range", "النطاق المرجعي")}</th><th>{text("Date", "التاريخ")}</th><th>{text("Status", "الحالة")}</th>
             </tr></thead>
@@ -1139,11 +1139,11 @@ export default function CitizenPortal() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
 
         {activeTab === "record" && recordView === "visits" && (
-          <table className="w-full data-table">
+          <div className="overflow-x-auto"><table className="w-full data-table">
             <thead><tr>
               <th>{text("Hospital", "المستشفى")}</th><th>{text("Department", "القسم")}</th><th>{text("Visit Type", "نوع الزيارة")}</th><th>{text("Diagnosis", "التشخيص")}</th><th>{text("Date", "التاريخ")}</th>
             </tr></thead>
@@ -1158,7 +1158,7 @@ export default function CitizenPortal() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
 
         {activeTab === "consent" && (

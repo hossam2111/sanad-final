@@ -810,8 +810,8 @@ export default function PharmacyPortal() {
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-4 px-4 py-3 bg-secondary rounded-2xl text-xs text-muted-foreground">
                   <History className="w-3.5 h-3.5" />
-                  {text("Full medication history — active and discontinued for", "Full medication history — active and discontinued for")} {data.patient.name}
-                  <span className="ml-auto font-bold text-foreground">{(data.allMedications ?? data.prescriptions)?.length ?? 0} {text("total", "total")}</span>
+                  {text("Full medication history — active and discontinued for", "السجل الكامل للأدوية — النشطة والموقوفة لـ")} {data.patient.name}
+                  <span className="ml-auto font-bold text-foreground">{(data.allMedications ?? data.prescriptions)?.length ?? 0} {text("total", "الإجمالي")}</span>
                 </div>
                 <div className="space-y-2">
                   {(data.allMedications ?? data.prescriptions ?? []).map((med: any, i: number) => (
@@ -838,7 +838,7 @@ export default function PharmacyPortal() {
               <div className="p-5 space-y-3">
                 <div className="flex items-center gap-2 mb-1 px-4 py-3 bg-secondary rounded-2xl text-xs text-muted-foreground">
                   <Package className="w-3.5 h-3.5" />
-                  {text("Real-time inventory check for this patient's medications", "Real-time inventory check for this patient's medications")}
+                  {text("Real-time inventory check for this patient's medications", "فحص المخزون اللحظي لأدوية هذا المريض")}
                 </div>
                 {(data.prescriptions ?? []).map((presc: any, i: number) => {
                   const avail = presc.stockAvailability;
@@ -862,14 +862,14 @@ export default function PharmacyPortal() {
                             <p className="text-xs font-bold text-foreground">{avail.stock?.toLocaleString()} {avail.unit}</p>
                           </div>
                         ) : (
-                          <Badge variant="outline" className="text-[10px]">{text("Not tracked", "Not tracked")}</Badge>
+                          <Badge variant="outline" className="text-[10px]">{text("Not tracked", "غير مُتتبَّع")}</Badge>
                         )}
                       </div>
                       {avail && (
                         <>
                           <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                            <span>{text("Stock level", "Stock level")}</span>
-                            <span>{avail.daysOfStock} {text("days of supply", "days of supply")}</span>
+                            <span>{text("Stock level", "مستوى المخزون")}</span>
+                            <span>{avail.daysOfStock} {text("days of supply", "يوم من الإمدادات")}</span>
                           </div>
                           <div className="h-2 bg-secondary rounded-full overflow-hidden">
                             <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />

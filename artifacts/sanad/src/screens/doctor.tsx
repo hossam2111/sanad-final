@@ -1178,7 +1178,7 @@ export default function DoctorDashboard() {
                   <p className="text-xs font-semibold text-muted-foreground">{text(`${activeMeds.length} active prescription${activeMeds.length !== 1 ? "s" : ""}`, `${activeMeds.length} وصفة فعّالة`)}</p>
                   <PrescribeModal patientId={patient.id} />
                 </div>
-                <table className="w-full data-table">
+                <div className="overflow-x-auto"><table className="w-full data-table">
                   <thead><tr>
                     <th>{text("Drug Name", "اسم الدواء")}</th><th>{text("Dosage", "الجرعة")}</th><th>{text("Frequency", "التكرار")}</th>
                     <th>{text("Prescribed By", "الطبيب الواصف")}</th><th>{text("Hospital", "المستشفى")}</th><th>{text("Start Date", "تاريخ البدء")}</th><th>{text("Status", "الحالة")}</th>
@@ -1198,7 +1198,7 @@ export default function DoctorDashboard() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             )}
 
@@ -1401,7 +1401,7 @@ export default function DoctorDashboard() {
                 <div className="px-5 py-3 border-b border-border" style={{ background: "hsl(240 6% 97%)" }}>
                   <p className="text-xs font-semibold text-muted-foreground">{text(`${patient.visits?.length ?? 0} recorded visits`, `${patient.visits?.length ?? 0} زيارة مُسجّلة`)}</p>
                 </div>
-                <table className="w-full data-table">
+                <div className="overflow-x-auto"><table className="w-full data-table">
                   <thead><tr>
                     <th>{text("Hospital", "المستشفى")}</th><th>{text("Department", "القسم")}</th><th>{text("Physician", "الطبيب")}</th><th>{text("Visit Type", "نوع الزيارة")}</th><th>{text("Diagnosis", "التشخيص")}</th><th>{text("Date", "التاريخ")}</th>
                   </tr></thead>
@@ -1417,7 +1417,7 @@ export default function DoctorDashboard() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                </table></div>
               </div>
             )}
 
