@@ -276,8 +276,8 @@ export function Layout({ children, role, localized = false }: { children: React.
 
       {/* User block */}
       <div className="border-t border-border px-3 pb-4 pt-3">
-        <div className="mb-1 flex items-center gap-2.5 rounded-[14px] bg-secondary px-3 py-2.5">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white">
+        <div className="mb-1 flex items-center gap-2.5 rounded-[14px] bg-secondary px-3 py-2.5" suppressHydrationWarning>
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-white" suppressHydrationWarning>
             {authUser?.initial ?? config.userInitial}
           </div>
           <div className="min-w-0 flex-1">
