@@ -4,6 +4,20 @@ import { medicationsTable, patientsTable, alertsTable } from "@workspace/db/sche
 import { eq, desc } from "drizzle-orm";
 import { checkDrugInteractions } from "../lib/ai-engine.js";
 import { requireOwnPatient } from "../lib/ownership.js";
+import { z } from "zod";
+import { validate } from "../middlewares/validate.js";
+
+const createMedicationSchema = z.object({
+  patientId: z.number().int().positive(),
+  drugName: z.string().min(1).max(200),
+  dosage: z.string().min(1).max(100),
+  frequency: z.string().min(1).max(100),
+  prescribedBy: z.string().min(1).max(200),
+  hospital: z.string().min(1).max(200),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
+  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD").optional(),
+  notes: z.string().optional(),
+});
 
 const router = Router();
 
@@ -24,14 +38,14 @@ router.get("/", async (req, res) => {
   res.json({ medications });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", validate(createMedicationSchema), async (req, res) => {
   // Prescribing is a clinical act — citizens cannot write medications.
   if (req.role === "citizen") {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may prescribe medications" });
     return;
   }
-  const body = req.body;
-  const patientId = parseInt(body.patientId);
+  const body = req.body as z.infer<typeof createMedicationSchema>;
+  const patientId = body.patientId;
 
   const patient = await db
     .select()

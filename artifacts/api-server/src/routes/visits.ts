@@ -3,6 +3,19 @@ import { db } from "@workspace/db";
 import { visitsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireOwnPatient } from "../lib/ownership.js";
+import { z } from "zod";
+import { validate } from "../middlewares/validate.js";
+
+const createVisitSchema = z.object({
+  patientId: z.number().int().positive(),
+  visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
+  hospital: z.string().min(1).max(200),
+  department: z.string().min(1).max(200),
+  doctor: z.string().min(1).max(200),
+  diagnosis: z.string().min(1).max(500),
+  notes: z.string().optional(),
+  visitType: z.enum(["emergency", "outpatient", "inpatient"]),
+});
 
 const router = Router();
 
@@ -23,13 +36,13 @@ router.get("/", async (req, res) => {
   res.json({ visits });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", validate(createVisitSchema), async (req, res) => {
   // Recording a visit is a clinical act — citizens cannot write visits.
   if (req.role === "citizen") {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record visits" });
     return;
   }
-  const body = req.body;
+  const body = req.body as z.infer<typeof createVisitSchema>;
   const [visit] = await db
     .insert(visitsTable)
     .values({

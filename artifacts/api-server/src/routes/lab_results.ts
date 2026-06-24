@@ -3,6 +3,20 @@ import { db } from "@workspace/db";
 import { labResultsTable, alertsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireOwnPatient } from "../lib/ownership.js";
+import { z } from "zod";
+import { validate } from "../middlewares/validate.js";
+
+const createLabResultSchema = z.object({
+  patientId: z.number().int().positive(),
+  testName: z.string().min(1).max(200),
+  testDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be YYYY-MM-DD"),
+  result: z.string().min(1).max(200),
+  unit: z.string().max(50).optional(),
+  referenceRange: z.string().max(100).optional(),
+  status: z.enum(["normal", "abnormal", "critical"]),
+  hospital: z.string().min(1).max(200),
+  notes: z.string().optional(),
+});
 
 const router = Router();
 
@@ -23,13 +37,13 @@ router.get("/", async (req, res) => {
   res.json({ labResults });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", validate(createLabResultSchema), async (req, res) => {
   // Publishing lab results is a clinical act — citizens cannot write results.
   if (req.role === "citizen") {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record lab results" });
     return;
   }
-  const body = req.body;
+  const body = req.body as z.infer<typeof createLabResultSchema>;
   const [labResult] = await db
     .insert(labResultsTable)
     .values({
