@@ -167,7 +167,7 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody>
                     <div className="h-56">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={dashboard.trendData} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
                           <defs>
                             <linearGradient id="gClaims" x1="0" y1="0" x2="0" y2="1">
@@ -187,7 +187,7 @@ export default function InsurancePortal() {
                           <Area type="monotone" dataKey="claims" name="Claims" stroke="#007AFF" fill="url(#gClaims)" strokeWidth={2} dot={false} />
                           <Area type="monotone" dataKey="fraud" name="Fraud" stroke="#ef4444" fill="url(#gFraud)" strokeWidth={2} dot={false} />
                         </AreaChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                     </div>
                   </CardBody>
                 </Card>
@@ -238,7 +238,7 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody>
                     <div className="h-44">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <BarChart data={dashboard.claimsByType} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                           <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -250,7 +250,7 @@ export default function InsurancePortal() {
                             ))}
                           </Bar>
                         </BarChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                     </div>
                   </CardBody>
                 </Card>
@@ -261,7 +261,7 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody className="flex items-center justify-center">
                     <div className="h-44 w-full">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie data={[
                             { name: text("Approved", "مقبول"), value: dashboard.approvedClaims },
@@ -274,7 +274,7 @@ export default function InsurancePortal() {
                           <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                           <Legend wrapperStyle={{ fontSize: 10 }} />
                         </PieChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                     </div>
                   </CardBody>
                 </Card>
@@ -444,7 +444,7 @@ export default function InsurancePortal() {
                     </CardHeader>
                     <CardBody>
                       <div className="h-36">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                           <BarChart data={patient.premiumBreakdown} layout="vertical" margin={{ top: 0, right: 40, bottom: 0, left: 0 }}>
                             <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
                             <YAxis type="category" dataKey="factor" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 10 }} width={160} />
@@ -453,7 +453,7 @@ export default function InsurancePortal() {
                               {patient.premiumBreakdown?.map((entry: any, i: number) => <Cell key={i} fill={entry.color} />)}
                             </Bar>
                           </BarChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer></div>
                       </div>
                     </CardBody>
                   </Card>
@@ -642,7 +642,7 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody>
                     <div className="h-56">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie data={[
                             { name: text("Low Risk", "خطر منخفض"), value: dashboard.portfolioRisk?.low },
@@ -655,7 +655,7 @@ export default function InsurancePortal() {
                           <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                           <Legend wrapperStyle={{ fontSize: 11 }} />
                         </PieChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                     </div>
                   </CardBody>
                 </Card>

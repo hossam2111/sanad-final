@@ -297,7 +297,7 @@ export default function LabPortal() {
                             )}
                           </div>
                         </div>
-                        <ResponsiveContainer width="100%" height={140}>
+                        <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height={140}>
                           <LineChart data={points} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
                             <XAxis
@@ -329,7 +329,7 @@ export default function LabPortal() {
                               activeDot={{ r: 7, strokeWidth: 2 }}
                             />
                           </LineChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer></div>
                       </div>
                     );
                   })}

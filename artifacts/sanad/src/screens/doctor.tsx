@@ -1245,7 +1245,7 @@ export default function DoctorDashboard() {
                           <p className="text-[10px] text-muted-foreground">{latest.val >= 7.0 ? "Diabetic range" : latest.val >= 5.7 ? "Pre-diabetic" : "Normal"}</p>
                         </div>
                       </div>
-                      <ResponsiveContainer width="100%" height={120}>
+                      <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height={120}>
                         <AreaChart data={hba1cData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
                           <defs>
                             <linearGradient id="hba1cGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1277,7 +1277,7 @@ export default function DoctorDashboard() {
                           <ReferenceLine y={5.7} stroke="#f59e0b" strokeDasharray="4 2" label={{ value: "5.7% Pre-DM", fontSize: 9, fill: "#f59e0b", position: "insideTopLeft" }} />
                           <Area type="monotone" dataKey="val" stroke={areaColor} strokeWidth={2.5} fill="url(#hba1cGrad)" dot={{ r: 4, fill: areaColor, strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
                         </AreaChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                     </div>
                   );
                 })()}
@@ -1315,7 +1315,7 @@ export default function DoctorDashboard() {
                         {/* Sparkline Chart */}
                         <div className="w-28 h-10 shrink-0">
                           {hasChart ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                               <LineChart data={chartData} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
                                 <RechartsTooltip
                                   content={({ active, payload }) => {
@@ -1341,7 +1341,7 @@ export default function DoctorDashboard() {
                                   isAnimationActive={false}
                                 />
                               </LineChart>
-                            </ResponsiveContainer>
+                            </ResponsiveContainer></div>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <Minus className="w-4 h-4 text-muted-foreground/40" />

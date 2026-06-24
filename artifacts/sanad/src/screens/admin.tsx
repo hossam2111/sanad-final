@@ -404,7 +404,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardBody>
               <div className="h-60">
-                <ResponsiveContainer width="100%" height="100%">
+                <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={popHealth.monthlyVisitTrend} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -413,7 +413,7 @@ export default function AdminDashboard() {
                     <Line type="monotone" dataKey="visits" stroke="#007AFF" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
                     <Line type="monotone" dataKey="emergency" stroke="#FF3B30" strokeWidth={2.5} dot={{ r: 3 }} strokeDasharray="5 3" />
                   </LineChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
             </CardBody>
           </Card>
@@ -423,14 +423,14 @@ export default function AdminDashboard() {
             <CardHeader><CardTitle>{text("Blood Type Distribution", "توزيع فصائل الدم")}</CardTitle></CardHeader>
             <CardBody>
               <div className="h-44">
-                <ResponsiveContainer width="100%" height="100%">
+                <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={popHealth.bloodTypeDistribution} innerRadius={50} outerRadius={70} paddingAngle={3} dataKey="count" nameKey="bloodType">
                       {popHealth.bloodTypeDistribution.map((_: any, i: number) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
                     </Pie>
                     <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                   </PieChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
               <div className="grid grid-cols-4 gap-x-2 gap-y-1.5 mt-1">
                 {popHealth.bloodTypeDistribution.map((d: any, i: number) => (
@@ -470,7 +470,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardBody>
               <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
+                <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={popHealth.conditionBreakdown} layout="vertical" margin={{ top: 0, right: 20, left: 140, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                     <XAxis type="number" hide />
@@ -478,7 +478,7 @@ export default function AdminDashboard() {
                     <RechartsTooltip cursor={{ fill: "#F1F5F9" }} contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                     <Bar dataKey="count" fill="#007AFF" radius={[0, 6, 6, 0]} barSize={16} />
                   </BarChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
             </CardBody>
           </Card>
@@ -488,7 +488,7 @@ export default function AdminDashboard() {
             <CardHeader><CardTitle>{text("Population Age Distribution", "التوزيع العمري للسكان")}</CardTitle></CardHeader>
             <CardBody>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
+                <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={popHealth.ageDistribution} margin={{ top: 10, right: 10, bottom: 10, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                     <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} dy={8} />
@@ -496,7 +496,7 @@ export default function AdminDashboard() {
                     <RechartsTooltip cursor={{ fill: "#F1F5F9" }} contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                     <Bar dataKey="count" fill="#007AFF" radius={[6, 6, 0, 0]} barSize={34} />
                   </BarChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
             </CardBody>
           </Card>
@@ -510,10 +510,10 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardBody>
                 <div className="h-44">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={stats.riskDistribution} innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="count" nameKey="level"
-                        label={({ level, percent }) => percent > 0.05 ? `${level} ${(percent * 100).toFixed(0)}%` : ""} labelLine={false}>
+                        label={({ level, percent }) => percent > 0.15 ? `${(percent * 100).toFixed(0)}%` : ""} labelLine={false}>
                         {stats.riskDistribution.map((entry: any, i: number) => (
                           <Cell key={i} fill={RISK_COLORS[entry.level as keyof typeof RISK_COLORS] || "#94a3b8"} />
                         ))}
@@ -521,7 +521,7 @@ export default function AdminDashboard() {
                       <RechartsTooltip formatter={(value: any, name: any) => [`${value} patients`, name]}
                         contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                     </PieChart>
-                  </ResponsiveContainer>
+                  </ResponsiveContainer></div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {stats.riskDistribution.map((d: any, i: number) => (

@@ -266,7 +266,7 @@ export default function AIControlCenter() {
               </CardHeader>
               <CardBody>
                 <div className="h-52">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={metrics?.confidenceHistory} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                       <defs>
                         <linearGradient id="confGrad" x1="0" y1="0" x2="0" y2="1">
@@ -281,7 +281,7 @@ export default function AIControlCenter() {
                       <ReferenceLine y={85} stroke="#ef4444" strokeDasharray="4 2" strokeWidth={1.5} label={{ value: text("85% Target", "المستهدف 85%"), fill: "#ef4444", fontSize: 10 }} />
                       <Area type="monotone" dataKey="confidence" stroke="#007AFF" fill="url(#confGrad)" strokeWidth={2.5} dot={{ fill: "#007AFF", r: 3 }} />
                     </AreaChart>
-                  </ResponsiveContainer>
+                  </ResponsiveContainer></div>
                 </div>
               </CardBody>
             </Card>
@@ -394,7 +394,7 @@ export default function AIControlCenter() {
             <CardHeader><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Event Type Distribution", "توزيع أنواع الأحداث")}</CardTitle></CardHeader>
             <CardBody>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
+                <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={metrics?.eventTypes?.slice(0, 10)} layout="vertical" margin={{ top: 0, right: 30, left: 170, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                     <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -402,7 +402,7 @@ export default function AIControlCenter() {
                     <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                     <Bar dataKey="count" fill="#007AFF" radius={[0, 6, 6, 0]} barSize={14} />
                   </BarChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
             </CardBody>
           </Card>

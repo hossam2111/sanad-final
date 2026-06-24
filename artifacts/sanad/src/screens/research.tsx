@@ -280,7 +280,7 @@ export default function ResearchPortal() {
                   <CardHeader><div className="flex items-center gap-2"><BarChart2 className="w-4 h-4 text-primary" /><CardTitle>{text("Disease Prevalence by Condition", "انتشار المرض حسب الحالة")}</CardTitle></div></CardHeader>
                   <CardBody>
                     <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data?.conditionInsights?.slice(0, 8)} layout="vertical" margin={{ top: 0, right: 40, left: 160, bottom: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                           <XAxis type="number" hide />
@@ -288,7 +288,7 @@ export default function ResearchPortal() {
                           <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} formatter={(v: any) => [`${v}%`, "Prevalence"]} />
                           <Bar dataKey="prevalence" fill="#0d9488" radius={[0, 6, 6, 0]} barSize={14} />
                         </BarChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                     </div>
                   </CardBody>
                 </Card>
@@ -320,7 +320,7 @@ export default function ResearchPortal() {
                 <CardHeader><div className="flex items-center gap-2"><FlaskConical className="w-4 h-4 text-violet-600" /><CardTitle>{text("Lab Test Abnormality Rates", "معدلات شذوذ اختبارات المختبر")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data?.labInsights} margin={{ top: 5, right: 30, bottom: 20, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                         <XAxis dataKey="test" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} angle={-20} textAnchor="end" dy={8} />
@@ -330,7 +330,7 @@ export default function ResearchPortal() {
                         <Bar dataKey="abnormalRate" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={28} name="Abnormal Rate" />
                         <Bar dataKey="criticalRate" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={28} name="Critical Rate" />
                       </BarChart>
-                    </ResponsiveContainer>
+                    </ResponsiveContainer></div>
                   </div>
                 </CardBody>
               </Card>
@@ -340,7 +340,7 @@ export default function ResearchPortal() {
                 <CardHeader><div className="flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /><CardTitle>{text("Top Drug Utilization Patterns", "أبرز أنماط استخدام الأدوية")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data?.drugPatterns} layout="vertical" margin={{ top: 0, right: 30, left: 180, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                         <XAxis type="number" hide />
@@ -348,7 +348,7 @@ export default function ResearchPortal() {
                         <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                         <Bar dataKey="prescriptions" fill="#007AFF" radius={[0, 6, 6, 0]} barSize={14} name="Prescriptions" />
                       </BarChart>
-                    </ResponsiveContainer>
+                    </ResponsiveContainer></div>
                   </div>
                 </CardBody>
               </Card>
@@ -358,7 +358,7 @@ export default function ResearchPortal() {
                 <CardHeader><div className="flex items-center gap-2"><Users className="w-4 h-4 text-primary" /><CardTitle>{text("Age Group × Average Priority Index", "الفئة العمرية × متوسط مؤشر الأولوية")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data?.ageRiskData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                         <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -366,7 +366,7 @@ export default function ResearchPortal() {
                         <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
                         <Bar dataKey="avgRiskScore" fill="#f97316" radius={[6, 6, 0, 0]} barSize={50} name="Avg Priority Index" />
                       </BarChart>
-                    </ResponsiveContainer>
+                    </ResponsiveContainer></div>
                   </div>
                 </CardBody>
               </Card>
@@ -475,7 +475,7 @@ export default function ResearchPortal() {
             </CardHeader>
             <CardBody>
               <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
+                <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={POPULATION_TRENDS} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                     <defs>
                       <linearGradient id="colorDiabetes" x1="0" y1="0" x2="0" y2="1">
@@ -505,7 +505,7 @@ export default function ResearchPortal() {
                     <Area type="monotone" dataKey="ckd" stroke="#8b5cf6" fill="url(#colorCKD)" strokeWidth={2.5} name="CKD" />
                     <Area type="monotone" dataKey="obesity" stroke="#007AFF" fill="url(#colorObesity)" strokeWidth={2.5} name="Obesity" />
                   </AreaChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
             </CardBody>
           </Card>
@@ -635,7 +635,7 @@ export default function ResearchPortal() {
               </CardHeader>
               <CardBody>
                 <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={COHORT_RADAR}>
                       <PolarGrid stroke="#E2E8F0" />
                       <PolarAngleAxis dataKey="metric" tick={{ fill: "#374151", fontSize: 11 }} />
@@ -645,7 +645,7 @@ export default function ResearchPortal() {
                       <Legend />
                       <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n]} />
                     </RadarChart>
-                  </ResponsiveContainer>
+                  </ResponsiveContainer></div>
                 </div>
               </CardBody>
             </Card>

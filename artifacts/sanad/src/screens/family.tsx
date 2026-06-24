@@ -300,7 +300,7 @@ export default function FamilyPortal() {
                         <TrendingUp className="w-3.5 h-3.5 text-primary" /> {text("5-Year Family Risk Trajectory", "مسار خطورة الأسرة لـ 5 سنوات")}
                       </p>
                       <div className="h-36">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={data.familyRiskTrend} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                             <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -310,7 +310,7 @@ export default function FamilyPortal() {
                             <Line type="monotone" dataKey="familyRisk" name="Family Risk" stroke="#ef4444" strokeWidth={2} dot={{ r: 4, fill: "#ef4444" }} />
                             <Line type="monotone" dataKey="patientRisk" name="Patient Risk" stroke="#007AFF" strokeWidth={2} dot={{ r: 4, fill: "#007AFF" }} />
                           </LineChart>
-                        </ResponsiveContainer>
+                        </ResponsiveContainer></div>
                       </div>
                     </div>
                   )}
@@ -425,7 +425,7 @@ export default function FamilyPortal() {
                   </CardHeader>
                   <CardBody>
                     <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data.conditionBurden} layout="vertical" margin={{ top: 0, right: 60, bottom: 0, left: 0 }}>
                           <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} domain={[0, 100]} />
                           <YAxis type="category" dataKey="condition" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 10 }} width={170} />
@@ -436,7 +436,7 @@ export default function FamilyPortal() {
                             ))}
                           </Bar>
                         </BarChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                     </div>
                   </CardBody>
                 </Card>
@@ -472,7 +472,7 @@ export default function FamilyPortal() {
                   </CardHeader>
                   <CardBody>
                     <div className="h-52">
-                      <ResponsiveContainer width="100%" height="100%">
+                      <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data.familyRiskTrend} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                           <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -482,7 +482,7 @@ export default function FamilyPortal() {
                           <Line type="monotone" dataKey="familyRisk" name="Family Aggregate Risk" stroke="#ef4444" strokeWidth={2.5} dot={{ r: 5, fill: "#ef4444" }} />
                           <Line type="monotone" dataKey="patientRisk" name="Patient Risk" stroke="#007AFF" strokeWidth={2.5} dot={{ r: 5, fill: "#007AFF" }} />
                         </LineChart>
-                      </ResponsiveContainer>
+                      </ResponsiveContainer></div>
                     </div>
                     <div className="mt-3 p-3.5 bg-risk-high-bg border border-risk-high/20 rounded-2xl flex items-start gap-2.5">
                       <Info className="w-4 h-4 text-risk-high shrink-0 mt-0.5" />

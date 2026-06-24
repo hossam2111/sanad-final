@@ -312,7 +312,7 @@ export default function SupplyChainPortal() {
                 <CardHeader><TrendingUp className="w-4 h-4 text-lime-700" /><CardTitle>{text("6-Month Consumption", "6-Month Consumption")}</CardTitle></CardHeader>
                 <CardBody>
                   <div className="h-48">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <LineChart data={CONSUMPTION_TREND} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
@@ -323,7 +323,7 @@ export default function SupplyChainPortal() {
                         <Line type="monotone" dataKey="lisinopril" stroke="#10b981" strokeWidth={2} dot={false} name="Lisinopril" />
                         <Line type="monotone" dataKey="atorvastatin" stroke="#8b5cf6" strokeWidth={2} dot={false} name="Atorvastatin" />
                       </LineChart>
-                    </ResponsiveContainer>
+                    </ResponsiveContainer></div>
                   </div>
                 </CardBody>
               </Card>
@@ -376,7 +376,7 @@ export default function SupplyChainPortal() {
             <CardHeader><Calendar className="w-4 h-4 text-primary" /><CardTitle>{text("30/60/90-Day Stock Forecast", "30/60/90-Day Stock Forecast")}</CardTitle><span className="ml-auto text-[11px] text-muted-foreground">{text("Units remaining", "Units remaining")}</span></CardHeader>
             <CardBody>
               <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
+                <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={(data?.shortagePredictions ?? []) as ShortagePrediction[]} layout="vertical" margin={{ top: 0, right: 30, left: 140, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
                     <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
@@ -388,7 +388,7 @@ export default function SupplyChainPortal() {
                     <Bar dataKey="day60" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={10} name="60 Days" />
                     <Bar dataKey="day90" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={10} name="90 Days" />
                   </BarChart>
-                </ResponsiveContainer>
+                </ResponsiveContainer></div>
               </div>
             </CardBody>
           </Card>
@@ -455,7 +455,7 @@ export default function SupplyChainPortal() {
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary mr-2" /> {text("Loading regional data...", "Loading regional data...")}
                     </div>
                   ) : (
-                    <ResponsiveContainer width="100%" height="100%">
+                    <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <BarChart data={regionalDistribution} margin={{ top: 5, right: 15, bottom: 5, left: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                         <XAxis dataKey="region" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
@@ -467,7 +467,7 @@ export default function SupplyChainPortal() {
                         <Bar dataKey="stock" fill="#10b981" radius={[4, 4, 0, 0]} barSize={22} name="Stock (units)" />
                         <Bar dataKey="demand" fill="#007AFF" radius={[4, 4, 0, 0]} barSize={22} name="Demand (units)" />
                       </BarChart>
-                    </ResponsiveContainer>
+                    </ResponsiveContainer></div>
                   )}
                 </div>
                 {regionalSummary && (
