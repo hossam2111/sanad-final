@@ -226,7 +226,8 @@ router.get("/patient/:nationalId", async (req, res) => {
     .select()
     .from(medicationsTable)
     .where(eq(medicationsTable.patientId, patient.id))
-    .orderBy(desc(medicationsTable.startDate));
+    .orderBy(desc(medicationsTable.startDate))
+    .limit(100);
 
   const activeMeds = medications.filter(m => m.isActive);
 
