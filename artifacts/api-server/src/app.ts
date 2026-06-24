@@ -1,5 +1,6 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
+import compression from "compression";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import pinoHttp from "pino-http";
@@ -15,6 +16,9 @@ assertAuthPosture();
 
 // ── Trust proxy (needed for correct IP behind Nginx / cloud LB) ──────────────
 app.set("trust proxy", 1);
+
+// ── Gzip compression ─────────────────────────────────────────────────────────
+app.use(compression({ threshold: 1024 }));
 
 // ── Security headers ──────────────────────────────────────────────────────────
 app.use(
@@ -129,6 +133,16 @@ app.use(
 
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+// ── Cache-Control: 30s for GETs, no-store for writes ─────────────────────────
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.method === "GET") {
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+  } else {
+    res.setHeader("Cache-Control", "no-store");
+  }
+  next();
+});
 
 // ── Routes with targeted rate limits ─────────────────────────────────────────
 app.use("/api/auth", authLimiter);
