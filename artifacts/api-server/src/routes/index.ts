@@ -44,5 +44,8 @@ router.use("/family", familyRouter);
 router.use("/supply-chain", supplyChainRouter);
 router.use("/appointments", appointmentsRouter);
 router.use("/consent", consentRouter);
+import { usersRouter } from "./users.js";
+
+router.use("/users", usersRouter);
 
 export default router;

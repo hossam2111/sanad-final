@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody, KpiCard, Badge, AlertBanner , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -9,7 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line, Legend, RadarChart, Radar, PolarGrid, PolarAngleAxis,
 } from "recharts";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/language-context";
 
 const COLORS = ["#007AFF", "#34C759", "#FF9500", "#FF3B30", "#5856D6", "#32ADE6", "#AF52DE"];
@@ -236,6 +236,13 @@ async function fetchSystemHealth() {
   return res.json();
 }
 
+async function fetchUsers() {
+  const res = await apiFetch("/api/users");
+  if (!res.ok) throw new Error("Failed to fetch users");
+  const data = await res.json();
+  return data.users ?? [];
+}
+
 const ROLE_BADGE: Record<string, { label: string; labelAr: string; cls: string }> = {
   admin:        { label: "Admin",        labelAr: "مدير النظام",    cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
   doctor:       { label: "Doctor",       labelAr: "طبيب",           cls: "bg-primary/10 text-primary" },
@@ -281,6 +288,39 @@ export default function AdminDashboard() {
   const [exportingLogs, setExportingLogs] = useState(false);
   const [resetState, setResetState] = useState<"idle" | "running" | "done" | "error">("idle");
   const [resetMsg, setResetMsg] = useState("");
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUser, setNewUser] = useState({ username: "", password: "", role: "doctor", name: "", organization: "", title: "" });
+
+  const queryClient = useQueryClient();
+  const { data: usersData, isLoading: usersLoading } = useQuery({ queryKey: ["admin-users"], queryFn: fetchUsers });
+
+  const statusMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: "active" | "revoked" }) => {
+      const res = await apiFetch(`/api/users/${id}/status`, {
+        method: "PUT",
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      return res.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["admin-users"] }),
+  });
+
+  const addUserMutation = useMutation({
+    mutationFn: async (user: any) => {
+      const res = await apiFetch("/api/users", {
+        method: "POST",
+        body: JSON.stringify(user),
+      });
+      if (!res.ok) throw new Error("Failed to create user");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      setShowAddUserModal(false);
+      setNewUser({ username: "", password: "", role: "doctor", name: "", organization: "", title: "" });
+    },
+  });
 
   const handleResetDemo = async () => {
     setResetState("running");
@@ -952,7 +992,7 @@ export default function AdminDashboard() {
                 </p>
                 <p className="text-sm text-muted-foreground mt-0.5">{text("Role-Based Access Control (RBAC) securely integrated with national ID systems.", "نظام إدارة صلاحيات آمن (RBAC) متصل مع أنظمة الهوية الوطنية.")}</p>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors">
+              <button onClick={() => setShowAddUserModal(true)} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors">
                 {text("+ Add User / Invite", "+ إضافة مستخدم / دعوة")}
               </button>
             </div>
@@ -970,9 +1010,14 @@ export default function AdminDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {DEMO_USERS.map(u => {
+                    {usersLoading ? (
+                      <tr><td colSpan={5} className="text-center py-4 text-muted-foreground">{text("Loading users...", "جاري تحميل المستخدمين...")}</td></tr>
+                    ) : (usersData?.length === 0 && DEMO_USERS.length === 0) ? (
+                      <tr><td colSpan={5} className="text-center py-4 text-muted-foreground">{text("No users found", "لا يوجد مستخدمين")}</td></tr>
+                    ) : (usersData?.length > 0 ? usersData : DEMO_USERS).map((u: any) => {
                       const badge = ROLE_BADGE[u.role] ?? { label: u.role, labelAr: u.role, cls: "bg-secondary text-muted-foreground" };
-                      const enabled = userEnabled[u.id] ?? true;
+                      // If it's a real user, status is active/revoked. Otherwise fallback to userEnabled map.
+                      const enabled = u.status ? u.status === "active" : (userEnabled[u.id] ?? true);
                       return (
                         <tr key={u.id} className={`border-b border-border last:border-0 transition-colors ${!enabled ? "opacity-50" : "hover:bg-secondary/30"}`}>
                           <td className="px-4 py-3">
@@ -994,7 +1039,7 @@ export default function AdminDashboard() {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-[12px] text-muted-foreground hidden md:table-cell">
-                            <p className="font-medium text-foreground">{u.org}</p>
+                            <p className="font-medium text-foreground">{u.org || u.organization}</p>
                             <p className="text-[10px]">{u.title}</p>
                           </td>
                           <td className="px-4 py-3 text-center">
@@ -1012,8 +1057,15 @@ export default function AdminDashboard() {
                           </td>
                           <td className="px-4 py-3 text-center">
                             <button
-                              onClick={() => setUserEnabled(prev => ({ ...prev, [u.id]: !prev[u.id] }))}
-                              className={`text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-colors ${enabled ? "border-danger/30 text-danger hover:bg-danger-bg" : "border-success/30 text-success hover:bg-success-bg"}`}
+                              onClick={() => {
+                                if (u.status) {
+                                  statusMutation.mutate({ id: u.id, status: enabled ? "revoked" : "active" });
+                                } else {
+                                  setUserEnabled(prev => ({ ...prev, [u.id]: !prev[u.id] }));
+                                }
+                              }}
+                              disabled={statusMutation.isPending}
+                              className={`text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-colors ${enabled ? "border-danger/30 text-danger hover:bg-danger-bg" : "border-success/30 text-success hover:bg-success-bg"} disabled:opacity-50`}
                             >
                               {enabled ? text("Revoke Token","سحب الصلاحية") : text("Restore Token","استعادة الصلاحية")}
                             </button>
@@ -1171,6 +1223,73 @@ export default function AdminDashboard() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+      {/* Add User Modal */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setShowAddUserModal(false)}>
+          <div className="bg-card rounded-2xl border border-border w-full max-w-md shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30">
+              <h3 className="font-bold text-foreground">{text("Add New User", "إضافة مستخدم جديد")}</h3>
+              <button onClick={() => setShowAddUserModal(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={e => {
+              e.preventDefault();
+              addUserMutation.mutate(newUser);
+            }} className="p-6 space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground">{text("Name", "الاسم")}</label>
+                <input required value={newUser.name} onChange={e => setNewUser(p => ({ ...p, name: e.target.value }))}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-xl text-sm" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground">{text("Username", "اسم المستخدم")}</label>
+                  <input required value={newUser.username} onChange={e => setNewUser(p => ({ ...p, username: e.target.value }))}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-sm" dir="ltr" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground">{text("Password", "كلمة المرور")}</label>
+                  <input required type="password" value={newUser.password} onChange={e => setNewUser(p => ({ ...p, password: e.target.value }))}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-sm" dir="ltr" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-muted-foreground">{text("Role", "الصلاحية")}</label>
+                <select required value={newUser.role} onChange={e => setNewUser(p => ({ ...p, role: e.target.value }))}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-xl text-sm">
+                  {Object.keys(ROLE_BADGE).map(role => (
+                    <option key={role} value={role}>{locale === "ar" ? ROLE_BADGE[role].labelAr : ROLE_BADGE[role].label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground">{text("Organization", "المنظمة")}</label>
+                  <input value={newUser.organization} onChange={e => setNewUser(p => ({ ...p, organization: e.target.value }))}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-sm" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-muted-foreground">{text("Title", "المسمى الوظيفي")}</label>
+                  <input value={newUser.title} onChange={e => setNewUser(p => ({ ...p, title: e.target.value }))}
+                    className="w-full px-3 py-2 bg-background border border-border rounded-xl text-sm" />
+                </div>
+              </div>
+              <div className="pt-4 flex items-center justify-end gap-3">
+                <button type="button" onClick={() => setShowAddUserModal(false)} className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground">
+                  {text("Cancel", "إلغاء")}
+                </button>
+                <button type="submit" disabled={addUserMutation.isPending} className="px-5 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50">
+                  {addUserMutation.isPending ? text("Adding...", "جاري الإضافة...") : text("Save User", "حفظ المستخدم")}
+                </button>
+              </div>
+              {addUserMutation.isError && (
+                <p className="text-danger text-xs font-medium text-center">{text("Error creating user", "حدث خطأ أثناء إضافة المستخدم")}</p>
+              )}
+            </form>
           </div>
         </div>
       )}
