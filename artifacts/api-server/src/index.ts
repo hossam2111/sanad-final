@@ -18,6 +18,10 @@ if (Number.isNaN(port) || port <= 0) {
 
 const server = app.listen(port, "0.0.0.0", () => {
   logger.info({ port }, "SANAD API server started");
+  // Warm the DB connection pool so first user request isn't slow (~2s cold start)
+  pool.connect().then(client => {
+    client.query("SELECT 1").finally(() => client.release());
+  }).catch(() => {/* non-fatal — pool will retry on first real query */});
 });
 
 server.on("error", (err: Error) => {
