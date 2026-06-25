@@ -204,7 +204,6 @@ router.post("/reorder", validate(reorderSchema), async (req, res) => {
     whoRole: req.role ?? "unknown",
     action: "CREATE",
     what: `PURCHASE_ORDER_SUBMITTED: ${orderId} for ${quantity}x ${drugName}`,
-    patientId: null,
     ipAddress,
     userAgent,
   });
@@ -316,7 +315,6 @@ router.post("/orders", validate(reorderSchema), async (req, res) => {
     whoRole: req.role ?? "unknown",
     action: "CREATE",
     what: `PURCHASE_ORDER_SUBMITTED: ${order.id} for ${quantity}x ${drugName}`,
-    patientId: null,
     ipAddress,
     userAgent,
   });
@@ -344,7 +342,6 @@ router.patch("/orders/:id/approve", async (req, res) => {
     whoRole: req.role ?? "unknown",
     action: "UPDATE",
     what: `PURCHASE_ORDER_APPROVED: ${id}`,
-    patientId: null,
     ipAddress,
     userAgent,
   });
@@ -372,7 +369,6 @@ router.patch("/orders/:id/reject", async (req, res) => {
     whoRole: req.role ?? "unknown",
     action: "UPDATE",
     what: `PURCHASE_ORDER_REJECTED: ${id}`,
-    patientId: null,
     ipAddress,
     userAgent,
   });
