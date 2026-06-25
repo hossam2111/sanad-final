@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, eventsTable } from "@workspace/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { requireOwnNationalId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { validate } from "../middlewares/validate.js";
 
@@ -211,6 +212,9 @@ function aiDispenseCheck(drugName: string, patient: { allergies: string[] | null
 
 router.get("/patient/:nationalId", async (req, res) => {
   const { nationalId } = req.params;
+
+  if (!requireOwnNationalId(req, res, nationalId)) return;
+
   const patients = await db
     .select()
     .from(patientsTable)
@@ -279,6 +283,18 @@ router.get("/patient/:nationalId", async (req, res) => {
       interactions: prescriptionsWithCheck.filter(p => !p.dispenseCheck.safe).length,
       insuranceCovered: prescriptionsWithCheck.filter(p => p.insurance.eligible).length,
     },
+  });
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "READ",
+    what: `Pharmacy profile accessed: ${patient.fullName} (${nationalId})`,
+    patientId: patient.id,
+    ipAddress,
+    userAgent,
   });
 });
 
