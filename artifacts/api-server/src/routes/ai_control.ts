@@ -143,12 +143,39 @@ router.post("/retrain-jobs", validate(retrainJobSchema), async (req, res) => {
     return;
   }
   const { model, reason } = req.body as z.infer<typeof retrainJobSchema>;
+  const jobId = `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+  const triggeredByName = (req as any).userId ?? "AI Control Center";
+  
   const [job] = await db.insert(aiRetrainJobsTable).values({
-    id: `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+    id: jobId,
     engine: model,
     status: "queued",
-    triggeredBy: (req as any).userId ?? "ai.khalid",
+    progress: 0,
+    triggeredBy: triggeredByName,
   }).returning();
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: triggeredByName,
+    whoRole: "ai_engineer",
+    action: "CREATE",
+    what: `Engine "${model}" retraining initiated via general endpoint`,
+    details: { engineName: model, jobId, reason },
+    confidence: 1.0,
+    ipAddress,
+    userAgent,
+  });
+
+  setTimeout(async () => {
+    await db.update(aiRetrainJobsTable).set({ status: "running", progress: 40 })
+      .where(eq(aiRetrainJobsTable.id, jobId)).catch(() => {});
+  }, 3000);
+
+  setTimeout(async () => {
+    await db.update(aiRetrainJobsTable).set({ status: "completed", progress: 100, completedAt: new Date() })
+      .where(eq(aiRetrainJobsTable.id, jobId)).catch(() => {});
+  }, 8000);
+
   res.status(201).json(job);
 });
 
