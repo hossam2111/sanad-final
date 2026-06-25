@@ -324,7 +324,7 @@ export function Layout({ children, role, localized = false }: { children: React.
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
         {/* Topbar */}
-        <header className="flex h-[60px] shrink-0 items-center justify-between border-b border-border bg-card/85 px-4 backdrop-blur lg:px-7">
+        <header className="relative z-50 flex h-[60px] shrink-0 items-center justify-between border-b border-border bg-card/85 px-4 backdrop-blur lg:px-7">
           <div className="flex items-center gap-3">
             <button
               type="button"
