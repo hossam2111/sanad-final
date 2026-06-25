@@ -7,5 +7,7 @@ export const usersTable = pgTable("users", {
   role:         varchar("role", { length: 50 }).notNull(), // 'admin', 'doctor', 'lab', 'pharmacy', 'citizen'
   hospitalId:   varchar("hospital_id", { length: 36 }),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
+  status:       varchar("status", { length: 20 }).notNull().default("active"), // 'active' | 'revoked'
   createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
 });

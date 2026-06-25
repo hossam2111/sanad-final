@@ -6,7 +6,7 @@ export const auditLogTable = pgTable("audit_log", {
   whoName: text("who_name"),
   whoRole: text("who_role").notNull(),
   action: text("action", {
-    enum: ["READ", "CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT", "AI_DECISION", "DRUG_CHECK", "EXPORT"],
+    enum: ["READ", "CREATE", "UPDATE", "DELETE", "LOGIN", "LOGOUT", "LOGIN_FAILED", "AI_DECISION", "AI_CHAT_QUERY", "DRUG_CHECK", "EXPORT", "PRESCRIBE_MEDICATION", "CREATE_VISIT", "CREATE_LAB_RESULT", "CREATE_APPOINTMENT", "UPDATE_APPOINTMENT"],
   }).notNull().default("CREATE"),
   what: text("what").notNull(),
   patientId: integer("patient_id"),

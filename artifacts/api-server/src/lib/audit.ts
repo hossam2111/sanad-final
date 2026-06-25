@@ -4,7 +4,7 @@ import { auditLogTable } from "@workspace/db/schema";
 import { desc, sql } from "drizzle-orm";
 import { logger } from "./logger.js";
 
-export type AuditAction = "READ" | "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "LOGOUT" | "AI_DECISION" | "DRUG_CHECK" | "EXPORT";
+export type AuditAction = "READ" | "CREATE" | "UPDATE" | "DELETE" | "LOGIN" | "LOGOUT" | "LOGIN_FAILED" | "AI_DECISION" | "AI_CHAT_QUERY" | "DRUG_CHECK" | "EXPORT" | "PRESCRIBE_MEDICATION" | "CREATE_VISIT" | "CREATE_LAB_RESULT" | "CREATE_APPOINTMENT" | "UPDATE_APPOINTMENT";
 
 export interface AuditParams {
   who: string;
