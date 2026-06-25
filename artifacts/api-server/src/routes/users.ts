@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { usersTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import bcrypt from "bcryptjs";
 
 export const usersRouter = Router();
 
@@ -50,13 +51,16 @@ usersRouter.post("/", async (req, res) => {
       return res.status(409).json({ error: "User with this National ID already exists" });
     }
 
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(data.password, saltRounds);
+
     const [newUser] = await db.insert(usersTable).values({
       id: newId,
       nationalId: data.nationalId,
       fullName: data.fullName,
       role: data.role,
       hospitalId: data.hospitalId,
-      passwordHash: data.password, // Storing raw for demo purposes
+      passwordHash: hashedPassword,
     }).returning();
 
     res.status(201).json(newUser);
@@ -75,5 +79,31 @@ usersRouter.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error deleting user:", error);
     res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
+// PUT /api/users/:id/status
+usersRouter.put("/:id/status", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (status !== "active" && status !== "revoked") {
+      return res.status(400).json({ error: "Invalid status value. Must be 'active' or 'revoked'." });
+    }
+
+    const [updatedUser] = await db.update(usersTable)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(usersTable.id, id))
+      .returning();
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating user status:", error);
+    res.status(500).json({ error: "Failed to update user status" });
   }
 });
