@@ -83,10 +83,18 @@ export async function getConsentState(patientId: number, consentType: string): P
   return row ? row.granted : null;
 }
 
+const hospitalIdCache = new Map<string, { hospitalId: string | null; ts: number }>();
+
 export async function getStaffHospitalId(username: string): Promise<string | null> {
+  const hit = hospitalIdCache.get(username);
+  if (hit && Date.now() - hit.ts < CACHE_TTL_MS) return hit.hospitalId;
+
   const [row] = await db.select({ hospitalId: staffAssignmentsTable.hospitalId })
     .from(staffAssignmentsTable)
     .where(eq(staffAssignmentsTable.username, username))
     .limit(1);
-  return row?.hospitalId ?? null;
+
+  const hospitalId = row?.hospitalId ?? null;
+  hospitalIdCache.set(username, { hospitalId, ts: Date.now() });
+  return hospitalId;
 }

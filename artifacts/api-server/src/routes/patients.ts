@@ -4,7 +4,7 @@ import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, visitsTable, labResultsTable, alertsTable } from "@workspace/db/schema";
 import { eq, ilike, or, and, desc, count, isNull } from "drizzle-orm";
 import { calculateRiskScore } from "../lib/ai-engine.js";
-import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { writeAudit, writeAuditAsync, extractRequestMeta } from "../lib/audit.js";
 import { validate } from "../middlewares/validate.js";
 import { CLINICAL_ROLES, getStaffHospitalId } from "../lib/ownership.js";
 
@@ -133,11 +133,15 @@ router.get("/national/:nationalId", async (req, res) => {
     visitFrequency: recentVisits,
   });
 
-  // H3 — persist the freshly computed risk score so DB stays current
-  await db.update(patientsTable).set({ riskScore: riskData.riskScore }).where(eq(patientsTable.id, p.id));
-
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+
+  // Only persist risk score when it changed — saves one write per request
+  if (riskData.riskScore !== p.riskScore) {
+    db.update(patientsTable).set({ riskScore: riskData.riskScore }).where(eq(patientsTable.id, p.id)).catch(() => {});
+  }
+
+  // Audit runs in parallel with risk-score write — both after we have all data
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
@@ -146,7 +150,7 @@ router.get("/national/:nationalId", async (req, res) => {
     patientId: p.id,
     ipAddress,
     userAgent,
-  });
+  }).then(() => {}).catch(() => {});
 
   res.json({
     ...p,
@@ -216,11 +220,13 @@ router.get("/:id", async (req, res) => {
     visitFrequency: recentVisits,
   });
 
-  // H3 — persist the freshly computed risk score
-  await db.update(patientsTable).set({ riskScore: riskData.riskScore }).where(eq(patientsTable.id, p.id));
-
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+
+  if (riskData.riskScore !== p.riskScore) {
+    db.update(patientsTable).set({ riskScore: riskData.riskScore }).where(eq(patientsTable.id, p.id)).catch(() => {});
+  }
+
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
@@ -229,7 +235,7 @@ router.get("/:id", async (req, res) => {
     patientId: p.id,
     ipAddress,
     userAgent,
-  });
+  }).then(() => {}).catch(() => {});
 
   res.json({
     ...p,

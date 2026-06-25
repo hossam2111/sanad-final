@@ -66,6 +66,14 @@ export function computeAuditHash(prevHash: string | null, record: HashRecord): s
   return createHash("sha256").update(data).digest("hex");
 }
 
+/**
+ * Fire-and-forget audit write — response is not blocked waiting for the chain lock.
+ * Use for READ operations where latency matters more than write confirmation.
+ */
+export function writeAuditAsync(params: AuditParams): void {
+  writeAudit(params).catch(() => { /* already handled inside writeAudit */ });
+}
+
 export async function writeAudit(params: AuditParams): Promise<void> {
   try {
     // Serialize chain writers with an advisory transaction lock. (FOR UPDATE on
