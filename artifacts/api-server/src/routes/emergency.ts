@@ -8,6 +8,15 @@ import { getConsentState } from "../lib/ownership.js";
 
 const router = Router();
 
+router.use((req, res, next) => {
+  const allowedRoles = ["emergency", "doctor", "hospital", "admin", "ai-control"];
+  if (!req.role || !allowedRoles.includes(req.role)) {
+    res.status(403).json({ error: "FORBIDDEN", message: "Only emergency and medical personnel can initiate break-glass access" });
+    return;
+  }
+  next();
+});
+
 router.get("/:nationalId", async (req, res) => {
   const { nationalId } = req.params;
 
