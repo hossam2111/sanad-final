@@ -189,7 +189,8 @@ function DecisionTrace() {
         dir={dir}
         role="img"
         aria-label="Decision Trace Visualization"
-        className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#070B12] text-left shadow-[0_24px_80px_rgba(0,0,0,0.5)]"
+        className="overflow-hidden rounded-2xl border border-white/[0.12] text-left shadow-[0_32px_120px_rgba(10,132,255,0.15)] backdrop-blur-2xl"
+        style={{ background: "rgba(10, 15, 25, 0.6)" }}
       >
         <div className="flex items-center justify-between border-b border-white/[0.06] px-5 py-3 font-mono text-[10.5px] tracking-[0.12em] text-white/45">
           <span>DECISION TRACE</span>
@@ -321,7 +322,7 @@ function Hero() {
                 isAr ? "text-[11.5px] font-semibold" : "text-[11px] font-mono uppercase tracking-[0.18em]"
               }`}
             >
-              {text("Sovereign Health Intelligence", "الذكاء الصحي السيادي")}
+              {text("The Sovereign Nervous System of National Healthcare", "العمود الفقري السيادي للرعاية الصحية")}
             </p>
           </Reveal>
 
@@ -334,15 +335,15 @@ function Hero() {
                 letterSpacing: isAr ? "0" : "-0.038em",
               }}
             >
-              {text("Behind every decision.", "لكل قرارٍ سند.")}
+              {text("Absolute clarity at the point of care.", "يقين تام.. عند كل قرار طبي.")}
             </h1>
           </Reveal>
 
           <Reveal delay={0.16}>
             <p className="mx-auto mb-10 max-w-[640px] text-[16px] leading-relaxed text-white/60 lg:text-[17px]">
               {text(
-                "In a critical moment, missing information isn't just a gap — it's a risk. An unknown allergy. A medication no one can verify. A file that exists somewhere else. A decision made in the dark. SANAD is the national backbone that ensures every doctor, every paramedic, every pharmacist knows what they need — exactly when they need it.",
-                "في لحظة الأزمة، المعلومة الناقصة ليست مجرد نقص — إنها خطر. حساسية مجهولة. دواء لا يعرفه المسعف. ملف في مستشفى آخر. وقرار طبي يُتّخذ في فراغ. سند هي المنظومة الوطنية التي تضمن أن كل طبيب وكل مسعف وكل صيدلي يعرف ما يحتاجه — في اللحظة التي يحتاجه فيها.",
+                "SANAD isn't just an application; it is the sovereign nervous system of the nation's healthcare. By unifying fragmented data into a single, intelligent stream, we empower clinicians with absolute clarity. Real-time telemetry, predictive analytics, and an unbreakable chain of trust ensure that every decision is informed, secure, and ultimately, lifesaving.",
+                "سند ليست مجرد منصة رقمية؛ إنها النظام العصبي السيادي للرعاية الصحية في المملكة. من خلال توحيد البيانات المتناثرة في مجرى واحد فائق الذكاء، نمنح الأطباء وضوحاً مطلقاً. عبر القياس اللحظي، والتحليلات التنبؤية، وسلسلة ثقة لا تُخترق، نضمن أن كل قرار طبي يستند إلى معرفة، محمي بأمان، وقادر على إنقاذ الأرواح.",
               )}
             </p>
           </Reveal>
@@ -387,8 +388,8 @@ function DeploymentStrip() {
           }`}
         >
           {text(
-            "Flagship national deployment — Kingdom of Saudi Arabia · 450+ facilities · 13 regions · 34.2M citizen records",
-            "النشر الوطني الأول — المملكة العربية السعودية · أكثر من 450 منشأة · 13 منطقة · 34.2 مليون سجل صحي",
+            "The National Health Intelligence Backbone — Kingdom of Saudi Arabia · 450+ Facilities · 13 Regions · 34.2M Immutable Records",
+            "نظام الاستخبارات الصحية الوطني — المملكة العربية السعودية · أكثر من 450 منشأة · 13 منطقة · 34.2 مليون سجل صحي محصّن",
           )}
         </p>
       </div>
@@ -403,22 +404,22 @@ function Thesis() {
   const isAr = locale === "ar";
   const gaps = [
     {
-      en: "Fragmented records",
-      ar: "سجلات مجزّأة",
-      enBody: "A citizen's medical history lives in dozens of disconnected systems. Every transfer of care loses context — and context is what saves lives.",
-      arBody: "يتوزّع تاريخ المواطن الصحي على عشرات الأنظمة المنفصلة. ومع كل انتقال بين جهات الرعاية يضيع السياق — والسياق هو ما ينقذ الحياة.",
+      en: "Data Fragmentation",
+      ar: "تشتت البيانات",
+      enBody: "Medical histories are trapped in isolated silos. When critical context is lost during a transfer of care, outcomes suffer. Intelligence requires unified data.",
+      arBody: "تاريخ المريض محتجز في أنظمة معزولة. عندما يضيع السياق الطبي بين المستشفيات، تتأثر النتائج. الذكاء الحقيقي يبدأ بتوحيد البيانات.",
     },
     {
-      en: "Slow signals",
-      ar: "إشارات متأخرة",
-      enBody: "Outbreaks, drug shortages and patient deterioration are visible in the data days before they become visible to people.",
-      arBody: "تظهر ملامح الأوبئة ونقص الأدوية وتدهور الحالات في البيانات قبل أيام من أن يراها البشر.",
+      en: "Latent Signals",
+      ar: "إشارات خفية",
+      enBody: "Epidemics, supply chain vulnerabilities, and patient anomalies hide in plain sight. SANAD detects these patterns in milliseconds, long before human observation.",
+      arBody: "المؤشرات الوبائية وتدهور الحالات ونقص الأدوية تختبئ في طيات البيانات. سند يلتقط هذه الأنماط في أجزاء من الثانية، قبل أن تدركها الملاحظة البشرية.",
     },
     {
-      en: "Decisions in isolation",
+      en: "Decision Isolation",
       ar: "قرارات معزولة",
-      enBody: "Clinicians make critical calls without the full picture — and the system never learns from the outcome.",
-      arBody: "يتّخذ الأطباء قرارات مصيرية دون اكتمال الصورة — ولا تتعلّم المنظومة شيئًا من النتيجة.",
+      enBody: "Clinicians are often forced to make life-altering decisions with incomplete intelligence. SANAD closes the loop, ensuring the system learns from every outcome.",
+      arBody: "يُجبر الأطباء أحياناً على اتخاذ قرارات مصيرية بصورة غير مكتملة. سند يغلق هذه الفجوة، ويضمن أن المنظومة تتعلم وتتطور بعد كل قرار.",
     },
   ];
   return (
@@ -436,8 +437,8 @@ function Thesis() {
           }}
         >
           {text(
-            "Medicine has never lacked data. It lacked a system that could act on it.",
-            "لم يفتقر الطب يومًا إلى البيانات. بل افتقر إلى منظومة تتحرّك بها.",
+            "Healthcare has never lacked data. It lacked an operating system.",
+            "لم تفتقر الرعاية الصحية يوماً للبيانات. بل افتقرت لنظام تشغيل يوظفها.",
           )}
         </h2>
       </Reveal>
@@ -458,8 +459,8 @@ function Thesis() {
       <Reveal delay={0.2}>
         <p className="mt-14 text-[16px] font-medium text-[#7CB9FF]">
           {text(
-            "SANAD exists to close the loop medicine leaves open.",
-            "وُجد سند ليغلق الدائرة التي يتركها الطب مفتوحة.",
+            "SANAD brings order to the chaos. Complete interoperability, absolute truth.",
+            "سند يخلق النظام من الفوضى. تكامل تام، وحقيقة مطلقة واحدة.",
           )}
         </p>
       </Reveal>
@@ -483,7 +484,8 @@ function BrokenTrace() {
         dir={dir}
         role="img"
         aria-label="Timeline without a trace"
-        className="overflow-hidden rounded-2xl border border-white/[0.06] bg-[#06090F] text-left"
+        className="overflow-hidden rounded-2xl border border-white/[0.08] text-left shadow-[0_16px_64px_rgba(0,0,0,0.4)] backdrop-blur-xl"
+        style={{ background: "rgba(6, 9, 15, 0.7)" }}
       >
         <div aria-hidden className="flex items-center justify-between border-b border-white/[0.05] px-5 py-3 font-mono text-[10.5px] tracking-[0.12em] text-white/35">
           <span>WITHOUT A TRACE</span>
@@ -566,9 +568,9 @@ function Intelligence() {
       </div>
 
       <Reveal delay={0.1}>
-        <div className="grid overflow-hidden rounded-2xl border border-white/[0.07] bg-card/[0.07] gap-px sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid overflow-hidden rounded-2xl border border-white/[0.12] shadow-2xl gap-px sm:grid-cols-2 lg:grid-cols-3" style={{ background: "rgba(255,255,255,0.03)" }}>
           {engines.map((e, i) => (
-            <div key={e.en} className="group min-w-0 bg-[#070B12] p-6 transition-colors duration-300 hover:bg-[#0A101B]">
+            <div key={e.en} className="group min-w-0 p-6 transition-all duration-300 hover:bg-white/[0.04] border border-transparent hover:border-white/[0.1]" style={{ background: "rgba(7, 11, 18, 0.6)", backdropFilter: "blur(12px)" }}>
               <p className="mb-4 font-mono text-[12px] text-[#4D9FFF]">{String(i + 1).padStart(2, "0")}</p>
               <h3 className="mb-3 text-[15px] font-semibold text-white">{text(e.en, e.ar)}</h3>
               <p

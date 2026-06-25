@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=IBM+Plex+Mono:wght@400;500&family=Tajawal:wght@400;500;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: 'Inter', 'Noto Sans Arabic', sans-serif;
-  --font-display: 'Inter', 'Noto Sans Arabic', sans-serif;
+  --font-sans: 'Inter', 'Tajawal', 'Noto Sans Arabic', sans-serif;
+  --font-display: 'Inter', 'Tajawal', 'Noto Sans Arabic', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
   --color-background: hsl(var(--background));
@@ -97,26 +97,26 @@
 }
 
 .dark {
-  --background: 240 10% 8%;
-  --foreground: 0 0% 96%;
-  --card: 240 8% 12%;
-  --card-foreground: 0 0% 96%;
+  --background: 220 25% 4%;
+  --foreground: 0 0% 98%;
+  --card: 220 20% 7%;
+  --card-foreground: 0 0% 98%;
   --primary: 211 100% 58%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 240 7% 16%;
-  --secondary-foreground: 0 0% 94%;
-  --muted: 240 7% 15%;
-  --muted-foreground: 240 5% 68%;
+  --secondary: 220 15% 12%;
+  --secondary-foreground: 0 0% 96%;
+  --muted: 220 15% 12%;
+  --muted-foreground: 220 10% 65%;
   --accent: 211 100% 58%;
   --accent-foreground: 0 0% 100%;
-  --destructive: 0 75% 58%;
+  --destructive: 0 80% 58%;
   --destructive-foreground: 0 0% 100%;
   --warning: 35 95% 56%;
-  --warning-foreground: 240 10% 8%;
+  --warning-foreground: 220 25% 4%;
   --success: 142 65% 45%;
   --success-foreground: 0 0% 100%;
-  --sidebar: 240 8% 11%;
-  --sidebar-foreground: 0 0% 94%;
+  --sidebar: 220 20% 6%;
+  --sidebar-foreground: 0 0% 96%;
   --border: 240 7% 22%;
   --input: 240 7% 22%;
   --ring: 211 100% 58%;

@@ -14,9 +14,8 @@ export function Card({ className, children, ...props }: React.HTMLAttributes<HTM
   return (
     <div
       className={cn(
-        "bg-card rounded-[20px]",
-        "shadow-[0_1px_3px_rgba(0,0,0,0.07),0_1px_2px_rgba(0,0,0,0.04)]",
-        "border border-border",
+        "bg-card/70 backdrop-blur-xl rounded-[20px]",
+        "shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/[0.08] dark:border-white/[0.05]",
         className
       )}
       {...props}
@@ -28,7 +27,7 @@ export function Card({ className, children, ...props }: React.HTMLAttributes<HTM
 
 export function CardHeader({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div className={cn("flex items-center justify-between px-5 py-4 border-b border-border", className)} {...props}>
+    <div className={cn("flex items-center justify-between px-5 py-4 border-b border-white/[0.08] dark:border-white/[0.05]", className)} {...props}>
       {children}
     </div>
   );
