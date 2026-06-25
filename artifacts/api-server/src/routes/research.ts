@@ -7,6 +7,15 @@ import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const router = Router();
 
+router.use((req, res, next) => {
+  const allowedRoles = ["research", "admin", "hospital", "ai-control"];
+  if (!req.role || !allowedRoles.includes(req.role)) {
+    res.status(403).json({ error: "FORBIDDEN", message: "Research or administrative role required" });
+    return;
+  }
+  next();
+});
+
 router.get("/insights", async (req, res) => {
   // All queries use SQL aggregations — no patient PHI (names, IDs) is loaded into memory
   const [
