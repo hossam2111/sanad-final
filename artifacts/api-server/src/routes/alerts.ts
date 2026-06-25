@@ -123,6 +123,12 @@ router.patch("/read-all", async (req, res) => {
     return;
   }
 
+  const allowedRoles = ["admin", "hospital", "ai-control", "doctor"];
+  if (!req.role || !allowedRoles.includes(req.role)) {
+    res.status(403).json({ error: "FORBIDDEN", message: "Elevated role required to clear operational feed" });
+    return;
+  }
+
   await db
     .update(alertsTable)
     .set({ isRead: true });
