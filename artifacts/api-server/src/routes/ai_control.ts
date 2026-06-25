@@ -18,6 +18,15 @@ const engineRetrainSchema = z.object({
 
 const router = Router();
 
+router.use((req, res, next) => {
+  const allowedRoles = ["ai-control", "admin"];
+  if (!req.role || !allowedRoles.includes(req.role)) {
+    res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
+    return;
+  }
+  next();
+});
+
 // In-memory toggle store
 const featureToggles: Record<string, boolean> = {
   risk_scoring: true,
@@ -32,10 +41,6 @@ router.get("/features", (req, res) => {
 });
 
 router.patch("/features/:feature", (req, res) => {
-  if (req.role !== "ai-control" && req.role !== "admin") {
-    res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
-    return;
-  }
   const { feature } = req.params;
   if (!(feature in featureToggles)) {
     res.status(404).json({ error: "UNKNOWN_FEATURE" });
@@ -138,10 +143,6 @@ router.get("/retrain-jobs", async (req, res) => {
 
 // POST /api/ai-control/retrain-jobs — queue a new retrain
 router.post("/retrain-jobs", validate(retrainJobSchema), async (req, res) => {
-  if (req.role !== "ai-control" && req.role !== "admin") {
-    res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
-    return;
-  }
   const { model, reason } = req.body as z.infer<typeof retrainJobSchema>;
   const jobId = `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
   const triggeredByName = (req as any).userId ?? "AI Control Center";
@@ -180,10 +181,6 @@ router.post("/retrain-jobs", validate(retrainJobSchema), async (req, res) => {
 });
 
 router.post("/engines/:engineName/retrain", validate(engineRetrainSchema), async (req, res) => {
-  if (req.role !== "ai-control" && req.role !== "admin") {
-    res.status(403).json({ error: "FORBIDDEN", message: "AI Control role required" });
-    return;
-  }
   const engineName = String(req.params["engineName"]);
   const { triggeredBy } = req.body as z.infer<typeof engineRetrainSchema>;
   const jobId = `RETRAIN-${engineName}-${Date.now()}`;
