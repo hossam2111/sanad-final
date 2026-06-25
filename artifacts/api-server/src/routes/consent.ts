@@ -103,7 +103,8 @@ router.get("/patient/:nationalId", async (req, res) => {
   // Get existing consent records
   const records = await db.select().from(consentTable)
     .where(eq(consentTable.patientId, patient.id))
-    .orderBy(desc(consentTable.updatedAt));
+    .orderBy(desc(consentTable.updatedAt))
+    .limit(100);
 
   // Build full consent profile — merge DB records with definitions
   const consentProfile = CONSENT_DEFINITIONS.map(def => {

@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, labResultsTable, visitsTable } from "@workspace/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, between } from "drizzle-orm";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { getConsentState } from "../lib/ownership.js";
 
@@ -169,10 +169,10 @@ router.get("/patient/:nationalId", async (req, res) => {
   });
 
   const [medications, labResults, visits, allPatients] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)),
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(50),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(20),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(20),
-    db.select().from(patientsTable).limit(50),
+    db.select().from(patientsTable).where(between(patientsTable.id, Math.max(1, p.id - 3), p.id + 5)).limit(50),
   ]);
 
   const conditions = p.chronicConditions ?? [];
