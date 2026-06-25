@@ -4,6 +4,7 @@ import { db } from "@workspace/db";
 import { patientsTable, labResultsTable, eventsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { broadcastToRole } from "../lib/sse.js";
+import { requireOwnNationalId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { validate } from "../middlewares/validate.js";
 
@@ -95,6 +96,9 @@ function interpretLabResult(testName: string, result: string, unit: string, stat
 
 router.get("/patient/:nationalId", async (req, res) => {
   const { nationalId } = req.params;
+  
+  if (!requireOwnNationalId(req, res, nationalId)) return;
+
   const patients = await db
     .select()
     .from(patientsTable)
@@ -136,6 +140,18 @@ router.get("/patient/:nationalId", async (req, res) => {
       abnormal: labs.filter(l => l.status === "abnormal").length,
       normal: labs.filter(l => l.status === "normal").length,
     },
+  });
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "READ",
+    what: `Lab results accessed: ${patient.fullName} (${nationalId})`,
+    patientId: patient.id,
+    ipAddress,
+    userAgent,
   });
 });
 
