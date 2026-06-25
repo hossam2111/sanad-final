@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { visitsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { requireOwnPatient } from "../lib/ownership.js";
+import { requireOwnPatient, isClinicalRole } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
@@ -39,8 +39,8 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", validate(createVisitSchema), async (req, res) => {
-  // Recording a visit is a clinical act — citizens cannot write visits.
-  if (req.role === "citizen") {
+  // Recording a visit is a clinical act — non-clinical roles cannot write visits.
+  if (!isClinicalRole(req.role)) {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record visits" });
     return;
   }

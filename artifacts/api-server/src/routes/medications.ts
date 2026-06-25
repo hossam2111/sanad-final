@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { medicationsTable, patientsTable, alertsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { checkDrugInteractions } from "../lib/ai-engine.js";
-import { requireOwnPatient } from "../lib/ownership.js";
+import { requireOwnPatient, isClinicalRole } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
@@ -41,8 +41,8 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", validate(createMedicationSchema), async (req, res) => {
-  // Prescribing is a clinical act — citizens cannot write medications.
-  if (req.role === "citizen") {
+  // Prescribing is a clinical act — non-clinical roles cannot write medications.
+  if (!isClinicalRole(req.role)) {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may prescribe medications" });
     return;
   }

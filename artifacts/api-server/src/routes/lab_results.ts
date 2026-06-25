@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { labResultsTable, alertsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { requireOwnPatient } from "../lib/ownership.js";
+import { requireOwnPatient, isClinicalRole } from "../lib/ownership.js";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
 
@@ -39,8 +39,8 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", validate(createLabResultSchema), async (req, res) => {
-  // Publishing lab results is a clinical act — citizens cannot write results.
-  if (req.role === "citizen") {
+  // Publishing lab results is a clinical act — non-clinical roles cannot write results.
+  if (!isClinicalRole(req.role)) {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record lab results" });
     return;
   }
