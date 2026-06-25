@@ -100,6 +100,18 @@ router.get("/national/:nationalId", async (req, res) => {
   }
 
   const p = patient[0]!;
+
+  if (req.role && CLINICAL_ROLES.has(req.role) && req.role !== "admin" && req.role !== "emergency") {
+    if (!req.username) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
+      return;
+    }
+    const hospitalId = await getStaffHospitalId(req.username);
+    if (!hospitalId || (p.hospitalId !== null && p.hospitalId !== hospitalId)) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Patient is registered at a different hospital" });
+      return;
+    }
+  }
   const [medications, visits, labResults, alerts] = await Promise.all([
     db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(200),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(200),
@@ -171,6 +183,18 @@ router.get("/:id", async (req, res) => {
   }
 
   const p = patient[0]!;
+
+  if (req.role && CLINICAL_ROLES.has(req.role) && req.role !== "admin" && req.role !== "emergency") {
+    if (!req.username) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
+      return;
+    }
+    const hospitalId = await getStaffHospitalId(req.username);
+    if (!hospitalId || (p.hospitalId !== null && p.hospitalId !== hospitalId)) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Patient is registered at a different hospital" });
+      return;
+    }
+  }
   const [medications, visits, labResults, alerts] = await Promise.all([
     db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(200),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(200),
