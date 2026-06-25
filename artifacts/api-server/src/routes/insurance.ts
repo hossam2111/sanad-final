@@ -4,7 +4,8 @@ import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, visitsTable, labResultsTable, claimReviewsTable } from "@workspace/db/schema";
 import { eq, desc, count, sql } from "drizzle-orm";
 import { validate } from "../middlewares/validate.js";
-import { getConsentState } from "../lib/ownership.js";
+import { getConsentState, requireOwnNationalId } from "../lib/ownership.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const claimReviewSchema = z.object({
   action: z.enum(["approve", "reject", "flag"]),
@@ -69,6 +70,9 @@ function computeClaimAnomalyScore(visit: any, allVisits: any[]): { score: number
 
 router.get("/patient/:nationalId", async (req, res) => {
   const { nationalId } = req.params;
+
+  if (!requireOwnNationalId(req, res, nationalId)) return;
+
   const patients = await db.select().from(patientsTable).where(eq(patientsTable.nationalId, nationalId)).limit(1);
   if (!patients.length) { res.status(404).json({ error: "NOT_FOUND", message: "Patient not found" }); return; }
   const p = patients[0]!;
@@ -153,6 +157,18 @@ router.get("/patient/:nationalId", async (req, res) => {
     totalClaimValue: claims.reduce((sum, c) => sum + c.estimatedCost, 0),
     coverageStatus: "active",
     insurancePlan: riskScore >= 70 ? "Comprehensive Plus" : riskScore >= 40 ? "Standard Care" : "Basic Health",
+  });
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "READ",
+    what: `Insurance profile accessed: ${p.fullName} (${nationalId})`,
+    patientId: p.id,
+    ipAddress,
+    userAgent,
   });
 });
 
@@ -259,6 +275,18 @@ router.post("/claim/:claimId/review", validate(claimReviewSchema), async (req, r
       set: { status, reviewedBy: reviewer, reviewedAt, notes: notes ?? "", aiReason },
     });
 
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "UPDATE",
+    what: `CLAIM_REVIEWED: ${claimId} marked as ${status}`,
+    patientId: undefined,
+    ipAddress,
+    userAgent,
+  });
+
   res.json({
     claimId,
     newStatus: status,
@@ -293,6 +321,19 @@ router.patch("/claims/:claimId", async (req, res) => {
     .returning();
 
   if (!claim) { res.status(404).json({ error: "NOT_FOUND" }); return; }
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "UPDATE",
+    what: `CLAIM_REVIEWED: ${claimId} marked as ${decision === "approved" ? "approved" : "rejected"}`,
+    patientId: undefined,
+    ipAddress,
+    userAgent,
+  });
+
   res.json(claim);
 });
 
