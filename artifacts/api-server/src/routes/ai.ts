@@ -416,6 +416,19 @@ router.post("/chat/:patientId", validate(chatSchema), async (req, res) => {
 
   const answer = await askClinicalQuestion(ctx, question);
 
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: (req as any).userId ?? "Unknown",
+    whoRole: (req as any).role ?? "unknown",
+    action: "AI_CHAT_QUERY",
+    what: `Clinical Q&A queried about patient ${patientId}`,
+    patientId,
+    details: { question_length: question.length },
+    confidence: 1.0,
+    ipAddress,
+    userAgent,
+  });
+
   res.json({ patientId, question, answer, model: "gpt-4o" });
 });
 
