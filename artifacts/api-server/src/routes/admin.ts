@@ -11,6 +11,15 @@ import type { AuditAction } from "../lib/audit.js";
 
 const router = Router();
 
+router.use((req, res, next) => {
+  const allowedRoles = ["admin", "hospital", "ai-control", "research"];
+  if (!req.role || !allowedRoles.includes(req.role)) {
+    res.status(403).json({ error: "FORBIDDEN", message: "Elevated role required for admin endpoints" });
+    return;
+  }
+  next();
+});
+
 const SAUDI_REGIONS = [
   { region: "Riyadh", hospitals: 78, coverage: "97%", population: 7_676_000, riskMultiplier: 1.12 },
   { region: "Makkah", hospitals: 64, coverage: "95%", population: 8_557_000, riskMultiplier: 1.05 },
