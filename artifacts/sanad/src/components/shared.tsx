@@ -10,17 +10,23 @@ export function cn(...inputs: ClassValue[]) {
 import { AlertTriangle, X } from "lucide-react";
 
 /* ─── Card ─────────────────────────────────────────────── */
-export function Card({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+export function Card({ className, children, hoverEffect = true, ...props }: React.HTMLAttributes<HTMLDivElement> & { hoverEffect?: boolean }) {
   return (
     <div
       className={cn(
-        "bg-card/70 backdrop-blur-xl rounded-[20px]",
-        "shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-white/[0.08] dark:border-white/[0.05]",
+        "glass-panel rounded-2xl relative overflow-hidden",
+        hoverEffect && "group cursor-pointer hover:-translate-y-0.5",
         className
       )}
       {...props}
     >
-      {children}
+      {/* Subtle shine effect on hover for premium feel */}
+      {hoverEffect && (
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+      )}
+      <div className="relative z-10 h-full flex flex-col">
+        {children}
+      </div>
     </div>
   );
 }
@@ -58,31 +64,33 @@ export function Button({
   children,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "outline" | "destructive" | "accent" | "ghost";
-  size?: "sm" | "md" | "lg";
+  variant?: "primary" | "secondary" | "outline" | "destructive" | "accent" | "ghost" | "glass";
+  size?: "sm" | "md" | "lg" | "icon";
   isLoading?: boolean;
 }) {
   const variants = {
-    primary:     "bg-primary text-white hover:bg-primary/90 shadow-sm shadow-primary/20 active:scale-[0.97]",
-    secondary:   "bg-secondary text-foreground hover:bg-border active:scale-[0.97]",
-    outline:     "border border-border bg-card text-foreground hover:bg-secondary active:scale-[0.97]",
-    destructive: "bg-destructive text-white hover:bg-destructive/90 shadow-sm shadow-destructive/20 active:scale-[0.97]",
-    accent:      "bg-primary text-white hover:bg-primary/90 shadow-sm shadow-primary/20 active:scale-[0.97]",
+    primary:     "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_14px_0_hsla(var(--primary)/0.39)] hover:shadow-[0_6px_20px_hsla(var(--primary)/0.23)] active:scale-[0.97]",
+    secondary:   "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:scale-[0.97]",
+    outline:     "border-2 border-border bg-transparent text-foreground hover:bg-secondary hover:border-secondary active:scale-[0.97]",
+    destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-[0_4px_14px_0_hsla(var(--destructive)/0.39)] active:scale-[0.97]",
+    accent:      "bg-accent text-accent-foreground hover:bg-accent/90 shadow-[0_4px_14px_0_hsla(var(--accent)/0.39)] active:scale-[0.97]",
     ghost:       "bg-transparent text-foreground hover:bg-secondary active:scale-[0.97]",
+    glass:       "glass-panel text-foreground hover:text-primary active:scale-[0.97]",
   };
   const sizes = {
-    sm: "h-8 px-3.5 text-xs gap-1.5 rounded-[10px]",
-    md: "h-9 px-4.5 text-sm gap-2 rounded-[12px]",
-    lg: "h-11 px-6 text-sm font-semibold gap-2 rounded-[14px]",
+    sm: "h-8 px-3 text-xs gap-1.5 rounded-lg",
+    md: "h-10 px-5 text-sm gap-2 rounded-xl",
+    lg: "h-12 px-8 text-base gap-2 rounded-2xl",
+    icon: "h-10 w-10 shrink-0 rounded-xl justify-center p-0",
   };
   const { text } = useLanguage();
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center font-semibold",
-        "transition-all duration-150 ease-out",
-        "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-1",
-        "disabled:opacity-40 disabled:pointer-events-none",
+        "inline-flex items-center justify-center font-bold tracking-tight",
+        "transition-all duration-300 ease-out",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        "disabled:opacity-40 disabled:pointer-events-none disabled:shadow-none",
         variants[variant], sizes[size], className
       )}
       disabled={isLoading || props.disabled}
@@ -143,21 +151,21 @@ export function Badge({
   className,
 }: {
   children: React.ReactNode;
-  variant?: "default" | "success" | "warning" | "destructive" | "outline" | "info" | "purple";
+  variant?: "default" | "success" | "warning" | "destructive" | "outline" | "info" | "accent";
   className?: string;
 }) {
   const variants = {
-    default:     "bg-primary/10 text-primary",
-    info:        "bg-sky-100 text-sky-700",
-    success:     "bg-emerald-100 text-emerald-700",
-    warning:     "bg-risk-high-bg text-risk-high",
-    destructive: "bg-red-100 text-red-700",
-    outline:     "bg-secondary text-muted-foreground border border-border",
-    purple:      "bg-violet-100 text-violet-700",
+    default:     "bg-primary/10 text-primary border border-primary/20",
+    info:        "bg-sky-500/10 text-sky-500 border border-sky-500/20",
+    success:     "bg-success/10 text-success border border-success/20",
+    warning:     "bg-warning/10 text-warning border border-warning/20",
+    destructive: "bg-destructive/10 text-destructive border border-destructive/20",
+    outline:     "bg-card/50 text-muted-foreground border border-border backdrop-blur-md",
+    accent:      "bg-accent/10 text-accent border border-accent/20",
   };
   return (
     <span className={cn(
-      "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide",
+      "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold tracking-wide transition-colors",
       variants[variant], className
     )}>
       {children}
@@ -166,18 +174,21 @@ export function Badge({
 }
 
 /* ─── PageHeader ────────────────────────────────────────── */
-export function PageHeader({ title, subtitle, action }: {
+export function PageHeader({ title, subtitle, action, className }: {
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex items-start justify-between mb-6">
-      <div>
-        <h1 className="text-[22px] font-bold text-foreground tracking-tight leading-tight">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{subtitle}</p>}
+    <div className={cn("flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8", className)}>
+      <div className="flex-1 min-w-0">
+        <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground to-muted-foreground tracking-tight leading-tight">
+          {title}
+        </h1>
+        {subtitle && <p className="mt-2 text-sm font-medium text-muted-foreground leading-relaxed max-w-2xl">{subtitle}</p>}
       </div>
-      {action && <div className="shrink-0 ms-4">{action}</div>}
+      {action && <div className="shrink-0 animate-fade-up stagger-1">{action}</div>}
     </div>
   );
 }

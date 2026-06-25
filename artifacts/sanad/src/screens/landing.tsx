@@ -322,28 +322,28 @@ function Hero() {
                 isAr ? "text-[11.5px] font-semibold" : "text-[11px] font-mono uppercase tracking-[0.18em]"
               }`}
             >
-              {text("The Sovereign Nervous System of National Healthcare", "العمود الفقري السيادي للرعاية الصحية")}
+              {text("The Cognitive Engine of National Healthcare", "المحرك الإدراكي للرعاية الصحية السيادية")}
             </p>
           </Reveal>
 
           <Reveal delay={0.08}>
             <h1
-              className="mb-7 font-bold text-white"
+              className="mb-7 font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/60"
               style={{
                 fontSize: "clamp(2.8rem, 7vw, 5rem)",
                 lineHeight: isAr ? 1.25 : 1.02,
                 letterSpacing: isAr ? "0" : "-0.038em",
               }}
             >
-              {text("Absolute clarity at the point of care.", "يقين تام.. عند كل قرار طبي.")}
+              {text("Beyond Data. Absolute Certainty.", "ما وراء البيانات.. يقين مطلق يصنع الفارق.")}
             </h1>
           </Reveal>
 
           <Reveal delay={0.16}>
             <p className="mx-auto mb-10 max-w-[640px] text-[16px] leading-relaxed text-white/60 lg:text-[17px]">
               {text(
-                "SANAD isn't just an application; it is the sovereign nervous system of the nation's healthcare. By unifying fragmented data into a single, intelligent stream, we empower clinicians with absolute clarity. Real-time telemetry, predictive analytics, and an unbreakable chain of trust ensure that every decision is informed, secure, and ultimately, lifesaving.",
-                "سند ليست مجرد منصة رقمية؛ إنها النظام العصبي السيادي للرعاية الصحية في المملكة. من خلال توحيد البيانات المتناثرة في مجرى واحد فائق الذكاء، نمنح الأطباء وضوحاً مطلقاً. عبر القياس اللحظي، والتحليلات التنبؤية، وسلسلة ثقة لا تُخترق، نضمن أن كل قرار طبي يستند إلى معرفة، محمي بأمان، وقادر على إنقاذ الأرواح.",
+                "SANAD redefines the boundaries of healthcare. More than a platform, it is a living, breathing intelligence that transforms vast streams of fragmented data into immediate, life-saving clarity. With predictive precision, real-time telemetry, and an impenetrable chain of trust, we ensure that every medical decision is an act of absolute certainty.",
+                "سند تعيد رسم حدود الرعاية الصحية. إنها ليست مجرد منصة، بل منظومة ذكاء حية تنبض بالحياة، تحوّل تدفقات البيانات الهائلة والمشتتة إلى رؤية واضحة ولحظية تنقذ الأرواح. بدقة تنبؤية فائقة، وتحليل لحظي للمؤشرات الحيوية، وسلسلة ثقة لا تُخترق، نجعل من كل قرار طبي عملاً يستند إلى يقين مطلق.",
               )}
             </p>
           </Reveal>
