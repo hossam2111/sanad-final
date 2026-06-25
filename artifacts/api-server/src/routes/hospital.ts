@@ -5,6 +5,15 @@ import { desc, gte, count } from "drizzle-orm";
 
 const router = Router();
 
+router.use((req, res, next) => {
+  const allowedRoles = ["hospital", "admin", "doctor"];
+  if (!req.role || !allowedRoles.includes(req.role)) {
+    res.status(403).json({ error: "FORBIDDEN", message: "Hospital administrative or medical role required" });
+    return;
+  }
+  next();
+});
+
 const HOSPITAL_NAME = "King Fahd Medical City";
 
 router.get("/overview", async (req, res) => {
