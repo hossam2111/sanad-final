@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { visitsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { requireOwnPatient } from "../lib/ownership.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
 
@@ -57,6 +58,19 @@ router.post("/", validate(createVisitSchema), async (req, res) => {
       visitType: body.visitType,
     })
     .returning();
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "CREATE_VISIT",
+    what: `Clinical visit recorded: ${body.visitType} at ${body.hospital}`,
+    patientId: body.patientId,
+    details: { diagnosis: body.diagnosis, doctor: body.doctor },
+    ipAddress,
+    userAgent,
+  });
 
   res.status(201).json(visit);
 });
