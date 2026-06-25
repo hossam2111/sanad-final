@@ -93,6 +93,19 @@ router.post("/login", validate(loginSchema), async (req, res) => {
 
   const user = CREDENTIALS[username] as (UserCredential & { password: string }) | undefined;
   if (!user || user.password !== password) {
+    const { ipAddress, userAgent } = extractRequestMeta(req);
+    await writeAudit({
+      who: "system",
+      whoName: "System",
+      whoRole: "admin",
+      action: "LOGIN_FAILED",
+      what: `Failed login attempt for username: ${username}`,
+      details: { username, error: "INVALID_CREDENTIALS" },
+      ipAddress,
+      userAgent,
+      confidence: 1.0,
+    });
+
     return res.status(401).json({
       error: "INVALID_CREDENTIALS",
       message: "Invalid username or password",
