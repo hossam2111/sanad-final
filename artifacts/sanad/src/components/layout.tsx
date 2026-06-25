@@ -281,8 +281,8 @@ export function Layout({ children, role, localized = false }: { children: React.
             {authUser?.initial ?? config.userInitial}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[12px] font-semibold leading-tight text-foreground">{authUser?.name ?? config.user}</p>
-            <p className="mt-0.5 truncate text-[10px] leading-tight text-muted-foreground">
+            <p className="truncate text-[12px] font-semibold leading-tight text-foreground" suppressHydrationWarning>{authUser?.name ?? config.user}</p>
+            <p className="mt-0.5 truncate text-[10px] leading-tight text-muted-foreground" suppressHydrationWarning>
               {authUser?.jobTitle ?? (locale === "ar" ? roleText[role].userRole : config.userRole)}
             </p>
           </div>
