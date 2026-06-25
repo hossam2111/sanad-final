@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, labResultsTable, visitsTable } from "@workspace/db/schema";
 import { eq, desc, between } from "drizzle-orm";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
-import { getConsentState } from "../lib/ownership.js";
+import { getConsentState, requireOwnNationalId } from "../lib/ownership.js";
 
 const router = Router();
 
@@ -138,6 +138,9 @@ function computeGeneticRisks(conditions: string[], familyConditions: string[][])
 
 router.get("/patient/:nationalId", async (req, res) => {
   const { nationalId } = req.params;
+
+  if (!requireOwnNationalId(req, res, nationalId)) return;
+
   const patients = await db.select().from(patientsTable).where(eq(patientsTable.nationalId, nationalId)).limit(1);
   if (!patients.length) { res.status(404).json({ error: "NOT_FOUND", message: "Patient not found" }); return; }
   const p = patients[0]!;
