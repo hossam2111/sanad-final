@@ -4,6 +4,7 @@ import { db } from "@workspace/db";
 import { medicationsTable, purchaseOrdersTable } from "@workspace/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { validate } from "../middlewares/validate.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const reorderSchema = z.object({
   drugName: z.string().min(1).max(200),
@@ -196,6 +197,18 @@ router.post("/reorder", validate(reorderSchema), async (req, res) => {
       .catch(() => {});
   }, 5000);
 
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "CREATE",
+    what: `PURCHASE_ORDER_SUBMITTED: ${orderId} for ${quantity}x ${drugName}`,
+    patientId: null,
+    ipAddress,
+    userAgent,
+  });
+
   res.json({
     ...order,
     drug: drugName,
@@ -295,6 +308,19 @@ router.post("/orders", validate(reorderSchema), async (req, res) => {
     requestedBy: req.userId ?? "unknown",
     status: "submitted",
   }).returning();
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "CREATE",
+    what: `PURCHASE_ORDER_SUBMITTED: ${order.id} for ${quantity}x ${drugName}`,
+    patientId: null,
+    ipAddress,
+    userAgent,
+  });
+
   res.status(201).json(order);
 });
 
@@ -310,6 +336,19 @@ router.patch("/orders/:id/approve", async (req, res) => {
     .where(eq(purchaseOrdersTable.id, id))
     .returning();
   if (!order) return res.status(404).json({ error: "NOT_FOUND" });
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "UPDATE",
+    what: `PURCHASE_ORDER_APPROVED: ${id}`,
+    patientId: null,
+    ipAddress,
+    userAgent,
+  });
+
   res.json(order);
 });
 
@@ -325,6 +364,19 @@ router.patch("/orders/:id/reject", async (req, res) => {
     .where(eq(purchaseOrdersTable.id, id))
     .returning();
   if (!order) return res.status(404).json({ error: "NOT_FOUND" });
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "UPDATE",
+    what: `PURCHASE_ORDER_REJECTED: ${id}`,
+    patientId: null,
+    ipAddress,
+    userAgent,
+  });
+
   res.json(order);
 });
 
