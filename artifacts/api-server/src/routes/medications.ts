@@ -4,6 +4,7 @@ import { medicationsTable, patientsTable, alertsTable } from "@workspace/db/sche
 import { eq, desc } from "drizzle-orm";
 import { checkDrugInteractions } from "../lib/ai-engine.js";
 import { requireOwnPatient } from "../lib/ownership.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
 
@@ -101,6 +102,19 @@ router.post("/", validate(createMedicationSchema), async (req, res) => {
   const safeToDispense = !interactionWarnings.some(
     w => w.severity === "critical" || w.severity === "high"
   );
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "PRESCRIBE_MEDICATION",
+    what: `Medication prescribed: ${body.drugName} at ${body.hospital}`,
+    patientId,
+    details: { dosage: body.dosage, frequency: body.frequency, warningsCount: interactionWarnings.length, safeToDispense },
+    ipAddress,
+    userAgent,
+  });
 
   res.status(201).json({
     medication,
