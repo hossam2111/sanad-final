@@ -173,6 +173,19 @@ router.patch("/:id/cancel", async (req, res) => {
     .returning();
 
   if (!updated) return res.status(404).json({ error: "Appointment not found" });
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "UPDATE",
+    what: `APPOINTMENT_CANCELLED: Appointment ${id}`,
+    patientId: updated.patientId,
+    ipAddress,
+    userAgent,
+  });
+
   res.json({ success: true, appointment: updated });
 });
 
@@ -187,6 +200,19 @@ router.patch("/:id/complete", async (req, res) => {
     .where(eq(appointmentsTable.id, id))
     .returning();
   if (!updated) return res.status(404).json({ error: "Appointment not found" });
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  await writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "UPDATE",
+    what: `APPOINTMENT_COMPLETED: Appointment ${id}`,
+    patientId: updated.patientId,
+    ipAddress,
+    userAgent,
+  });
+
   res.json({ success: true });
 });
 
