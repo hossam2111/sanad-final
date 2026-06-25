@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getGetPatientByNationalIdQueryKey } from "@workspace/api-client-react";
 import { apiFetch } from "@/lib/api";
 import {
   Search, Shield, Activity, AlertCircle, Syringe, Clock,
@@ -918,7 +920,7 @@ export default function DoctorDashboard() {
                 )}
 
                 <div className="px-5 py-4 flex flex-col justify-center gap-2 min-w-[160px]">
-                  <PrescribeModal patientId={patient.id} />
+                  <PrescribeModal patientId={patient.id} nationalId={patient.nationalId} />
                   <Button variant="outline" size="sm">
                     <CalendarDays className="w-3.5 h-3.5" /> {text("Schedule Visit", "جدولة زيارة")}
                   </Button>
@@ -1183,7 +1185,7 @@ export default function DoctorDashboard() {
               <div>
                 <div className="flex items-center justify-between px-5 py-3 border-b border-border" style={{ background: "hsl(240 6% 97%)" }}>
                   <p className="text-xs font-semibold text-muted-foreground">{text(`${activeMeds.length} active prescription${activeMeds.length !== 1 ? "s" : ""}`, `${activeMeds.length} وصفة فعّالة`)}</p>
-                  <PrescribeModal patientId={patient.id} />
+                  <PrescribeModal patientId={patient.id} nationalId={patient.nationalId} />
                 </div>
                 <div className="overflow-x-auto"><table className="w-full data-table">
                   <thead><tr>
@@ -1972,10 +1974,10 @@ export default function DoctorDashboard() {
   );
 }
 
-function PrescribeModal({ patientId }: { patientId: number }) {
-  const { text, dir, locale, toggleLocale } = useLanguage();
+function PrescribeModal({ patientId, nationalId }: { patientId: number; nationalId: string }) {
+  const { text } = useLanguage();
+  const qc = useQueryClient();
 
-  
   const [isOpen, setIsOpen] = useState(false);
   const [showAiExplanation, setShowAiExplanation] = useState(false);
   const [drugName, setDrugName] = useState("");
@@ -2003,12 +2005,10 @@ function PrescribeModal({ patientId }: { patientId: number }) {
     setIsOpen(false);
     setDrugName(""); setDosage(""); setFrequency("");
     checkMutation.reset();
-    window.location.reload();
+    await qc.invalidateQueries({ queryKey: getGetPatientByNationalIdQueryKey(nationalId) });
   };
 
-  const close = () => {
-  const { text, dir, locale, toggleLocale } = useLanguage();
- setIsOpen(false); checkMutation.reset(); };
+  const close = () => { setIsOpen(false); checkMutation.reset(); };
 
   return (
     <>
