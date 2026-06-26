@@ -44,7 +44,24 @@ router.post("/", validate(createVisitSchema), async (req, res) => {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record visits" });
     return;
   }
+  
   const body = req.body as z.infer<typeof createVisitSchema>;
+  
+  // Enforce hospital assignment
+  if (req.role !== "admin") {
+    if (!req.username) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
+      return;
+    }
+    const { getStaffHospitalId } = await import("../lib/ownership.js");
+    const staffHospitalId = await getStaffHospitalId(req.username);
+    
+    if (!staffHospitalId || staffHospitalId !== body.hospital) {
+      res.status(403).json({ error: "FORBIDDEN", message: "You may only record visits for your assigned hospital" });
+      return;
+    }
+  }
+
   const [visit] = await db
     .insert(visitsTable)
     .values({

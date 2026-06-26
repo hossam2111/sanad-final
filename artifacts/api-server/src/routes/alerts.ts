@@ -47,7 +47,15 @@ router.get("/system", async (req, res) => {
     return;
   }
 
-  const alerts = await db
+  let hospitalFilter: string | undefined;
+  if (req.role !== "admin" && req.role !== "citizen") {
+    if (req.username) {
+      const { getStaffHospitalId } = await import("../lib/ownership.js");
+      hospitalFilter = (await getStaffHospitalId(req.username)) ?? undefined;
+    }
+  }
+
+  const baseQuery = db
     .select({
       id: alertsTable.id,
       alertType: alertsTable.alertType,
@@ -61,14 +69,29 @@ router.get("/system", async (req, res) => {
       patientNationalId: patientsTable.nationalId,
     })
     .from(alertsTable)
-    .leftJoin(patientsTable, eq(alertsTable.patientId, patientsTable.id))
+    .leftJoin(patientsTable, eq(alertsTable.patientId, patientsTable.id));
+
+  const alerts = await (hospitalFilter 
+    ? baseQuery.where(eq(patientsTable.hospitalId, hospitalFilter))
+    : baseQuery)
     .orderBy(desc(alertsTable.createdAt))
     .limit(limit);
 
-  const unreadResult = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(alertsTable)
-    .where(eq(alertsTable.isRead, false));
+  let unreadCount = 0;
+  if (hospitalFilter) {
+    const unreadResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(alertsTable)
+      .leftJoin(patientsTable, eq(alertsTable.patientId, patientsTable.id))
+      .where(and(eq(alertsTable.isRead, false), eq(patientsTable.hospitalId, hospitalFilter)));
+    unreadCount = Number(unreadResult[0]?.count ?? 0);
+  } else {
+    const unreadResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(alertsTable)
+      .where(eq(alertsTable.isRead, false));
+    unreadCount = Number(unreadResult[0]?.count ?? 0);
+  }
 
   // Non-clinical roles (insurance, research, family, supply-chain, ai-control)
   // get the operational feed without patient identity.
@@ -78,7 +101,7 @@ router.get("/system", async (req, res) => {
 
   res.json({
     alerts: visible,
-    unreadCount: Number(unreadResult[0]?.count ?? 0),
+    unreadCount,
   });
 });
 
@@ -129,9 +152,21 @@ router.patch("/read-all", async (req, res) => {
     return;
   }
 
-  await db
-    .update(alertsTable)
-    .set({ isRead: true });
+  if (req.role === "admin" || req.role === "ai-control") {
+    await db.update(alertsTable).set({ isRead: true });
+  } else if (req.username) {
+    const { getStaffHospitalId } = await import("../lib/ownership.js");
+    const hospitalId = await getStaffHospitalId(req.username);
+    if (hospitalId) {
+      // Find alerts for this hospital
+      const hospitalPatients = await db.select({ id: patientsTable.id }).from(patientsTable).where(eq(patientsTable.hospitalId, hospitalId));
+      const patientIds = hospitalPatients.map(p => p.id);
+      if (patientIds.length > 0) {
+        const { inArray } = await import("drizzle-orm");
+        await db.update(alertsTable).set({ isRead: true }).where(inArray(alertsTable.patientId, patientIds));
+      }
+    }
+  }
 
   res.json({ success: true });
 });
