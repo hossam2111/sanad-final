@@ -584,7 +584,7 @@ export default function DoctorDashboard() {
               onFocus={() => setShowDropdown(true)}
             />
             {showDropdown && searchPatients.length > 0 && (
-              <div className="absolute top-full left-0 mt-1 w-full bg-card rounded-2xl shadow-xl border border-border z-50 overflow-hidden">
+              <div className="absolute top-full left-0 mt-2 w-full glass-panel rounded-2xl shadow-2xl z-50 overflow-hidden">
                 {searchPatients.map((p: any) => (
                   <button
                     key={p.id}
@@ -621,8 +621,8 @@ export default function DoctorDashboard() {
       </div>
 
       {showRegisterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeWizard}>
-          <div className="bg-card rounded-2xl border border-border w-full max-w-xl shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={closeWizard}>
+          <div className="glass-panel rounded-2xl w-full max-w-xl shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2">
