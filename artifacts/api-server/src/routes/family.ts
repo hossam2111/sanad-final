@@ -185,9 +185,18 @@ router.get("/patient/:nationalId", async (req, res) => {
     .filter(fp => fp.id !== p.id && fp.id >= Math.max(1, p.id - 3) && fp.id <= p.id + 5)
     .slice(0, 6);
 
-  const parents = rawFamily.filter(fp => fp.id < p.id).slice(0, 2);
-  const siblings = rawFamily.filter(fp => fp.id > p.id && fp.id <= p.id + 2).slice(0, 2);
-  const children = rawFamily.filter(fp => fp.id > p.id + 2).slice(0, 2);
+  const allowedFamily = [];
+  for (const fp of rawFamily) {
+    const state = await getConsentState(fp.id, "family_linking");
+    const granted = state === null ? FAMILY_LINKING_DEFAULT_GRANTED : state;
+    if (granted) {
+      allowedFamily.push(fp);
+    }
+  }
+
+  const parents = allowedFamily.filter(fp => fp.id < p.id).slice(0, 2);
+  const siblings = allowedFamily.filter(fp => fp.id > p.id && fp.id <= p.id + 2).slice(0, 2);
+  const children = allowedFamily.filter(fp => fp.id > p.id + 2).slice(0, 2);
 
   const mapMember = (fp: any, relationship: string) => ({
     id: fp.id,
