@@ -45,8 +45,8 @@ const featureToggleSchema = z.object({
 });
 
 router.patch("/features/:feature", validate(featureToggleSchema), (req, res) => {
-  const { feature } = req.params;
-  if (!(feature in featureToggles)) {
+  const feature = req.params["feature"];
+  if (typeof feature !== "string" || !(feature in featureToggles)) {
     res.status(404).json({ error: "UNKNOWN_FEATURE" });
     return;
   }
