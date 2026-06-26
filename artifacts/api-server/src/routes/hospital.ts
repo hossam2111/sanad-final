@@ -2,6 +2,8 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, visitsTable } from "@workspace/db/schema";
 import { desc, gte, count } from "drizzle-orm";
+import { getStaffHospitalId } from "../lib/ownership.js";
+import { and, eq } from "drizzle-orm";
 
 const router = Router();
 
@@ -14,15 +16,35 @@ router.use((req, res, next) => {
   next();
 });
 
-const HOSPITAL_NAME = "King Fahd Medical City";
-
 router.get("/overview", async (req, res) => {
+  let hospitalFilter: string | null = null;
+  if (req.role !== "admin") {
+    if (!req.username) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
+      return;
+    }
+    hospitalFilter = await getStaffHospitalId(req.username);
+    if (!hospitalFilter) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Staff not assigned to a hospital" });
+      return;
+    }
+  }
+
   const [highRiskPatients, recentVisits, [totalPatientsRow]] = await Promise.all([
-    db.select().from(patientsTable).where(gte(patientsTable.riskScore, 50)).orderBy(desc(patientsTable.riskScore)).limit(15),
-    db.select().from(visitsTable).orderBy(desc(visitsTable.visitDate)).limit(500),
-    db.select({ count: count() }).from(patientsTable),
+    db.select().from(patientsTable).where(
+      hospitalFilter 
+        ? and(gte(patientsTable.riskScore, 50), eq(patientsTable.hospitalId, hospitalFilter))
+        : gte(patientsTable.riskScore, 50)
+    ).orderBy(desc(patientsTable.riskScore)).limit(15),
+    db.select().from(visitsTable).where(
+      hospitalFilter ? eq(visitsTable.hospital, hospitalFilter) : undefined
+    ).orderBy(desc(visitsTable.visitDate)).limit(500),
+    db.select({ count: count() }).from(patientsTable).where(
+      hospitalFilter ? eq(patientsTable.hospitalId, hospitalFilter) : undefined
+    ),
   ]);
   const totalPatientCount = Number(totalPatientsRow?.count ?? 0);
+  const HOSPITAL_NAME = hospitalFilter || "SANAD Global Network";
 
   const today = new Date();
   const last30Days = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
