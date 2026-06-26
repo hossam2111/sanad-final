@@ -110,6 +110,19 @@ router.get("/patient/:nationalId", async (req, res) => {
   }
 
   const patient = patients[0]!;
+
+  if (req.role && ["doctor", "lab", "pharmacy"].includes(req.role)) {
+    if (!req.username) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
+      return;
+    }
+    const { getStaffHospitalId } = await import("../lib/ownership.js");
+    const hospitalId = await getStaffHospitalId(req.username);
+    if (!hospitalId || (patient.hospitalId !== null && patient.hospitalId !== hospitalId)) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Patient is registered at a different hospital" });
+      return;
+    }
+  }
   const labs = await db
     .select()
     .from(labResultsTable)
@@ -229,8 +242,9 @@ router.post("/result", validate(labResultSchema), async (req, res) => {
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
   await writeAudit({
-    who: "Lab Technician (Lab Portal)",
-    whoRole: "lab_technician",
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
     action: "CREATE",
     what: `Lab result uploaded: ${testName} = ${result} ${unit ?? ""} (${status.toUpperCase()})`,
     patientId,
