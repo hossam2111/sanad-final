@@ -121,15 +121,15 @@ export default function LabPortal() {
     "LDL Cholesterol", "Creatinine", "Hemoglobin", "eGFR", "Potassium", "Sodium"
   ];
   const CHART_COLORS: Record<string, string> = {
-    "HbA1c": "#e11d48",
-    "Fasting Glucose": "#f59e0b", "Fasting Blood Glucose": "#f59e0b",
-    "Total Cholesterol": "#8b5cf6",
-    "LDL Cholesterol": "#3b82f6",
-    "Creatinine": "#10b981",
-    "Hemoglobin": "#f97316",
-    "eGFR": "#06b6d4",
-    "Potassium": "#84cc16",
-    "Sodium": "#a855f7",
+    "HbA1c": "hsl(var(--destructive))",
+    "Fasting Glucose": "hsl(var(--warning))", "Fasting Blood Glucose": "hsl(var(--warning))",
+    "Total Cholesterol": "hsl(var(--violet-500))",
+    "LDL Cholesterol": "hsl(var(--primary))",
+    "Creatinine": "hsl(var(--success))",
+    "Hemoglobin": "hsl(var(--risk-high))",
+    "eGFR": "hsl(var(--cyan-500))",
+    "Potassium": "hsl(var(--lime-500))",
+    "Sodium": "hsl(var(--violet-500))",
   };
   const NORMAL_RANGES: Record<string, { min: number; max: number; unit: string }> = {
     "HbA1c": { min: 4.0, max: 5.7, unit: "%" },
@@ -261,7 +261,7 @@ export default function LabPortal() {
                 <div className="grid grid-cols-2 gap-5">
                   {chartsToShow.map(testName => {
                     const points = trendChartData[testName]!;
-                    const color = CHART_COLORS[testName] ?? "#6366f1";
+                    const color = CHART_COLORS[testName] ?? "hsl(var(--primary))";
                     const range = NORMAL_RANGES[testName];
                     const latest = points[points.length - 1];
                     const previous = points.length >= 2 ? points[points.length - 2] : null;
@@ -305,19 +305,19 @@ export default function LabPortal() {
                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" />
                             <XAxis
                               dataKey="date"
-                              tick={{ fontSize: 10, fill: "#94a3b8" }}
+                              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                               tickFormatter={d => d.slice(5)}
                             />
-                            <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} />
+                            <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                             <Tooltip
                               contentStyle={{ borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)", fontSize: 11 }}
                               formatter={(val: any) => [`${val} ${range?.unit ?? ""}`, testName]}
                             />
                             {range && range.max > 0 && (
-                              <ReferenceLine y={range.max} stroke="#f59e0b" strokeDasharray="4 2" strokeWidth={1.5} />
+                              <ReferenceLine y={range.max} stroke="hsl(var(--warning))" strokeDasharray="4 2" strokeWidth={1.5} />
                             )}
                             {range && range.min > 0 && (
-                              <ReferenceLine y={range.min} stroke="#10b981" strokeDasharray="4 2" strokeWidth={1.5} />
+                              <ReferenceLine y={range.min} stroke="hsl(var(--success))" strokeDasharray="4 2" strokeWidth={1.5} />
                             )}
                             <Line
                               type="monotone"
@@ -326,7 +326,7 @@ export default function LabPortal() {
                               strokeWidth={2.5}
                               dot={(props: any) => {
                                 const { cx, cy, payload } = props;
-                                const fill = payload.status === "critical" ? "#ef4444" : payload.status === "abnormal" ? "#f59e0b" : "#10b981";
+                                const fill = payload.status === "critical" ? "hsl(var(--destructive))" : payload.status === "abnormal" ? "hsl(var(--warning))" : "hsl(var(--success))";
                                 return <circle key={`dot-${cx}-${cy}`} cx={cx} cy={cy} r={5} fill={fill} stroke="white" strokeWidth={2} />;
                               }}
                               activeDot={{ r: 7, strokeWidth: 2 }}

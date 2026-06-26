@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
@@ -455,8 +455,8 @@ export default function PharmacyPortal() {
             )}
           </button>
           <div className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-card">
-            <Bell className={`w-3.5 h-3.5 ${sseConnected ? "text-success" : "text-gray-400"}`} />
-            <div className={`w-1.5 h-1.5 rounded-full ${sseConnected ? "bg-success animate-pulse" : "bg-gray-300"}`} />
+            <Bell className={`w-3.5 h-3.5 ${sseConnected ? "text-success" : "text-muted-foreground"}`} />
+            <div className={`w-1.5 h-1.5 rounded-full ${sseConnected ? "bg-success animate-pulse" : "bg-muted"}`} />
             <span className="text-muted-foreground">{sseConnected ? text("Live", "مباشر") : text("Connecting...", "جارٍ الاتصال...")}</span>
           </div>
         </div>
@@ -825,7 +825,7 @@ export default function PharmacyPortal() {
                   {(data.allMedications ?? data.prescriptions ?? []).map((med: any, i: number) => (
                     <div key={i} className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl border ${med.isActive ? "bg-card border-success/30" : "bg-muted/50 border-border opacity-70"}`}>
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${med.isActive ? "bg-purple-100" : "bg-muted"}`}>
-                        <Pill className={`w-4 h-4 ${med.isActive ? "text-purple-600" : "text-gray-400"}`} />
+                        <Pill className={`w-4 h-4 ${med.isActive ? "text-purple-600" : "text-muted-foreground"}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className={`font-bold text-sm ${med.isActive ? "text-foreground" : "text-muted-foreground"}`}>{med.drugName}</p>
@@ -851,7 +851,7 @@ export default function PharmacyPortal() {
                 {(data.prescriptions ?? []).map((presc: any, i: number) => {
                   const avail = presc.stockAvailability;
                   const pct = avail ? Math.min(100, Math.round((avail.daysOfStock / 45) * 100)) : 0;
-                  const barColor = !avail ? "bg-gray-300" : avail.status === "critical" ? "bg-danger" : avail.status === "low" ? "bg-risk-high" : "bg-success";
+                  const barColor = !avail ? "bg-muted" : avail.status === "critical" ? "bg-danger" : avail.status === "low" ? "bg-risk-high" : "bg-success";
                   return (
                     <div key={i} className={`px-4 py-4 rounded-2xl border ${avail?.status === "critical" ? "border-danger/30 bg-danger-bg" : avail?.status === "low" ? "border-risk-high/20 bg-risk-high-bg" : "border-border bg-card"}`}>
                       <div className="flex items-center justify-between mb-2">

@@ -567,7 +567,7 @@ export default function DoctorDashboard() {
                 </span>
               )}
             </button>
-            <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-success" : "bg-gray-300"}`} title={sseConnected ? text("Live", "مباشر") : text("Offline", "غير متصل")} />
+            <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-success" : "bg-muted"}`} title={sseConnected ? text("Live", "مباشر") : text("Offline", "غير متصل")} />
           </div>
         <form onSubmit={handleSearch} className="flex items-center gap-2">
           <div className="relative" ref={searchRef}>
@@ -801,10 +801,10 @@ export default function DoctorDashboard() {
                         <RiskBadge level={aiResult.riskLevel as "critical"|"high"|"medium"|"low"} />
                       </div>
                       <div>
-                        <p className="font-bold text-foreground text-sm flex items-center gap-1.5">
+                        <div className="font-bold text-foreground text-sm flex items-center gap-1.5">
                           {aiResult.urgency}
                           <button onClick={() => setShowAiExplanation(true)} title={text("View AI Methodology", "عرض منهجية الذكاء الاصطناعي")}><AlertCircle className="w-3.5 h-3.5 text-muted-foreground hover:text-primary transition-colors"/></button>
-                        </p>
+                        </div>
                         <p className="text-[12px] text-muted-foreground mt-0.5">{aiResult.primaryAction}</p>
                       </div>
                     </div>
@@ -878,101 +878,110 @@ export default function DoctorDashboard() {
 
       {patient && (
         <div className="space-y-5">
-          {/* Patient Banner */}
-          <Card>
-            <CardBody className="p-0">
-              <div className="flex items-stretch divide-x divide-border">
-                <div className="flex-1 p-5 flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <UserIcon className="w-7 h-7 text-primary" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-foreground mb-1">{patient.fullName}</h2>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs bg-secondary px-2.5 py-1 rounded-xl" dir="ltr">{patient.nationalId}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {text("DOB:", "تاريخ الميلاد:")} {format(safeDate(patient.dateOfBirth), "dd MMM yyyy")}
-                      </span>
-                      <span className="text-xs text-muted-foreground">· {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}</span>
-                      {(patient.allergies?.length ?? 0) > 0 && (
-                        <Badge variant="destructive">{text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}</Badge>
-                      )}
+          {/* Patient Banner - Clean Bento Box */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="md:col-span-3 bg-card border-border/50 shadow-sm overflow-hidden relative">
+              {/* Soft background gradient */}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
+              <CardBody className="p-0">
+                <div className="flex flex-col lg:flex-row">
+                  
+                  {/* Left Side: Avatar & Basic Info */}
+                  <div className="flex-1 p-6 flex flex-col lg:flex-row gap-6 lg:gap-10 z-10">
+                    {/* Left: Avatar & Identity */}
+                    <div className="flex items-center gap-5 shrink-0">
+                      <div className="relative">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 shadow-sm flex items-center justify-center relative overflow-hidden">
+                          <UserIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary/60" />
+                        </div>
+                        <div className={`absolute -bottom-2 -right-2 text-white text-[11px] px-2.5 py-0.5 rounded-lg font-bold shadow-md ring-2 ring-background ${patient.gender === "male" ? "bg-blue-600" : "bg-pink-600"}`}>
+                          {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col justify-center">
+                        <div className="flex items-center gap-3 mb-1.5">
+                          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">{patient.fullName}</h2>
+                          {(patient.allergies?.length ?? 0) > 0 && (
+                            <Badge variant="destructive" className="h-6 px-3 text-[11px] font-bold tracking-wide rounded-full shadow-sm animate-in zoom-in">
+                              {text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-sm">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-muted-foreground/70 uppercase tracking-widest text-[10px] font-bold">{text("ID", "رقم الهوية")}</span>
+                            <span className="font-mono text-foreground font-semibold">{patient.nationalId}</span>
+                          </div>
+                          <div className="w-1 h-1 rounded-full bg-border" />
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-muted-foreground/70 uppercase tracking-widest text-[10px] font-bold">{text("DOB", "تاريخ الميلاد")}</span>
+                            <span className="font-mono text-foreground font-semibold">{format(safeDate(patient.dateOfBirth), "yyyy/MM/dd")}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Middle: Key Demographics Grid */}
+                    <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
+                      <div className="bg-secondary/40 rounded-xl p-3 border border-border/40">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Age", "العمر")}</p>
+                        <p className="text-xl font-black text-foreground">
+                          {Math.floor((new Date().getTime() - new Date(patient.dateOfBirth).getTime()) / 3.15576e+10)} <span className="text-xs font-semibold text-muted-foreground">{text("Yrs", "سنة")}</span>
+                        </p>
+                      </div>
+                      <div className="bg-secondary/40 rounded-xl p-3 border border-border/40">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Blood", "فصيلة الدم")}</p>
+                        <p className="text-xl font-black text-danger" dir="ltr">{patient.bloodType}</p>
+                      </div>
+                      <div className="col-span-2 flex flex-col justify-center gap-2">
+                        <PrescribeModal patientId={patient.id} nationalId={patient.nationalId} />
+                        <Button variant="outline" className="w-full rounded-xl shadow-sm font-bold border-border bg-background hover:bg-secondary transition-colors">
+                          <CalendarDays className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" /> {text("Book Appointment", "حجز موعد")}
+                        </Button>
+                      </div>
                     </div>
                   </div>
+                  
                 </div>
+              </CardBody>
+            </Card>
 
-                <div className="px-6 py-4 flex flex-col items-center justify-center bg-destructive/10 min-w-[90px]">
-                  <DataLabel label={text("Blood Type", "فصيلة الدم")}>
-                    <p className="text-3xl font-bold text-danger" dir="ltr">{patient.bloodType}</p>
-                  </DataLabel>
+            {/* Quick Risk Score Card */}
+            {riskScore && (
+              <Card className="bg-secondary/20">
+                <CardBody className="p-6 flex flex-col items-center justify-center h-full text-center">
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                    {text("Clinical Index", "المؤشر السريري")}
+                  </p>
+                  <p className="text-4xl font-bold tabular-nums text-foreground tracking-tight mb-2" dir="ltr">
+                    {riskScore.riskScore}<span className="text-lg font-normal text-muted-foreground">/100</span>
+                  </p>
+                  <RiskBadge level={riskScore.riskLevel as "critical" | "high" | "medium" | "low"} className="px-3" />
+                </CardBody>
+              </Card>
+            )}
+          </div>
+
+          {/* Compact Stats Bar */}
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {[
+              { label: text("Medications", "الأدوية"), value: activeMeds.length, icon: Pill },
+              { label: text("Labs", "المختبر"), value: labResults.length, icon: FlaskConical },
+              { label: text("Visits", "الزيارات"), value: patient.visits?.length ?? 0, icon: Building2 },
+              { label: text("Predictions", "التنبؤات"), value: predictions.length, icon: Brain },
+              { label: text("Alerts", "التنبيهات"), value: unreadAlerts, icon: Bell },
+            ].map((stat, i) => (
+              <div key={i} className="flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border shadow-sm">
+                <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                  <stat.icon className="w-4 h-4 text-muted-foreground" />
                 </div>
-
-                {riskScore && (
-                  <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[120px] bg-secondary/40">
-                    <DataLabel label={text("Clinical Priority Index", "مؤشر الأولوية السريرية")}>
-                      <p className="text-3xl font-bold tabular-nums text-foreground" dir="ltr">
-                        {riskScore.riskScore}<span className="text-base font-normal text-muted-foreground">/100</span>
-                      </p>
-                    </DataLabel>
-                    <RiskBadge
-                      level={riskScore.riskLevel as "critical" | "high" | "medium" | "low"}
-                      className="mt-2"
-                    />
-                  </div>
-                )}
-
-                <div className="px-5 py-4 flex flex-col justify-center gap-2 min-w-[160px]">
-                  <PrescribeModal patientId={patient.id} nationalId={patient.nationalId} />
-                  <Button variant="outline" size="sm">
-                    <CalendarDays className="w-3.5 h-3.5" /> {text("Schedule Visit", "جدولة زيارة")}
-                  </Button>
+                <div>
+                  <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">{stat.label}</p>
+                  <p className="text-[15px] font-semibold text-foreground leading-tight">{stat.value}</p>
                 </div>
               </div>
-            </CardBody>
-          </Card>
-
-          {/* KPI Row */}
-          <div className="grid grid-cols-5 gap-4">
-            <KpiCard
-              title={text("Active Medications", "الأدوية الفعّالة")}
-              value={activeMeds.length}
-              sub={text("Current prescriptions", "الوصفات الحالية")}
-              icon={Pill}
-              iconBg="bg-primary/10"
-              iconColor="text-primary"
-            />
-            <KpiCard
-              title={text("Lab Results", "نتائج المختبر")}
-              value={labResults.length}
-              sub={text(`${criticalLabs} critical · ${abnormalLabs} abnormal`, `${criticalLabs} حرجة · ${abnormalLabs} غير طبيعية`)}
-              icon={FlaskConical}
-              iconBg={criticalLabs > 0 ? "bg-danger-bg" : "bg-info-bg"}
-              iconColor={criticalLabs > 0 ? "text-danger" : "text-info"}
-            />
-            <KpiCard
-              title={text("Visit History", "سجل الزيارات")}
-              value={patient.visits?.length ?? 0}
-              sub={text("Total hospital visits", "إجمالي الزيارات")}
-              icon={Building2}
-              iconBg="bg-success-bg"
-              iconColor="text-success"
-            />
-            <KpiCard
-              title={text("AI Predictions", "التنبؤات الذكية")}
-              value={predictions.length}
-              sub={text(`${criticalPredictions} high priority`, `${criticalPredictions} عالية الأولوية`)}
-              icon={Brain}
-              iconBg={criticalPredictions > 0 ? "bg-risk-high-bg" : "bg-violet-100"}
-              iconColor={criticalPredictions > 0 ? "text-risk-high" : "text-violet-600"}
-            />
-            <KpiCard
-              title={text("Active Alerts", "التنبيهات النشطة")}
-              value={unreadAlerts}
-              sub={text(`${alerts.length} total alerts`, `${alerts.length} إجمالي التنبيهات`)}
-              icon={Bell}
-              iconBg={unreadAlerts > 0 ? "bg-danger-bg" : "bg-secondary"}
-              iconColor={unreadAlerts > 0 ? "text-danger" : "text-muted-foreground"}
-            />
+            ))}
           </div>
 
           {/* Tabbed Content */}
@@ -1016,82 +1025,66 @@ export default function DoctorDashboard() {
 
             {activeTab === "overview" && (
               <div className="divide-y divide-border">
-                {/* Clinical Decision Panel */}
+                {/* Clinical Decision Panel - Cleaned Up */}
                 {riskScore && (
-                  <div className="p-5 bg-secondary/30">
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                        <Brain className="w-3.5 h-3.5 text-violet-600" /> {text("Clinical Intelligence — Decision Summary", "التحليلات السريرية — ملخّص القرار")}
-                      </p>
+                  <div className="p-6">
+                    <div className="mb-5 flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                        <Brain className="w-4 h-4 text-muted-foreground" /> 
+                        {text("AI Clinical Summary", "ملخّص الذكاء الاصطناعي السريري")}
+                      </h3>
                       <button
                         type="button"
                         onClick={() => setActiveTab("intelligence")}
-                        className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:text-primary/80"
+                        className="text-xs font-medium text-primary hover:underline flex items-center gap-1"
                       >
-                        {text("Full analysis", "التحليل الكامل")} <ChevronRight className="h-3 w-3" />
+                        {text("View Full Analysis", "عرض التحليل الكامل")} <ChevronRight className="h-3 w-3" />
                       </button>
                     </div>
-                    <div className="flex items-stretch gap-4">
-                      {/* Score Block */}
-                      <div className="rounded-2xl px-6 py-4 flex flex-col items-center justify-center min-w-[130px] shrink-0 bg-risk-critical-bg border border-risk-critical/20"
-                        style={{
-                          background: `hsl(var(--risk-${riskScore.riskLevel}-bg))`,
-                          borderColor: `hsl(var(--risk-${riskScore.riskLevel}) / 0.2)`,
-                        }}>
-                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-1.5 justify-center">
-                          {text("Priority Index", "مؤشر الأولوية")}
-                          <button onClick={() => setShowAiExplanation(true)} title={text("View AI Methodology", "عرض منهجية الذكاء الاصطناعي")}><AlertCircle className="w-3.5 h-3.5 hover:text-foreground transition-colors" /></button>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Risk Factors List */}
+                      <div>
+                        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                          {text("Key Risk Factors", "عوامل الخطورة الرئيسية")}
                         </p>
-                        <p className="text-5xl font-bold tabular-nums leading-none" dir="ltr"
-                          style={{ color: `hsl(var(--risk-${riskScore.riskLevel}))` }}>
-                          {riskScore.riskScore}
-                        </p>
-                        <p className="text-muted-foreground text-xs mt-1">/ 100</p>
-                        <RiskBadge
-                          level={riskScore.riskLevel as "critical" | "high" | "medium" | "low"}
-                          className="mt-3"
-                        />
-                      </div>
-
-                      {/* WHY Block */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                          <TriangleAlert className="w-3 h-3 text-risk-high" /> {text("WHY — Top Risk Factors", "المُبرّرات — أبرز عوامل الخطورة")}
-                        </p>
-                        <div className="space-y-1.5">
+                        <div className="space-y-2.5">
                           {riskScore.factors.slice(0, 4).map((f: any, i: number) => (
-                            <div key={i} className="flex items-center gap-2.5 px-3 py-2 bg-card/70 border border-border rounded-xl">
-                              <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                            <div key={i} className="flex items-start gap-2.5 text-sm">
+                              <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${
                                 f.impact === "high" ? "bg-danger" :
-                                f.impact === "moderate" ? "bg-risk-high" : "bg-primary"
+                                f.impact === "moderate" ? "bg-warning" : "bg-info"
                               }`} />
-                              <span className="text-xs font-semibold text-foreground flex-1 truncate">{f.factor}</span>
-                              <Badge variant={f.impact === "high" ? "destructive" : f.impact === "moderate" ? "warning" : "info"} className="text-[9px] shrink-0">{f.impact === "high" ? text("high", "مرتفع") : f.impact === "moderate" ? text("moderate", "متوسط") : text("low", "منخفض")}</Badge>
+                              <span className="text-foreground leading-relaxed">{f.factor}</span>
                             </div>
                           ))}
                           {riskScore.factors.length === 0 && (
-                            <p className="text-xs text-muted-foreground px-2">{text("No significant risk factors detected.", "لم تُرصد عوامل خطورة جوهرية.")}</p>
+                            <p className="text-sm text-muted-foreground">{text("No significant risk factors detected.", "لم تُرصد عوامل خطورة جوهرية.")}</p>
                           )}
                         </div>
                       </div>
 
-                      {/* ACTION Block */}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                          <ChevronRight className="w-3 h-3 text-primary" /> {text("RECOMMENDED ACTIONS", "الإجراءات الموصى بها")}
+                      {/* Recommendations List */}
+                      <div>
+                        <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                          {text("Recommended Actions", "الإجراءات الموصى بها")}
                         </p>
-                        <div className="space-y-1.5">
+                        <div className="space-y-2.5">
                           {riskScore.recommendations.slice(0, 3).map((rec: string, i: number) => (
-                            <div key={i} className="flex items-start gap-2 px-3 py-2 bg-card/70 border border-border rounded-xl">
-                              <Lightbulb className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                              <p className="text-xs text-foreground leading-snug">{rec}</p>
+                            <div key={i} className="flex items-start gap-2.5 text-sm">
+                              <div className="mt-1 w-4 h-4 rounded-full bg-secondary flex items-center justify-center shrink-0">
+                                <CheckCheck className="w-2.5 h-2.5 text-muted-foreground" />
+                              </div>
+                              <span className="text-foreground leading-relaxed">{rec}</span>
                             </div>
                           ))}
                         </div>
                         {topPredictions.length > 0 && (
-                          <div className="mt-2 px-3 py-2 bg-risk-high-bg/60 border border-risk-high/20 rounded-xl">
-                            <p className="text-[10px] font-bold text-risk-high uppercase tracking-wide mb-1">{text("AI Alert", "تنبيه ذكي")}</p>
-                            <p className="text-xs text-risk-high font-medium">{topPredictions[0]?.title}</p>
+                          <div className="mt-4 px-4 py-3 bg-risk-high-bg/60 border border-risk-high/20 rounded-xl">
+                            <p className="text-[10px] font-bold text-risk-high uppercase tracking-wide mb-1 flex items-center gap-1.5">
+                              <AlertCircle className="w-3 h-3" /> {text("AI Alert", "تنبيه ذكي")}
+                            </p>
+                            <p className="text-[13px] text-risk-high font-medium">{topPredictions[0]?.title}</p>
                           </div>
                         )}
                       </div>

@@ -457,7 +457,7 @@ export default function CitizenPortal() {
                   </span>
                 )}
               </button>
-              <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-success" : "bg-gray-300"}`} />
+              <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-success" : "bg-muted"}`} />
             </div>
             <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }}>
               {text("Sign Out", "تسجيل الخروج")}
@@ -510,22 +510,41 @@ export default function CitizenPortal() {
       {/* Identity + Score Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-5">
         <Card className="col-span-full lg:col-span-7">
-          <CardBody className="flex items-center gap-4 p-5">
-            <div className="w-14 h-14 rounded-3xl bg-risk-high-bg flex items-center justify-center shrink-0">
-              <User className="w-7 h-7 text-risk-high" />
+          <CardBody className="flex flex-col sm:flex-row items-start sm:items-center gap-5 p-6">
+            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <User className="w-8 h-8 text-primary" />
             </div>
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-foreground mb-1.5">{patient.fullName}</h2>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="font-mono bg-secondary text-xs px-2.5 py-1 rounded-xl" dir="ltr">{patient.nationalId}</span>
-                <span className="text-xs text-muted-foreground">{text("DOB:", "تاريخ الميلاد:")} {format(new Date(patient.dateOfBirth), "dd MMM yyyy")}</span>
-                <span className="text-xs text-muted-foreground">· {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}</span>
-                <span className="text-xs font-bold text-danger bg-danger-bg px-2.5 py-0.5 rounded-full">{text("Blood:", "فصيلة الدم:")} <span dir="ltr">{patient.bloodType}</span></span>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-2xl font-bold text-foreground">{patient.fullName}</h2>
+                {(patient.allergies?.length ?? 0) > 0 && (
+                  <Badge variant="destructive" className="h-6 px-2.5">
+                    {text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-foreground">{text("ID:", "الهوية:")}</span>
+                  <span className="font-mono bg-secondary px-2 py-0.5 rounded-md" dir="ltr">{patient.nationalId}</span>
+                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 hidden sm:block"></div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-foreground">{text("DOB:", "الميلاد:")}</span>
+                  <span>{format(new Date(patient.dateOfBirth), "dd MMM yyyy")}</span>
+                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 hidden sm:block"></div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-foreground">{text("Gender:", "الجنس:")}</span>
+                  <span>{patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}</span>
+                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 hidden sm:block"></div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-medium text-danger">{text("Blood:", "فصيلة الدم:")}</span>
+                  <span className="font-bold text-danger bg-danger-bg px-2 py-0.5 rounded-md" dir="ltr">{patient.bloodType}</span>
+                </div>
               </div>
             </div>
-            {(patient.allergies?.length ?? 0) > 0 && (
-              <Badge variant="destructive">{text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}</Badge>
-            )}
           </CardBody>
         </Card>
 
@@ -535,10 +554,10 @@ export default function CitizenPortal() {
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("AI Health Score", "درجتك الصحية")}</p>
               <div className="relative w-24 h-24 mb-2">
                 <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90">
-                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E5E7EB" strokeWidth="2.5" />
+                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="hsl(var(--border))" strokeWidth="2.5" />
                   <circle
                     cx="18" cy="18" r="15.9" fill="none"
-                    stroke={healthScore.score >= 85 ? "#22c55e" : healthScore.score >= 70 ? "#38bdf8" : healthScore.score >= 55 ? "#f59e0b" : healthScore.score >= 40 ? "#f97316" : "#ef4444"}
+                    stroke={healthScore.score >= 85 ? "hsl(var(--success))" : healthScore.score >= 70 ? "hsl(var(--info))" : healthScore.score >= 55 ? "hsl(var(--warning))" : healthScore.score >= 40 ? "hsl(var(--risk-high))" : "hsl(var(--destructive))"}
                     strokeWidth="2.5"
                     strokeDasharray={`${healthScore.score} 100`}
                     strokeLinecap="round"
@@ -729,10 +748,10 @@ export default function CitizenPortal() {
               <div className="flex-shrink-0">
                 <div className="relative w-20 h-20">
                   <svg viewBox="0 0 36 36" className="w-20 h-20 -rotate-90">
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E5E7EB" strokeWidth="2.5" />
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="hsl(var(--border))" strokeWidth="2.5" />
                     <circle
                       cx="18" cy="18" r="15.9" fill="none"
-                      stroke={healthScore.score >= 85 ? "#22c55e" : healthScore.score >= 70 ? "#38bdf8" : healthScore.score >= 55 ? "#f59e0b" : healthScore.score >= 40 ? "#f97316" : "#ef4444"}
+                      stroke={healthScore.score >= 85 ? "hsl(var(--success))" : healthScore.score >= 70 ? "hsl(var(--info))" : healthScore.score >= 55 ? "hsl(var(--warning))" : healthScore.score >= 40 ? "hsl(var(--risk-high))" : "hsl(var(--destructive))"}
                       strokeWidth="2.5"
                       strokeDasharray={`${healthScore.score} 100`}
                       strokeLinecap="round"

@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -314,14 +314,14 @@ export default function SupplyChainPortal() {
                   <div className="h-48">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <LineChart data={CONSUMPTION_TREND} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 9 }} />
-                        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 11 }} />
-                        <Line type="monotone" dataKey="metformin" stroke="#007AFF" strokeWidth={2} dot={false} name="Metformin" />
-                        <Line type="monotone" dataKey="insulin" stroke="#ef4444" strokeWidth={2} dot={false} name="Insulin" />
-                        <Line type="monotone" dataKey="lisinopril" stroke="#10b981" strokeWidth={2} dot={false} name="Lisinopril" />
-                        <Line type="monotone" dataKey="atorvastatin" stroke="#8b5cf6" strokeWidth={2} dot={false} name="Atorvastatin" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }} />
+                        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", fontSize: 11 }} />
+                        <Line type="monotone" dataKey="metformin" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Metformin" />
+                        <Line type="monotone" dataKey="insulin" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} name="Insulin" />
+                        <Line type="monotone" dataKey="lisinopril" stroke="hsl(var(--success))" strokeWidth={2} dot={false} name="Lisinopril" />
+                        <Line type="monotone" dataKey="atorvastatin" stroke="hsl(var(--violet-500))" strokeWidth={2} dot={false} name="Atorvastatin" />
                       </LineChart>
                     </ResponsiveContainer></div>
                   </div>
@@ -378,15 +378,15 @@ export default function SupplyChainPortal() {
               <div className="min-h-[350px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={(data?.shortagePredictions ?? []) as ShortagePrediction[]} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                    <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                    <YAxis dataKey="drug" type="category" axisLine={false} tickLine={false} tick={{ fill: "#374151", fontSize: 10, fontWeight: 500 }} width={135} />
-                    <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
+                    <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                    <YAxis dataKey="drug" type="category" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={135} />
+                    <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                     <Legend />
-                    <Bar dataKey="current" fill="#10b981" radius={[0, 4, 4, 0]} barSize={10} name="Now" />
-                    <Bar dataKey="day30" fill="#007AFF" radius={[0, 4, 4, 0]} barSize={10} name="30 Days" />
-                    <Bar dataKey="day60" fill="#f59e0b" radius={[0, 4, 4, 0]} barSize={10} name="60 Days" />
-                    <Bar dataKey="day90" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={10} name="90 Days" />
+                    <Bar dataKey="current" fill="hsl(var(--success))" radius={[0, 4, 4, 0]} barSize={10} name="Now" />
+                    <Bar dataKey="day30" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={10} name="30 Days" />
+                    <Bar dataKey="day60" fill="hsl(var(--warning))" radius={[0, 4, 4, 0]} barSize={10} name="60 Days" />
+                    <Bar dataKey="day90" fill="hsl(var(--destructive))" radius={[0, 4, 4, 0]} barSize={10} name="90 Days" />
                   </BarChart>
                 </ResponsiveContainer></div>
               </div>
@@ -457,15 +457,15 @@ export default function SupplyChainPortal() {
                   ) : (
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <BarChart data={regionalDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                        <XAxis dataKey="region" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }}
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                        <XAxis dataKey="region" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                        <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }}
                           formatter={(value: any, name: string) => [value.toLocaleString(), name]} />
                         <Legend />
                         <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1} />
-                        <Bar dataKey="stock" fill="#10b981" radius={[4, 4, 0, 0]} barSize={22} name="Stock (units)" />
-                        <Bar dataKey="demand" fill="#007AFF" radius={[4, 4, 0, 0]} barSize={22} name="Demand (units)" />
+                        <Bar dataKey="stock" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} barSize={22} name="Stock (units)" />
+                        <Bar dataKey="demand" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={22} name="Demand (units)" />
                       </BarChart>
                     </ResponsiveContainer></div>
                   )}

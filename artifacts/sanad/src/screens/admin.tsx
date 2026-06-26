@@ -12,8 +12,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/language-context";
 
-const COLORS = ["#007AFF", "#34C759", "#FF9500", "#FF3B30", "#5856D6", "#32ADE6", "#AF52DE"];
-const RISK_COLORS = { Low: "#22c55e", Medium: "#f59e0b", High: "#f97316", Critical: "#ef4444" };
+const COLORS = ["hsl(var(--primary))", "hsl(var(--success))", "hsl(var(--warning))", "hsl(var(--destructive))", "hsl(var(--accent))", "hsl(var(--info))", "hsl(var(--primary))"];
+const RISK_COLORS = { Low: "hsl(var(--success))", Medium: "hsl(var(--warning))", High: "hsl(var(--risk-high))", Critical: "hsl(var(--destructive))" };
 
 // KSA Region approximate SVG coordinates (simplified polygon centroids)
 const KSA_REGIONS: Record<string, { cx: number; cy: number; label: string; labelAr: string; r: number }> = {
@@ -33,10 +33,10 @@ const KSA_REGIONS: Record<string, { cx: number; cy: number; label: string; label
 };
 
 const RISK_FILL: Record<string, string> = {
-  critical: "#ef4444",
-  high:     "#f97316",
-  medium:   "#f59e0b",
-  low:      "#22c55e",
+  critical: "hsl(var(--risk-critical))",
+  high:     "hsl(var(--risk-high))",
+  medium:   "hsl(var(--risk-medium))",
+  low:      "hsl(var(--risk-low))",
 };
 
 function KSAHeatmap({ regions }: { regions: any[] }) {
@@ -76,7 +76,7 @@ function KSAHeatmap({ regions }: { regions: any[] }) {
         {Object.entries(KSA_REGIONS).map(([name, pos]) => {
           const data = regionMap[name];
           if (!data) return null;
-          const fill = RISK_FILL[data.riskLevel] ?? "#94a3b8";
+          const fill = RISK_FILL[data.riskLevel] ?? "hsl(var(--muted-foreground))";
           const isHov = hovered === name;
 
           return (
@@ -446,12 +446,12 @@ export default function AdminDashboard() {
               <div className="min-h-[300px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={popHealth.monthlyVisitTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                    <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
-                    <Line type="monotone" dataKey="visits" stroke="#007AFF" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                    <Line type="monotone" dataKey="emergency" stroke="#FF3B30" strokeWidth={2.5} dot={{ r: 3 }} strokeDasharray="5 3" />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                    <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
+                    <Line type="monotone" dataKey="visits" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                    <Line type="monotone" dataKey="emergency" stroke="hsl(var(--destructive))" strokeWidth={2.5} dot={{ r: 3 }} strokeDasharray="5 3" />
                   </LineChart>
                 </ResponsiveContainer></div>
               </div>
@@ -468,7 +468,7 @@ export default function AdminDashboard() {
                     <Pie data={popHealth.bloodTypeDistribution} innerRadius={50} outerRadius={70} paddingAngle={3} dataKey="count" nameKey="bloodType">
                       {popHealth.bloodTypeDistribution.map((_: any, i: number) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
                     </Pie>
-                    <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                    <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                   </PieChart>
                 </ResponsiveContainer></div>
               </div>
@@ -512,11 +512,11 @@ export default function AdminDashboard() {
               <div className="min-h-[350px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={popHealth.conditionBreakdown} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                     <XAxis type="number" hide />
-                    <YAxis dataKey="condition" type="category" axisLine={false} tickLine={false} tick={{ fill: "#374151", fontSize: 11, fontWeight: 500 }} width={130} />
-                    <RechartsTooltip cursor={{ fill: "#F1F5F9" }} contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
-                    <Bar dataKey="count" fill="#007AFF" radius={[0, 6, 6, 0]} barSize={16} />
+                    <YAxis dataKey="condition" type="category" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={130} />
+                    <RechartsTooltip cursor={{ fill: "hsl(var(--secondary))" }} contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={16} />
                   </BarChart>
                 </ResponsiveContainer></div>
               </div>
@@ -530,11 +530,11 @@ export default function AdminDashboard() {
               <div className="min-h-[320px] h-full w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={popHealth.ageDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} dy={8} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                    <RechartsTooltip cursor={{ fill: "#F1F5F9" }} contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
-                    <Bar dataKey="count" fill="#007AFF" radius={[6, 6, 0, 0]} barSize={34} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} dy={8} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                    <RechartsTooltip cursor={{ fill: "hsl(var(--secondary))" }} contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} barSize={34} />
                   </BarChart>
                 </ResponsiveContainer></div>
               </div>
@@ -555,11 +555,11 @@ export default function AdminDashboard() {
                       <Pie data={stats.riskDistribution} innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="count" nameKey="level"
                         label={({ percent }) => percent > 0.15 ? `${(percent * 100).toFixed(0)}%` : ""} labelLine={false}>
                         {stats.riskDistribution.map((entry: any, i: number) => (
-                          <Cell key={i} fill={RISK_COLORS[entry.level as keyof typeof RISK_COLORS] || "#94a3b8"} />
+                          <Cell key={i} fill={RISK_COLORS[entry.level as keyof typeof RISK_COLORS] || "hsl(var(--muted-foreground))"} />
                         ))}
                       </Pie>
                       <RechartsTooltip formatter={(value: any, name: any) => [`${value} patients`, name]}
-                        contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                        contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                     </PieChart>
                   </ResponsiveContainer></div>
                 </div>

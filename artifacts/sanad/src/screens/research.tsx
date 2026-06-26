@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -282,11 +282,11 @@ export default function ResearchPortal() {
                     <div className="min-h-[320px] h-full w-full py-4">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data?.conditionInsights?.slice(0, 8)} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                           <XAxis type="number" hide />
-                          <YAxis dataKey="condition" type="category" axisLine={false} tickLine={false} tick={{ fill: "#374151", fontSize: 10, fontWeight: 500 }} width={155} />
-                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} formatter={(v: any) => [`${v}%`, "Prevalence"]} />
-                          <Bar dataKey="prevalence" fill="#0d9488" radius={[0, 6, 6, 0]} barSize={14} />
+                          <YAxis dataKey="condition" type="category" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 10, fontWeight: 500 }} width={155} />
+                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any) => [`${v}%`, "Prevalence"]} />
+                          <Bar dataKey="prevalence" fill="hsl(var(--teal-600))" radius={[0, 6, 6, 0]} barSize={14} />
                         </BarChart>
                       </ResponsiveContainer></div>
                     </div>
@@ -322,13 +322,13 @@ export default function ResearchPortal() {
                   <div className="min-h-[320px] h-full w-full py-4">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data?.labInsights} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                        <XAxis dataKey="test" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} angle={-20} textAnchor="end" dy={8} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                        <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n === "abnormalRate" ? "Abnormal Rate" : "Critical Rate"]} />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                        <XAxis dataKey="test" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} angle={-20} textAnchor="end" dy={8} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                        <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n === "abnormalRate" ? "Abnormal Rate" : "Critical Rate"]} />
                         <Legend />
-                        <Bar dataKey="abnormalRate" fill="#f59e0b" radius={[4, 4, 0, 0]} barSize={28} name="Abnormal Rate" />
-                        <Bar dataKey="criticalRate" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={28} name="Critical Rate" />
+                        <Bar dataKey="abnormalRate" fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} barSize={28} name="Abnormal Rate" />
+                        <Bar dataKey="criticalRate" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} barSize={28} name="Critical Rate" />
                       </BarChart>
                     </ResponsiveContainer></div>
                   </div>
@@ -342,11 +342,11 @@ export default function ResearchPortal() {
                   <div className="min-h-[320px] h-full w-full py-4">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data?.drugPatterns} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                         <XAxis type="number" hide />
-                        <YAxis dataKey="drug" type="category" axisLine={false} tickLine={false} tick={{ fill: "#374151", fontSize: 11, fontWeight: 500 }} width={175} />
-                        <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
-                        <Bar dataKey="prescriptions" fill="#007AFF" radius={[0, 6, 6, 0]} barSize={14} name="Prescriptions" />
+                        <YAxis dataKey="drug" type="category" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={175} />
+                        <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
+                        <Bar dataKey="prescriptions" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={14} name="Prescriptions" />
                       </BarChart>
                     </ResponsiveContainer></div>
                   </div>
@@ -360,11 +360,11 @@ export default function ResearchPortal() {
                   <div className="min-h-[320px] h-full w-full py-4">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data?.ageRiskData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                        <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                        <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                        <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
-                        <Bar dataKey="avgRiskScore" fill="#f97316" radius={[6, 6, 0, 0]} barSize={50} name="Avg Priority Index" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                        <XAxis dataKey="ageGroup" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                        <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
+                        <Bar dataKey="avgRiskScore" fill="hsl(var(--risk-high))" radius={[6, 6, 0, 0]} barSize={50} name="Avg Priority Index" />
                       </BarChart>
                     </ResponsiveContainer></div>
                   </div>
@@ -479,31 +479,31 @@ export default function ResearchPortal() {
                   <AreaChart data={POPULATION_TRENDS} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <defs>
                       <linearGradient id="colorDiabetes" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+                        <stop offset="5%" stopColor="hsl(var(--warning))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--warning))" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorHypertension" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                        <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorCKD" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                        <stop offset="5%" stopColor="hsl(var(--violet-500))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--violet-500))" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorObesity" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#007AFF" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#007AFF" stopOpacity={0} />
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} unit="%" />
-                    <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n]} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} unit="%" />
+                    <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n]} />
                     <Legend />
-                    <Area type="monotone" dataKey="diabetes" stroke="#f59e0b" fill="url(#colorDiabetes)" strokeWidth={2.5} name="Type-2 Diabetes" />
-                    <Area type="monotone" dataKey="hypertension" stroke="#ef4444" fill="url(#colorHypertension)" strokeWidth={2.5} name="Hypertension" />
+                    <Area type="monotone" dataKey="diabetes" stroke="hsl(var(--warning))" fill="url(#colorDiabetes)" strokeWidth={2.5} name="Type-2 Diabetes" />
+                    <Area type="monotone" dataKey="hypertension" stroke="hsl(var(--destructive))" fill="url(#colorHypertension)" strokeWidth={2.5} name="Hypertension" />
                     <Area type="monotone" dataKey="ckd" stroke="#8b5cf6" fill="url(#colorCKD)" strokeWidth={2.5} name="CKD" />
-                    <Area type="monotone" dataKey="obesity" stroke="#007AFF" fill="url(#colorObesity)" strokeWidth={2.5} name="Obesity" />
+                    <Area type="monotone" dataKey="obesity" stroke="hsl(var(--primary))" fill="url(#colorObesity)" strokeWidth={2.5} name="Obesity" />
                   </AreaChart>
                 </ResponsiveContainer></div>
               </div>
@@ -637,13 +637,13 @@ export default function ResearchPortal() {
                 <div className="min-h-[350px] h-full w-full py-4">
                   <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                     <RadarChart data={COHORT_RADAR}>
-                      <PolarGrid stroke="#E2E8F0" />
-                      <PolarAngleAxis dataKey="metric" tick={{ fill: "#374151", fontSize: 11 }} />
-                      <PolarRadiusAxis angle={90} domain={[0, 80]} tick={{ fill: "#94A3B8", fontSize: 9 }} />
-                      <Radar name="AI Cohort" dataKey="A" stroke="#ef4444" fill="#ef4444" fillOpacity={0.15} strokeWidth={2} />
-                      <Radar name="Standard Care" dataKey="B" stroke="#007AFF" fill="#007AFF" fillOpacity={0.15} strokeWidth={2} />
+                      <PolarGrid stroke="hsl(var(--border))" />
+                      <PolarAngleAxis dataKey="metric" tick={{ fill: "hsl(var(--success))", fontSize: 11 }} />
+                      <PolarRadiusAxis angle={90} domain={[0, 80]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }} />
+                      <Radar name="AI Cohort" dataKey="A" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.15} strokeWidth={2} />
+                      <Radar name="Standard Care" dataKey="B" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} strokeWidth={2} />
                       <Legend />
-                      <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n]} />
+                      <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n]} />
                     </RadarChart>
                   </ResponsiveContainer></div>
                 </div>

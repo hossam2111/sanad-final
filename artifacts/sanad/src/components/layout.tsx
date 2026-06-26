@@ -180,6 +180,11 @@ export function Layout({ children, role, localized = false }: { children: React.
   const bellRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const qc = useQueryClient();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { data: alertsData } = useQuery({
     queryKey: ["system-alerts"],
@@ -360,7 +365,7 @@ export function Layout({ children, role, localized = false }: { children: React.
               aria-label="Toggle dark mode"
               className="h-8 w-8 rounded-full bg-card border border-border"
             >
-              {theme === "dark" ? <Sun className="h-3.5 w-3.5 text-muted-foreground" /> : <Moon className="h-3.5 w-3.5 text-muted-foreground" />}
+              {mounted ? (theme === "dark" ? <Sun className="h-3.5 w-3.5 text-muted-foreground" /> : <Moon className="h-3.5 w-3.5 text-muted-foreground" />) : <span className="w-3.5 h-3.5" />}
             </Button>
 
             {/* Alerts Bell */}

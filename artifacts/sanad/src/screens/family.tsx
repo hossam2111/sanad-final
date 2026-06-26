@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Input, Button, Badge, PageHeader, DataLabel , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -34,9 +34,9 @@ async function fetchFamilyData(nationalId: string) {
 }
 
 const RISK_CONFIG = {
-  high: { color: "text-danger", bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, dot: "bg-danger", bar: "#ef4444" },
-  medium: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high", bar: "#f59e0b" },
-  low: { color: "text-success", bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, dot: "bg-success", bar: "#22c55e" },
+  high: { color: "text-danger", bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, dot: "bg-danger", bar: "hsl(var(--destructive))" },
+  medium: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high", bar: "hsl(var(--warning))" },
+  low: { color: "text-success", bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, dot: "bg-success", bar: "hsl(var(--success))" },
 };
 
 const STATUS_CONFIG = {
@@ -173,8 +173,6 @@ export default function FamilyPortal() {
       {isLoading && <div className="p-5"><SkeletonCard rows={3} /></div>}
       {isError && nationalId && (
         consentRequired ? (
-          // The consent gate is a feature, not a failure: record access here is
-          // controlled by the patient's Family Health Linking consent.
           <Card className="border-risk-high/20 bg-risk-high-bg">
             <CardBody className="p-5">
               <div className="flex items-start gap-3">
@@ -201,7 +199,6 @@ export default function FamilyPortal() {
 
       {data && (
         <div className="space-y-5">
-          {/* Alert Banner */}
           {data.familyRiskAlert && (
             <div className={`flex items-start gap-3 p-4 border-2 rounded-3xl ${data.summary.overallFamilyRisk === "HIGH" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
               <AlertTriangle className={`w-5 h-5 shrink-0 mt-0.5 ${data.summary.overallFamilyRisk === "HIGH" ? "text-danger" : "text-risk-high"}`} />
@@ -220,7 +217,6 @@ export default function FamilyPortal() {
             </div>
           )}
 
-          {/* Summary KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-danger" : data.heritabilityScore >= 40 ? "text-risk-high" : "text-success", bg: data.heritabilityScore >= 70 ? "bg-danger-bg" : "bg-secondary" },
@@ -235,7 +231,6 @@ export default function FamilyPortal() {
             ))}
           </div>
 
-          {/* ─── FAMILY TREE TAB ─── */}
           {activeTab === "tree" && (
             <Card>
               <CardHeader>
@@ -244,7 +239,6 @@ export default function FamilyPortal() {
               </CardHeader>
               <CardBody>
                 <div className="space-y-6">
-                  {/* Parents */}
                   {data.parents?.length > 0 && (
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
@@ -256,7 +250,6 @@ export default function FamilyPortal() {
                     </div>
                   )}
 
-                  {/* Connector line */}
                   {data.parents?.length > 0 && (
                     <div className="flex items-center justify-center gap-2">
                       <div className="h-6 w-px bg-border" />
@@ -265,7 +258,6 @@ export default function FamilyPortal() {
                     </div>
                   )}
 
-                  {/* INDEX PATIENT + Siblings */}
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
                       <span className="w-4 h-0.5 bg-border inline-block" /> {text("Index Patient + Siblings (P2)", "المريض الأساسي والأشقّاء (P2)")}
@@ -276,7 +268,6 @@ export default function FamilyPortal() {
                     </div>
                   </div>
 
-                  {/* Children */}
                   {data.children?.length > 0 && (
                     <>
                       <div className="flex items-center justify-center">
@@ -293,7 +284,6 @@ export default function FamilyPortal() {
                     </>
                   )}
 
-                  {/* Risk Trend */}
                   {data.familyRiskTrend?.length > 0 && (
                     <div className="pt-4 border-t border-border">
                       <p className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-1.5">
@@ -302,13 +292,13 @@ export default function FamilyPortal() {
                       <div className="h-36">
                         <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                           <LineChart data={data.familyRiskTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                            <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} domain={[0, 100]} />
-                            <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                            <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} domain={[0, 100]} />
+                            <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                             <Legend wrapperStyle={{ fontSize: 11 }} />
-                            <Line type="monotone" dataKey="familyRisk" name="Family Risk" stroke="#ef4444" strokeWidth={2} dot={{ r: 4, fill: "#ef4444" }} />
-                            <Line type="monotone" dataKey="patientRisk" name="Patient Risk" stroke="#007AFF" strokeWidth={2} dot={{ r: 4, fill: "#007AFF" }} />
+                            <Line type="monotone" dataKey="familyRisk" name="Family Risk" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--destructive))" }} />
+                            <Line type="monotone" dataKey="patientRisk" name="Patient Risk" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: "hsl(var(--primary))" }} />
                           </LineChart>
                         </ResponsiveContainer></div>
                       </div>
@@ -319,7 +309,6 @@ export default function FamilyPortal() {
             </Card>
           )}
 
-          {/* ─── GENETIC RISKS TAB ─── */}
           {activeTab === "genetics" && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-1">
@@ -414,7 +403,6 @@ export default function FamilyPortal() {
             </div>
           )}
 
-          {/* ─── CONDITION BURDEN TAB ─── */}
           {activeTab === "burden" && (
             <div className="space-y-5">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
@@ -427,12 +415,12 @@ export default function FamilyPortal() {
                     <div className="min-h-[320px] h-full w-full py-4">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <BarChart data={data.conditionBurden} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                          <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} domain={[0, 100]} />
-                          <YAxis type="category" dataKey="condition" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 10 }} width={170} />
+                          <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} domain={[0, 100]} />
+                          <YAxis type="category" dataKey="condition" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={170} />
                           <RechartsTooltip contentStyle={{ borderRadius: "12px", fontSize: 11 }} formatter={(v: any, n: string) => [n === "familyLoad" ? `${v}%` : v, n === "familyLoad" ? "Family Load" : "Count"]} />
                           <Bar dataKey="familyLoad" name="Family Load %" radius={[0, 6, 6, 0]} barSize={16}>
                             {data.conditionBurden?.map((_: any, i: number) => (
-                              <Cell key={i} fill={i === 0 ? "#ef4444" : i === 1 ? "#f97316" : i <= 3 ? "#f59e0b" : "#007AFF"} />
+                              <Cell key={i} fill={i === 0 ? "hsl(var(--destructive))" : i === 1 ? "hsl(var(--warning))" : i <= 3 ? "hsl(var(--info))" : "hsl(var(--primary))"} />
                             ))}
                           </Bar>
                         </BarChart>
@@ -474,13 +462,13 @@ export default function FamilyPortal() {
                     <div className="h-52">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data.familyRiskTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                          <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                          <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} domain={[0, 100]} />
-                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                          <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} domain={[0, 100]} />
+                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                           <Legend wrapperStyle={{ fontSize: 11 }} />
-                          <Line type="monotone" dataKey="familyRisk" name="Family Aggregate Risk" stroke="#ef4444" strokeWidth={2.5} dot={{ r: 5, fill: "#ef4444" }} />
-                          <Line type="monotone" dataKey="patientRisk" name="Patient Risk" stroke="#007AFF" strokeWidth={2.5} dot={{ r: 5, fill: "#007AFF" }} />
+                          <Line type="monotone" dataKey="familyRisk" name="Family Aggregate Risk" stroke="hsl(var(--destructive))" strokeWidth={2.5} dot={{ r: 5, fill: "#ef4444" }} />
+                          <Line type="monotone" dataKey="patientRisk" name="Patient Risk" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 5, fill: "#007AFF" }} />
                         </LineChart>
                       </ResponsiveContainer></div>
                     </div>

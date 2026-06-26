@@ -64,12 +64,12 @@ function AnomalyGauge({ score }: { score: number }) {
   return (
     <div className="flex flex-col items-center">
       <svg width="140" height="80" viewBox="0 0 140 80">
-        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#e2e8f0" strokeWidth="10" strokeLinecap="round" />
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="hsl(var(--border))" strokeWidth="10" strokeLinecap="round" />
         {score > 0 && (
           <path d={`M ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`} fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" />
         )}
         <text x={cx} y={cy - 4} textAnchor="middle" fill={color} fontSize="20" fontWeight="bold">{score}</text>
-        <text x={cx} y={cy + 14} textAnchor="middle" fill="#64748b" fontSize="8" fontWeight="600">{label}</text>
+        <text x={cx} y={cy + 14} textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize="8" fontWeight="600">{label}</text>
       </svg>
       <p className="text-[10px] text-muted-foreground font-semibold -mt-1">{text("Neural Fraud Score", "نقاط الاحتيال العصبية")}</p>
     </div>
@@ -179,21 +179,21 @@ export default function InsurancePortal() {
                         <AreaChart data={dashboard.trendData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                           <defs>
                             <linearGradient id="gClaims" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#007AFF" stopOpacity={0.15} />
-                              <stop offset="95%" stopColor="#007AFF" stopOpacity={0} />
+                              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                             </linearGradient>
                             <linearGradient id="gFraud" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#ef4444" stopOpacity={0.15} />
-                              <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                              <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.15} />
+                              <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                          <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                          <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                          <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                           <Legend wrapperStyle={{ fontSize: 11 }} />
-                          <Area type="monotone" dataKey="claims" name="Claims" stroke="#007AFF" fill="url(#gClaims)" strokeWidth={2} dot={false} />
-                          <Area type="monotone" dataKey="fraud" name="Fraud" stroke="#ef4444" fill="url(#gFraud)" strokeWidth={2} dot={false} />
+                          <Area type="monotone" dataKey="claims" name="Claims" stroke="hsl(var(--primary))" fill="url(#gClaims)" strokeWidth={2} dot={false} />
+                          <Area type="monotone" dataKey="fraud" name="Fraud" stroke="hsl(var(--destructive))" fill="url(#gFraud)" strokeWidth={2} dot={false} />
                         </AreaChart>
                       </ResponsiveContainer></div>
                     </div>
@@ -248,10 +248,10 @@ export default function InsurancePortal() {
                     <div className="min-h-[280px] h-full w-full py-4">
                       <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                         <BarChart data={dashboard.claimsByType} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                          <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                          <YAxis axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 11 }} />
-                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                          <XAxis dataKey="type" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                          <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                           <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={48} name="Claims">
                             {dashboard.claimsByType.map((entry: any, i: number) => (
                               <Cell key={i} fill={entry.color} />
@@ -277,9 +277,9 @@ export default function InsurancePortal() {
                             { name: text("Rejected", "مرفوض"), value: dashboard.rejectedClaims },
                             { name: text("Fraud", "احتيال"), value: dashboard.fraudSuspected },
                           ]} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={3} dataKey="value">
-                            {["#22c55e", "#f59e0b", "#ef4444", "#7c3aed"].map((color, i) => <Cell key={i} fill={color} />)}
+                            {PORTFOLIO_COLORS.map((color, i) => <Cell key={i} fill={color} />)}
                           </Pie>
-                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                           <Legend wrapperStyle={{ fontSize: 10 }} />
                         </PieChart>
                       </ResponsiveContainer></div>
@@ -454,8 +454,8 @@ export default function InsurancePortal() {
                       <div className="h-36">
                         <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                           <BarChart data={patient.premiumBreakdown} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                            <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "#94A3B8", fontSize: 10 }} />
-                            <YAxis type="category" dataKey="factor" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 10 }} width={160} />
+                            <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--secondary))", fontSize: 10 }} />
+                            <YAxis type="category" dataKey="factor" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={160} />
                             <RechartsTooltip contentStyle={{ borderRadius: "10px", fontSize: 11 }} formatter={(v: any) => [`SAR ${v}`, "Amount"]} />
                             <Bar dataKey="amount" radius={[0, 6, 6, 0]} barSize={14}>
                               {patient.premiumBreakdown?.map((entry: any, i: number) => <Cell key={i} fill={entry.color} />)}
@@ -660,7 +660,7 @@ export default function InsurancePortal() {
                           ]} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value">
                             {PORTFOLIO_COLORS.map((color, i) => <Cell key={i} fill={color} />)}
                           </Pie>
-                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid #E2E8F0", fontSize: 12 }} />
+                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                           <Legend wrapperStyle={{ fontSize: 11 }} />
                         </PieChart>
                       </ResponsiveContainer></div>

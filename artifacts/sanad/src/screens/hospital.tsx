@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
@@ -20,12 +20,12 @@ async function fetchHospitalOverview() {
 }
 
 const UNIT_COLORS: Record<string, string> = {
-  Icu: "#ef4444",
-  General: "#007AFF",
-  Emergency: "#f59e0b",
-  Pediatric: "#22c55e",
-  Maternity: "#a855f7",
-  Surgical: "#06b6d4",
+  Icu: "hsl(var(--destructive))",
+  General: "hsl(var(--primary))",
+  Emergency: "hsl(var(--warning))",
+  Pediatric: "hsl(var(--success))",
+  Maternity: "hsl(var(--violet-500))",
+  Surgical: "hsl(var(--cyan-500))",
 };
 
 const PRIORITY_COLORS = {
@@ -89,7 +89,7 @@ export default function HospitalPortal() {
 
       <PageHeader
         title={data?.hospitalName ?? text("Hospital Portal", "بوابة المستشفى")}
-        subtitle={text("Bed management · ICU alerts · OR scheduling · Readmission risk", "إدارة الأسرّة · تنبيهات العناية المركّزة · جدولة العمليات · خطر إعادة التنويم")}
+        subtitle={text("Bed management · ICU alerts · OR scheduling · Readmission risk", "إدارة الأسرّة · تنبيهات العناية المركزة · جدولة العمليات · خطر إعادة التنويم")}
       />
 
       {/* KPI row */}
@@ -156,7 +156,7 @@ export default function HospitalPortal() {
             <CardBody>
               <div className="grid grid-cols-3 gap-3">
                 {data?.bedStatus?.map((unit: any) => {
-                  const color = UNIT_COLORS[unit.unit] ?? "#007AFF";
+                  const color = UNIT_COLORS[unit.unit] ?? "hsl(var(--primary))";
                   return (
                     <div key={unit.unitKey} className={`p-4 rounded-2xl border ${
                       unit.status === "critical" ? "bg-danger-bg border-danger/20" :
