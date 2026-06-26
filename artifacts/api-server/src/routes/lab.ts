@@ -190,6 +190,8 @@ router.post("/result", validate(labResultSchema), async (req, res) => {
 
   const interpretation = interpretLabResult(testName, result, unit ?? "", status);
 
+  const patients = await db.select().from(patientsTable).where(eq(patientsTable.id, patientId)).limit(1);
+
   await db.insert(eventsTable).values({
     eventType: "LAB_RESULT_RECEIVED",
     patientId,
