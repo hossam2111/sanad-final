@@ -173,6 +173,11 @@ router.get("/patient/:nationalId", async (req, res) => {
 });
 
 router.get("/dashboard", async (req, res) => {
+  if (req.role !== "insurance" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Insurance role required to view dashboard" });
+    return;
+  }
+
   const [allVisits, [riskAgg], [totalPatientsRow]] = await Promise.all([
     db.select().from(visitsTable).orderBy(desc(visitsTable.visitDate)).limit(200),
     db.select({

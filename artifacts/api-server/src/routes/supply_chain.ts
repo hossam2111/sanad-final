@@ -87,6 +87,11 @@ function computeAiPredictions(drugs: typeof DRUG_INVENTORY) {
 }
 
 router.get("/inventory", async (req, res) => {
+  if (req.role !== "supply-chain" && req.role !== "admin" && req.role !== "hospital") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Authorized role required" });
+    return;
+  }
+
   const allMeds = await db.select().from(medicationsTable).limit(1000);
 
   const activePrescriptions: Record<string, number> = {};
@@ -215,7 +220,11 @@ router.post("/reorder", validate(reorderSchema), async (req, res) => {
   });
 });
 
-router.get("/purchase-orders", async (_req, res) => {
+router.get("/purchase-orders", async (req, res) => {
+  if (req.role !== "supply-chain" && req.role !== "admin") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Supply Chain role required" });
+    return;
+  }
   const orders = await db.select().from(purchaseOrdersTable)
     .orderBy(desc(purchaseOrdersTable.createdAt))
     .limit(100);
@@ -223,7 +232,11 @@ router.get("/purchase-orders", async (_req, res) => {
 });
 
 // Regional distribution — computed from DRUG_INVENTORY demand vs stock ratios
-router.get("/regional-distribution", async (_req, res) => {
+router.get("/regional-distribution", async (req, res) => {
+  if (req.role !== "supply-chain" && req.role !== "admin" && req.role !== "hospital") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Authorized role required" });
+    return;
+  }
   const REGIONS = [
     { region: "Riyadh", population: 7_938_000, weight: 0.26 },
     { region: "Jeddah", population: 4_697_000, weight: 0.15 },
