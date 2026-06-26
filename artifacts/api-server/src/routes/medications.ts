@@ -47,6 +47,22 @@ router.post("/", validate(createMedicationSchema), async (req, res) => {
     return;
   }
   const body = req.body as z.infer<typeof createMedicationSchema>;
+  
+  // Enforce hospital assignment
+  if (req.role !== "admin") {
+    if (!req.username) {
+      res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
+      return;
+    }
+    const { getStaffHospitalId } = await import("../lib/ownership.js");
+    const staffHospitalId = await getStaffHospitalId(req.username);
+    
+    if (!staffHospitalId || staffHospitalId !== body.hospital) {
+      res.status(403).json({ error: "FORBIDDEN", message: "You may only prescribe medications from your assigned hospital" });
+      return;
+    }
+  }
+
   const patientId = body.patientId;
 
   const patient = await db

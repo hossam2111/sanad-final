@@ -255,6 +255,12 @@ router.post("/", validate(createPatientSchema), async (req, res) => {
     return;
   }
   const body = req.body as z.infer<typeof createPatientSchema>;
+  let hospitalId: string | undefined;
+  if (req.username && req.role !== "admin") {
+    const { getStaffHospitalId } = await import("../lib/ownership.js");
+    hospitalId = (await getStaffHospitalId(req.username)) ?? undefined;
+  }
+
   const [patient] = await db
     .insert(patientsTable)
     .values({
@@ -268,6 +274,7 @@ router.post("/", validate(createPatientSchema), async (req, res) => {
       emergencyPhone: body.emergencyPhone,
       chronicConditions: body.chronicConditions,
       allergies: body.allergies,
+      hospitalId,
     })
     .returning();
 
