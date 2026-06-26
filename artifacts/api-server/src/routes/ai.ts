@@ -75,6 +75,10 @@ router.post("/check-interaction", validate(checkInteractionSchema), async (req, 
 
 router.get("/risk-score/:patientId", async (req, res) => {
   const patientId = parseInt(req.params["patientId"]!);
+  if (isNaN(patientId)) {
+    res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patient ID" });
+    return;
+  }
   if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const [patient] = await db
@@ -116,6 +120,10 @@ router.get("/risk-score/:patientId", async (req, res) => {
 
 router.get("/predictions/:patientId", async (req, res) => {
   const patientId = parseInt(req.params["patientId"]!);
+  if (isNaN(patientId)) {
+    res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patient ID" });
+    return;
+  }
   if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const [patient] = await db
@@ -160,6 +168,10 @@ router.get("/predictions/:patientId", async (req, res) => {
 
 router.get("/decision/:patientId", async (req, res) => {
   const patientId = parseInt(req.params["patientId"]!);
+  if (isNaN(patientId)) {
+    res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patient ID" });
+    return;
+  }
   if (!(await requireOwnPatient(req, res, patientId))) return;
 
   const [patient] = await db
