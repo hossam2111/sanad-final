@@ -68,7 +68,7 @@ router.post("/", validate(createMedicationSchema), async (req, res) => {
     .limit(100);
 
   const activeMedNames = existingMeds.filter(m => m.isActive).map(m => m.drugName);
-  const interactionWarnings = checkDrugInteractions(body.drugName, activeMedNames);
+  const interactionWarnings = checkDrugInteractions(body.drugName, activeMedNames, patient[0].allergies ?? []);
 
   const [medication] = await db
     .insert(medicationsTable)

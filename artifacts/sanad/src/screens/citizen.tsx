@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import {
@@ -65,48 +65,7 @@ import {
 } from "recharts";
 import { format } from "date-fns";
 
-function computeHealthScore(patient: {
-  dateOfBirth: string;
-  chronicConditions?: string[] | null;
-  allergies?: string[] | null;
-  medications?: Array<{ isActive: boolean }> | null;
-  labResults?: Array<{ status: string }> | null;
-  visits?: Array<{ visitDate: string; visitType: string }> | null;
-}, text: TextFn): { score: number; grade: "A" | "B" | "C" | "D" | "F"; label: string; color: string; bg: string; summary: string } {
-  let score = 100;
-
-  const age = new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
-  if (age >= 75) score -= 20;
-  else if (age >= 60) score -= 10;
-  else if (age >= 45) score -= 5;
-
-  const conditions = patient.chronicConditions || [];
-  const highRisk = ["heart failure", "coronary artery disease", "chronic kidney disease", "ckd", "cancer", "copd", "cirrhosis"];
-  const modRisk = ["hypertension", "diabetes", "atrial fibrillation", "stroke", "depression"];
-  for (const c of conditions) {
-    const cl = c.toLowerCase();
-    if (highRisk.some(h => cl.includes(h))) score -= 18;
-    else if (modRisk.some(m => cl.includes(m))) score -= 10;
-    else score -= 5;
-  }
-
-  const activeMeds = (patient.medications || []).filter(m => m.isActive).length;
-  if (activeMeds >= 5) score -= 15;
-  else if (activeMeds >= 3) score -= 7;
-
-  const labs = patient.labResults || [];
-  const criticalLabs = labs.filter(l => l.status === "critical").length;
-  const abnormalLabs = labs.filter(l => l.status === "abnormal").length;
-  score -= criticalLabs * 15;
-  score -= abnormalLabs * 7;
-
-  const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  const recentEmergency = (patient.visits || []).filter(v => v.visitType === "emergency" && new Date(v.visitDate) >= sixMonthsAgo).length;
-  score -= recentEmergency * 8;
-
-  score = Math.max(0, Math.min(100, score));
-  return { score, ...gradeLadder(score, text) };
-}
+// Client-side heuristic removed. Scoring is done via server AI.
 
 function gradeLadder(score: number, text: TextFn): { grade: "A" | "B" | "C" | "D" | "F"; label: string; color: string; bg: string; summary: string } {
   if (score >= 85) {
@@ -127,183 +86,7 @@ function gradeLadder(score: number, text: TextFn): { grade: "A" | "B" | "C" | "D
   }
 }
 
-function generateRecommendations(patient: {
-  dateOfBirth: string;
-  chronicConditions?: string[] | null;
-  labResults?: Array<{ testName: string; status: string; result: string; unit?: string | null }> | null;
-  medications?: Array<{ isActive: boolean; drugName: string }> | null;
-  visits?: Array<{ visitDate: string }> | null;
-}, text: TextFn): Array<{ icon: React.ElementType; title: string; description: string; priority: "high" | "medium" | "low"; category: string }> {
-  const recs: Array<{ icon: React.ElementType; title: string; description: string; priority: "high" | "medium" | "low"; category: string }> = [];
-  const conditions = (patient.chronicConditions || []).map(c => c.toLowerCase());
-  const criticalLabs = (patient.labResults || []).filter(l => l.status === "critical");
-  const abnormalLabs = (patient.labResults || []).filter(l => l.status === "abnormal");
-  const age = new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear();
-
-  if (criticalLabs.length > 0) {
-    recs.push({
-      icon: ShieldAlert,
-      title: text("Critical Lab Results Require Attention", "نتائج مخبرية حرجة تتطلب الانتباه"),
-      description: text(
-        `${criticalLabs.length} lab result(s) are in the critical range: ${criticalLabs.map(l => l.testName).join(", ")}. Contact your doctor immediately.`,
-        `${criticalLabs.length} من نتائجك المخبرية في النطاق الحرج: ${criticalLabs.map(l => l.testName).join("، ")}. تواصل مع طبيبك فورًا.`,
-      ),
-      priority: "high",
-      category: text("Urgent", "عاجل"),
-    });
-  }
-
-  if (abnormalLabs.length > 0 && criticalLabs.length === 0) {
-    recs.push({
-      icon: FlaskConical,
-      title: text("Follow Up on Abnormal Lab Results", "متابعة النتائج المخبرية غير الطبيعية"),
-      description: text(
-        `${abnormalLabs.length} test(s) showed abnormal results. Schedule a follow-up appointment to review these with your doctor.`,
-        `أظهرت ${abnormalLabs.length} من فحوصاتك نتائج غير طبيعية. احجز موعد متابعة لمراجعتها مع طبيبك.`,
-      ),
-      priority: "medium",
-      category: text("Lab Results", "نتائج المختبر"),
-    });
-  }
-
-  if (conditions.some(c => c.includes("diabetes") || c.includes("type 1") || c.includes("type 2"))) {
-    recs.push({
-      icon: Activity,
-      title: text("Monitor Blood Sugar Daily", "راقب سكر الدم يوميًا"),
-      description: text(
-        "Check your fasting blood glucose every morning and after meals. Target HbA1c below 7%. Avoid sugary foods and refined carbohydrates.",
-        "افحص سكر الدم الصائم كل صباح وبعد الوجبات. المستهدف: HbA1c أقل من 7%. تجنّب الأطعمة السكرية والنشويات المكررة.",
-      ),
-      priority: "high",
-      category: text("Diabetes Management", "إدارة السكري"),
-    });
-    recs.push({
-      icon: Stethoscope,
-      title: text("Annual Diabetic Screening", "الفحص السنوي لمضاعفات السكري"),
-      description: text(
-        "Get annual eye exam, kidney function tests (creatinine, microalbumin), and foot examination to detect complications early.",
-        "أجرِ فحص العين السنوي، وفحوصات وظائف الكلى (الكرياتينين، الألبومين الدقيق)، وفحص القدم لاكتشاف المضاعفات مبكرًا.",
-      ),
-      priority: "medium",
-      category: text("Preventive Care", "الرعاية الوقائية"),
-    });
-  }
-
-  if (conditions.some(c => c.includes("hypertension") || c.includes("blood pressure"))) {
-    recs.push({
-      icon: Heart,
-      title: text("Monitor Blood Pressure Regularly", "راقب ضغط الدم بانتظام"),
-      description: text(
-        "Check your blood pressure at least twice a week. Target: below 130/80 mmHg. Reduce salt intake and avoid stress.",
-        "افحص ضغط دمك مرتين أسبوعيًا على الأقل. المستهدف: أقل من 130/80 ملم زئبق. قلّل الملح وتجنّب التوتر.",
-      ),
-      priority: "high",
-      category: text("Cardiovascular", "القلب والأوعية"),
-    });
-  }
-
-  if (conditions.some(c => c.includes("heart"))) {
-    recs.push({
-      icon: Heart,
-      title: text("Cardiac Monitoring", "متابعة حالة القلب"),
-      description: text(
-        "Avoid strenuous activity without medical clearance. Know the warning signs: chest pain, shortness of breath, or sudden dizziness require emergency care.",
-        "تجنّب المجهود الشديد دون إذن طبي. اعرف العلامات التحذيرية: ألم الصدر أو ضيق التنفّس أو الدوخة المفاجئة تستدعي رعاية طارئة.",
-      ),
-      priority: "high",
-      category: text("Cardiovascular", "القلب والأوعية"),
-    });
-  }
-
-  if (conditions.some(c => c.includes("ckd") || c.includes("kidney") || c.includes("renal"))) {
-    recs.push({
-      icon: FlaskConical,
-      title: text("Protect Your Kidneys", "احمِ كليتيك"),
-      description: text(
-        "Stay well hydrated. Avoid NSAIDs (ibuprofen, naproxen). Limit protein and potassium intake as advised. Check creatinine & eGFR every 3 months.",
-        "حافظ على ترطيب جيد. تجنّب مضادات الالتهاب غير الستيرويدية (إيبوبروفين، نابروكسين). قلّل البروتين والبوتاسيوم حسب الإرشادات. افحص الكرياتينين وeGFR كل 3 أشهر.",
-      ),
-      priority: "high",
-      category: text("Kidney Health", "صحة الكلى"),
-    });
-  }
-
-  if (conditions.some(c => c.includes("asthma") || c.includes("copd"))) {
-    recs.push({
-      icon: Activity,
-      title: text("Respiratory Health", "صحة الجهاز التنفّسي"),
-      description: text(
-        "Always carry your rescue inhaler. Avoid smoke, dust, and strong odors. Get annual flu vaccine. Track your peak flow readings.",
-        "احمل دائمًا بخّاخ الإسعاف. تجنّب الدخان والغبار والروائح القوية. خذ لقاح الإنفلونزا السنوي. تابِع قياسات تدفّق الذروة.",
-      ),
-      priority: "medium",
-      category: text("Respiratory", "الجهاز التنفّسي"),
-    });
-  }
-
-  const activeMeds = (patient.medications || []).filter(m => m.isActive);
-  if (activeMeds.length >= 3) {
-    recs.push({
-      icon: Pill,
-      title: text("Medication Adherence", "الالتزام بالأدوية"),
-      description: text(
-        `You are on ${activeMeds.length} medications. Set daily reminders and never skip doses without consulting your doctor. Bring your medication list to every appointment.`,
-        `أنت تتناول ${activeMeds.length} أدوية. اضبط تذكيرات يومية ولا تتخطَّ أي جرعة دون استشارة طبيبك. أحضِر قائمة أدويتك في كل موعد.`,
-      ),
-      priority: "medium",
-      category: text("Medications", "الأدوية"),
-    });
-  }
-
-  const lastVisitDate = patient.visits?.[0]?.visitDate;
-  const daysSinceVisit = lastVisitDate
-    ? Math.floor((Date.now() - new Date(lastVisitDate).getTime()) / (1000 * 60 * 60 * 24))
-    : 999;
-
-  if (daysSinceVisit > 180 && conditions.length > 0) {
-    recs.push({
-      icon: CalendarDays,
-      title: text("Schedule a Routine Check-up", "احجز فحصًا دوريًا"),
-      description: text(
-        `It has been ${Math.round(daysSinceVisit / 30)} months since your last recorded visit. Regular check-ups are essential for managing your conditions.`,
-        `مضى ${Math.round(daysSinceVisit / 30)} شهرًا منذ آخر زيارة مُسجّلة لك. الفحوصات الدورية ضرورية لإدارة حالتك الصحية.`,
-      ),
-      priority: "medium",
-      category: text("Preventive Care", "الرعاية الوقائية"),
-    });
-  }
-
-  if (age >= 50) {
-    recs.push({
-      icon: Stethoscope,
-      title: text("Age-Appropriate Screenings", "فحوصات مناسبة للعمر"),
-      description: age >= 65
-        ? text(
-            "At your age, annual screenings for colon cancer, osteoporosis, and cardiovascular disease are recommended. Discuss vaccination schedules with your doctor.",
-            "في عمرك، يُوصى بالفحوصات السنوية لسرطان القولون وهشاشة العظام وأمراض القلب والأوعية. ناقش جداول التطعيمات مع طبيبك.",
-          )
-        : text(
-            "Consider screenings for colorectal cancer (colonoscopy), blood pressure, cholesterol, and diabetes if not already monitored.",
-            "فكّر في فحوصات سرطان القولون والمستقيم (تنظير القولون) وضغط الدم والكوليسترول والسكري إن لم تكن متابَعة بالفعل.",
-          ),
-      priority: "medium",
-      category: text("Preventive Care", "الرعاية الوقائية"),
-    });
-  }
-
-  recs.push({
-    icon: Lightbulb,
-    title: text("Healthy Lifestyle Habits", "عادات نمط حياة صحي"),
-    description: text(
-      "Walk 30 minutes daily, maintain a balanced diet rich in vegetables and whole grains, limit sodium to < 2g/day, sleep 7-8 hours, and manage stress through mindfulness.",
-      "امشِ 30 دقيقة يوميًا، واتّبع نظامًا غذائيًا متوازنًا غنيًا بالخضار والحبوب الكاملة، وقلّل الصوديوم إلى أقل من 2 غرام يوميًا، ونم 7–8 ساعات، وتعامل مع التوتر عبر اليقظة الذهنية.",
-    ),
-    priority: "low",
-    category: text("Lifestyle", "نمط الحياة"),
-  });
-
-  return recs.slice(0, 8);
-}
+// All client-side heuristics have been removed for medical safety.
 
 function AppointmentBooking({ patientId }: { patientId: number }) {
   const { text, dir, locale, toggleLocale } = useLanguage();
@@ -577,10 +360,7 @@ export default function CitizenPortal() {
     return null; // wait for the engine instead of showing a contradictory local estimate
   }, [patient, aiDecision]);
 
-  const recommendations = useMemo(() => {
-    if (!patient) return [];
-    return generateRecommendations(patient, text);
-  }, [patient, text]);
+  // recommendations strictly fetched from aiDecision to ensure medical safety
 
   if (!isLoggedIn) {
     return (
@@ -653,13 +433,6 @@ export default function CitizenPortal() {
   const labResults = patient.labResults ?? [];
   const abnormal = labResults.filter(l => l.status !== "normal").length;
   const criticalCount = labResults.filter(l => l.status === "critical").length;
-  const highPriorityRecs = recommendations.filter(r => r.priority === "high").length;
-
-  const priorityColors = {
-    high: { bg: "bg-danger-bg", border: "border-danger/30", badge: "destructive" as const, dot: "bg-danger" },
-    medium: { bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high" },
-    low: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground" },
-  };
 
   return (
     <Layout role="citizen" localized>
@@ -802,7 +575,7 @@ export default function CitizenPortal() {
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lightbulb className="w-3.5 h-3.5 text-violet-500" /> {text("AI Tips", "نصائح ذكية")}</div>
-              <span className={`font-bold ${highPriorityRecs > 0 ? "text-danger" : "text-foreground"}`}>{recommendations.length}</span>
+              <span className={`font-bold ${(aiDecision?.recommendations?.length || 0) > 0 ? "text-primary" : "text-foreground"}`}>{aiDecision?.recommendations?.length || 0}</span>
             </div>
           </CardBody>
         </Card>
@@ -1021,41 +794,7 @@ export default function CitizenPortal() {
               </div>
             </div>
 
-            {/* AI Recommendations */}
-            <div>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                <Lightbulb className="w-3.5 h-3.5" /> {text("Personalised Health Recommendations", "توصيات صحية مخصّصة")}
-              </p>
-              <div className="space-y-2.5">
-                {recommendations.map((rec, i) => {
-                  const cfg = priorityColors[rec.priority];
-                  const Icon = rec.icon;
-                  return (
-                    <div key={i} className={`flex items-start gap-3.5 p-4 ${cfg.bg} border ${cfg.border} rounded-2xl`}>
-                      <div className="w-8 h-8 rounded-xl bg-card flex items-center justify-center shrink-0">
-                        <Icon className="w-4 h-4 text-foreground" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-semibold text-sm text-foreground">{rec.title}</p>
-                          <Badge variant={cfg.badge} className="text-[10px] shrink-0">{rec.category}</Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{rec.description}</p>
-                      </div>
-                      {rec.priority === "high" && (
-                        <div className={`w-2 h-2 rounded-full ${cfg.dot} shrink-0 mt-1.5`} />
-                      )}
-                    </div>
-                  );
-                })}
-                {recommendations.length === 0 && (
-                  <div className="flex items-center gap-3 px-4 py-5 bg-success-bg border border-success/30 rounded-2xl">
-                    <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-                    <p className="text-sm font-semibold text-success">{text("No urgent recommendations. Continue your healthy routine!", "لا توجد توصيات عاجلة. واصِل روتينك الصحي!")}</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            {/* Server-side AI Recommendations are rendered above in the overview tab */}
           </div>
         )}
 

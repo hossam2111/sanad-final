@@ -296,76 +296,84 @@ function Hero() {
   const isAr = locale === "ar";
   return (
     <div className="relative overflow-hidden pt-16">
-      {/* Atmosphere: faint engineering grid + a single overhead glow */}
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px)",
-          backgroundSize: "56px 56px",
-          maskImage: "radial-gradient(ellipse 75% 65% at 50% 0%, black 30%, transparent 100%)",
-          WebkitMaskImage: "radial-gradient(ellipse 75% 65% at 50% 0%, black 30%, transparent 100%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="absolute left-1/2 top-[-260px] h-[560px] w-[860px] -translate-x-1/2 rounded-full"
-        style={{ background: "radial-gradient(closest-side, rgba(10,132,255,0.16), transparent)" }}
-      />
+      {/* Atmosphere: Vercel/Stripe-inspired glowing mesh and sharp grid */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-[#05070C] [mask-image:linear-gradient(to_bottom,white,transparent)]" />
+        <div
+          className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"
+        />
+        {/* Animated glowing orb */}
+        <motion.div
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute -top-[300px] left-1/2 h-[700px] w-[1000px] -translate-x-1/2 rounded-[100%] bg-gradient-to-b from-[#0A84FF]/20 to-transparent blur-3xl"
+        />
+      </div>
 
-      <Section className="relative pb-0 pt-24 lg:pt-32">
-        <div className="mx-auto max-w-[860px] text-center">
+      <Section className="relative z-10 pb-0 pt-24 lg:pt-36">
+        <div className="mx-auto max-w-[900px] text-center">
           <Reveal>
-            <p
-              className={`mb-7 inline-flex items-center rounded-full border border-white/10 bg-card/[0.04] px-4 py-2 text-white/60 ${
-                isAr ? "text-[11.5px] font-semibold" : "text-[11px] font-mono uppercase tracking-[0.18em]"
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              className={`mb-8 inline-flex items-center gap-2 rounded-full border border-[#0A84FF]/30 bg-[#0A84FF]/10 px-5 py-2.5 text-[#7CB9FF] shadow-[0_0_20px_rgba(10,132,255,0.2)] backdrop-blur-md ${
+                isAr ? "text-[12.5px] font-bold" : "text-[11.5px] font-mono uppercase tracking-[0.2em]"
               }`}
             >
-              {text("The Cognitive Engine of National Healthcare", "المحرك الإدراكي للرعاية الصحية السيادية")}
-            </p>
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#0A84FF] opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#0A84FF]"></span>
+              </span>
+              {text("The Sovereign Brain of National Healthcare", "العقل السيادي للرعاية الصحية الوطنية")}
+            </motion.div>
           </Reveal>
 
-          <Reveal delay={0.08}>
+          <Reveal delay={0.1}>
             <h1
-              className="mb-7 font-bold text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/60"
+              className="mb-8 font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-[#E2E8F0] to-[#94A3B8]"
               style={{
-                fontSize: "clamp(2.8rem, 7vw, 5rem)",
-                lineHeight: isAr ? 1.25 : 1.02,
-                letterSpacing: isAr ? "0" : "-0.038em",
+                fontSize: "clamp(3rem, 7.5vw, 5.5rem)",
+                lineHeight: isAr ? 1.3 : 1.05,
+                letterSpacing: isAr ? "0" : "-0.04em",
               }}
             >
-              {text("Beyond Data. Absolute Certainty.", "ما وراء البيانات.. يقين مطلق يصنع الفارق.")}
+              {text("Beyond Data.", "ما وراء البيانات.")}
+              <br className="hidden md:block" />
+              <span className="bg-gradient-to-r from-[#0A84FF] to-[#0048C0] bg-clip-text text-transparent">
+                {text(" Absolute Certainty.", " يقين مطلق يصنع الفارق.")}
+              </span>
             </h1>
           </Reveal>
 
-          <Reveal delay={0.16}>
-            <p className="mx-auto mb-10 max-w-[640px] text-[16px] leading-relaxed text-white/60 lg:text-[17px]">
+          <Reveal delay={0.2}>
+            <p className="mx-auto mb-12 max-w-[720px] text-[17px] leading-relaxed text-[#94A3B8] lg:text-[19px]">
               {text(
-                "SANAD redefines the boundaries of healthcare. More than a platform, it is a living, breathing intelligence that transforms vast streams of fragmented data into immediate, life-saving clarity. With predictive precision, real-time telemetry, and an impenetrable chain of trust, we ensure that every medical decision is an act of absolute certainty.",
-                "سند تعيد رسم حدود الرعاية الصحية. إنها ليست مجرد منصة، بل منظومة ذكاء حية تنبض بالحياة، تحوّل تدفقات البيانات الهائلة والمشتتة إلى رؤية واضحة ولحظية تنقذ الأرواح. بدقة تنبؤية فائقة، وتحليل لحظي للمؤشرات الحيوية، وسلسلة ثقة لا تُخترق، نجعل من كل قرار طبي عملاً يستند إلى يقين مطلق.",
+                "SANAD is the cognitive backbone of healthcare. A sovereign intelligence that processes fragmented data streams in milliseconds, turning chaos into life-saving clarity. Predictive precision. Immutable trust. Absolute certainty at scale.",
+                "سند هي العقل المدبر لقطاع الرعاية الصحية. ذكاء سيادي يعالج تدفقات البيانات المشتتة في أجزاء من الثانية، ليحول الفوضى إلى رؤية واضحة تنقذ الأرواح. دقة تنبؤية فائقة، ثقة لا تُخترق، ويقين مطلق على نطاق وطني."
               )}
             </p>
           </Reveal>
 
-          <Reveal delay={0.24} className="flex flex-wrap items-center justify-center gap-3">
+          <Reveal delay={0.3} className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/login"
-              className={`flex h-11 items-center gap-2 rounded-full bg-card px-6 text-[14px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}
+              className={`group flex h-12 items-center gap-2.5 rounded-full bg-white px-8 text-[15px] font-bold text-black transition-all hover:scale-105 hover:bg-gray-100 hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] ${FOCUS}`}
             >
-              {text("Enter your workspace", "ادخل إلى مساحة عملك")}
-              <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
+              {text("Enter Workspace", "دخول مساحة العمل")}
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1" />
             </Link>
             <a
-              href="#why"
-              className={`flex h-11 items-center gap-2 rounded-full border border-white/15 px-6 text-[14px] font-semibold text-white/75 transition-colors hover:border-white/35 hover:text-white ${FOCUS}`}
+              href="#intelligence"
+              className={`flex h-12 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-8 text-[15px] font-semibold text-white transition-all hover:bg-white/10 hover:text-white backdrop-blur-md ${FOCUS}`}
             >
-              {text("Explore the platform", "استكشف المنصة")}
+              {text("Explore the Engine", "استكشف المحرك")}
             </a>
           </Reveal>
         </div>
 
-        <Reveal delay={0.32} className="mt-16 lg:mt-20">
+        <Reveal delay={0.4} className="mt-20 lg:mt-28">
           <DecisionTrace />
         </Reveal>
       </Section>
@@ -425,44 +433,60 @@ function Thesis() {
   return (
     <Section id="why" className="py-28 lg:py-36">
       <Reveal>
-        <Eyebrow en="Why SANAD exists" ar="لماذا وُجد سند" />
+        <Eyebrow en="The Fundamental Challenge" ar="التحدي الجوهري" />
       </Reveal>
-      <Reveal delay={0.08}>
+      <Reveal delay={0.1}>
         <h2
-          className="mb-16 max-w-[760px] font-semibold text-white"
+          className="mb-16 max-w-[800px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-[#94A3B8]"
           style={{
-            fontSize: "clamp(1.7rem, 3.4vw, 2.6rem)",
-            lineHeight: isAr ? 1.45 : 1.18,
+            fontSize: "clamp(2rem, 4vw, 3rem)",
+            lineHeight: isAr ? 1.4 : 1.15,
             letterSpacing: isAr ? "0" : "-0.025em",
           }}
         >
           {text(
-            "Healthcare has never lacked data. It lacked an operating system.",
-            "لم تفتقر الرعاية الصحية يوماً للبيانات. بل افتقرت لنظام تشغيل يوظفها.",
+            "Healthcare has never lacked data. It lacked a sovereign operating system.",
+            "لم تفتقر الرعاية الصحية يوماً للبيانات. بل افتقرت لنظام تشغيل سيادي يوظفها.",
           )}
         </h2>
       </Reveal>
-      <div className="grid gap-12 border-t border-white/[0.06] pt-12 lg:grid-cols-[1fr_440px] lg:gap-16">
-        <div className="min-w-0 space-y-10">
-          {gaps.map((g, i) => (
-            <Reveal key={g.en} delay={0.08 * i}>
-              <p className="mb-3 font-mono text-[12px] text-white/45">{`0${i + 1}`}</p>
-              <h3 className="mb-2.5 text-[16px] font-semibold text-white">{text(g.en, g.ar)}</h3>
-              <p className="max-w-[480px] text-[14px] leading-relaxed text-white/55">{text(g.enBody, g.arBody)}</p>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal delay={0.15} className="min-w-0">
-          <BrokenTrace />
+      
+      {/* Bento Grid Design */}
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:grid-rows-2">
+        <Reveal delay={0.15} className="lg:row-span-2">
+          <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-10 shadow-2xl backdrop-blur-xl">
+            <h3 className="mb-6 text-[22px] font-bold text-white">{text(gaps[0]!.en, gaps[0]!.ar)}</h3>
+            <p className="text-[16px] leading-relaxed text-[#94A3B8]">{text(gaps[0]!.enBody, gaps[0]!.arBody)}</p>
+            <div className="mt-12">
+               <BrokenTrace />
+            </div>
+          </div>
+        </Reveal>
+        
+        <Reveal delay={0.25} className="h-full">
+          <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-bl from-white/[0.04] to-transparent p-10 shadow-2xl backdrop-blur-xl transition-all hover:bg-white/[0.06]">
+            <h3 className="mb-4 text-[20px] font-bold text-[#7CB9FF]">{text(gaps[1]!.en, gaps[1]!.ar)}</h3>
+            <p className="text-[15px] leading-relaxed text-[#94A3B8]">{text(gaps[1]!.enBody, gaps[1]!.arBody)}</p>
+          </div>
+        </Reveal>
+        
+        <Reveal delay={0.35} className="h-full">
+           <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-tl from-white/[0.04] to-transparent p-10 shadow-2xl backdrop-blur-xl transition-all hover:bg-white/[0.06]">
+            <h3 className="mb-4 text-[20px] font-bold text-[#7CB9FF]">{text(gaps[2]!.en, gaps[2]!.ar)}</h3>
+            <p className="text-[15px] leading-relaxed text-[#94A3B8]">{text(gaps[2]!.enBody, gaps[2]!.arBody)}</p>
+          </div>
         </Reveal>
       </div>
-      <Reveal delay={0.2}>
-        <p className="mt-14 text-[16px] font-medium text-[#7CB9FF]">
-          {text(
-            "SANAD brings order to the chaos. Complete interoperability, absolute truth.",
-            "سند يخلق النظام من الفوضى. تكامل تام، وحقيقة مطلقة واحدة.",
-          )}
-        </p>
+
+      <Reveal delay={0.4}>
+        <div className="mt-16 rounded-full border border-[#0A84FF]/20 bg-[#0A84FF]/5 px-8 py-4 text-center backdrop-blur-md">
+          <p className="text-[16px] font-semibold text-[#4D9FFF]">
+            {text(
+              "SANAD brings order to the chaos. Complete interoperability, absolute truth.",
+              "سند يخلق النظام من الفوضى. تكامل تام، وحقيقة مطلقة واحدة للجميع.",
+            )}
+          </p>
+        </div>
       </Reveal>
     </Section>
   );
@@ -524,8 +548,6 @@ function BrokenTrace() {
 function Intelligence() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const isAr = locale === "ar";
-  // Each engine demonstrates itself: a real output line in the trace syntax,
-  // not a marketing description. Outputs stay Latin mono, like all telemetry.
   const engines = [
     { en: "Clinical Decision Support", ar: "دعم القرار السريري", out: "ddx: DKA 0.81 · sepsis 0.12 — reasoning attached" },
     { en: "Drug Interaction Analysis", ar: "تحليل التعارض الدوائي", out: "warfarin × ciprofloxacin — INR risk · hold advised" },
@@ -538,52 +560,58 @@ function Intelligence() {
     { en: "Hereditary Risk Mapping", ar: "خرائط المخاطر الوراثية", out: "BRCA1 lineage · 3 relatives — screening due ×2" },
   ];
   return (
-    <Section id="intelligence" className="border-t border-white/[0.06] py-28 lg:py-36">
-      <div className="mb-16 grid gap-10 lg:grid-cols-[1fr_360px] lg:items-end">
-        <div>
-          <Reveal>
-            <Eyebrow en="The intelligence layer" ar="طبقة الذكاء" />
-          </Reveal>
-          <Reveal delay={0.08}>
-            <h2
-              className="font-semibold text-white"
-              style={{
-                fontSize: "clamp(1.7rem, 3.4vw, 2.6rem)",
-                lineHeight: isAr ? 1.45 : 1.18,
-                letterSpacing: isAr ? "0" : "-0.025em",
-              }}
-            >
-              {text("Nine engines. One clinical mind.", "تسعة محركات. عقلٌ سريري واحد.")}
-            </h2>
-          </Reveal>
-        </div>
-        <Reveal delay={0.15}>
-          <p className="text-[14px] leading-relaxed text-white/55">
+    <Section id="intelligence" className="relative border-t border-white/[0.06] py-28 lg:py-36">
+      {/* Background Glow */}
+      <div className="absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0A84FF]/10 blur-[120px] pointer-events-none" />
+      
+      <div className="relative z-10 mb-20 flex flex-col items-center text-center">
+        <Reveal>
+          <Eyebrow en="The Core Intelligence Layer" ar="طبقة الذكاء الأساسية" />
+        </Reveal>
+        <Reveal delay={0.1}>
+          <h2
+            className="mb-6 font-extrabold text-white"
+            style={{
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              lineHeight: isAr ? 1.4 : 1.15,
+              letterSpacing: isAr ? "0" : "-0.025em",
+            }}
+          >
+            {text("Nine autonomous engines. ", "تسعة محركات ذاتية. ")}
+            <span className="text-[#4D9FFF]">{text("One clinical mind.", "عقل سريري واحد.")}</span>
+          </h2>
+        </Reveal>
+        <Reveal delay={0.2}>
+          <p className="max-w-[600px] text-[16px] leading-relaxed text-[#94A3B8]">
             {text(
-              "Every output carries a confidence score, a reasoning trace, and a human override. The AI advises. Clinicians decide.",
-              "كل مخرجات الذكاء تحمل درجة ثقة وسلسلة تعليل وإمكانية تجاوز بشري. الذكاء يوصي، والطبيب يقرّر.",
+              "Every output carries a confidence score, an immutable reasoning trace, and a human override. The AI processes at scale; clinicians decide with precision.",
+              "كل مخرجات الذكاء تحمل درجة ثقة، وسلسلة تعليل غير قابلة للتغيير، وإمكانية تدخل بشري. الذكاء يعالج البيانات الهائلة؛ والطبيب يقرر بدقة متناهية."
             )}
           </p>
         </Reveal>
       </div>
 
-      <Reveal delay={0.1}>
-        <div className="grid overflow-hidden rounded-2xl border border-white/[0.12] shadow-2xl gap-px sm:grid-cols-2 lg:grid-cols-3" style={{ background: "rgba(255,255,255,0.03)" }}>
-          {engines.map((e, i) => (
-            <div key={e.en} className="group min-w-0 p-6 transition-all duration-300 hover:bg-white/[0.04] border border-transparent hover:border-white/[0.1]" style={{ background: "rgba(7, 11, 18, 0.6)", backdropFilter: "blur(12px)" }}>
-              <p className="mb-4 font-mono text-[12px] text-[#4D9FFF]">{String(i + 1).padStart(2, "0")}</p>
-              <h3 className="mb-3 text-[15px] font-semibold text-white">{text(e.en, e.ar)}</h3>
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {engines.map((e, i) => (
+          <Reveal key={e.en} delay={0.1 + i * 0.05}>
+            <motion.div 
+              whileHover={{ y: -5, scale: 1.02 }}
+              className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0F1A]/80 p-8 shadow-xl backdrop-blur-md transition-colors hover:border-[#0A84FF]/40 hover:bg-[#0A0F1A]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-[#0A84FF]/10 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+              <p className="mb-4 font-mono text-[13px] font-bold text-[#4D9FFF]">{String(i + 1).padStart(2, "0")}</p>
+              <h3 className="mb-4 text-[17px] font-bold text-white">{text(e.en, e.ar)}</h3>
               <p
                 dir="ltr"
-                className="truncate rounded-lg border border-white/[0.06] bg-card/[0.03] px-3 py-2 text-left font-mono text-[11px] leading-relaxed text-white/65"
+                className="relative z-10 truncate rounded-xl border border-white/[0.05] bg-black/40 px-4 py-3 text-left font-mono text-[11.5px] leading-relaxed text-[#94A3B8] shadow-inner"
               >
-                <span aria-hidden className="me-1.5 text-[#4D9FFF]">›</span>
+                <span aria-hidden className="me-2 font-bold text-[#0A84FF]">›</span>
                 {e.out}
               </p>
-            </div>
-          ))}
-        </div>
-      </Reveal>
+            </motion.div>
+          </Reveal>
+        ))}
+      </div>
     </Section>
   );
 }

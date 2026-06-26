@@ -113,10 +113,30 @@ function normalizeDrug(drug: string): string {
 
 export function checkDrugInteractions(
   newDrug: string,
-  existingMedications: string[]
+  existingMedications: string[],
+  allergies: string[] = []
 ): InteractionWarning[] {
   const normalizedNew = normalizeDrug(newDrug);
   const warnings: InteractionWarning[] = [];
+
+  // 1. Check for Allergy Contraindications
+  const drug = newDrug.toLowerCase();
+  for (const allergy of allergies) {
+    const allergyL = allergy.toLowerCase();
+    if (
+      (allergyL.includes("penicillin") && (drug.includes("amoxicillin") || drug.includes("ampicillin") || drug.includes("penicillin") || drug.includes("augmentin"))) ||
+      (allergyL.includes("sulfa") && (drug.includes("sulfamethoxazole") || drug.includes("bactrim"))) ||
+      ((allergyL.includes("aspirin") || allergyL.includes("nsaid")) && (drug.includes("ibuprofen") || drug.includes("naproxen") || drug.includes("aspirin") || drug.includes("diclofenac"))) ||
+      (allergyL.includes("cephalosporin") && (drug.includes("cephalexin") || drug.includes("ceftriaxone") || drug.includes("cefuroxime")))
+    ) {
+      warnings.push({
+        severity: "critical",
+        conflictingDrug: allergy,
+        description: `⚠️ ALLERGY CONFLICT: Patient is allergic to ${allergy}.`,
+        recommendation: `CONTRAINDICATED. Do not prescribe ${newDrug}. High risk of anaphylaxis or severe hypersensitivity reaction. Consult for alternative therapy.`
+      });
+    }
+  }
 
   for (const existingDrug of existingMedications) {
     const normalizedExisting = normalizeDrug(existingDrug);

@@ -746,8 +746,6 @@ export default function AIControlCenter() {
 
       {/* ─── FOOTER ─── */}
 
-      {/* ─── FOOTER ─── */}
-
       <div className="px-5 py-3.5 bg-secondary border border-border rounded-2xl flex items-center gap-4 mt-5">
         <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
         <p className="flex-1 text-xs text-muted-foreground">

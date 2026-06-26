@@ -1,11 +1,11 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Input, Button, Badge, PageHeader, KpiCard, DataLabel , SkeletonCard, ErrorBanner} from "@/components/shared";
 import {
   Shield, Search, AlertTriangle, CheckCircle2, TrendingUp, DollarSign, Users, Brain,
   ShieldAlert, Zap, X, Clock, BarChart2, Activity, ChevronRight, FileCheck,
-  RefreshCw, TrendingDown, Eye, MessageSquare
+  RefreshCw, TrendingDown, Eye, MessageSquare, PieChart as PieChartIcon
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/language-context";
@@ -646,7 +646,7 @@ export default function InsurancePortal() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 <Card className="col-span-full lg:col-span-6">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><PieChart className="w-4 h-4 text-primary" /><CardTitle>{text("Portfolio Risk Distribution", "توزيع خطورة المحفظة")}</CardTitle></div>
+                    <div className="flex items-center gap-2"><PieChartIcon className="w-4 h-4 text-primary" /><CardTitle>{text("Portfolio Risk Distribution", "توزيع خطورة المحفظة")}</CardTitle></div>
                   </CardHeader>
                   <CardBody>
                     <div className="h-56">

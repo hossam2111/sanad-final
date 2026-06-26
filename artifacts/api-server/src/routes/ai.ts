@@ -25,6 +25,12 @@ router.post("/check-interaction", validate(checkInteractionSchema), async (req, 
   const { patientId, newDrug } = req.body as z.infer<typeof checkInteractionSchema>;
   if (!(await requireOwnPatient(req, res, patientId))) return;
 
+  const [patient] = await db
+    .select()
+    .from(patientsTable)
+    .where(eq(patientsTable.id, patientId))
+    .limit(1);
+
   const medications = await db
     .select()
     .from(medicationsTable)
@@ -33,7 +39,8 @@ router.post("/check-interaction", validate(checkInteractionSchema), async (req, 
     .limit(100);
 
   const activeMedNames = medications.filter(m => m.isActive).map(m => m.drugName);
-  const warnings = checkDrugInteractions(newDrug, activeMedNames);
+  const allergies = patient?.allergies ?? [];
+  const warnings = checkDrugInteractions(newDrug, activeMedNames, allergies);
 
   const safe = !warnings.some(w => w.severity === "critical" || w.severity === "high");
 
