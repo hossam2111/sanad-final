@@ -1994,7 +1994,7 @@ function PrescribeModal({ patientId, nationalId }: { patientId: number; national
   };
 
   const handlePrescribe = async () => {
-    await prescribeMutation.mutateAsync({
+    const result = await prescribeMutation.mutateAsync({
       data: {
         patientId, drugName, dosage, frequency,
         prescribedBy: "Dr. Ahmed Al-Rashidi",
@@ -2005,7 +2005,11 @@ function PrescribeModal({ patientId, nationalId }: { patientId: number; national
     setIsOpen(false);
     setDrugName(""); setDosage(""); setFrequency("");
     checkMutation.reset();
-    await qc.invalidateQueries({ queryKey: getGetPatientByNationalIdQueryKey(nationalId) });
+    // Inject the new medication directly into the cache — no refetch, no screen shake
+    qc.setQueryData(getGetPatientByNationalIdQueryKey(nationalId), (old: any) => {
+      if (!old) return old;
+      return { ...old, medications: [result.medication, ...(old.medications ?? [])] };
+    });
   };
 
   const close = () => { setIsOpen(false); checkMutation.reset(); };
