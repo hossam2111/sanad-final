@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @theme inline {
   /* Arabic renders in IBM Plex Sans Arabic — same superfamily as the Plex Mono
      telemetry — so both scripts carry the same engineered character.
@@ -58,7 +60,52 @@
   --radius-3xl: 2rem;
 }
 
-[data-theme="dark"] {
+:root {
+  --background: 240 6% 97%;
+  --foreground: 240 10% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 8%;
+  --primary: 211 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 6% 95%;
+  --secondary-foreground: 240 8% 25%;
+  --muted: 240 5% 94%;
+  --muted-foreground: 240 5% 52%;
+  --accent: 211 100% 50%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 85% 57%;
+  --destructive-foreground: 0 0% 100%;
+  --warning: 35 95% 50%;
+  --warning-foreground: 0 0% 100%;
+  --success: 142 71% 40%;
+  --success-foreground: 0 0% 100%;
+  --sidebar: 0 0% 100%;
+  --sidebar-foreground: 240 10% 10%;
+  --border: 240 6% 91%;
+  --input: 240 6% 91%;
+  --ring: 211 100% 50%;
+  --risk-critical: 0 84% 55%;
+  --risk-high: 25 90% 50%;
+  --risk-medium: 45 90% 48%;
+  --risk-low: 142 65% 40%;
+  --risk-none: 215 20% 60%;
+  --risk-critical-bg: 0 100% 97%;
+  --risk-high-bg: 25 100% 96%;
+  --risk-medium-bg: 43 100% 95%;
+  --risk-low-bg: 142 76% 95%;
+
+  /* Status tokens — light (success/warning already defined above) */
+  --info: 211 100% 50%;
+  --info-foreground: 0 0% 100%;
+  --danger: 0 85% 57%;
+  --danger-foreground: 0 0% 100%;
+  --success-bg: 142 76% 95%;
+  --warning-bg: 43 100% 95%;
+  --info-bg: 210 100% 96%;
+  --danger-bg: 0 100% 97%;
+}
+
+.dark {
   --background: 222 47% 8%;
   --foreground: 210 40% 98%;
   --card: 222 47% 11%;
@@ -105,57 +152,15 @@
   --warning-bg: 38 45% 13%;
   --info-bg: 210 45% 14%;
   --danger-bg: 0 40% 14%;
-}
 
-:root {
-  --background: 240 6% 97%;
-  --foreground: 240 10% 8%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 8%;
-  --primary: 211 100% 50%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 240 6% 95%;
-  --secondary-foreground: 240 8% 25%;
-  --muted: 240 5% 94%;
-  --muted-foreground: 240 5% 52%;
-  --accent: 211 100% 50%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 85% 57%;
-  --destructive-foreground: 0 0% 100%;
-  --warning: 35 95% 50%;
-  --warning-foreground: 0 0% 100%;
-  --success: 142 71% 40%;
-  --success-foreground: 0 0% 100%;
-  --sidebar: 0 0% 100%;
-  --sidebar-foreground: 240 10% 10%;
-  --border: 240 6% 91%;
-  --input: 240 6% 91%;
-  --ring: 211 100% 50%;
-  --risk-critical: 0 84% 55%;
-  --risk-high: 25 90% 50%;
-  --risk-medium: 45 90% 48%;
-  --risk-low: 142 65% 40%;
-  --risk-none: 215 20% 60%;
-  --risk-critical-bg: 0 100% 97%;
-  --risk-high-bg: 25 100% 96%;
-  --risk-medium-bg: 43 100% 95%;
-  --risk-low-bg: 142 76% 95%;
-
-  /* Status tokens — light (success/warning already defined above) */
-  --info: 211 100% 50%;
-  --info-foreground: 0 0% 100%;
-  --danger: 0 85% 57%;
-  --danger-foreground: 0 0% 100%;
-  --success-bg: 142 76% 95%;
-  --warning-bg: 43 100% 95%;
-  --info-bg: 210 100% 96%;
-  --danger-bg: 0 100% 97%;
+  --sidebar: 222 47% 9%;
+  --sidebar-foreground: 210 40% 98%;
 }
 
 @layer base {
   * { @apply border-border; box-sizing: border-box; }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -174,10 +179,29 @@
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tbody tr:hover td { background: hsl(var(--secondary)); transition: background 0.15s ease; }
 
+/* ─── Fix Recharts Tooltip Z-Index ─── */
+.recharts-tooltip-wrapper { z-index: 50 !important; }
+
+/* ─── Global Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsla(var(--muted-foreground) / 0.3);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(var(--muted-foreground) / 0.6);
+}
+
 .sidebar-scroll { scrollbar-width: none; }
 .sidebar-scroll::-webkit-scrollbar { width: 0; display: none; }
 
-* { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(6px); }
