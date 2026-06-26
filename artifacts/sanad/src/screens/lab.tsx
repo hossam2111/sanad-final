@@ -85,7 +85,10 @@ export default function LabPortal() {
       setLastResult(result);
       setShowAddForm(false);
       setForm({ testName: "", result: "", unit: "", referenceRange: "", status: "normal", hospital: "SANAD Lab Network", notes: "" });
-      qc.invalidateQueries({ queryKey: ["lab-patient", nationalId] });
+      qc.setQueryData(["lab-patient", nationalId], (old: any) => {
+        if (!old) return old;
+        return { ...old, labs: [result.result, ...(old.labs ?? [])] };
+      });
     },
   });
 

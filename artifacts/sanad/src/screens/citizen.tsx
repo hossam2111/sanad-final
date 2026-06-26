@@ -1220,7 +1220,15 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
   const mutation = useMutation({
     mutationFn: updateConsent,
     onSuccess: (res, vars) => {
-      qc.invalidateQueries({ queryKey: ["consent", nationalId] });
+      qc.setQueryData(["consent", nationalId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          consents: old.consents?.map((c: any) =>
+            c.consentType === vars.consentType ? { ...c, granted: vars.granted } : c
+          ) ?? [],
+        };
+      });
       setToggling(null);
       setToast({ msg: res.message, ok: true });
       setTimeout(() => setToast(null), 3000);

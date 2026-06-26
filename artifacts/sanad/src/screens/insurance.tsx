@@ -109,7 +109,15 @@ export default function InsurancePortal() {
       setReviewResults(prev => ({ ...prev, [claimId]: result }));
       setReviewingClaim(null);
       setReviewNotes("");
-      qc.invalidateQueries({ queryKey: ["insurance-patient", nationalId] });
+      qc.setQueryData(["insurance-patient", nationalId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          claims: old.claims?.map((c: any) =>
+            c.claimId === claimId ? { ...c, status: result.newStatus, reviewedBy: result.reviewedBy } : c
+          ) ?? [],
+        };
+      });
     },
   });
 

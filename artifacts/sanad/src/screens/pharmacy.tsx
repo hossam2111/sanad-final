@@ -335,7 +335,15 @@ export default function PharmacyPortal() {
     onSuccess: (result, { id }) => {
       setDispensedResults((prev) => ({ ...prev, [id]: result }));
       setDispensingId(null);
-      qc.invalidateQueries({ queryKey: ["pharmacy-patient", nationalId] });
+      qc.setQueryData(["pharmacy-patient", nationalId], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          prescriptions: old.prescriptions?.map((p: any) =>
+            p.id === id ? { ...p, dispensedAt: result.dispensedAt } : p
+          ) ?? [],
+        };
+      });
       const presc = data?.prescriptions?.find((p: any) => p.id === id);
       if (presc && data?.patient) {
         const newReceipt: DispenseReceipt = {
