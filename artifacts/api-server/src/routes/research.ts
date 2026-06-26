@@ -112,7 +112,8 @@ router.get("/export", async (req, res) => {
   // Audit the export — research data exports must be traceable per PDPL
   const { ipAddress, userAgent } = extractRequestMeta(req);
   await writeAudit({
-    who: req.role ?? "researcher",
+    who: req.userId ?? req.role ?? "researcher",
+    whoName: req.userName,
     whoRole: req.role ?? "researcher",
     action: "EXPORT",
     what: `Research data export requested (format: ${format})`,

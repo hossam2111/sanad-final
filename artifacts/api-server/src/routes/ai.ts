@@ -53,8 +53,9 @@ router.post("/check-interaction", validate(checkInteractionSchema), async (req, 
     });
     const { ipAddress, userAgent } = extractRequestMeta(req);
     await writeAudit({
-      who: "Physician Portal",
-      whoRole: "doctor",
+      who: req.userId ?? req.role ?? "unknown",
+      whoName: req.userName,
+      whoRole: req.role ?? "doctor",
       action: "DRUG_CHECK",
       what: `${newDrug} checked — ${warnings.length} conflict(s) found`,
       patientId: Number(patientId),

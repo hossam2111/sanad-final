@@ -31,9 +31,15 @@ router.get("/stream", (req, res) => {
   }
 
   let role: string | undefined;
+  let username: string | undefined;
+  let nationalId: string | undefined;
   try {
-    const decoded = jwt.verify(rawToken, secret) as JwtPayload | string;
-    role = typeof decoded === "object" && typeof decoded.role === "string" ? decoded.role : undefined;
+    const decoded = jwt.verify(rawToken, secret) as JwtPayload;
+    if (typeof decoded === "object") {
+      role = decoded.role;
+      username = decoded.username;
+      nationalId = decoded.nationalId;
+    }
   } catch {
     res.status(401).json({ error: "Unauthorized", message: "Invalid or expired token" });
     return;
@@ -45,7 +51,28 @@ router.get("/stream", (req, res) => {
   }
 
   const clientId = randomUUID();
-  registerSseClient(clientId, role, res);
+  
+  (async () => {
+    let hospitalId: string | undefined;
+    let patientId: number | undefined;
+    
+    if (username) {
+      const { getStaffHospitalId } = await import("../lib/ownership.js");
+      hospitalId = (await getStaffHospitalId(username)) ?? undefined;
+    }
+    
+    if (role === "citizen" && nationalId) {
+      const { db } = await import("@workspace/db");
+      const { patientsTable } = await import("@workspace/db/schema");
+      const { eq } = await import("drizzle-orm");
+      const [row] = await db.select({ id: patientsTable.id }).from(patientsTable).where(eq(patientsTable.nationalId, nationalId)).limit(1);
+      patientId = row?.id;
+    }
+
+    registerSseClient(clientId, role, res, hospitalId, patientId);
+  })().catch(() => {
+    res.status(500).end();
+  });
 });
 
 router.get("/status", (_req, res) => {

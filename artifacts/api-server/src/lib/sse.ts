@@ -5,13 +5,15 @@ interface SseClient {
   role: string;
   res: Response;
   heartbeat: NodeJS.Timeout;
+  hospitalId?: string;
+  patientId?: number;
 }
 
 const clients: Map<string, SseClient> = new Map();
 let messagesSent = 0;
 let writeFailureCount = 0;
 
-export function registerSseClient(id: string, role: string, res: Response) {
+export function registerSseClient(id: string, role: string, res: Response, hospitalId?: string, patientId?: number) {
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
@@ -35,7 +37,7 @@ export function registerSseClient(id: string, role: string, res: Response) {
     }
   }, 25000);
 
-  const client: SseClient = { id, role, res, heartbeat };
+  const client: SseClient = { id, role, res, heartbeat, hospitalId, patientId };
   clients.set(id, client);
 
   res.on("close", () => {
@@ -52,6 +54,44 @@ export function broadcastToRole(
   const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
   for (const client of clients.values()) {
     if (client.role === role || client.role === "admin") {
+      try {
+        client.res.write(payload);
+        messagesSent += 1;
+      } catch {
+        writeFailureCount += 1;
+        clients.delete(client.id);
+      }
+    }
+  }
+}
+
+export function broadcastToHospital(
+  hospitalId: string,
+  event: string,
+  data: Record<string, unknown>
+) {
+  const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+  for (const client of clients.values()) {
+    if (client.hospitalId === hospitalId || client.role === "admin") {
+      try {
+        client.res.write(payload);
+        messagesSent += 1;
+      } catch {
+        writeFailureCount += 1;
+        clients.delete(client.id);
+      }
+    }
+  }
+}
+
+export function broadcastToPatient(
+  patientId: number,
+  event: string,
+  data: Record<string, unknown>
+) {
+  const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+  for (const client of clients.values()) {
+    if (client.patientId === patientId || client.role === "admin") {
       try {
         client.res.write(payload);
         messagesSent += 1;
