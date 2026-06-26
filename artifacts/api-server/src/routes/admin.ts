@@ -405,7 +405,8 @@ router.get("/audit-log", async (req, res) => {
 });
 
 router.get("/audit-feed", async (req, res) => {
-  const limit = Math.min(parseInt((req.query["limit"] as string) || "50"), 200);
+  const limitRaw = parseInt((req.query["limit"] as string) || "50");
+  const limit = isNaN(limitRaw) || limitRaw < 1 ? 50 : Math.min(limitRaw, 200);
   const roleFilter = req.query["role"] as string | undefined;
 
   const rows = await db
