@@ -40,13 +40,17 @@ router.get("/features", (req, res) => {
   res.json({ features: featureToggles });
 });
 
-router.patch("/features/:feature", (req, res) => {
+const featureToggleSchema = z.object({
+  enabled: z.boolean()
+});
+
+router.patch("/features/:feature", validate(featureToggleSchema), (req, res) => {
   const { feature } = req.params;
   if (!(feature in featureToggles)) {
     res.status(404).json({ error: "UNKNOWN_FEATURE" });
     return;
   }
-  const { enabled } = req.body as { enabled: boolean };
+  const { enabled } = req.body as z.infer<typeof featureToggleSchema>;
   featureToggles[feature as keyof typeof featureToggles] = enabled;
   res.json({ feature, enabled });
 });
