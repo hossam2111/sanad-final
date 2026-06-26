@@ -134,10 +134,11 @@ app.use(
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
-// ── Cache-Control: 30s for GETs, no-store for writes ─────────────────────────
+// ── Cache-Control: Private for GETs to prevent CDN caching of PHI, no-store for writes ─────────────────────────
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (req.method === "GET") {
-    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+    // SECURITY FIX: API responses contain sensitive patient data (PHI). They must NEVER be cached by public CDNs.
+    res.setHeader("Cache-Control", "private, max-age=15, stale-while-revalidate=30");
   } else {
     res.setHeader("Cache-Control", "no-store");
   }
