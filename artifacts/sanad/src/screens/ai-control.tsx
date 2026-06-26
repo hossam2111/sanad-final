@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { Card, CardHeader, CardTitle, CardBody, Badge, PageHeader, KpiCard , SkeletonCard, ErrorBanner} from "@/components/shared";
@@ -137,32 +137,33 @@ export default function AIControlCenter() {
     <Layout role="ai-control" localized>
       {/* Priority Strip */}
       {driftDetected.length > 0 && (
-        <div className="flex items-center gap-3 px-4 py-2.5 bg-danger text-white rounded-2xl mb-5">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <p className="text-xs font-bold uppercase tracking-widest">
-            {text("DRIFT DETECTED", "تم رصد انحراف")} — {text(`${driftDetected.length} engine${driftDetected.length > 1 ? "s" : ""} ${driftDetected.length > 1 ? "require" : "requires"} retraining:`, `${driftDetected.length} ${driftDetected.length > 1 ? "محركات تتطلب" : "محرك يتطلب"} إعادة تدريب:`)}{" "}
-            {driftDetected.map((e: any) => e.engine).join(" · ")}
+        <div className="flex items-center gap-3 px-4 py-3 glass-panel border border-danger/40 rounded-2xl mb-5 shadow-[0_0_15px_rgba(239,68,68,0.15)] relative overflow-hidden">
+          <div className="absolute inset-0 bg-danger/5 animate-pulse pointer-events-none" />
+          <AlertTriangle className="w-5 h-5 text-danger shrink-0 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+          <p className="text-xs font-bold uppercase tracking-widest text-danger relative z-10">
+            {text("DRIFT DETECTED", "تم رصد انحراف")} — <span className="text-foreground/80">{text(`${driftDetected.length} engine${driftDetected.length > 1 ? "s" : ""} ${driftDetected.length > 1 ? "require" : "requires"} retraining:`, `${driftDetected.length} ${driftDetected.length > 1 ? "محركات تتطلب" : "محرك يتطلب"} إعادة تدريب:`)}</span>{" "}
+            <span className="text-foreground">{driftDetected.map((e: any) => e.engine).join(" · ")}</span>
           </p>
           <button
             onClick={() => setActiveTab("drift")}
-            className="ms-auto text-[11px] font-bold bg-card/20 hover:bg-card/30 px-3 py-1 rounded-full transition-colors"
+            className="ms-auto text-[11px] font-bold text-danger border border-danger/30 hover:bg-danger/10 px-4 py-1.5 rounded-full transition-all relative z-10"
           >
             {text("View Drift Analysis →", "عرض تحليل الانحراف ←")}
           </button>
         </div>
       )}
 
-      <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 bg-danger text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
-          <Brain className="w-3 h-3" />
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center gap-2 glass-panel border border-danger/30 text-danger text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">
+          <Brain className="w-3.5 h-3.5" />
           {text("AI Control Center", "مركز التحكم بالذكاء")}
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-success bg-success-bg px-3 py-1.5 rounded-full">
-          <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+        <div className="flex items-center gap-2 text-[11px] font-bold text-success glass-panel border border-success/30 px-4 py-1.5 rounded-full drop-shadow-[0_0_8px_rgba(34,197,94,0.2)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.8)]" />
           {text(`${metrics?.engines?.filter((e: any) => e.status === "operational").length} / ${metrics?.engines?.length} engines operational`, `${metrics?.engines?.filter((e: any) => e.status === "operational").length} / ${metrics?.engines?.length} محرك يعمل`)}
         </div>
-        <div className="ms-auto font-mono text-[11px] text-muted-foreground bg-secondary border border-border px-3 py-1.5 rounded-full" dir={dir}>
-          {text("Uptime", "التشغيل")} {metrics?.systemHealth?.uptime} · {text("Last retrain:", "آخر تدريب:")} {metrics?.systemHealth?.lastRetraining}
+        <div className="ms-auto font-mono text-[11px] text-muted-foreground glass-panel border border-white/10 px-4 py-1.5 rounded-full" dir={dir}>
+          {text("Uptime", "التشغيل")} <span className="text-foreground">{metrics?.systemHealth?.uptime}</span> <span className="text-white/20 mx-1">·</span> {text("Last retrain:", "آخر تدريب:")} <span className="text-foreground">{metrics?.systemHealth?.lastRetraining}</span>
         </div>
       </div>
 
