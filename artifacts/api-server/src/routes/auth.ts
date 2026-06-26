@@ -168,13 +168,20 @@ router.post("/refresh", async (req, res) => {
     return res.status(401).json({ error: "TOKEN_EXPIRED", message: "Token expired or invalid — please log in again" });
   }
 
+  const username = decoded["username"] as string;
+  const user = CREDENTIALS[username];
+
+  if (!user) {
+    return res.status(401).json({ error: "INVALID_USER", message: "User account no longer exists or has been disabled" });
+  }
+
   const payload: Record<string, string> = {
-    role: decoded["role"] as string,
-    userId: decoded["userId"] as string,
-    userName: decoded["userName"] as string,
-    username: decoded["username"] as string,
+    role: user.role,
+    userId: user.userId,
+    userName: user.name,
+    username: username,
   };
-  if (decoded["nationalId"]) payload["nationalId"] = decoded["nationalId"] as string;
+  if (user.nationalId) payload["nationalId"] = user.nationalId;
 
   const newToken = jwt.sign(payload, secret, { expiresIn: EXPIRES_IN_SECONDS });
 
