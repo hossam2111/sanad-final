@@ -195,6 +195,8 @@ router.patch("/:id/complete", async (req, res) => {
     return res.status(403).json({ error: "FORBIDDEN", message: "Only clinical staff may complete appointments" });
   }
   const id = parseInt(req.params["id"]!);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
   const [updated] = await db.update(appointmentsTable)
     .set({ status: "completed", completedAt: new Date(), updatedAt: new Date() })
     .where(eq(appointmentsTable.id, id))
