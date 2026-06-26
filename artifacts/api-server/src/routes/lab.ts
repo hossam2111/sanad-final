@@ -156,6 +156,11 @@ router.get("/patient/:nationalId", async (req, res) => {
 });
 
 router.post("/result", validate(labResultSchema), async (req, res) => {
+  if (req.role !== "lab" && req.role !== "admin" && req.role !== "hospital") {
+    res.status(403).json({ error: "FORBIDDEN", message: "Lab or hospital role required to submit results" });
+    return;
+  }
+
   const { patientId, testName, result, unit, referenceRange, status, hospital, notes } = req.body as z.infer<typeof labResultSchema>;
 
   const [newResult] = await db.insert(labResultsTable).values({
