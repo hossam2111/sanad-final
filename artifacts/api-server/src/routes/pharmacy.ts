@@ -307,9 +307,15 @@ router.post("/dispense/:medicationId", validate(dispenseSchema), async (req, res
   const medicationId = String(req.params["medicationId"]);
   const { pharmacistName, notes } = req.body as z.infer<typeof dispenseSchema>;
 
+  const medIdInt = parseInt(medicationId);
+  if (isNaN(medIdInt)) {
+    res.status(400).json({ error: "BAD_REQUEST", message: "Invalid medication ID" });
+    return;
+  }
+
   const [med] = await db.update(medicationsTable)
     .set({ isActive: false })
-    .where(eq(medicationsTable.id, parseInt(medicationId)))
+    .where(eq(medicationsTable.id, medIdInt))
     .returning();
   if (!med) return res.status(404).json({ error: "Prescription not found" });
 
