@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { getGetPatientByNationalIdQueryKey } from "@workspace/api-client-react";
 import { apiFetch } from "@/lib/api";
@@ -620,9 +621,9 @@ export default function DoctorDashboard() {
         </div>
       </div>
 
-      {showRegisterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={closeWizard}>
-          <div className="glass-panel rounded-2xl w-full max-w-xl shadow-2xl max-h-[90vh] flex flex-col" onClick={e => e.stopPropagation()}>
+      {showRegisterModal && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={closeWizard}>
+          <div className="bg-card rounded-2xl border border-border w-full max-w-xl shadow-2xl max-h-[90vh] flex flex-col" style={{ isolation: "isolate" }} onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
               <div className="flex items-center gap-2">
@@ -854,7 +855,8 @@ export default function DoctorDashboard() {
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {!patientId && !isLoading && (
@@ -2020,9 +2022,9 @@ function PrescribeModal({ patientId, nationalId }: { patientId: number; national
         <Syringe className="w-3.5 h-3.5" /> {text("Prescribe Medication", "وصف دواء")}
       </Button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-          <div className="bg-card rounded-3xl border border-border shadow-2xl w-full max-w-lg overflow-hidden">
+      {isOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-card rounded-3xl border border-border shadow-2xl w-full max-w-lg overflow-hidden" style={{ isolation: "isolate" }}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
               <div>
                 <h3 className="font-bold text-foreground text-base">{text("Prescribe Medication", "وصف دواء")}</h3>
@@ -2113,10 +2115,11 @@ function PrescribeModal({ patientId, nationalId }: { patientId: number; national
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-      {showAiExplanation && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowAiExplanation(false)}>
+      {showAiExplanation && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={() => setShowAiExplanation(false)}>
           <div className="bg-card rounded-2xl border border-border w-full max-w-xl shadow-2xl flex flex-col" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <div className="flex items-center gap-2">
@@ -2141,7 +2144,8 @@ function PrescribeModal({ patientId, nationalId }: { patientId: number; national
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
