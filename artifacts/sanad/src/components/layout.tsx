@@ -380,7 +380,7 @@ export function Layout({ children, role, localized = false }: { children: React.
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -end-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+                  <span className="absolute -end-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-destructive-foreground">
                     {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
@@ -422,7 +422,7 @@ export function Layout({ children, role, localized = false }: { children: React.
                   <div className="max-h-[360px] overflow-y-auto">
                     {systemAlerts.length === 0 ? (
                       <div className="flex flex-col items-center py-8 text-muted-foreground">
-                        <CheckCircle2 className="mb-2 h-8 w-8 text-emerald-400" />
+                        <CheckCircle2 className="mb-2 h-8 w-8 text-success" />
                         <p className="text-[13px] font-medium">{text("No alerts", "لا توجد تنبيهات")}</p>
                       </div>
                     ) : (
@@ -437,13 +437,13 @@ export function Layout({ children, role, localized = false }: { children: React.
                           <div className="flex items-start gap-2.5">
                             <div className={cn(
                               "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
-                              alert.severity === "critical" ? "bg-red-100" :
-                              alert.severity === "warning" ? "bg-risk-high-bg" : "bg-blue-100"
+                              alert.severity === "critical" ? "bg-danger-bg" :
+                              alert.severity === "warning" ? "bg-warning-bg" : "bg-info-bg"
                             )}>
                               <AlertTriangle className={cn(
                                 "h-3 w-3",
-                                alert.severity === "critical" ? "text-red-600" :
-                                alert.severity === "warning" ? "text-risk-high" : "text-blue-600"
+                                alert.severity === "critical" ? "text-danger" :
+                                alert.severity === "warning" ? "text-warning" : "text-info"
                               )} />
                             </div>
                             <div className="min-w-0 flex-1">

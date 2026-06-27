@@ -1888,8 +1888,8 @@ export default function DoctorDashboard() {
                       </Button>
                     </div>
                     {chatAnswer && (
-                      <div className="rounded-xl bg-violet-50 border border-violet-100 p-3.5 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-                        <p className="text-[10px] font-bold text-violet-500 uppercase tracking-widest mb-2">{text("AI Response", "رد الذكاء الاصطناعي")}</p>
+                      <div className="rounded-xl bg-primary/5 border border-primary/20 p-3.5 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-2">{text("AI Response", "رد الذكاء الاصطناعي")}</p>
                         {chatAnswer}
                       </div>
                     )}

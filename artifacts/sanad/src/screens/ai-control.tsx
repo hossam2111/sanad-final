@@ -230,8 +230,8 @@ export default function AIControlCenter() {
                 {[
                   { label: text("Model Confidence", "ثقة النموذج"), value: metrics?.avgConfidence, unit: "%", color: "bg-info" },
                   { label: text("Engine Availability", "توافر المحركات"), value: metrics?.engines?.length ? Math.round((metrics.engines.filter((e: any) => e.status === "operational").length / metrics.engines.length) * 100) : undefined, unit: "%", color: "bg-success" },
-                  { label: text("Drift Headroom", "هامش الانحراف"), value: metrics?.driftRisk != null ? Math.max(0, 100 - Math.round(metrics.driftRisk)) : undefined, unit: "%", color: "bg-violet-500" },
-                  { label: text("Memory Utilization", "استخدام الذاكرة"), value: metrics?.systemHealth?.memoryUsedPct, unit: "%", color: "bg-teal-500" },
+                  { label: text("Drift Headroom", "هامش الانحراف"), value: metrics?.driftRisk != null ? Math.max(0, 100 - Math.round(metrics.driftRisk)) : undefined, unit: "%", color: "bg-primary" },
+                  { label: text("Memory Utilization", "استخدام الذاكرة"), value: metrics?.systemHealth?.memoryUsedPct, unit: "%", color: "bg-info" },
                 ].map((item, i) => (
                   <div key={i}>
                     <div className="flex items-center justify-between mb-1">

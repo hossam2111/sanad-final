@@ -244,18 +244,18 @@ async function fetchUsers() {
 }
 
 const ROLE_BADGE: Record<string, { label: string; labelAr: string; cls: string }> = {
-  admin:        { label: "Admin",        labelAr: "مدير النظام",    cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
+  admin:        { label: "Admin",        labelAr: "مدير النظام",    cls: "bg-primary/10 text-primary" },
   doctor:       { label: "Doctor",       labelAr: "طبيب",           cls: "bg-primary/10 text-primary" },
   emergency:    { label: "Emergency",    labelAr: "طوارئ",          cls: "bg-danger-bg text-danger" },
   lab:          { label: "Lab",          labelAr: "مختبر",          cls: "bg-info-bg text-info" },
   pharmacy:     { label: "Pharmacy",     labelAr: "صيدلية",         cls: "bg-success-bg text-success" },
   hospital:     { label: "Hospital",     labelAr: "مستشفى",         cls: "bg-warning-bg text-warning" },
-  insurance:    { label: "Insurance",    labelAr: "تأمين",          cls: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300" },
-  "ai-control": { label: "AI Control",  labelAr: "تحكم ذكي",       cls: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300" },
-  research:     { label: "Research",     labelAr: "بحث",            cls: "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300" },
+  insurance:    { label: "Insurance",    labelAr: "تأمين",          cls: "bg-warning-bg text-warning" },
+  "ai-control": { label: "AI Control",  labelAr: "تحكم ذكي",       cls: "bg-primary/10 text-primary" },
+  research:     { label: "Research",     labelAr: "بحث",            cls: "bg-info-bg text-info" },
   citizen:      { label: "Citizen",      labelAr: "مواطن",          cls: "bg-secondary text-muted-foreground" },
-  family:       { label: "Family",       labelAr: "أسرة",           cls: "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300" },
-  "supply-chain":{ label: "Supply Chain",labelAr: "سلسلة التوريد", cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300" },
+  family:       { label: "Family",       labelAr: "أسرة",           cls: "bg-success-bg text-success" },
+  "supply-chain":{ label: "Supply Chain",labelAr: "سلسلة التوريد", cls: "bg-warning-bg text-warning" },
 };
 
 const DEMO_USERS = [
@@ -425,7 +425,7 @@ export default function AdminDashboard() {
           <KpiCard title={text("Registered Patients", "المرضى المسجّلون")} value={(stats.totalPatients ?? 0).toLocaleString()} sub={text("Active national records", "سجلات وطنية نشطة")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
           <KpiCard title={text("Visits Today", "زيارات اليوم")} value={(stats.totalVisitsToday ?? 0).toLocaleString()} sub={text("Across all facilities", "في جميع المنشآت")} icon={Activity} iconBg="bg-info-bg" iconColor="text-info" />
           <KpiCard title={text("Drug Conflicts Prevented", "تداخلات دوائية مُنعت")} value={(stats.drugInteractionsBlocked ?? 0).toLocaleString()} sub={text("Blocked by interaction screening", "حُجبت عبر فحص التداخلات")} icon={ShieldAlert} iconBg="bg-success-bg" iconColor="text-success" />
-          <KpiCard title={text("AI Decisions Made", "قرارات الذكاء الاصطناعي")} value={(stats.aiDecisionsMade ?? 0).toLocaleString()} sub={text(`${(stats.activeAlerts ?? 0).toLocaleString()} active alerts`, `${(stats.activeAlerts ?? 0).toLocaleString()} تنبيه نشط`)} icon={Building} iconBg="bg-violet-100" iconColor="text-violet-600" />
+          <KpiCard title={text("AI Decisions Made", "قرارات الذكاء الاصطناعي")} value={(stats.aiDecisionsMade ?? 0).toLocaleString()} sub={text(`${(stats.activeAlerts ?? 0).toLocaleString()} active alerts`, `${(stats.activeAlerts ?? 0).toLocaleString()} تنبيه نشط`)} icon={Building} iconBg="bg-primary/10" iconColor="text-primary" />
         </div>
       )}
 
@@ -619,7 +619,7 @@ export default function AdminDashboard() {
           {intelligence && (
             <Card className="col-span-12">
               <CardHeader>
-                <Brain className="w-4 h-4 text-violet-600" />
+                <Brain className="w-4 h-4 text-primary" />
                 <CardTitle>{text("National AI Intelligence Platform", "منصّة الذكاء الاصطناعي الوطنية")}</CardTitle>
                 <Badge variant="outline" className="ms-auto">{text("LIVE · v3.0", "مباشر · v3.0")}</Badge>
               </CardHeader>
@@ -681,12 +681,12 @@ export default function AdminDashboard() {
                 {((intelligence as Record<string, any>))?.policyInsights && ((intelligence as Record<string, any>)).policyInsights.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <Lightbulb className="w-3.5 h-3.5 text-violet-500" /> {text("AI Policy Intelligence Recommendations", "توصيات ذكاء السياسات الصحية")}
+                      <Lightbulb className="w-3.5 h-3.5 text-primary" /> {text("AI Policy Intelligence Recommendations", "توصيات ذكاء السياسات الصحية")}
                     </p>
                     <div className="space-y-2">
                       {((intelligence as Record<string, any>)).policyInsights.map((insight: any, i: number) => (
-                        <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${insight.priority === "high" ? "bg-violet-50 border-violet-200" : "bg-secondary border-border"}`}>
-                          <Target className="w-4 h-4 shrink-0 mt-0.5 text-violet-600" />
+                        <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${insight.priority === "high" ? "bg-primary/5 border-primary/20" : "bg-secondary border-border"}`}>
+                          <Target className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between gap-2">
                               <p className="text-sm font-bold text-foreground">{insight.insight}</p>
@@ -818,7 +818,7 @@ export default function AdminDashboard() {
                 title={text("SSE Clients","عملاء الأحداث المباشرة")}
                 value={sysHealth?.services?.sse?.connectedClients ?? "—"}
                 sub={text("Live event streams","بث الأحداث المباشر")}
-                icon={Radio} iconBg="bg-violet-100" iconColor="text-violet-600"
+                icon={Radio} iconBg="bg-primary/10" iconColor="text-primary"
               />
             </div>
 
@@ -871,8 +871,8 @@ export default function AdminDashboard() {
 
               {/* SSE */}
               <Card>
-                <CardHeader><Radio className="w-4 h-4 text-violet-600"/><CardTitle>{text("Real-time Events","الأحداث المباشرة")}</CardTitle>
-                  <span className="ms-auto text-[11px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">LIVE</span>
+                <CardHeader><Radio className="w-4 h-4 text-primary"/><CardTitle>{text("Real-time Events","الأحداث المباشرة")}</CardTitle>
+                  <span className="ms-auto text-[11px] font-bold px-2 py-0.5 rounded-full bg-success-bg text-success">LIVE</span>
                 </CardHeader>
                 <CardBody className="space-y-2 text-sm">
                   {[
@@ -911,7 +911,7 @@ export default function AdminDashboard() {
               <div className="space-y-5">
                 {/* KPI row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <KpiCard title={text("Total AI Decisions","إجمالي قرارات الذكاء")} value={total.toLocaleString()} sub={text("All time","منذ البداية")} icon={Brain} iconBg="bg-violet-100" iconColor="text-violet-600" />
+                  <KpiCard title={text("Total AI Decisions","إجمالي قرارات الذكاء")} value={total.toLocaleString()} sub={text("All time","منذ البداية")} icon={Brain} iconBg="bg-primary/10" iconColor="text-primary" />
                   <KpiCard title={text("Decisions Today","قرارات اليوم")} value={todayDec.toLocaleString()} sub={text("Since midnight","منذ منتصف الليل")} icon={Clock} iconBg="bg-info-bg" iconColor="text-info" />
                   <KpiCard title={text("Avg Confidence","متوسط الثقة")} value={`${confidence}%`} sub={text("AI model performance","أداء نموذج الذكاء")} icon={Target} iconBg="bg-success-bg" iconColor="text-success" />
                   <KpiCard title={text("Critical Patients","المرضى الحرجون")} value={critPts.toLocaleString()} sub={text("Score ≥ 70 — immediate action","نتيجة ≥ 70 — تدخل فوري")} icon={AlertTriangle} iconBg="bg-danger-bg" iconColor="text-danger" />

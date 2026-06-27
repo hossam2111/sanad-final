@@ -156,7 +156,7 @@ export function Badge({
 }) {
   const variants = {
     default:     "bg-primary/10 text-primary border border-primary/20",
-    info:        "bg-sky-500/10 text-sky-500 border border-sky-500/20",
+    info:        "bg-info/10 text-info border border-info/20",
     success:     "bg-success/10 text-success border border-success/20",
     warning:     "bg-warning/10 text-warning border border-warning/20",
     destructive: "bg-destructive/10 text-destructive border border-destructive/20",
@@ -213,7 +213,7 @@ export function KpiCard({ title, value, sub, icon: Icon, iconBg = "bg-secondary"
             </div>
           )}
           {trend && (
-            <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">{trend}</span>
+            <span className="text-xs font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full">{trend}</span>
           )}
         </div>
         <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-1">{title}</p>
@@ -227,11 +227,11 @@ export function KpiCard({ title, value, sub, icon: Icon, iconBg = "bg-secondary"
 /* ─── StatusDot ─────────────────────────────────────────── */
 export function StatusDot({ status }: { status: "normal" | "abnormal" | "critical" | "active" | "inactive" }) {
   const colors = {
-    normal:   "bg-emerald-500",
-    active:   "bg-emerald-500",
-    abnormal: "bg-risk-high",
+    normal:   "bg-success",
+    active:   "bg-success",
+    abnormal: "bg-warning",
     inactive: "bg-muted-foreground",
-    critical: "bg-red-500 animate-pulse",
+    critical: "bg-danger animate-pulse",
   };
   return <span className={cn("inline-block w-2 h-2 rounded-full shrink-0", colors[status])} />;
 }
@@ -280,14 +280,14 @@ export function AlertBanner({ children, variant = "warning", onDismiss }: {
   onDismiss?: () => void;
 }) {
   const styles = {
-    warning:     "bg-risk-high-bg border-risk-high/20/60 text-risk-high",
-    destructive: "bg-red-50 border-red-200/60 text-red-900",
-    info:        "bg-sky-50 border-sky-200/60 text-sky-900",
+    warning:     "bg-warning-bg border-warning/20 text-warning",
+    destructive: "bg-danger-bg border-danger/20 text-danger",
+    info:        "bg-info-bg border-info/20 text-info",
   };
   const dismissStyles = {
-    warning:     "hover:bg-risk-high/10 text-risk-high",
-    destructive: "hover:bg-red-100 text-red-700",
-    info:        "hover:bg-sky-100 text-sky-700",
+    warning:     "hover:bg-warning/10 text-warning",
+    destructive: "hover:bg-danger/10 text-danger",
+    info:        "hover:bg-info/10 text-info",
   };
   return (
     <div className={cn(
@@ -345,15 +345,15 @@ export function SkeletonCard({ rows = 3 }: { rows?: number }) {
 export function ErrorBanner({ message, onRetry }: { message: string; onRetry?: () => void }) {
   const { text } = useLanguage();
   return (
-    <Card className="border-red-200 bg-destructive/10">
+    <Card className="border-danger/30 bg-danger-bg">
       <CardBody className="flex flex-col items-center justify-center py-10 text-center">
-        <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
-          <AlertTriangle className="w-6 h-6 text-red-600" />
+        <div className="w-12 h-12 rounded-full bg-danger-bg flex items-center justify-center mb-4">
+          <AlertTriangle className="w-6 h-6 text-danger" />
         </div>
-        <h3 className="text-lg font-bold text-red-900 mb-1">
+        <h3 className="text-lg font-bold text-danger mb-1">
           {message}
         </h3>
-        <p className="text-sm text-red-700/80 mb-6 max-w-[300px]">
+        <p className="text-sm text-danger/80 mb-6 max-w-[300px]">
           {text("Unable to reach the server. Check your connection or try again.", "تعذّر الاتصال بالخادم. تحقق من اتصالك أو أعد المحاولة.")}
         </p>
         {onRetry && (
