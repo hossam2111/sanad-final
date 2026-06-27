@@ -509,39 +509,43 @@ export default function CitizenPortal() {
 
       {/* Identity + Score Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-5">
-        <Card className="col-span-full lg:col-span-7">
-          <CardBody className="flex flex-col sm:flex-row items-start sm:items-center gap-5 p-6">
-            <div className="w-16 h-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-              <User className="w-8 h-8 text-primary" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-2xl font-bold text-foreground">{patient.fullName}</h2>
-                {(patient.allergies?.length ?? 0) > 0 && (
-                  <Badge variant="destructive" className="h-6 px-2.5">
-                    {text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}
-                  </Badge>
-                )}
+        <Card className="col-span-full lg:col-span-7 bg-card border-border/50 shadow-sm overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
+          <CardBody className="p-0">
+            <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 p-6 z-10 relative">
+              <div className="relative shrink-0">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 shadow-sm flex items-center justify-center overflow-hidden">
+                  <User className="w-10 h-10 sm:w-12 sm:h-12 text-primary/60" />
+                </div>
+                <div className={`absolute -bottom-2 -right-2 text-white text-[11px] px-2.5 py-0.5 rounded-lg font-bold shadow-md ring-2 ring-background ${patient.gender === "male" ? "bg-info" : "bg-danger"}`}>
+                  {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-foreground">{text("ID:", "الهوية:")}</span>
-                  <span className="font-mono bg-secondary px-2 py-0.5 rounded-md" dir="ltr">{patient.nationalId}</span>
+              
+              <div className="flex-1 text-center sm:text-start">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-3">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">{patient.fullName}</h2>
+                  {(patient.allergies?.length ?? 0) > 0 && (
+                    <Badge variant="destructive" className="h-6 px-3 text-[11px] font-bold tracking-wide rounded-full shadow-sm animate-in zoom-in mx-auto sm:mx-0">
+                      {text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}
+                    </Badge>
+                  )}
                 </div>
-                <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 hidden sm:block"></div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-foreground">{text("DOB:", "الميلاد:")}</span>
-                  <span>{format(new Date(patient.dateOfBirth), "dd MMM yyyy")}</span>
-                </div>
-                <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 hidden sm:block"></div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-foreground">{text("Gender:", "الجنس:")}</span>
-                  <span>{patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}</span>
-                </div>
-                <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30 hidden sm:block"></div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-medium text-danger">{text("Blood:", "فصيلة الدم:")}</span>
-                  <span className="font-bold text-danger bg-danger-bg px-2 py-0.5 rounded-md" dir="ltr">{patient.bloodType}</span>
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground justify-center sm:justify-start">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-center sm:text-start">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">{text("ID", "الهوية")}</span>
+                    <span className="font-mono font-semibold text-foreground bg-secondary/50 px-2 py-0.5 rounded-md" dir="ltr">{patient.nationalId}</span>
+                  </div>
+                  <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-center sm:text-start">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">{text("DOB", "الميلاد")}</span>
+                    <span className="font-semibold text-foreground">{format(new Date(patient.dateOfBirth), "yyyy/MM/dd")}</span>
+                  </div>
+                  <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-center sm:text-start">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-danger/70">{text("Blood", "فصيلة الدم")}</span>
+                    <span className="font-black text-danger bg-danger-bg px-2 py-0.5 rounded-md" dir="ltr">{patient.bloodType}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -549,7 +553,7 @@ export default function CitizenPortal() {
         </Card>
 
         {healthScore && (
-          <Card className={`col-span-3 ${healthScore.bg} border-${healthScore.bg.replace("bg-", "border-")}`}>
+          <Card className={`col-span-full lg:col-span-3 ${healthScore.bg} border-${healthScore.bg.replace("bg-", "border-")}`}>
             <CardBody className="flex flex-col items-center justify-center py-5 text-center">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("AI Health Score", "درجتك الصحية")}</p>
               <div className="relative w-24 h-24 mb-2">
@@ -593,7 +597,7 @@ export default function CitizenPortal() {
               <span className={`font-bold ${abnormal > 0 ? "text-risk-high" : "text-foreground"}`}>{abnormal}</span>
             </div>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lightbulb className="w-3.5 h-3.5 text-violet-500" /> {text("AI Tips", "نصائح ذكية")}</div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground"><Lightbulb className="w-3.5 h-3.5 text-secondary-foreground" /> {text("AI Tips", "نصائح ذكية")}</div>
               <span className={`font-bold ${(aiDecision?.recommendations?.length || 0) > 0 ? "text-primary" : "text-foreground"}`}>{aiDecision?.recommendations?.length || 0}</span>
             </div>
           </CardBody>
@@ -1046,7 +1050,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       )}
 
       {/* Header */}
-      <div className="flex items-start gap-4 px-5 py-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-info/30">
+      <div className="flex items-start gap-4 px-5 py-4 rounded-2xl bg-gradient-to-r from-primary/10 to-secondary/30 border border-info/30">
         <div className="w-10 h-10 rounded-2xl bg-info-bg flex items-center justify-center shrink-0">
           <Lock className="w-5 h-5 text-primary" />
         </div>
@@ -1092,14 +1096,14 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
             >
               {/* Status dot */}
               <div className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full border-2 border-card ${
-                consent.granted ? "bg-success" : "bg-gray-300"
+                consent.granted ? "bg-success" : "bg-muted"
               }`} />
 
               <div className="flex items-start gap-3 mb-3">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                   consent.granted ? sev.bg : "bg-muted"
                 }`}>
-                  <Icon className={`w-4 h-4 ${consent.granted ? sev.text : "text-gray-400"}`} />
+                  <Icon className={`w-4 h-4 ${consent.granted ? sev.text : "text-muted-foreground"}`} />
                 </div>
                 <div className="flex-1 min-w-0 pr-4">
                   <p className={`text-[13px] font-bold leading-tight ${consent.granted ? "text-foreground" : "text-muted-foreground"}`}>
@@ -1127,7 +1131,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
                   className={`ml-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all disabled:opacity-50 ${
                     consent.granted
                       ? "bg-success-bg text-success hover:bg-success-bg/80"
-                      : "bg-muted text-muted-foreground hover:bg-gray-200"
+                      : "bg-muted text-muted-foreground hover:bg-secondary/50"
                   } ${!consent.canRevoke ? "cursor-not-allowed" : "cursor-pointer"}`}
                 >
                   {isToggling ? (

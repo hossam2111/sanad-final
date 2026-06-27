@@ -129,10 +129,10 @@ export default function FamilyPortal() {
   return (
     <Layout role="family" localized>
       <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 bg-pink-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
-          <Users className="w-3 h-3" /> {text("Family Health Portal", "بوابة صحة الأسرة")}
+        <div className="flex items-center gap-2 bg-danger text-danger-foreground text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
+          <Users className="w-4 h-4" /> {text("Family Records", "سجلات الأسرة")}
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-violet-600 bg-violet-50 px-3 py-1.5 rounded-full">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full">
           <Dna className="w-3 h-3" /> {text("Genetic Risk Intelligence Active", "ذكاء المخاطر الوراثية نشط")}
         </div>
         <form onSubmit={(e) => { e.preventDefault(); if (searchId.trim()) { setNationalId(searchId.trim()); setActiveTab("tree"); } }} className="flex items-center gap-2 ms-auto">
@@ -161,8 +161,8 @@ export default function FamilyPortal() {
       {!nationalId && (
         <Card>
           <CardBody className="py-16 text-center">
-            <div className="w-16 h-16 rounded-3xl bg-pink-50 flex items-center justify-center mx-auto mb-4">
-              <Users className="w-7 h-7 text-pink-500" />
+            <div className="w-16 h-16 rounded-3xl bg-danger/10 flex items-center justify-center mx-auto mb-4">
+              <Users className="w-7 h-7 text-danger" />
             </div>
             <p className="font-bold text-foreground mb-1">{text("No Family Profile Selected", "لم يتم اختيار ملف أسرة")}</p>
             <p className="text-sm text-muted-foreground mb-2">{text("Enter a National ID to load genetic risk analysis, family tree, and hereditary condition mapping.", "أدخل رقم الهوية لتحميل تحليل المخاطر الوراثية وشجرة العائلة وخريطة الأمراض الوراثية.")}</p>
@@ -220,7 +220,7 @@ export default function FamilyPortal() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: text("Heritability Score", "درجة التوريث"), value: data.heritabilityScore, suffix: "/100", color: data.heritabilityScore >= 70 ? "text-danger" : data.heritabilityScore >= 40 ? "text-risk-high" : "text-success", bg: data.heritabilityScore >= 70 ? "bg-danger-bg" : "bg-secondary" },
-              { label: text("Genetic Risk Factors", "عوامل الخطورة الوراثية"), value: data.geneticRisks?.length, suffix: text(" identified", " مُحدّد"), color: "text-violet-600", bg: "bg-violet-50" },
+              { label: text("Genetic Risk Factors", "عوامل الخطورة الوراثية"), value: data.geneticRisks?.length, suffix: text(" identified", " مُحدّد"), color: "text-primary", bg: "bg-primary/10" },
               { label: text("Family Members Linked", "أفراد الأسرة المرتبطون"), value: data.summary?.totalMembers, suffix: text(" members", " فرد"), color: "text-primary", bg: "bg-primary/5" },
               { label: text("Clinical Priority Index", "مؤشر الأولوية السريرية"), value: data.patient?.riskScore, suffix: "/100", color: data.patient?.riskScore >= 70 ? "text-danger" : "text-risk-high", bg: "bg-risk-high-bg" },
             ].map((kpi, i) => (
@@ -234,7 +234,7 @@ export default function FamilyPortal() {
           {activeTab === "tree" && (
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-2"><Users className="w-4 h-4 text-pink-600" /><CardTitle>{text("Family Tree — Risk Map", "شجرة العائلة — خريطة الخطورة")}</CardTitle></div>
+                <div className="flex items-center gap-2"><Users className="w-4 h-4 text-danger" /><CardTitle>{text("Family Tree — Risk Map", "شجرة العائلة — خريطة الخطورة")}</CardTitle></div>
                 <p className="text-xs text-muted-foreground ms-auto">{text("Colors indicate Clinical Priority", "الألوان تشير إلى الأولوية السريرية")}</p>
               </CardHeader>
               <CardBody>
@@ -312,7 +312,7 @@ export default function FamilyPortal() {
           {activeTab === "genetics" && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-1">
-                <Dna className="w-4 h-4 text-violet-600" />
+                <Dna className="w-4 h-4 text-primary" />
                 <p className="text-sm font-bold text-foreground">{text(`${data.geneticRisks?.length} Hereditary Risk Factors Identified`, `${data.geneticRisks?.length} عامل خطورة وراثي مُحدّد`)}</p>
                 <Badge variant={data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length > 0 ? "destructive" : "success"} className="ms-auto">
                   {text(`${data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length} high-penetrance`, `${data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length} عالية النفاذية`)}
@@ -431,7 +431,7 @@ export default function FamilyPortal() {
 
                 <Card className="col-span-full lg:col-span-5">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("Condition Details", "تفاصيل الأمراض")}</CardTitle></div>
+                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-primary" /><CardTitle>{text("Condition Details", "تفاصيل الأمراض")}</CardTitle></div>
                   </CardHeader>
                   <CardBody className="space-y-2.5">
                     {data.conditionBurden?.slice(0, 6).map((c: any, i: number) => (

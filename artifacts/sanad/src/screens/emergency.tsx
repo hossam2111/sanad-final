@@ -55,7 +55,7 @@ interface EmergencyPatient {
 const actionConfig: Record<ClinicalAction["action"], { icon: React.ElementType; color: string; bg: string; border: string; label: string }> = {
   DO_NOT_GIVE: { icon: Ban, color: "text-danger", bg: "bg-danger-bg", border: "border-danger/20", label: "DO NOT GIVE" },
   HOLD_MEDICATION: { icon: PauseCircle, color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "HOLD" },
-  URGENT_REVIEW: { icon: Brain, color: "text-purple-700", bg: "bg-purple-50", border: "border-purple-200", label: "URGENT REVIEW" },
+  URGENT_REVIEW: { icon: Brain, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20", label: "URGENT REVIEW" },
   ALERT_FAMILY: { icon: PhoneCall, color: "text-info", bg: "bg-info-bg", border: "border-info/20", label: "ALERT FAMILY" },
   MONITOR: { icon: Eye, color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", label: "MONITOR" },
   PREPARE_EQUIPMENT: { icon: Wrench, color: "text-info", bg: "bg-info-bg", border: "border-info/20", label: "PREPARE" },

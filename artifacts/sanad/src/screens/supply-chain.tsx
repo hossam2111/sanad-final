@@ -155,7 +155,7 @@ export default function SupplyChainPortal() {
       )}
 
       <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 bg-lime-750 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
+        <div className="flex items-center gap-2 bg-success text-success-foreground text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Package className="w-3 h-3" />
           {text("Supply Chain", "سلسلة الإمداد")}
         </div>
@@ -189,7 +189,7 @@ export default function SupplyChainPortal() {
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard title={text("Total Drug Lines", "إجمالي أصناف الأدوية")} value={data?.summary?.totalDrugs} sub={text("Tracked nationally", "متابَعة وطنيًا")} icon={Package} iconBg="bg-lime-100" iconColor="text-lime-700" />
+        <KpiCard title={text("Total Drug Lines", "إجمالي أصناف الأدوية")} value={data?.summary?.totalDrugs} sub={text("Tracked nationally", "متابَعة وطنيًا")} icon={Package} iconBg="bg-success-bg" iconColor="text-success" />
         <KpiCard
           title={text("Critical Shortages", "النقص الحرج")} value={data?.summary?.criticalShortages}
           sub={text(`${data?.summary?.reorderAlerts} reorder alerts active`, `${data?.summary?.reorderAlerts} تنبيه إعادة طلب`)}
@@ -228,7 +228,7 @@ export default function SupplyChainPortal() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             <Card className="col-span-full lg:col-span-8">
-              <CardHeader><Package className="w-4 h-4 text-lime-700" /><CardTitle>{text("Drug Inventory — All Lines", "مخزون الأدوية — جميع البنود")}</CardTitle></CardHeader>
+              <CardHeader><Package className="w-4 h-4 text-success" /><CardTitle>{text("Drug Inventory — All Lines", "مخزون الأدوية — جميع البنود")}</CardTitle></CardHeader>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -309,7 +309,7 @@ export default function SupplyChainPortal() {
 
               {/* Consumption Trend */}
               <Card>
-                <CardHeader><TrendingUp className="w-4 h-4 text-lime-700" /><CardTitle>{text("6-Month Consumption", "الاستهلاك لـ 6 أشهر")}</CardTitle></CardHeader>
+                <CardHeader><TrendingUp className="w-4 h-4 text-success" /><CardTitle>{text("6-Month Consumption", "الاستهلاك لـ 6 أشهر")}</CardTitle></CardHeader>
                 <CardBody>
                   <div className="h-48">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
@@ -321,7 +321,7 @@ export default function SupplyChainPortal() {
                         <Line type="monotone" dataKey="metformin" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Metformin" />
                         <Line type="monotone" dataKey="insulin" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} name="Insulin" />
                         <Line type="monotone" dataKey="lisinopril" stroke="hsl(var(--success))" strokeWidth={2} dot={false} name="Lisinopril" />
-                        <Line type="monotone" dataKey="atorvastatin" stroke="hsl(var(--violet-500))" strokeWidth={2} dot={false} name="Atorvastatin" />
+                        <Line type="monotone" dataKey="atorvastatin" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Atorvastatin" />
                       </LineChart>
                     </ResponsiveContainer></div>
                   </div>
@@ -335,11 +335,11 @@ export default function SupplyChainPortal() {
       {/* ─── AI SHORTAGE PREDICTIONS ─── */}
       {activeTab === "predictions" && (
         <div className="space-y-5">
-          <div className="flex items-start gap-4 px-5 py-4 bg-violet-50 border border-violet-200 rounded-2xl">
-            <Brain className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-4 px-5 py-4 bg-primary/10 border border-primary/20 rounded-2xl">
+            <Brain className="w-5 h-5 text-primary shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="text-sm font-bold text-violet-800">{text("AI Supply Forecasting Engine v2.1", "محرك التنبؤ بالإمدادات v2.1")}</p>
-              <p className="text-xs text-violet-600 mt-0.5">
+              <p className="text-sm font-bold text-primary">{text("AI Supply Forecasting Engine v2.1", "محرك التنبؤ بالإمدادات v2.1")}</p>
+              <p className="text-xs text-primary/80 mt-0.5">
                 {text("Machine learning demand prediction using 24-month historical consumption, prescription trends, disease prevalence, and seasonal patterns. Predictions recalculated daily at 02:00 AST.", "تنبؤ الطلب بالتعلم الآلي باستخدام 24 شهراً من بيانات الاستهلاك والوصفات الطبية وانتشار الأمراض والأنماط الموسمية. يُعاد الحساب يومياً الساعة 02:00.")}
               </p>
             </div>
@@ -348,12 +348,12 @@ export default function SupplyChainPortal() {
 
           {/* AI Predictions from backend */}
           <Card>
-            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Demand Predictions", "تنبؤات الطلب بالذكاء الاصطناعي")}</CardTitle></CardHeader>
+            <CardHeader><Brain className="w-4 h-4 text-primary" /><CardTitle>{text("AI Demand Predictions", "تنبؤات الطلب بالذكاء الاصطناعي")}</CardTitle></CardHeader>
             <CardBody className="space-y-3">
               {data?.aiPredictions?.map((pred: any, i: number) => (
-                <div key={i} className="flex items-start gap-4 px-4 py-3.5 bg-violet-50 border border-violet-100 rounded-2xl">
-                  <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
-                    <Brain className="w-4 h-4 text-violet-600" />
+                <div key={i} className="flex items-start gap-4 px-4 py-3.5 bg-primary/10 border border-primary/20 rounded-2xl">
+                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Brain className="w-4 h-4 text-primary" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-foreground">{pred.prediction}</p>
@@ -363,7 +363,7 @@ export default function SupplyChainPortal() {
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold text-violet-700">{pred.confidence}%</p>
+                    <p className="text-sm font-bold text-primary">{pred.confidence}%</p>
                     <p className="text-[10px] text-muted-foreground">{text("confidence", "ثقة")}</p>
                   </div>
                 </div>
@@ -515,11 +515,11 @@ export default function SupplyChainPortal() {
 
           {/* AI Redistribution Recommendations */}
           <Card>
-            <CardHeader><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Redistribution Recommendations", "توصيات إعادة التوزيع")}</CardTitle><Badge variant="info">{text("Live · computed from inventory", "Live · computed from inventory")}</Badge></CardHeader>
+            <CardHeader><Brain className="w-4 h-4 text-primary" /><CardTitle>{text("AI Redistribution Recommendations", "توصيات إعادة التوزيع")}</CardTitle><Badge variant="info">{text("Live · computed from inventory", "Live · computed from inventory")}</Badge></CardHeader>
             <CardBody className="space-y-3">
               {loadingRegional ? (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-violet-600" /> {text("Computing recommendations...", "جارٍ حساب التوصيات...")}
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" /> {text("Computing recommendations...", "جارٍ حساب التوصيات...")}
                 </div>
               ) : regionalRecs.length > 0 ? regionalRecs.map((rec: any, i: number) => (
                 <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>

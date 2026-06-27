@@ -156,7 +156,7 @@ export default function ResearchPortal() {
     return (
       <Layout role="research" localized>
         <div className="flex items-center justify-center gap-3 py-20 text-muted-foreground">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-500" />
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
           <span className="text-sm font-medium">{text("Aggregating anonymized research data...", "جارٍ تجميع بيانات البحث المجهّلة...")}</span>
         </div>
       </Layout>
@@ -175,7 +175,7 @@ export default function ResearchPortal() {
     <Layout role="research" localized>
       {/* Header Strip */}
       <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 bg-teal-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
+        <div className="flex items-center gap-2 bg-primary text-primary-foreground text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <FlaskConical className="w-3 h-3" />
           {text("Research Portal", "بوابة الأبحاث")}
         </div>
@@ -186,14 +186,14 @@ export default function ResearchPortal() {
         <div className="ms-auto flex items-center gap-2">
           <button
             onClick={() => handleExport("csv")}
-            className="flex items-center gap-1.5 text-[11px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-full hover:bg-teal-100 transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full hover:bg-primary/20 transition-colors"
           >
             <Download className="w-3 h-3" />
             {text("Export CSV", "تصدير CSV")}
           </button>
           <button
             onClick={() => handleExport("json")}
-            className="flex items-center gap-1.5 text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-3 py-1.5 rounded-full hover:bg-violet-100 transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-secondary-foreground bg-secondary border border-border px-3 py-1.5 rounded-full hover:bg-secondary/80 transition-colors"
           >
             <Database className="w-3 h-3" />
             {text("Export JSON", "تصدير JSON")}
@@ -208,8 +208,8 @@ export default function ResearchPortal() {
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard title={text("Anonymized Records", "سجلات مجهّلة")} value={data?.totalAnonymizedRecords?.toLocaleString()} sub={text("Fully de-identified", "مجهّلة الهوية بالكامل")} icon={Users} iconBg="bg-teal-100" iconColor="text-teal-600" />
-        <KpiCard title={text("Active Studies", "الدراسات النشطة")} value={CLINICAL_STUDIES.filter(s => s.status === "active").length} sub={text(`${CLINICAL_STUDIES.length} total registered`, `${CLINICAL_STUDIES.length} مُسجّلة إجمالًا`)} icon={BookOpen} iconBg="bg-violet-100" iconColor="text-violet-600" />
+        <KpiCard title={text("Anonymized Records", "سجلات مجهّلة")} value={data?.totalAnonymizedRecords?.toLocaleString()} sub={text("Fully de-identified", "مجهّلة الهوية بالكامل")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
+        <KpiCard title={text("Active Studies", "الدراسات النشطة")} value={CLINICAL_STUDIES.filter(s => s.status === "active").length} sub={text(`${CLINICAL_STUDIES.length} total registered`, `${CLINICAL_STUDIES.length} مُسجّلة إجمالًا`)} icon={BookOpen} iconBg="bg-secondary" iconColor="text-secondary-foreground" />
         <KpiCard title={text("AI Decisions Analyzed", "قرارات ذكاء مُحلّلة")} value={data?.aiMetrics?.totalDecisions?.toLocaleString()} sub={text(`${data?.aiMetrics?.avgConfidence}% avg confidence`, `${data?.aiMetrics?.avgConfidence}% متوسط الثقة`)} icon={Brain} iconBg="bg-risk-high-bg" iconColor="text-risk-high" />
         <KpiCard title={text("Lab Results", "نتائج المختبر")} value={data?.totalLabResults?.toLocaleString()} sub={text("Cross-patient trend data", "بيانات اتجاهات عبر المرضى")} icon={FlaskConical} iconBg="bg-primary/10" iconColor="text-primary" />
       </div>
@@ -286,7 +286,7 @@ export default function ResearchPortal() {
                           <XAxis type="number" hide />
                           <YAxis dataKey="condition" type="category" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 10, fontWeight: 500 }} width={155} />
                           <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any) => [`${v}%`, "Prevalence"]} />
-                          <Bar dataKey="prevalence" fill="hsl(var(--teal-600))" radius={[0, 6, 6, 0]} barSize={14} />
+                          <Bar dataKey="prevalence" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={14} />
                         </BarChart>
                       </ResponsiveContainer></div>
                     </div>
@@ -317,7 +317,7 @@ export default function ResearchPortal() {
             )}
             {selectedConditions === "labs" && (
               <Card className="col-span-12">
-                <CardHeader><div className="flex items-center gap-2"><FlaskConical className="w-4 h-4 text-violet-600" /><CardTitle>{text("Lab Test Abnormality Rates", "معدلات شذوذ اختبارات المختبر")}</CardTitle></div></CardHeader>
+                <CardHeader><div className="flex items-center gap-2"><FlaskConical className="w-4 h-4 text-primary" /><CardTitle>{text("Lab Test Abnormality Rates", "معدلات شذوذ اختبارات المختبر")}</CardTitle></div></CardHeader>
                 <CardBody>
                   <div className="min-h-[320px] h-full w-full py-4">
                     <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
@@ -346,7 +346,7 @@ export default function ResearchPortal() {
                         <XAxis type="number" hide />
                         <YAxis dataKey="drug" type="category" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={175} />
                         <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
-                        <Bar dataKey="prescriptions" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={14} name="Prescriptions" />
+                        <Bar dataKey="prevalence" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={14} />
                       </BarChart>
                     </ResponsiveContainer></div>
                   </div>
@@ -378,11 +378,11 @@ export default function ResearchPortal() {
       {/* ─── CLINICAL STUDIES ─── */}
       {activeView === "studies" && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-violet-50 border border-violet-200 rounded-2xl">
-            <BookOpen className="w-5 h-5 text-violet-600 shrink-0" />
+          <div className="flex items-center gap-3 p-4 bg-secondary border border-border rounded-2xl">
+            <BookOpen className="w-5 h-5 text-secondary-foreground shrink-0" />
             <div>
-              <p className="text-sm font-bold text-violet-800">{text("SANAD Clinical Research Registry", "سجل أبحاث سند السريري الوطني")}</p>
-              <p className="text-xs text-violet-600 mt-0.5">
+              <p className="text-sm font-bold text-foreground">{text("SANAD Clinical Research Registry", "سجل أبحاث سند السريري الوطني")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {CLINICAL_STUDIES.filter(s => s.status === "active").length} {text("active ·", "نشط ·")}{" "}
                 {CLINICAL_STUDIES.filter(s => s.status === "recruiting").length} {text("recruiting ·", "تجنيد ·")}{" "}
                 {CLINICAL_STUDIES.filter(s => s.status === "completed").length} {text("completed ·", "مكتمل ·")}{" "}
@@ -417,7 +417,7 @@ export default function ResearchPortal() {
                       </div>
                     </div>
                     <div className="mt-3 w-full bg-card/60 rounded-full h-1.5">
-                      <div className="h-full rounded-full bg-teal-500 transition-all" style={{ width: `${enrollPct}%` }} />
+                      <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${enrollPct}%` }} />
                     </div>
                     <div className="flex items-center gap-4 mt-1.5 text-[10px] text-muted-foreground">
                       <span>{study.enrolled.toLocaleString()} / {study.cohortSize.toLocaleString()} {text("participants", "مشارك")}</span>
@@ -441,10 +441,10 @@ export default function ResearchPortal() {
                     </div>
                   </div>
 
-                  <div className="px-5 py-3 bg-violet-50 border-t border-violet-100 rounded-b-[inherit]">
+                  <div className="px-5 py-3 bg-secondary/30 border-t border-border rounded-b-[inherit]">
                     <div className="flex items-start gap-2">
-                      <Brain className="w-3.5 h-3.5 text-violet-600 shrink-0 mt-0.5" />
-                      <p className="text-[11px] text-violet-800">
+                      <Brain className="w-3.5 h-3.5 text-secondary-foreground shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-foreground">
                         <span className="font-bold">{text("AI Insight:", "رؤية الذكاء الاصطناعي:")}</span> {study.aiInsight}
                       </p>
                     </div>
@@ -487,8 +487,8 @@ export default function ResearchPortal() {
                         <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorCKD" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--violet-500))" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="hsl(var(--violet-500))" stopOpacity={0} />
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorObesity" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
@@ -516,17 +516,17 @@ export default function ResearchPortal() {
       {/* ─── CORRELATION ANALYSIS ─── */}
       {activeView === "correlations" && (
         <div className="space-y-5">
-          <div className="flex items-center gap-3 p-4 bg-teal-50 border border-teal-200 rounded-2xl">
-            <GitBranch className="w-5 h-5 text-teal-600 shrink-0" />
+          <div className="flex items-center gap-3 p-4 bg-primary/10 border border-primary/20 rounded-2xl">
+            <GitBranch className="w-5 h-5 text-primary shrink-0" />
             <div>
-              <p className="text-sm font-bold text-teal-800">{text("Disease Co-Occurrence Correlation Matrix", "مصفوفة ارتباط تزامن الأمراض")}</p>
-              <p className="text-xs text-teal-600 mt-0.5">{text("AI-detected co-occurrence patterns across chronic conditions — values represent % of patients with Condition A who also have Condition B", "أنماط التزامن المكتشفة — القيم تمثل % مرضى الحالة A الذين لديهم أيضاً الحالة B")}</p>
+              <p className="text-sm font-bold text-foreground">{text("Disease Co-Occurrence Correlation Matrix", "مصفوفة ارتباط تزامن الأمراض")}</p>
+              <p className="text-xs text-primary/80 mt-0.5">{text("AI-detected co-occurrence patterns across chronic conditions — values represent % of patients with Condition A who also have Condition B", "أنماط التزامن المكتشفة — القيم تمثل % مرضى الحالة A الذين لديهم أيضاً الحالة B")}</p>
             </div>
           </div>
 
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2"><GitBranch className="w-4 h-4 text-teal-600" /><CardTitle>{text("Chronic Disease Co-Occurrence Matrix", "مصفوفة تزامن الأمراض المزمنة")}</CardTitle></div>
+              <div className="flex items-center gap-2"><GitBranch className="w-4 h-4 text-primary" /><CardTitle>{text("Chronic Disease Co-Occurrence Matrix", "مصفوفة تزامن الأمراض المزمنة")}</CardTitle></div>
               <Badge variant="info">{text("AI-Detected Patterns", "أنماط مكتشفة بالذكاء")}</Badge>
             </CardHeader>
             <CardBody className="p-0">
@@ -594,7 +594,7 @@ export default function ResearchPortal() {
             </Card>
 
             <Card className="col-span-full lg:col-span-6">
-              <CardHeader><div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("AI Policy Recommendations", "توصيات سياسة الذكاء الاصطناعي")}</CardTitle></div></CardHeader>
+              <CardHeader><div className="flex items-center gap-2"><Brain className="w-4 h-4 text-secondary-foreground" /><CardTitle>{text("AI Policy Recommendations", "توصيات سياسة الذكاء الاصطناعي")}</CardTitle></div></CardHeader>
               <CardBody className="space-y-3">
                 {[
                   { priority: "P1", rec: "Launch integrated DM+HTN screening program — high co-occurrence (72%) demands co-management protocol", impact: "High" },
@@ -602,8 +602,8 @@ export default function ResearchPortal() {
                   { priority: "P3", rec: "Dyslipidemia screening in all CVD patients — 69% co-occurrence, statin therapy massively underused", impact: "High" },
                   { priority: "P4", rec: "Obesity management centers in high-prevalence regions — upstream intervention for DM prevention", impact: "Medium" },
                 ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 px-3.5 py-3 bg-violet-50 border border-violet-100 rounded-2xl">
-                    <span className="text-[10px] font-bold text-violet-700 bg-violet-200 px-1.5 py-0.5 rounded-full shrink-0 mt-0.5">{item.priority}</span>
+                  <div key={i} className="flex items-start gap-3 px-3.5 py-3 bg-secondary/30 border border-border rounded-2xl">
+                    <span className="text-[10px] font-bold text-foreground bg-secondary px-1.5 py-0.5 rounded-full shrink-0 mt-0.5">{item.priority}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-foreground">{item.rec}</p>
                     </div>
@@ -695,7 +695,7 @@ export default function ResearchPortal() {
 
             <Card className="col-span-12">
               <CardHeader>
-                <div className="flex items-center gap-2"><FileText className="w-4 h-4 text-teal-600" /><CardTitle>{text("Research Data Export", "تصدير بيانات البحث")}</CardTitle></div>
+                <div className="flex items-center gap-2"><FileText className="w-4 h-4 text-primary" /><CardTitle>{text("Research Data Export", "تصدير بيانات البحث")}</CardTitle></div>
                 <Badge variant="success">{text("PDPL Compliant", "متوافق مع نظام PDPL")}</Badge>
               </CardHeader>
               <CardBody>
@@ -707,18 +707,18 @@ export default function ResearchPortal() {
                   ].map((item, i) => (
                     <div key={i} className="p-4 bg-secondary border border-border rounded-2xl">
                       <div className="flex items-center gap-2 mb-2">
-                        <Database className="w-4 h-4 text-teal-600" />
+                        <Database className="w-4 h-4 text-primary" />
                         <p className="text-sm font-bold text-foreground">{item.title}</p>
                       </div>
                       <p className="text-xs text-muted-foreground mb-3">{item.desc}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">{item.format}</span>
+                          <span className="text-[10px] font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-full">{item.format}</span>
                           <span className="text-[10px] text-muted-foreground">{item.size}</span>
                         </div>
                         <button
                           onClick={item.onclick}
-                          className="flex items-center gap-1.5 text-[11px] font-semibold text-teal-700 hover:text-teal-800 transition-colors"
+                          className="flex items-center gap-1.5 text-[11px] font-semibold text-primary hover:text-primary/80 transition-colors"
                         >
                           <Download className="w-3 h-3" />
                           {text("Export", "تصدير")}

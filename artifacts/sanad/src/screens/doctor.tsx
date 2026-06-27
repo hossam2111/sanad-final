@@ -439,7 +439,7 @@ export default function DoctorDashboard() {
 
   const timelineIconMap = {
     visit: { icon: Building2, bg: "bg-info-bg", color: "text-info" },
-    lab: { icon: FlaskConical, bg: "bg-violet-100", color: "text-violet-600" },
+    lab: { icon: FlaskConical, bg: "bg-primary/10", color: "text-primary" },
     medication: { icon: Pill, bg: "bg-success-bg", color: "text-success" },
     alert: { icon: AlertCircle, bg: "bg-danger-bg", color: "text-danger" },
   };
@@ -894,7 +894,7 @@ export default function DoctorDashboard() {
                         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 shadow-sm flex items-center justify-center relative overflow-hidden">
                           <UserIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary/60" />
                         </div>
-                        <div className={`absolute -bottom-2 -right-2 text-white text-[11px] px-2.5 py-0.5 rounded-lg font-bold shadow-md ring-2 ring-background ${patient.gender === "male" ? "bg-blue-600" : "bg-pink-600"}`}>
+                        <div className={`absolute -bottom-2 -right-2 text-white text-[11px] px-2.5 py-0.5 rounded-lg font-bold shadow-md ring-2 ring-background ${patient.gender === "male" ? "bg-info" : "bg-danger"}`}>
                           {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}
                         </div>
                       </div>
@@ -1134,7 +1134,7 @@ export default function DoctorDashboard() {
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Unified Clinical Timeline", "الجدول الزمني السريري الموحّد")}</p>
                   <div className="flex items-center gap-2 ms-auto">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-info" /> {text("Visit", "زيارة")}</div>
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-violet-500" /> {text("Lab", "مختبر")}</div>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-primary" /> {text("Lab", "مختبر")}</div>
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-2 h-2 rounded-full bg-success" /> {text("Medication", "دواء")}</div>
                   </div>
                 </div>
@@ -1235,13 +1235,13 @@ export default function DoctorDashboard() {
                   const trend = isWorsening ? "↑ WORSENING" : isImproving ? "↓ IMPROVING" : "→ STABLE";
 
                   return (
-                    <div className={`mx-5 my-4 rounded-2xl border p-4 ${isWorsening ? "border-danger/30 bg-danger-bg" : isImproving ? "border-success/30 bg-success-bg" : "border-violet-200 bg-violet-50/40"}`}>
+                    <div className={`mx-5 my-4 rounded-2xl border p-4 ${isWorsening ? "border-danger/30 bg-danger-bg" : isImproving ? "border-success/30 bg-success-bg" : "border-primary/20 bg-primary/10"}`}>
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <FlaskConical className={`w-4 h-4 ${isWorsening ? "text-danger" : isImproving ? "text-success" : "text-violet-500"}`} />
+                            <FlaskConical className={`w-4 h-4 ${isWorsening ? "text-danger" : isImproving ? "text-success" : "text-primary"}`} />
                             <span className="font-bold text-sm">HbA1c Glycemic Trajectory</span>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isWorsening ? "bg-danger-bg text-danger" : isImproving ? "bg-success-bg text-success" : "bg-violet-100 text-violet-700"}`}>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${isWorsening ? "bg-danger-bg text-danger" : isImproving ? "bg-success-bg text-success" : "bg-secondary text-secondary-foreground"}`}>
                               {trend}
                             </span>
                           </div>
@@ -1498,7 +1498,7 @@ export default function DoctorDashboard() {
               <div className="p-5">
                 {decisionLoading && (
                   <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600" />
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
                     <span className="text-sm font-medium">{text("AI Decision Engine processing...", "محرك القرار الذكي قيد المعالجة...")}</span>
                   </div>
                 )}
@@ -1624,7 +1624,7 @@ export default function DoctorDashboard() {
                         <div className="flex items-start justify-between mb-3">
                           <div>
                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-2">
-                              <Brain className="w-3.5 h-3.5 text-violet-600" /> {text("Digital Twin", "التوأم الرقمي")} — {aiDecision.digitalTwin.timeframe}
+                              <Brain className="w-3.5 h-3.5 text-primary" /> {text("Digital Twin", "التوأم الرقمي")} — {aiDecision.digitalTwin.timeframe}
                             </p>
                             <p className="font-bold text-foreground">{text("Trajectory:", "المسار:")} <span className={
                               aiDecision.digitalTwin.riskTrajectory === "rapidly_worsening" ? "text-danger" :
@@ -1692,7 +1692,7 @@ export default function DoctorDashboard() {
             {activeTab === "intelligence" && (
               <div className="border-t border-border p-5">
                 <div className="flex items-center gap-3 mb-5">
-                  <Brain className="w-4 h-4 text-violet-600" />
+                  <Brain className="w-4 h-4 text-primary" />
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{text("Predictive Warnings", "الإنذارات التنبؤية")}</p>
                   <Badge variant="outline" className="ms-auto">{text(`${predictions.length} total`, `${predictions.length} الإجمالي`)}</Badge>
                 </div>
@@ -1775,8 +1775,8 @@ export default function DoctorDashboard() {
                 {/* Header */}
                 <div className="sanad-print-hidden flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center">
-                      <Sparkles className="w-4 h-4 text-violet-600" />
+                    <div className="w-8 h-8 rounded-xl bg-secondary flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-primary" />
                     </div>
                     <div>
                       <p className="font-bold text-sm text-foreground">{text("SANAD AI — Clinical Narrative", "ذكاء سند — السرد السريري")}</p>
@@ -1844,7 +1844,7 @@ export default function DoctorDashboard() {
                     </div>
                   )}
                   {narrativeLoading && !narrativeText && (
-                    <div className="flex items-center gap-2 text-violet-600 text-sm">
+                    <div className="flex items-center gap-2 text-primary text-sm">
                       <RefreshCw className="w-4 h-4 animate-spin" />
                       <span>{text("Connecting to AI...", "جارٍ الاتصال بالذكاء الاصطناعي...")}</span>
                     </div>
@@ -1853,7 +1853,7 @@ export default function DoctorDashboard() {
                     <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap leading-relaxed text-sm font-mono">
                       {narrativeText}
                       {narrativeLoading && (
-                        <span className="inline-block w-1.5 h-4 bg-violet-500 animate-pulse ml-0.5 align-middle" />
+                        <span className="inline-block w-1.5 h-4 bg-primary animate-pulse ml-0.5 align-middle" />
                       )}
                     </div>
                   )}
@@ -1862,13 +1862,13 @@ export default function DoctorDashboard() {
                 {/* Chat / Q&A */}
                 <div className="sanad-print-hidden rounded-2xl border border-border overflow-hidden">
                   <div className="flex items-center gap-2 px-4 py-2.5 bg-secondary border-b border-border">
-                    <MessageSquare className="w-3.5 h-3.5 text-violet-500" />
+                    <MessageSquare className="w-3.5 h-3.5 text-primary" />
                     <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{text("Ask the AI about this patient", "اسأل الذكاء الاصطناعي عن هذا المريض")}</p>
                   </div>
                   <div className="p-4 space-y-3">
                     <div className="flex gap-2">
                       <input
-                        className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                        className="flex-1 rounded-xl border border-border bg-background px-3.5 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
                         placeholder={text("e.g. What are the main drug risks for this patient?", "مثال: ما هي أبرز المخاطر الدوائية لهذا المريض؟")}
                         value={chatQuestion}
                         onChange={e => setChatQuestion(e.target.value)}

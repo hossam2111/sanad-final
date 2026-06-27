@@ -123,13 +123,13 @@ export default function LabPortal() {
   const CHART_COLORS: Record<string, string> = {
     "HbA1c": "hsl(var(--destructive))",
     "Fasting Glucose": "hsl(var(--warning))", "Fasting Blood Glucose": "hsl(var(--warning))",
-    "Total Cholesterol": "hsl(var(--violet-500))",
-    "LDL Cholesterol": "hsl(var(--primary))",
+    "Total Cholesterol": "hsl(var(--primary))",
+    "LDL Cholesterol": "hsl(var(--info))",
     "Creatinine": "hsl(var(--success))",
     "Hemoglobin": "hsl(var(--risk-high))",
-    "eGFR": "hsl(var(--cyan-500))",
-    "Potassium": "hsl(var(--lime-500))",
-    "Sodium": "hsl(var(--violet-500))",
+    "eGFR": "hsl(var(--primary))",
+    "Potassium": "hsl(var(--secondary-foreground))",
+    "Sodium": "hsl(var(--info))",
   };
   const NORMAL_RANGES: Record<string, { min: number; max: number; unit: string }> = {
     "HbA1c": { min: 4.0, max: 5.7, unit: "%" },
@@ -187,7 +187,7 @@ export default function LabPortal() {
 
       {isLoading && (
         <div className="flex items-center justify-center gap-3 py-16 text-muted-foreground">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-teal-600" />
+          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
           <span className="text-sm font-medium">{text("Retrieving patient records...", "جارٍ استدعاء سجلات المريض...")}</span>
         </div>
       )}
@@ -208,7 +208,7 @@ export default function LabPortal() {
           <div className={`rounded-3xl p-5 flex items-center justify-between gap-5 ${
             data.patient.riskLevel === "critical" ? "bg-danger" :
             data.patient.riskLevel === "high" ? "bg-risk-high" :
-            "bg-teal-500"
+            "bg-primary"
           } text-white`}>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Patient Identified", "تم تحديد المريض")}</p>
@@ -251,7 +251,7 @@ export default function LabPortal() {
           {chartsToShow.length > 0 && (
             <Card>
               <CardHeader>
-                <Activity className="w-4 h-4 text-teal-600" />
+                <Activity className="w-4 h-4 text-primary" />
                 <CardTitle>{text("Lab Trends — Clinical Progression", "اتجاهات المختبر — التطوّر السريري")}</CardTitle>
                 <span className="ms-auto text-[11px] font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">
                   {text(`${chartsToShow.length} test${chartsToShow.length > 1 ? "s" : ""} charted`, `${chartsToShow.length} فحص مرسوم`)}
@@ -345,7 +345,7 @@ export default function LabPortal() {
           {lastResult && (
             <div className={`rounded-2xl p-5 border-2 ${lastResult.aiAnalysis?.status === "critical" ? "bg-danger-bg border-danger/30" : lastResult.aiAnalysis?.status === "abnormal" ? "bg-risk-high-bg border-risk-high/20" : "bg-success-bg border-success/30"}`}>
               <div className="flex items-start gap-3 mb-3">
-                <Brain className="w-5 h-5 text-violet-600 shrink-0 mt-0.5" />
+                <Brain className="w-5 h-5 text-secondary-foreground shrink-0 mt-0.5" />
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1">{text("AI Lab Interpreter — Just Submitted", "مفسّر المختبر الذكي — أُرسل للتو")}</p>
                   <p className="font-bold text-foreground" dir="ltr">{lastResult.result?.testName} = {lastResult.result?.result} {lastResult.result?.unit}</p>
@@ -369,7 +369,7 @@ export default function LabPortal() {
           {showAddForm && (
             <Card>
               <CardHeader>
-                <FlaskConical className="w-4 h-4 text-teal-600" />
+                <FlaskConical className="w-4 h-4 text-primary" />
                 <CardTitle>{text("Upload New Lab Result", "رفع نتيجة مخبرية جديدة")}</CardTitle>
                 <button onClick={() => setShowAddForm(false)} className="ms-auto text-muted-foreground hover:text-foreground">
                   <X className="w-4 h-4" />
@@ -474,7 +474,7 @@ export default function LabPortal() {
           {/* Lab Results List */}
           <Card>
             <CardHeader>
-              <FlaskConical className="w-4 h-4 text-teal-600" />
+              <FlaskConical className="w-4 h-4 text-primary" />
               <CardTitle>{text("Lab Results with AI Interpretation", "نتائج المختبر مع التفسير الذكي")}</CardTitle>
               <Badge variant="outline" className="ms-auto">{text(`${data.labs.length} results`, `${data.labs.length} نتيجة`)}</Badge>
             </CardHeader>
@@ -488,7 +488,7 @@ export default function LabPortal() {
                 data.labs.map((lab: any) => (
                   <div key={lab.id} className={`p-4 ${lab.status === "critical" ? "bg-danger-bg" : lab.status === "abnormal" ? "bg-risk-high-bg/30" : ""}`}>
                     <div className="flex items-start gap-4">
-                      <div className="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-teal-500" />
+                      <div className="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-primary" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <p className="font-bold text-sm text-foreground">{lab.testName}</p>
@@ -510,7 +510,7 @@ export default function LabPortal() {
                           "bg-success-bg border-success/30"
                         }`}>
                           <div className="flex items-start gap-2">
-                            <Brain className="w-3.5 h-3.5 text-violet-600 shrink-0 mt-0.5" />
+                            <Brain className="w-3.5 h-3.5 text-secondary-foreground shrink-0 mt-0.5" />
                             <div>
                               <p className="font-semibold text-foreground mb-0.5">{lab.interpretation?.significance}</p>
                               <p className="text-muted-foreground">{text("→", "←")} {lab.interpretation?.action}</p>
@@ -533,8 +533,8 @@ export default function LabPortal() {
 
       {!nationalId && !isLoading && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 rounded-3xl bg-teal-100 flex items-center justify-center mx-auto mb-5">
-            <FlaskConical className="w-8 h-8 text-teal-600" />
+          <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <FlaskConical className="w-8 h-8 text-primary" />
           </div>
           <p className="text-xl font-bold text-foreground mb-2">{text("Lab Results Portal", "بوابة نتائج المختبر")}</p>
           <p className="text-sm text-muted-foreground max-w-sm">{text("Enter a patient's National ID to retrieve their lab history and upload new results with AI interpretation.", "أدخل رقم هوية المريض لاستدعاء سجل تحاليله ورفع نتائج جديدة مع التفسير الذكي.")}</p>

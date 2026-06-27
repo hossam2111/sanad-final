@@ -24,8 +24,8 @@ const UNIT_COLORS: Record<string, string> = {
   General: "hsl(var(--primary))",
   Emergency: "hsl(var(--warning))",
   Pediatric: "hsl(var(--success))",
-  Maternity: "hsl(var(--violet-500))",
-  Surgical: "hsl(var(--cyan-500))",
+  Maternity: "hsl(var(--primary))",
+  Surgical: "hsl(var(--secondary))",
 };
 
 const PRIORITY_COLORS = {
@@ -239,7 +239,7 @@ export default function HospitalPortal() {
 
           <Card className="col-span-12">
             <CardHeader>
-              <Brain className="w-4 h-4 text-violet-600" />
+              <Brain className="w-4 h-4 text-primary" />
               <CardTitle>{text("AI Capacity Intelligence", "ذكاء استيعاب المرضى")}</CardTitle>
               <Badge variant="outline" className="ml-auto">{text("Predictive Analysis", "تحليل تنبؤي")}</Badge>
             </CardHeader>
@@ -414,17 +414,17 @@ export default function HospitalPortal() {
 
       {activeTab === "readmission" && (
         <div className="space-y-4">
-          <div className="flex items-center gap-3 p-4 bg-violet-50 border border-violet-200 rounded-2xl">
-            <Brain className="w-5 h-5 text-violet-600 shrink-0" />
+          <div className="flex items-center gap-3 p-4 bg-primary/10 border border-primary/20 rounded-2xl">
+            <Brain className="w-5 h-5 text-primary shrink-0" />
             <div>
-              <p className="text-sm font-bold text-violet-800">{text("AI Readmission Risk Analysis", "تحليل الذكاء الاصطناعي — خطر الإعادة للمستشفى")}</p>
-              <p className="text-xs text-violet-600 mt-0.5">{text("Patients with highest 30-day readmission probability — AI-calculated from clinical history", "المرضى الأعلى احتمالاً للعودة خلال 30 يوماً — محسوب بالذكاء الاصطناعي من السجل السريري")}</p>
+              <p className="text-sm font-bold text-primary">{text("AI Readmission Risk Analysis", "تحليل الذكاء الاصطناعي — خطر الإعادة للمستشفى")}</p>
+              <p className="text-xs text-primary mt-0.5">{text("Patients with highest 30-day readmission probability — AI-calculated from clinical history", "المرضى الأعلى احتمالاً للعودة خلال 30 يوماً — محسوب بالذكاء الاصطناعي من السجل السريري")}</p>
             </div>
           </div>
 
           <Card>
             <CardHeader>
-              <TrendingUp className="w-4 h-4 text-violet-600" />
+              <TrendingUp className="w-4 h-4 text-primary" />
               <CardTitle>{text("Readmission Risk — Top Patients", "خطر الإعادة — أعلى المرضى")}</CardTitle>
               <Badge variant="outline" className="ml-auto">{text("Sorted by risk %", "مرتب حسب نسبة الخطر")}</Badge>
             </CardHeader>

@@ -130,7 +130,7 @@ export default function InsurancePortal() {
   return (
     <Layout role="insurance" localized>
       <div className="flex items-center gap-2 mb-5">
-        <div className="flex items-center gap-2 bg-violet-600 text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
+        <div className="flex items-center gap-2 bg-primary text-primary-foreground text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Shield className="w-3 h-3" /> {text("Insurance Operations Center", "مركز عمليات التأمين")}
         </div>
         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-success bg-success-bg px-3 py-1.5 rounded-full">
@@ -154,13 +154,13 @@ export default function InsurancePortal() {
 
           {loadingDash ? (
             <div className="flex items-center gap-3 py-16 justify-center text-muted-foreground">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600" />
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
               <span className="text-sm">{text("Loading insurance operations...", "جارٍ تحميل عمليات التأمين...")}</span>
             </div>
           ) : dashboard && (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <KpiCard title={text("Active Policies", "الوثائق النشطة")} value={dashboard.totalPolicies?.toLocaleString()} sub={text("National coverage", "تغطية وطنية")} icon={Users} iconBg="bg-violet-100" iconColor="text-violet-600" />
+                <KpiCard title={text("Active Policies", "الوثائق النشطة")} value={dashboard.totalPolicies?.toLocaleString()} sub={text("National coverage", "تغطية وطنية")} icon={Users} iconBg="bg-secondary" iconColor="text-secondary-foreground" />
                 <KpiCard title={text("Total Claims", "إجمالي المطالبات")} value={dashboard.totalClaims?.toLocaleString()} sub={text(`${dashboard.pendingClaims} awaiting review`, `${dashboard.pendingClaims} بانتظار المراجعة`)} icon={Shield} iconBg="bg-primary/10" iconColor="text-primary" />
                 <KpiCard title={text("Total Payout", "إجمالي المدفوعات")} value={`${text("SAR", "ر.س")} ${(dashboard.totalPayout / 1000).toFixed(0)}K`} sub={text(`Avg SAR ${dashboard.avgClaimValue?.toLocaleString()} per claim`, `متوسط ${dashboard.avgClaimValue?.toLocaleString()} ر.س للمطالبة`)} icon={DollarSign} iconBg="bg-success-bg" iconColor="text-success" />
                 <KpiCard title={text("Fraud Flagged", "حالات احتيال موسومة")} value={dashboard.fraudSuspected} sub={text(`${dashboard.fraudRate}% fraud rate`, `معدّل الاحتيال ${dashboard.fraudRate}%`)} icon={ShieldAlert} iconBg="bg-danger-bg" iconColor="text-danger" />
@@ -329,8 +329,8 @@ export default function InsurancePortal() {
           {!nationalId && (
             <Card>
               <CardBody className="py-16 text-center">
-                <div className="w-16 h-16 rounded-3xl bg-violet-50 flex items-center justify-center mx-auto mb-4">
-                  <Shield className="w-7 h-7 text-violet-500" />
+                <div className="w-16 h-16 rounded-3xl bg-secondary/30 flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-7 h-7 text-secondary-foreground" />
                 </div>
                 <p className="font-bold text-foreground mb-1">{text("No Policy Selected", "لم يتم اختيار وثيقة")}</p>
                 <p className="text-sm text-muted-foreground mb-2">{text("Enter a National ID to load full fraud analysis and claim review tools.", "أدخل رقم الهوية لتحميل تحليل الاحتيال الكامل وأدوات مراجعة المطالبات.")}</p>
@@ -341,7 +341,7 @@ export default function InsurancePortal() {
 
           {loadingPatient && (
             <div className="flex items-center gap-3 py-16 justify-center text-muted-foreground">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-violet-600" />
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
               <span className="text-sm">{text("Loading policy data...", "جارٍ تحميل بيانات الوثيقة...")}</span>
             </div>
           )}
@@ -381,9 +381,9 @@ export default function InsurancePortal() {
                         <p className={`text-2xl font-bold ${patient.fraudRisk === "high" ? "text-danger" : patient.fraudRisk === "medium" ? "text-risk-high" : "text-success"}`}>{patient.fraudRisk?.toUpperCase()}</p>
                       </DataLabel>
                     </div>
-                    <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[150px] bg-violet-50">
+                    <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[150px] bg-primary/10">
                       <DataLabel label={text("Monthly Premium", "القسط الشهري")}>
-                        <p className="text-2xl font-bold text-violet-700">{text("SAR", "ر.س")} {patient.monthlyPremium?.toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-primary">{text("SAR", "ر.س")} {patient.monthlyPremium?.toLocaleString()}</p>
                       </DataLabel>
                       <p className="text-xs text-muted-foreground mt-1">{patient.riskMultiplier}{text("× risk factor", "× معامل الخطورة")}</p>
                     </div>
@@ -401,7 +401,7 @@ export default function InsurancePortal() {
                 {/* Anomaly Breakdown */}
                 <Card className="col-span-full lg:col-span-5">
                   <CardHeader>
-                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-violet-600" /><CardTitle>{text("Neural Fraud Analysis", "تحليل الاحتيال العصبي")}</CardTitle></div>
+                    <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-primary" /><CardTitle>{text("Neural Fraud Analysis", "تحليل الاحتيال العصبي")}</CardTitle></div>
                     <Badge variant={patient.anomalyScore >= 50 ? "destructive" : patient.anomalyScore >= 25 ? "warning" : "success"}>
                       {text("Score:", "الدرجة:")} {patient.anomalyScore}/100
                     </Badge>
@@ -447,8 +447,8 @@ export default function InsurancePortal() {
 
                   <Card>
                     <CardHeader>
-                      <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-violet-600" /><CardTitle>{text("Premium Breakdown", "تفصيل القسط")}</CardTitle></div>
-                      <p className="text-sm font-bold text-violet-700 ml-auto">{text("SAR", "ر.س")} {patient.monthlyPremium}{text("/mo", "/شهر")}</p>
+                      <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-primary" /><CardTitle>{text("Premium Breakdown", "تفصيل القسط")}</CardTitle></div>
+                      <p className="text-sm font-bold text-primary ml-auto">{text("SAR", "ر.س")} {patient.monthlyPremium}{text("/mo", "/شهر")}</p>
                     </CardHeader>
                     <CardBody>
                       <div className="h-36">
@@ -501,7 +501,7 @@ export default function InsurancePortal() {
                       const canReview = effectiveStatus === "pending" || effectiveStatus === "under_review";
 
                       return (
-                        <div key={claim.claimId} className={`transition-colors ${isReviewing ? "bg-violet-50/50" : "hover:bg-secondary/20"}`}>
+                        <div key={claim.claimId} className={`transition-colors ${isReviewing ? "bg-primary/10" : "hover:bg-secondary/20"}`}>
                           <div className="flex items-center gap-4 px-5 py-3.5">
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-2 mb-0.5">
@@ -567,7 +567,7 @@ export default function InsurancePortal() {
                                 <div>
                                   <div className="flex items-center gap-2 mb-4 p-3 bg-secondary/50 rounded-xl border border-border">
                                     <button onClick={() => fetchAiRec(claim.claimId)}
-                                      className="text-xs rounded-full bg-violet-100 text-violet-700 px-3 py-1.5 font-bold hover:bg-violet-200 transition-colors">
+                                      className="text-xs rounded-full bg-secondary text-secondary-foreground px-3 py-1.5 font-bold hover:bg-secondary/80 transition-colors">
                                       {text("AI Recommendation", "توصية الذكاء الاصطناعي")}
                                     </button>
                                     {aiRecs[claim.claimId] && (
@@ -589,7 +589,7 @@ export default function InsurancePortal() {
                                   <div className="flex gap-2">
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "approve" })}
                                       disabled={reviewMutation.isPending}
-                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-success text-white rounded-xl hover:bg-emerald-650 transition-colors disabled:opacity-50">
+                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-success text-white rounded-xl hover:bg-success/90 transition-colors disabled:opacity-50">
                                       <CheckCircle2 className="w-3.5 h-3.5" /> {text("Approve", "اعتماد")}
                                     </button>
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "flag" })}
@@ -599,7 +599,7 @@ export default function InsurancePortal() {
                                     </button>
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "reject" })}
                                       disabled={reviewMutation.isPending}
-                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-danger text-white rounded-xl hover:bg-red-650 transition-colors disabled:opacity-50">
+                                      className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-danger text-white rounded-xl hover:bg-danger/90 transition-colors disabled:opacity-50">
                                       <X className="w-3.5 h-3.5" /> {text("Reject", "رفض")}
                                     </button>
                                   </div>
