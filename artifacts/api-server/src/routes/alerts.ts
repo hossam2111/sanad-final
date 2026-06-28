@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { alertsTable, patientsTable } from "@workspace/db/schema";
-import { eq, and, desc, sql } from "drizzle-orm";
-import { isClinicalRole, requireOwnPatient, resolveOwnPatientId } from "../lib/ownership.js";
+import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { isClinicalRole, requireOwnPatient, resolveOwnPatientId, getStaffHospitalId } from "../lib/ownership.js";
 
 const router = Router();
 
@@ -50,7 +50,6 @@ router.get("/system", async (req, res) => {
   let hospitalFilter: string | undefined;
   if (req.role !== "admin" && req.role !== "citizen") {
     if (req.username) {
-      const { getStaffHospitalId } = await import("../lib/ownership.js");
       hospitalFilter = (await getStaffHospitalId(req.username)) ?? undefined;
     }
   }
@@ -71,7 +70,7 @@ router.get("/system", async (req, res) => {
     .from(alertsTable)
     .leftJoin(patientsTable, eq(alertsTable.patientId, patientsTable.id));
 
-  const alerts = await (hospitalFilter 
+  const alerts = await (hospitalFilter
     ? baseQuery.where(eq(patientsTable.hospitalId, hospitalFilter))
     : baseQuery)
     .orderBy(desc(alertsTable.createdAt))
@@ -155,16 +154,15 @@ router.patch("/read-all", async (req, res) => {
   if (req.role === "admin" || req.role === "ai-control") {
     await db.update(alertsTable).set({ isRead: true });
   } else if (req.username) {
-    const { getStaffHospitalId } = await import("../lib/ownership.js");
     const hospitalId = await getStaffHospitalId(req.username);
     if (hospitalId) {
-      // Find alerts for this hospital
-      const hospitalPatients = await db.select({ id: patientsTable.id }).from(patientsTable).where(eq(patientsTable.hospitalId, hospitalId));
-      const patientIds = hospitalPatients.map(p => p.id);
-      if (patientIds.length > 0) {
-        const { inArray } = await import("drizzle-orm");
-        await db.update(alertsTable).set({ isRead: true }).where(inArray(alertsTable.patientId, patientIds));
-      }
+      // Single UPDATE with correlated subquery — no round-trip to fetch patient IDs
+      await db.update(alertsTable)
+        .set({ isRead: true })
+        .where(inArray(
+          alertsTable.patientId,
+          db.select({ id: patientsTable.id }).from(patientsTable).where(eq(patientsTable.hospitalId, hospitalId)),
+        ));
     }
   }
 
