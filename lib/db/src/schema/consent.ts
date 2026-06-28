@@ -16,8 +16,8 @@ export const consentTable = pgTable("consent_records", {
   userAgent: text("user_agent"),
   notes: text("notes"),
 }, (t) => [
-  index("idx_consent_patient_id").on(t.patientId),
-  index("idx_consent_type").on(t.consentType),
+  // Composite index covers the only query pattern: WHERE patient_id = ? AND consent_type = ?
+  index("idx_consent_patient_type").on(t.patientId, t.consentType),
 ]);
 
 export type ConsentRecord = typeof consentTable.$inferSelect;
