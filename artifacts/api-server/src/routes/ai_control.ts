@@ -2,7 +2,7 @@ import { Router } from "express";
 import os from "os";
 import { db } from "@workspace/db";
 import { aiDecisionsTable, eventsTable, auditLogTable, aiRetrainJobsTable } from "@workspace/db/schema";
-import { desc, count, eq, sql } from "drizzle-orm";
+import { desc, count, eq, sql, gte } from "drizzle-orm";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
@@ -56,63 +56,102 @@ router.patch("/features/:feature", validate(featureToggleSchema), (req, res) => 
 });
 
 router.get("/metrics", async (req, res) => {
-  const [allDecisions, recentEvents, [auditCount]] = await Promise.all([
-    db.select().from(aiDecisionsTable).orderBy(desc(aiDecisionsTable.createdAt)).limit(500),
-    db.select().from(eventsTable).orderBy(desc(eventsTable.processedAt)).limit(200),
+  const last24hBoundary = new Date();
+  last24hBoundary.setHours(last24hBoundary.getHours() - 24);
+  const yearStart = new Date(new Date().getFullYear(), 0, 1);
+
+  const [
+    [globalStats],
+    [recentCount],
+    urgencyRows,
+    riskRows,
+    eventTypeRows,
+    [totalEventCount],
+    [auditCount],
+    confHistoryResult,
+  ] = await Promise.all([
+    db.select({
+      total: count(),
+      avgConf: sql<number>`ROUND(AVG(COALESCE(${aiDecisionsTable.confidence}, 0))::numeric, 4)::float`,
+      lowConfCount: sql<number>`SUM(CASE WHEN COALESCE(${aiDecisionsTable.confidence}, 0) < 0.7 THEN 1 ELSE 0 END)::int`,
+    }).from(aiDecisionsTable),
+
+    db.select({ cnt: count() }).from(aiDecisionsTable)
+      .where(gte(aiDecisionsTable.createdAt, last24hBoundary)),
+
+    db.select({ urgency: aiDecisionsTable.urgency, cnt: count() })
+      .from(aiDecisionsTable).groupBy(aiDecisionsTable.urgency),
+
+    db.select({ riskLevel: aiDecisionsTable.riskLevel, cnt: count() })
+      .from(aiDecisionsTable).groupBy(aiDecisionsTable.riskLevel),
+
+    db.select({ eventType: eventsTable.eventType, cnt: count() })
+      .from(eventsTable).groupBy(eventsTable.eventType).orderBy(desc(count())).limit(20),
+
+    db.select({ cnt: count() }).from(eventsTable),
+
     db.select({ count: count() }).from(auditLogTable),
+
+    db.execute<{ month_idx: number; avg_conf: number; decisions: number }>(
+      sql`SELECT (EXTRACT(MONTH FROM created_at)::int - 1) AS month_idx,
+              ROUND(AVG(COALESCE(confidence, 0))::numeric, 4)::float AS avg_conf,
+              COUNT(*)::int AS decisions
+          FROM ai_decisions
+          WHERE created_at >= ${yearStart}
+          GROUP BY EXTRACT(MONTH FROM created_at)
+          ORDER BY month_idx`
+    ),
   ]);
 
-  const avgConfidence = allDecisions.length > 0
-    ? allDecisions.reduce((s, d) => s + (d.confidence ?? 0), 0) / allDecisions.length
-    : 0;
+  const totalDecisions = Number(globalStats?.total ?? 0);
+  const avgConfidence = globalStats?.avgConf ?? 0;
+  const lowConfidenceCount = Number(globalStats?.lowConfCount ?? 0);
+  const decisionsLast24h = Number(recentCount?.cnt ?? 0);
+  const totalEvents = Number(totalEventCount?.cnt ?? 0);
 
-  const urgencyBreakdown = {
-    immediate: allDecisions.filter(d => d.urgency === "immediate").length,
-    urgent: allDecisions.filter(d => d.urgency === "urgent").length,
-    soon: allDecisions.filter(d => d.urgency === "soon").length,
-    routine: allDecisions.filter(d => d.urgency === "routine").length,
-  };
-
-  const riskBreakdown = {
-    critical: allDecisions.filter(d => d.riskLevel === "critical").length,
-    high: allDecisions.filter(d => d.riskLevel === "high").length,
-    medium: allDecisions.filter(d => d.riskLevel === "medium").length,
-    low: allDecisions.filter(d => d.riskLevel === "low").length,
-  };
-
-  const eventTypes: Record<string, number> = {};
-  for (const e of recentEvents) {
-    eventTypes[e.eventType] = (eventTypes[e.eventType] || 0) + 1;
-  }
-
-  const lowConfidenceDecisions = allDecisions.filter(d => (d.confidence ?? 0) < 0.7);
-  const driftRisk = lowConfidenceDecisions.length / Math.max(allDecisions.length, 1);
-
-  const last24h = new Date(); last24h.setHours(last24h.getHours() - 24);
-  const recentDecisions = allDecisions.filter(d => d.createdAt !== null && new Date(d.createdAt) >= last24h);
-
+  const urgencyMap = new Map(urgencyRows.map(r => [r.urgency, Number(r.cnt)]));
+  const riskMap = new Map(riskRows.map(r => [r.riskLevel, Number(r.cnt)]));
+  const driftRisk = totalDecisions > 0 ? lowConfidenceCount / totalDecisions : 0;
   const modelStatus = avgConfidence >= 0.85 ? "optimal" : avgConfidence >= 0.75 ? "good" : avgConfidence >= 0.65 ? "degraded" : "needs_retraining";
 
+  const confHistoryRows = (Array.isArray(confHistoryResult) ? confHistoryResult : confHistoryResult.rows) as { month_idx: number; avg_conf: number; decisions: number }[];
+  const confByMonth = new Map(confHistoryRows.map(r => [r.month_idx, r]));
+  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"] as const;
+  const confidenceHistory = monthNames.map((month, i) => {
+    const row = confByMonth.get(i);
+    return { month, confidence: row ? Math.round(row.avg_conf * 100) : null, decisions: row?.decisions ?? 0 };
+  });
+
   res.json({
-    totalDecisions: allDecisions.length,
-    decisionsLast24h: recentDecisions.length,
+    totalDecisions,
+    decisionsLast24h,
     avgConfidence: Math.round(avgConfidence * 100),
     modelStatus,
     driftRisk: parseFloat((driftRisk * 100).toFixed(1)),
-    lowConfidenceCount: lowConfidenceDecisions.length,
-    urgencyBreakdown,
-    riskBreakdown,
-    eventTypes: Object.entries(eventTypes).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count),
+    lowConfidenceCount,
+    urgencyBreakdown: {
+      immediate: urgencyMap.get("immediate") ?? 0,
+      urgent: urgencyMap.get("urgent") ?? 0,
+      soon: urgencyMap.get("soon") ?? 0,
+      routine: urgencyMap.get("routine") ?? 0,
+    },
+    riskBreakdown: {
+      critical: riskMap.get("critical") ?? 0,
+      high: riskMap.get("high") ?? 0,
+      medium: riskMap.get("medium") ?? 0,
+      low: riskMap.get("low") ?? 0,
+    },
+    eventTypes: eventTypeRows.map(r => ({ type: r.eventType, count: Number(r.cnt) })),
     auditRecords: Number(auditCount?.count ?? 0),
-    totalEvents: recentEvents.length,
+    totalEvents,
     engines: [
-      { name: "Risk Scoring Engine", version: "v4.2", status: "operational", accuracy: 91, requests: allDecisions.length, avgLatencyMs: 38 },
-      { name: "Decision Engine", version: "v3.0", status: "operational", accuracy: 88, requests: allDecisions.length, avgLatencyMs: 52 },
-      { name: "Digital Twin Simulator", version: "v2.1", status: "operational", accuracy: 79, requests: Math.round(allDecisions.length * 0.8), avgLatencyMs: 145 },
-      { name: "Drug Interaction AI", version: "v5.1", status: "operational", accuracy: 96, requests: Math.round(recentEvents.length * 0.3), avgLatencyMs: 12 },
-      { name: "Behavioral AI", version: "v1.8", status: "operational", accuracy: 74, requests: Math.round(allDecisions.length * 0.6), avgLatencyMs: 89 },
-      { name: "Recommendation Engine", version: "v2.3", status: "operational", accuracy: 85, requests: allDecisions.length, avgLatencyMs: 28 },
-      { name: "Explainability Layer", version: "v1.5", status: "operational", accuracy: 99, requests: allDecisions.length, avgLatencyMs: 8 },
+      { name: "Risk Scoring Engine", version: "v4.2", status: "operational", accuracy: 91, requests: totalDecisions, avgLatencyMs: 38 },
+      { name: "Decision Engine", version: "v3.0", status: "operational", accuracy: 88, requests: totalDecisions, avgLatencyMs: 52 },
+      { name: "Digital Twin Simulator", version: "v2.1", status: "operational", accuracy: 79, requests: Math.round(totalDecisions * 0.8), avgLatencyMs: 145 },
+      { name: "Drug Interaction AI", version: "v5.1", status: "operational", accuracy: 96, requests: Math.round(totalEvents * 0.3), avgLatencyMs: 12 },
+      { name: "Behavioral AI", version: "v1.8", status: "operational", accuracy: 74, requests: Math.round(totalDecisions * 0.6), avgLatencyMs: 89 },
+      { name: "Recommendation Engine", version: "v2.3", status: "operational", accuracy: 85, requests: totalDecisions, avgLatencyMs: 28 },
+      { name: "Explainability Layer", version: "v1.5", status: "operational", accuracy: 99, requests: totalDecisions, avgLatencyMs: 8 },
       { name: "Policy AI", version: "v1.2", status: "operational", accuracy: 82, requests: 47, avgLatencyMs: 210 },
       { name: "Audit Engine", version: "v2.0", status: "operational", accuracy: 100, requests: Number(auditCount?.count ?? 0), avgLatencyMs: 5 },
     ],
@@ -125,17 +164,7 @@ router.get("/metrics", async (req, res) => {
       processHeapUsedMb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
       platform: process.platform,
     },
-    confidenceHistory: Array.from({ length: 12 }, (_, i) => {
-      const monthDecisions = allDecisions.filter(d => d.createdAt !== null && new Date(d.createdAt).getMonth() === i);
-      const avgConf = monthDecisions.length > 0
-        ? monthDecisions.reduce((s, d) => s + (d.confidence ?? 0), 0) / monthDecisions.length
-        : null;
-      return {
-        month: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i],
-        confidence: avgConf !== null ? Math.round(avgConf * 100) : null,
-        decisions: monthDecisions.length,
-      };
-    }),
+    confidenceHistory,
   });
 });
 
