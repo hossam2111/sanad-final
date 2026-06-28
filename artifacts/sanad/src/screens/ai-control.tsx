@@ -30,7 +30,24 @@ async function fetchRetrainingJobs() {
   return res.json();
 }
 
-const STATUS_COLORS: Record<string, { bg: string; text: string; border: string; badge: any; dot: string }> = {
+type BadgeVariant = "success" | "warning" | "info" | "destructive" | "outline" | "default";
+type AiEngine = { name: string; version: string; status: string; accuracy: number; requests: number; avgLatencyMs: number };
+type DriftEngine = { engine: string; driftScore: number; status: string; threshold: number };
+type RetrainJob = { id: string; engine: string; status: string; progress: number; triggeredBy: string; createdAt?: string | null; startedAt?: string | null; completedAt?: string | null };
+type RetrainResult = { jobId?: string };
+type AiMetrics = {
+  totalDecisions: number; decisionsLast24h: number; avgConfidence: number; modelStatus: string;
+  driftRisk: number; lowConfidenceCount: number; auditRecords: number; totalEvents: number;
+  urgencyBreakdown: { immediate: number; urgent: number; soon: number; routine: number };
+  riskBreakdown: Record<string, number>;
+  eventTypes: { type: string; count: number }[];
+  engines: AiEngine[];
+  systemHealth: Record<string, string | number | null | undefined>;
+  confidenceHistory: { month: string; confidence: number | null; decisions: number }[];
+};
+type DriftData = { engines: DriftEngine[]; summary: { stable: number; driftDetected: number; monitoring: number }; lastAnalyzed: string; totalDecisions: number };
+
+const STATUS_COLORS: Record<string, { bg: string; text: string; border: string; badge: BadgeVariant; dot: string }> = {
   operational: { bg: "bg-success-bg", text: "text-success", border: "border-success/30", badge: "success" as const, dot: "bg-success" },
   degraded: { bg: "bg-risk-high-bg", text: "text-risk-high", border: "border-risk-high/20", badge: "warning" as const, dot: "bg-risk-high animate-pulse" },
   drift_detected: { bg: "bg-danger-bg", text: "text-danger", border: "border-danger/30", badge: "destructive" as const, dot: "bg-danger animate-pulse" },
@@ -45,15 +62,15 @@ export default function AIControlCenter() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeTab, setActiveTab] = useState<ViewTab>("overview");
   const [retrainingTarget, setRetrainingTarget] = useState<string | null>(null);
-  const [retrainResult, setRetrainResult] = useState<Record<string, any>>({});
+  const [retrainResult, setRetrainResult] = useState<Record<string, RetrainResult>>({});
   const [newJobForm, setNewJobForm] = useState(false);
   const [newJobModel, setNewJobModel] = useState("");
   const [newJobReason, setNewJobReason] = useState("");
 
   const qc = useQueryClient();
 
-  const { data: metrics, isLoading: loadingMetrics } = useQuery({ queryKey: ["ai-metrics"], queryFn: fetchMetrics, refetchInterval: 30000 });
-  const { data: drift, isLoading: loadingDrift } = useQuery({ queryKey: ["ai-drift"], queryFn: fetchDrift, refetchInterval: 30000 });
+  const { data: metrics, isLoading: loadingMetrics } = useQuery<AiMetrics>({ queryKey: ["ai-metrics"], queryFn: fetchMetrics, refetchInterval: 30000 });
+  const { data: drift, isLoading: loadingDrift } = useQuery<DriftData>({ queryKey: ["ai-drift"], queryFn: fetchDrift, refetchInterval: 30000 });
   const { data: jobs } = useQuery({ queryKey: ["retraining-jobs-new"], queryFn: async () => apiFetch("/api/ai-control/retrain-jobs").then(r => r.json()), refetchInterval: 5000 });
   const { data: featureData } = useQuery({ queryKey: ["ai-features"], queryFn: async () => apiFetch("/api/ai-control/features").then(r => r.json()), refetchInterval: 5000 });
 
@@ -131,7 +148,7 @@ export default function AIControlCenter() {
   ];
 
   const driftEngines = drift?.engines ?? [];
-  const driftDetected = driftEngines.filter((e: any) => e.status === "drift_detected");
+  const driftDetected = driftEngines.filter((e: DriftEngine) => e.status === "drift_detected");
 
   return (
     <Layout role="ai-control" localized>
@@ -142,7 +159,7 @@ export default function AIControlCenter() {
           <AlertTriangle className="w-5 h-5 text-danger shrink-0 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
           <p className="text-xs font-bold uppercase tracking-widest text-danger relative z-10">
             {text("DRIFT DETECTED", "تم رصد انحراف")} — <span className="text-foreground/80">{text(`${driftDetected.length} engine${driftDetected.length > 1 ? "s" : ""} ${driftDetected.length > 1 ? "require" : "requires"} retraining:`, `${driftDetected.length} ${driftDetected.length > 1 ? "محركات تتطلب" : "محرك يتطلب"} إعادة تدريب:`)}</span>{" "}
-            <span className="text-foreground">{driftDetected.map((e: any) => e.engine).join(" · ")}</span>
+            <span className="text-foreground">{driftDetected.map((e: DriftEngine) => e.engine).join(" · ")}</span>
           </p>
           <button
             onClick={() => setActiveTab("drift")}
@@ -160,17 +177,31 @@ export default function AIControlCenter() {
         </div>
         <div className="flex items-center gap-2 text-[11px] font-bold text-success glass-panel border border-success/30 px-4 py-1.5 rounded-full drop-shadow-[0_0_8px_rgba(34,197,94,0.2)]">
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.8)]" />
-          {text(`${metrics?.engines?.filter((e: any) => e.status === "operational").length} / ${metrics?.engines?.length} engines operational`, `${metrics?.engines?.filter((e: any) => e.status === "operational").length} / ${metrics?.engines?.length} محرك يعمل`)}
+          {text(`${metrics?.engines?.filter((e: AiEngine) => e.status === "operational").length} / ${metrics?.engines?.length} engines operational`, `${metrics?.engines?.filter((e: AiEngine) => e.status === "operational").length} / ${metrics?.engines?.length} محرك يعمل`)}
         </div>
         <div className="ms-auto font-mono text-[11px] text-muted-foreground glass-panel border border-white/10 px-4 py-1.5 rounded-full" dir={dir}>
           {text("Uptime", "التشغيل")} <span className="text-foreground">{metrics?.systemHealth?.uptime}</span> <span className="text-white/20 mx-1">·</span> {text("Last retrain:", "آخر تدريب:")} <span className="text-foreground">{metrics?.systemHealth?.lastRetraining}</span>
         </div>
       </div>
 
-      <PageHeader
-        title={text("AI Governance & Control Center", "مركز حوكمة الذكاء الاصطناعي والتحكم")}
-        subtitle={text("9-engine real-time monitor · Model drift detection · Retraining orchestration · Decision audit trail", "مراقبة فورية لـ 9 محركات · كشف انحراف النماذج · تنظيم إعادة التدريب · سجل تدقيق القرارات")}
-      />
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Brain className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text("AI Governance & Control Center", "مركز حوكمة الذكاء الاصطناعي والتحكم")}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("9-engine real-time monitor · Model drift detection · Retraining orchestration · Decision audit trail", "مراقبة فورية لـ 9 محركات · كشف انحراف النماذج · تنظيم إعادة التدريب · سجل تدقيق القرارات")}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -182,15 +213,15 @@ export default function AIControlCenter() {
         <KpiCard
           title={text("Drift Risk", "خطر الانحراف")} value={`${metrics?.driftRisk}%`}
           sub={text(`${metrics?.lowConfidenceCount} low-confidence decisions`, `${metrics?.lowConfidenceCount} قرار منخفض الثقة`)}
-          icon={AlertCircle} iconBg={metrics?.driftRisk > 10 ? "bg-danger-bg" : "bg-success-bg"} iconColor={metrics?.driftRisk > 10 ? "text-danger" : "text-success"}
+          icon={AlertCircle} iconBg={(metrics?.driftRisk ?? 0) > 10 ? "bg-danger-bg" : "bg-success-bg"} iconColor={(metrics?.driftRisk ?? 0) > 10 ? "text-danger" : "text-success"}
         />
         <KpiCard
-          title={text("Total AI Decisions", "إجمالي قرارات الذكاء")} value={metrics?.totalDecisions?.toLocaleString()}
+          title={text("Total AI Decisions", "إجمالي قرارات الذكاء")} value={metrics?.totalDecisions?.toLocaleString() ?? 0}
           sub={text(`${metrics?.decisionsLast24h} in last 24 hours`, `${metrics?.decisionsLast24h} خلال 24 ساعة`)}
           icon={Zap} iconBg="bg-risk-high-bg" iconColor="text-risk-high"
         />
         <KpiCard
-          title={text("Audit Records", "سجلات التدقيق")} value={metrics?.auditRecords?.toLocaleString()}
+          title={text("Audit Records", "سجلات التدقيق")} value={metrics?.auditRecords?.toLocaleString() ?? 0}
           sub={text("Fully traceable · Tamper-evident", "قابلة للتتبّع · مقاومة للتلاعب")}
           icon={Shield} iconBg="bg-primary/10" iconColor="text-primary"
         />
@@ -229,7 +260,7 @@ export default function AIControlCenter() {
               <CardBody className="space-y-3">
                 {[
                   { label: text("Model Confidence", "ثقة النموذج"), value: metrics?.avgConfidence, unit: "%", color: "bg-info" },
-                  { label: text("Engine Availability", "توافر المحركات"), value: metrics?.engines?.length ? Math.round((metrics.engines.filter((e: any) => e.status === "operational").length / metrics.engines.length) * 100) : undefined, unit: "%", color: "bg-success" },
+                  { label: text("Engine Availability", "توافر المحركات"), value: metrics?.engines?.length ? Math.round((metrics.engines.filter((e: AiEngine) => e.status === "operational").length / metrics.engines.length) * 100) : undefined, unit: "%", color: "bg-success" },
                   { label: text("Drift Headroom", "هامش الانحراف"), value: metrics?.driftRisk != null ? Math.max(0, 100 - Math.round(metrics.driftRisk)) : undefined, unit: "%", color: "bg-primary" },
                   { label: text("Memory Utilization", "استخدام الذاكرة"), value: metrics?.systemHealth?.memoryUsedPct, unit: "%", color: "bg-info" },
                 ].map((item, i) => (
@@ -278,7 +309,7 @@ export default function AIControlCenter() {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                       <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
                       <YAxis domain={[60, 100]} axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} unit="%" />
-                      <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any) => [`${v}%`, text("Confidence", "الثقة")]} />
+                      <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: number | string) => [`${v}%`, text("Confidence", "الثقة")]} />
                       <ReferenceLine y={85} stroke="hsl(var(--danger))" strokeDasharray="4 2" strokeWidth={1.5} />
                       <Area type="monotone" dataKey="confidence" stroke="hsl(var(--primary))" fill="url(#confGrad)" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} />
                     </AreaChart>
@@ -297,8 +328,8 @@ export default function AIControlCenter() {
               </Badge>
             </CardHeader>
             <div className="divide-y divide-border">
-              {metrics?.engines?.map((engine: any, i: number) => {
-                const driftInfo = driftEngines.find((d: any) => d.engine === engine.name);
+              {metrics?.engines?.map((engine: AiEngine, i: number) => {
+                const driftInfo = driftEngines.find((d: DriftEngine) => d.engine === engine.name);
                 const hasDrift = driftInfo?.status === "drift_detected";
                 const statusCfg = STATUS_COLORS[hasDrift ? "drift_detected" : engine.status] ?? STATUS_COLORS.operational;
                 return (
@@ -415,7 +446,7 @@ export default function AIControlCenter() {
         <div className="space-y-5">
           {driftDetected.length > 0 && (
             <div className="space-y-3">
-              {driftDetected.map((engine: any, i: number) => (
+              {driftDetected.map((engine: DriftEngine, i: number) => (
                 <div key={i} className="flex items-start gap-4 px-5 py-4 bg-danger-bg border-2 border-danger/30 rounded-2xl">
                   <AlertTriangle className="w-6 h-6 text-danger shrink-0 mt-0.5" />
                   <div className="flex-1">
@@ -450,7 +481,7 @@ export default function AIControlCenter() {
             </CardHeader>
             <CardBody>
               <div className="space-y-2.5">
-                {[...driftEngines].sort((a: any, b: any) => b.driftScore - a.driftScore).map((engine: any, i: number) => {
+                {[...driftEngines].sort((a: DriftEngine, b: DriftEngine) => b.driftScore - a.driftScore).map((engine: DriftEngine, i: number) => {
                   const pct = (engine.driftScore / 10) * 100;
                   const color = engine.driftScore > 5 ? "bg-danger" : engine.driftScore > 3 ? "bg-risk-high" : "bg-success";
                   const textColor = engine.driftScore > 5 ? "text-danger" : engine.driftScore > 3 ? "text-risk-high" : "text-success";
@@ -527,8 +558,8 @@ export default function AIControlCenter() {
           <Card>
             <CardHeader><RotateCcw className="w-4 h-4 text-danger" /><CardTitle>{text("Manual Retraining Triggers", "مشغّلات إعادة التدريب اليدوية")}</CardTitle><Badge variant="warning">{text("Privileged Action · Logged", "إجراء مميّز · مُسجَّل")}</Badge></CardHeader>
             <div className="divide-y divide-border">
-              {metrics?.engines?.map((engine: any, i: number) => {
-                const driftInfo = driftEngines.find((d: any) => d.engine === engine.name);
+              {metrics?.engines?.map((engine: AiEngine, i: number) => {
+                const driftInfo = driftEngines.find((d: DriftEngine) => d.engine === engine.name);
                 const hasDrift = driftInfo?.status === "drift_detected";
                 const jobResult = retrainResult[engine.name];
                 const isMonitoring = driftInfo?.status === "monitoring";
@@ -621,12 +652,12 @@ export default function AIControlCenter() {
               )}
 
               <div className="divide-y divide-border">
-                {jobs.jobs.map((job: any, i: number) => (
+                {jobs.jobs.map((job: RetrainJob, i: number) => (
                   <div key={i} className="flex items-center gap-4 px-5 py-3.5">
                     <div className={`w-2 h-2 rounded-full ${job.status === "completed" ? "bg-success" : job.status === "running" ? "bg-info animate-pulse" : "bg-risk-high"} shrink-0`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-foreground font-mono">{job.id}</p>
-                      <p className="text-xs text-muted-foreground">{job.engine} · {text("Started:", "بدأ:")} {new Date(job.createdAt || job.startedAt).toLocaleTimeString()} · {text("By:", "بواسطة:")} {job.triggeredBy}</p>
+                      <p className="text-xs text-muted-foreground">{job.engine} · {text("Started:", "بدأ:")} {new Date(job.createdAt ?? job.startedAt ?? Date.now()).toLocaleTimeString()} · {text("By:", "بواسطة:")} {job.triggeredBy}</p>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
                       {job.status === "running" && (
@@ -666,10 +697,10 @@ export default function AIControlCenter() {
                     <div key={i}>
                       <div className="flex items-center justify-between mb-1">
                         <span className={`text-xs font-semibold ${item.text}`}>{item.urgency}</span>
-                        <span className="text-xs font-bold text-foreground">{item.value?.toLocaleString()} ({metrics?.totalDecisions ? Math.round((item.value / metrics.totalDecisions) * 100) : 0}%)</span>
+                        <span className="text-xs font-bold text-foreground">{item.value?.toLocaleString()} ({metrics?.totalDecisions ? Math.round(((item.value ?? 0) / metrics.totalDecisions) * 100) : 0}%)</span>
                       </div>
                       <div className="w-full bg-secondary rounded-full h-2.5">
-                        <div className={`h-full rounded-full ${item.color}`} style={{ width: `${metrics?.totalDecisions ? (item.value / metrics.totalDecisions) * 100 : 0}%` }} />
+                        <div className={`h-full rounded-full ${item.color}`} style={{ width: `${metrics?.totalDecisions ? ((item.value ?? 0) / metrics.totalDecisions) * 100 : 0}%` }} />
                       </div>
                     </div>
                   ))}
@@ -692,7 +723,7 @@ export default function AIControlCenter() {
                       <span className="text-xs font-bold text-foreground">{item.value?.toLocaleString()}</span>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2">
-                      <div className={`h-full rounded-full ${item.color}`} style={{ width: `${metrics?.totalDecisions ? (item.value / metrics.totalDecisions) * 100 : 0}%` }} />
+                      <div className={`h-full rounded-full ${item.color}`} style={{ width: `${metrics?.totalDecisions ? ((item.value ?? 0) / metrics.totalDecisions) * 100 : 0}%` }} />
                     </div>
                   </div>
                 ))}
