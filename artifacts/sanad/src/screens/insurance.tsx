@@ -34,7 +34,101 @@ async function reviewClaim(claimId: string, action: string, notes: string) {
   return res.json();
 }
 
-const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string; badge: any; label: string; labelAr: string }> = {
+type BadgeVariant = "success" | "warning" | "info" | "destructive" | "outline" | "default";
+
+type InsuranceClaim = {
+  claimId: string;
+  date: string;
+  type: string;
+  hospital: string;
+  diagnosis: string;
+  estimatedCost: number;
+  status: string;
+  aiVerified: boolean;
+  anomalyScore: number;
+  anomalyReasons: string[];
+  reviewedBy?: string;
+  reviewedAt?: string;
+  reviewNotes?: string;
+  aiReason?: string;
+};
+
+type AnomalyFactor = {
+  label: string;
+  value: string;
+  weight: number;
+  flag: boolean;
+};
+
+type PremiumBreakdownEntry = {
+  factor: string;
+  amount: number;
+  color: string;
+};
+
+type FraudAlert = {
+  type: string;
+  count: number;
+  severity: string;
+  description: string;
+};
+
+type RiskPricingAlert = {
+  region: string;
+  avgRisk: number;
+  trend: string;
+  action: string;
+  change: string;
+};
+
+type ClaimsByTypeEntry = {
+  type: string;
+  count: number;
+  avgCost: number;
+  color: string;
+};
+
+type InsurancePatientData = {
+  patient: { id: number; fullName: string; nationalId: string; dateOfBirth: string; gender: string; age: number; bloodType: string };
+  riskScore: number;
+  anomalyScore: number;
+  anomalyFactors: AnomalyFactor[];
+  fraudRisk: string;
+  fraudFlags: string[];
+  behaviorProfile: { visitPattern: string; preferredHospital: string; avgClaimInterval: number; claimConsistency: string };
+  monthlyPremium: number;
+  riskMultiplier: number;
+  premiumBreakdown: PremiumBreakdownEntry[];
+  claims: InsuranceClaim[];
+  activeMeds: number;
+  totalClaims: number;
+  totalClaimValue: number;
+  coverageStatus: string;
+  insurancePlan: string;
+};
+
+type InsuranceDashboard = {
+  totalPolicies: number;
+  activePolicies: number;
+  totalClaims: number;
+  pendingClaims: number;
+  approvedClaims: number;
+  rejectedClaims: number;
+  fraudSuspected: number;
+  totalPayout: number;
+  avgClaimValue: number;
+  fraudRate: string;
+  approvalRate: string;
+  claimsByType: ClaimsByTypeEntry[];
+  highRiskPolicies: number;
+  criticalPolicies: number;
+  trendData: Array<{ month: string; claims: number; payout: number }>;
+  riskPricingAlerts: RiskPricingAlert[];
+  fraudAlerts: FraudAlert[];
+  portfolioRisk: { low: number; medium: number; high: number; critical: number };
+};
+
+const STATUS_CONFIG: Record<string, { color: string; bg: string; border: string; badge: BadgeVariant; label: string; labelAr: string }> = {
   approved: { color: "text-success", bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, label: "Approved", labelAr: "مقبول" },
   pending: { color: "text-risk-high", bg: "bg-risk-high-bg", border: "border-risk-high/20", badge: "warning" as const, label: "Pending", labelAr: "قيد الانتظار" },
   under_review: { color: "text-info", bg: "bg-info-bg", border: "border-info/30", badge: "info" as const, label: "Under Review", labelAr: "قيد المراجعة" },
@@ -95,8 +189,8 @@ export default function InsurancePortal() {
     setAiRecs(prev => ({ ...prev, [claimId]: rec }));
   }
 
-  const { data: dashboard, isLoading: loadingDash } = useQuery({ queryKey: ["insurance-dashboard"], queryFn: fetchInsuranceDashboard });
-  const { data: patient, isLoading: loadingPatient, isError: patientError } = useQuery({
+  const { data: dashboard, isLoading: loadingDash } = useQuery<InsuranceDashboard>({ queryKey: ["insurance-dashboard"], queryFn: fetchInsuranceDashboard });
+  const { data: patient, isLoading: loadingPatient, isError: patientError } = useQuery<InsurancePatientData>({
     queryKey: ["insurance-patient", nationalId],
     queryFn: () => fetchInsurancePatient(nationalId),
     enabled: !!nationalId,
@@ -109,11 +203,11 @@ export default function InsurancePortal() {
       setReviewResults(prev => ({ ...prev, [claimId]: result }));
       setReviewingClaim(null);
       setReviewNotes("");
-      qc.setQueryData(["insurance-patient", nationalId], (old: any) => {
+      qc.setQueryData(["insurance-patient", nationalId], (old: InsurancePatientData | undefined) => {
         if (!old) return old;
         return {
           ...old,
-          claims: old.claims?.map((c: any) =>
+          claims: old.claims?.map((c: InsuranceClaim) =>
             c.claimId === claimId ? { ...c, status: result.newStatus, reviewedBy: result.reviewedBy } : c
           ) ?? [],
         };
@@ -150,7 +244,24 @@ export default function InsurancePortal() {
       {/* ─── DASHBOARD TAB ─── */}
       {activeTab === "dashboard" && (
         <div className="space-y-5">
-          <PageHeader title={text("Insurance Portal", "بوابة التأمين")} subtitle={text("National health insurance operations, AI fraud detection, risk-based pricing, and portfolio analytics.", "عمليات التأمين الصحي الوطني، وكشف الاحتيال بالذكاء الاصطناعي، والتسعير القائم على الخطورة، وتحليلات المحفظة.")} />
+          <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+            <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                    <Shield className="w-6 h-6 text-primary" />
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                    {text("Insurance Portal", "بوابة التأمين")}
+                  </h1>
+                </div>
+                <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+                  {text("National health insurance operations, AI fraud detection, risk-based pricing, and portfolio analytics.", "عمليات التأمين الصحي الوطني، وكشف الاحتيال بالذكاء الاصطناعي، والتسعير القائم على الخطورة، وتحليلات المحفظة.")}
+                </p>
+              </div>
+            </div>
+          </div>
 
           {loadingDash ? (
             <div className="flex items-center gap-3 py-16 justify-center text-muted-foreground">
@@ -207,7 +318,7 @@ export default function InsurancePortal() {
                     <Badge variant="destructive">{dashboard.fraudSuspected} {text("active", "نشط")}</Badge>
                   </CardHeader>
                   <CardBody className="space-y-2.5">
-                    {dashboard.fraudAlerts?.map((alert: any, i: number) => (
+                    {dashboard.fraudAlerts?.map((alert: FraudAlert, i: number) => (
                       <div key={i} className={`p-3.5 rounded-2xl border ${alert.severity === "high" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
                         <div className="flex items-center justify-between gap-2 mb-1.5">
                           <div className="flex items-center gap-1.5">
@@ -221,7 +332,7 @@ export default function InsurancePortal() {
                     ))}
                     <div className="pt-2 border-t border-border">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2 flex items-center gap-1.5"><Zap className="w-3 h-3 text-risk-high" /> {text("Regional Pricing Alerts", "تنبيهات التسعير الإقليمي")}</p>
-                      {dashboard.riskPricingAlerts?.map((a: any, i: number) => (
+                      {dashboard.riskPricingAlerts?.map((a: RiskPricingAlert, i: number) => (
                         <div key={i} className="flex items-center gap-2 py-1.5">
                           <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.trend === "rising" ? "bg-danger" : a.trend === "declining" ? "bg-success" : "bg-risk-high"}`} />
                           <div className="flex-1 min-w-0">
@@ -253,7 +364,7 @@ export default function InsurancePortal() {
                           <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
                           <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                           <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={48} name="Claims">
-                            {dashboard.claimsByType.map((entry: any, i: number) => (
+                            {dashboard.claimsByType.map((entry: ClaimsByTypeEntry, i: number) => (
                               <Cell key={i} fill={entry.color} />
                             ))}
                           </Bar>
@@ -407,7 +518,7 @@ export default function InsurancePortal() {
                     </Badge>
                   </CardHeader>
                   <CardBody className="space-y-2.5">
-                    {patient.anomalyFactors?.map((factor: any, i: number) => (
+                    {patient.anomalyFactors?.map((factor: AnomalyFactor, i: number) => (
                       <div key={i} className={`p-3 rounded-2xl border ${factor.flag ? "bg-danger-bg border-danger/30" : "bg-secondary border-transparent"}`}>
                         <div className="flex items-center justify-between gap-2 mb-1">
                           <p className={`text-xs font-bold ${factor.flag ? "text-danger" : "text-foreground"}`}>{factor.label}</p>
@@ -458,7 +569,7 @@ export default function InsurancePortal() {
                             <YAxis type="category" dataKey="factor" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={160} />
                             <RechartsTooltip contentStyle={{ borderRadius: "10px", fontSize: 11 }} formatter={(v: any) => [`SAR ${v}`, "Amount"]} />
                             <Bar dataKey="amount" radius={[0, 6, 6, 0]} barSize={14}>
-                              {patient.premiumBreakdown?.map((entry: any, i: number) => <Cell key={i} fill={entry.color} />)}
+                              {patient.premiumBreakdown?.map((entry: PremiumBreakdownEntry, i: number) => <Cell key={i} fill={entry.color} />)}
                             </Bar>
                           </BarChart>
                         </ResponsiveContainer></div>
@@ -493,7 +604,7 @@ export default function InsurancePortal() {
                 </CardHeader>
                 <CardBody className="p-0">
                   <div className="divide-y divide-border">
-                    {patient.claims?.map((claim: any) => {
+                    {patient.claims?.map((claim: InsuranceClaim) => {
                       const cfg = STATUS_CONFIG[reviewResults[claim.claimId]?.newStatus ?? claim.status] ?? STATUS_CONFIG["pending"]!;
                       const isReviewing = reviewingClaim === claim.claimId;
                       const reviewResult = reviewResults[claim.claimId];
@@ -674,7 +785,7 @@ export default function InsurancePortal() {
                   </CardHeader>
                   <CardBody>
                     <div className="space-y-4">
-                      {dashboard.riskPricingAlerts?.map((a: any, i: number) => (
+                      {dashboard.riskPricingAlerts?.map((a: RiskPricingAlert, i: number) => (
                         <div key={i}>
                           <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2">

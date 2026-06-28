@@ -32,6 +32,52 @@ async function submitLabResult(data: Record<string, string>) {
   return res.json();
 }
 
+type LabInterpretation = {
+  significance: string;
+  riskImpact: number;
+  trend: string;
+  action: string;
+  confidence: number;
+};
+
+type LabResultWithInterpretation = {
+  id: number;
+  patientId: number;
+  testName: string;
+  testDate: string;
+  result: string;
+  unit?: string | null;
+  referenceRange?: string | null;
+  status: string;
+  hospital: string;
+  notes?: string | null;
+  createdAt?: string;
+  interpretation?: LabInterpretation;
+};
+
+type LabPatientData = {
+  patient: {
+    id: number;
+    name: string;
+    nationalId: string;
+    age: number;
+    bloodType: string;
+    riskScore?: number | null;
+    riskLevel?: string;
+    allergies?: string[] | null;
+    chronicConditions?: string[] | null;
+  };
+  labs: LabResultWithInterpretation[];
+  summary: { total: number; critical: number; abnormal: number; normal: number };
+};
+
+type LabSubmitResult = {
+  result: LabResultWithInterpretation;
+  interpretation: LabInterpretation;
+  event: string;
+  aiAnalysis: { status: string; significance: string; riskImpact: number; action: string; confidence: number };
+};
+
 const TEST_NAMES = [
   "HbA1c", "Fasting Glucose", "Total Cholesterol", "LDL Cholesterol", "HDL Cholesterol",
   "Triglycerides", "Creatinine", "eGFR", "Hemoglobin", "WBC Count", "Platelet Count",
@@ -64,7 +110,7 @@ export default function LabPortal() {
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
-  const [lastResult, setLastResult] = useState<any>(null);
+  const [lastResult, setLastResult] = useState<LabSubmitResult | null>(null);
 
   const [form, setForm] = useState({
     testName: "", result: "", unit: "", referenceRange: "", status: "normal", hospital: "SANAD Lab Network", notes: ""
@@ -72,7 +118,7 @@ export default function LabPortal() {
 
   const qc = useQueryClient();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<LabPatientData>({
     queryKey: ["lab-patient", nationalId],
     queryFn: () => fetchLabPatient(nationalId),
     enabled: !!nationalId,
@@ -80,12 +126,12 @@ export default function LabPortal() {
   });
 
   const submitMutation = useMutation({
-    mutationFn: (formData: Record<string, string>) => submitLabResult({ ...formData, patientId: data?.patient?.id }),
+    mutationFn: (formData: Record<string, string>) => submitLabResult({ ...formData, patientId: String(data?.patient?.id ?? "") }),
     onSuccess: (result) => {
       setLastResult(result);
       setShowAddForm(false);
       setForm({ testName: "", result: "", unit: "", referenceRange: "", status: "normal", hospital: "SANAD Lab Network", notes: "" });
-      qc.setQueryData(["lab-patient", nationalId], (old: any) => {
+      qc.setQueryData(["lab-patient", nationalId], (old: LabPatientData | undefined) => {
         if (!old) return old;
         return { ...old, labs: [result.result, ...(old.labs ?? [])] };
       });
@@ -160,10 +206,24 @@ export default function LabPortal() {
 
   return (
     <Layout role="lab" localized>
-      <PageHeader
-        title={text("Lab Portal", "بوابة المختبر")}
-        subtitle={text("Upload results · AI interpretation · Clinical flags", "رفع النتائج · التفسير الذكي · الإشارات السريرية")}
-      />
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <FlaskConical className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text("Lab Portal", "بوابة المختبر")}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("Upload results · AI interpretation · Clinical flags", "رفع النتائج · التفسير الذكي · الإشارات السريرية")}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Search */}
       <Card className="mb-5">
@@ -311,7 +371,7 @@ export default function LabPortal() {
                             <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
                             <Tooltip
                               contentStyle={{ borderRadius: 10, border: "1px solid rgba(0,0,0,0.08)", fontSize: 11 }}
-                              formatter={(val: any) => [`${val} ${range?.unit ?? ""}`, testName]}
+                              formatter={(val: number | string) => [`${val} ${range?.unit ?? ""}`, testName]}
                             />
                             {range && range.max > 0 && (
                               <ReferenceLine y={range.max} stroke="hsl(var(--warning))" strokeDasharray="4 2" strokeWidth={1.5} />
@@ -324,7 +384,7 @@ export default function LabPortal() {
                               dataKey="value"
                               stroke={color}
                               strokeWidth={2.5}
-                              dot={(props: any) => {
+                              dot={(props: { cx: number; cy: number; payload: { status: string } }) => {
                                 const { cx, cy, payload } = props;
                                 const fill = payload.status === "critical" ? "hsl(var(--destructive))" : payload.status === "abnormal" ? "hsl(var(--warning))" : "hsl(var(--success))";
                                 return <circle key={`dot-${cx}-${cy}`} cx={cx} cy={cy} r={5} fill={fill} stroke="white" strokeWidth={2} />;
@@ -485,7 +545,7 @@ export default function LabPortal() {
                   <p className="font-bold text-foreground">{text("No lab results on record", "لا توجد نتائج مخبرية مُسجّلة")}</p>
                 </div>
               ) : (
-                data.labs.map((lab: any) => (
+                data.labs.map((lab: LabResultWithInterpretation) => (
                   <div key={lab.id} className={`p-4 ${lab.status === "critical" ? "bg-danger-bg" : lab.status === "abnormal" ? "bg-risk-high-bg/30" : ""}`}>
                     <div className="flex items-start gap-4">
                       <div className="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-primary" />
