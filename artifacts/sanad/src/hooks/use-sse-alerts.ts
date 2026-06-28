@@ -20,15 +20,18 @@ export function useSseAlerts(role: string) {
   const [alerts, setAlerts] = useState<LabAlert[]>([]);
   const [connected, setConnected] = useState(false);
   const esRef = useRef<EventSource | null>(null);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!role) return;
+    let destroyed = false;
 
     const connect = () => {
+      if (destroyed) return;
       // EventSource cannot send an Authorization header, so the stream
       // endpoint accepts the JWT as a query parameter instead.
       const token = localStorage.getItem("sanad_jwt") ?? "";
-      const es = new EventSource(`/api/events/stream?role=${encodeURIComponent(role)}&token=${encodeURIComponent(token)}`);
+      const es = new EventSource(`/api/events/stream?token=${encodeURIComponent(token)}`);
       esRef.current = es;
 
       es.onopen = () => setConnected(true);
@@ -49,13 +52,17 @@ export function useSseAlerts(role: string) {
       es.onerror = () => {
         setConnected(false);
         es.close();
-        setTimeout(connect, 5000);
+        if (!destroyed) {
+          retryTimerRef.current = setTimeout(connect, 5000);
+        }
       };
     };
 
     connect();
 
     return () => {
+      destroyed = true;
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
       esRef.current?.close();
       setConnected(false);
     };
