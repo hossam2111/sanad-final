@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { z } from "zod";
 import { db } from "@workspace/db";
-import { medicationsTable, purchaseOrdersTable } from "@workspace/db/schema";
+import { purchaseOrdersTable } from "@workspace/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { validate } from "../middlewares/validate.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
@@ -90,14 +90,6 @@ router.get("/inventory", async (req, res) => {
   if (req.role !== "supply-chain" && req.role !== "admin" && req.role !== "hospital") {
     res.status(403).json({ error: "FORBIDDEN", message: "Authorized role required" });
     return;
-  }
-
-  const allMeds = await db.select().from(medicationsTable).limit(1000);
-
-  const activePrescriptions: Record<string, number> = {};
-  for (const m of allMeds.filter(m => m.isActive)) {
-    const key = m.drugName.split(" ")[0]?.toLowerCase() ?? "";
-    activePrescriptions[key] = (activePrescriptions[key] || 0) + 1;
   }
 
   const inventory = DRUG_INVENTORY.map(drug => {
