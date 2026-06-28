@@ -28,6 +28,9 @@ import {
   useListAlerts,
   useMarkAlertRead,
   useGetPatientPredictions,
+  type RiskFactor,
+  type InteractionWarning,
+  type PatientDetail,
 } from "@workspace/api-client-react";
 import { useAiDecision, useAuditLog } from "@/hooks/use-ai-decision";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
@@ -36,6 +39,22 @@ import { useLanguage } from "@/contexts/language-context";
 import { T } from "@/lib/terms";
 import { useQuery } from "@tanstack/react-query";
 import { format, isValid } from "date-fns";
+
+type SearchPatient = {
+  id: number;
+  nationalId: string;
+  fullName: string;
+  dateOfBirth: string;
+  riskLevel?: string;
+};
+
+type AuditEntry = {
+  what: string;
+  who: string;
+  whoRole: string;
+  confidence?: number;
+  createdAt?: string;
+};
 
 type PredictionWarning = {
   type: string;
@@ -183,7 +202,7 @@ export default function DoctorDashboard() {
     },
     enabled: searchQuery.length >= 2 && !/^\d+$/.test(searchQuery),
   });
-  const searchPatients: any[] = nameSearchResults?.patients ?? [];
+  const searchPatients: SearchPatient[] = (nameSearchResults?.patients as SearchPatient[] | undefined) ?? [];
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -586,7 +605,7 @@ export default function DoctorDashboard() {
             />
             {showDropdown && searchPatients.length > 0 && (
               <div className="absolute top-full left-0 mt-2 w-full glass-panel rounded-2xl shadow-2xl z-50 overflow-hidden">
-                {searchPatients.map((p: any) => (
+                {searchPatients.map((p: SearchPatient) => (
                   <button
                     key={p.id}
                     type="button"
@@ -866,7 +885,7 @@ export default function DoctorDashboard() {
               <Stethoscope className="w-7 h-7 text-muted-foreground" />
             </div>
             <p className="font-bold text-foreground mb-1">{text("No Patient Selected", "لم يتم اختيار مريض")}</p>
-            <p className="text-sm text-muted-foreground mb-2">{text("Enter a National ID above to load a patient record.", "أدخل رقم الهوية الوطنية أعلاه لاستدعاء سجل المريض.")}</p>
+            <p className="text-sm text-muted-foreground mb-2">{text("Enter a National ID above to load a patient record.", "أدخل رقم الهوية الوطنية أعلد لاستدعاء سجل المريض.")}</p>
             <p className="text-xs text-muted-foreground font-mono bg-secondary inline-block px-3 py-1.5 rounded-xl" dir="ltr">
               {text("Demo:", "للتجربة:")} 1000000001 · 1000000003 · 1000000006 · 1000000009
             </p>
@@ -878,71 +897,65 @@ export default function DoctorDashboard() {
 
       {patient && (
         <div className="space-y-5">
-          {/* Patient Banner - Clean Bento Box */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="md:col-span-3 bg-card border-border/50 shadow-sm overflow-hidden relative">
-              {/* Soft background gradient */}
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
-              <CardBody className="p-0">
-                <div className="flex flex-col lg:flex-row">
+          {/* Patient Banner - Premium Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+            <Card className="lg:col-span-3 bg-gradient-to-br from-card to-card/50 border-border/60 shadow-lg overflow-hidden relative">
+              {/* Premium gradient accent */}
+              <div className="absolute top-0 ltr:left-0 rtl:right-0 w-2 h-full bg-gradient-to-b from-primary to-primary/40" />
+              <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[400px] h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
+              
+              <CardBody className="p-6 sm:p-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                   
                   {/* Left Side: Avatar & Basic Info */}
-                  <div className="flex-1 p-6 flex flex-col lg:flex-row gap-6 lg:gap-10 z-10">
-                    {/* Left: Avatar & Identity */}
-                    <div className="flex items-center gap-5 shrink-0">
-                      <div className="relative">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 shadow-sm flex items-center justify-center relative overflow-hidden">
-                          <UserIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary/60" />
-                        </div>
-                        <div className={`absolute -bottom-2 -right-2 text-white text-[11px] px-2.5 py-0.5 rounded-lg font-bold shadow-md ring-2 ring-background ${patient.gender === "male" ? "bg-info" : "bg-danger"}`}>
-                          {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}
-                        </div>
+                  <div className="flex items-center gap-6">
+                    <div className="relative shrink-0">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 shadow-inner flex items-center justify-center overflow-hidden backdrop-blur-md">
+                        <UserIcon className="w-10 h-10 sm:w-12 sm:h-12 text-primary/70" />
                       </div>
-                      
-                      <div className="flex flex-col justify-center">
-                        <div className="flex items-center gap-3 mb-1.5">
-                          <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">{patient.fullName}</h2>
-                          {(patient.allergies?.length ?? 0) > 0 && (
-                            <Badge variant="destructive" className="h-6 px-3 text-[11px] font-bold tracking-wide rounded-full shadow-sm animate-in zoom-in">
-                              {text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-4 text-sm">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-muted-foreground/70 uppercase tracking-widest text-[10px] font-bold">{text("ID", "رقم الهوية")}</span>
-                            <span className="font-mono text-foreground font-semibold">{patient.nationalId}</span>
-                          </div>
-                          <div className="w-1 h-1 rounded-full bg-border" />
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-muted-foreground/70 uppercase tracking-widest text-[10px] font-bold">{text("DOB", "تاريخ الميلاد")}</span>
-                            <span className="font-mono text-foreground font-semibold">{format(safeDate(patient.dateOfBirth), "yyyy/MM/dd")}</span>
-                          </div>
-                        </div>
+                      <div className={`absolute -bottom-2 ltr:-right-2 rtl:-left-2 text-white text-[11px] px-3 py-1 rounded-xl font-bold shadow-lg ring-4 ring-card ${patient.gender === "male" ? "bg-info" : "bg-danger"}`}>
+                        {patient.gender === "male" ? text("Male", "ذكر") : text("Female", "أنثى")}
                       </div>
                     </div>
-
-                    {/* Middle: Key Demographics Grid */}
-                    <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
-                      <div className="bg-secondary/40 rounded-xl p-3 border border-border/40">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Age", "العمر")}</p>
-                        <p className="text-xl font-black text-foreground">
-                          {Math.floor((new Date().getTime() - new Date(patient.dateOfBirth).getTime()) / 3.15576e+10)} <span className="text-xs font-semibold text-muted-foreground">{text("Yrs", "سنة")}</span>
-                        </p>
+                    
+                    <div className="flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">{patient.fullName}</h2>
+                        {(patient.allergies?.length ?? 0) > 0 && (
+                          <Badge variant="destructive" className="h-6 px-3 text-[11px] font-bold tracking-wide rounded-full shadow-sm">
+                            {text(`${patient.allergies?.length ?? 0} Allerg${(patient.allergies?.length ?? 0) > 1 ? "ies" : "y"}`, `${patient.allergies?.length ?? 0} حساسية`)}
+                          </Badge>
+                        )}
                       </div>
-                      <div className="bg-secondary/40 rounded-xl p-3 border border-border/40">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">{text("Blood", "فصيلة الدم")}</p>
-                        <p className="text-xl font-black text-danger" dir="ltr">{patient.bloodType}</p>
-                      </div>
-                      <div className="col-span-2 flex flex-col justify-center gap-2">
-                        <PrescribeModal patientId={patient.id} nationalId={patient.nationalId} />
-                        <Button variant="outline" className="w-full rounded-xl shadow-sm font-bold border-border bg-background hover:bg-secondary transition-colors">
-                          <CalendarDays className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" /> {text("Book Appointment", "حجز موعد")}
-                        </Button>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] font-medium text-muted-foreground/80">
+                        <div className="flex items-center gap-1.5 bg-secondary/50 px-2.5 py-1 rounded-md border border-border/50">
+                          <span className="uppercase tracking-widest text-[10px] font-bold">{text("ID:", "الهوية:")}</span>
+                          <span className="font-mono text-foreground">{patient.nationalId}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-secondary/50 px-2.5 py-1 rounded-md border border-border/50">
+                          <span className="uppercase tracking-widest text-[10px] font-bold">{text("DOB:", "الميلاد:")}</span>
+                          <span className="font-mono text-foreground">{format(safeDate(patient.dateOfBirth), "yyyy/MM/dd")}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-secondary/50 px-2.5 py-1 rounded-md border border-border/50">
+                          <span className="uppercase tracking-widest text-[10px] font-bold">{text("AGE:", "العمر:")}</span>
+                          <span className="font-mono text-foreground">{Math.floor((new Date().getTime() - new Date(patient.dateOfBirth).getTime()) / 3.15576e+10)} <span className="text-[10px]">{text("YRS", "سنة")}</span></span>
+                        </div>
+                        <div className="flex items-center gap-1.5 bg-secondary/50 px-2.5 py-1 rounded-md border border-border/50">
+                          <span className="uppercase tracking-widest text-[10px] font-bold">{text("BLOOD:", "الدم:")}</span>
+                          <span className="font-mono text-danger font-bold" dir="ltr">{patient.bloodType}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  
+
+                  {/* Right Side: Quick Actions */}
+                  <div className="flex md:flex-col items-center md:items-end gap-3 shrink-0 mt-4 md:mt-0">
+                    <PrescribeModal patientId={patient.id} nationalId={patient.nationalId} />
+                    <Button variant="outline" className="w-full sm:w-auto min-w-[160px] rounded-xl shadow-sm font-bold border-border bg-card hover:bg-secondary transition-colors">
+                      <CalendarDays className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" /> {text("Book Appt", "حجز موعد")}
+                    </Button>
+                  </div>
+
                 </div>
               </CardBody>
             </Card>
@@ -1049,7 +1062,7 @@ export default function DoctorDashboard() {
                           {text("Key Risk Factors", "عوامل الخطورة الرئيسية")}
                         </p>
                         <div className="space-y-2.5">
-                          {riskScore.factors.slice(0, 4).map((f: any, i: number) => (
+                          {riskScore.factors.slice(0, 4).map((f: RiskFactor, i: number) => (
                             <div key={i} className="flex items-start gap-2.5 text-sm">
                               <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${
                                 f.impact === "high" ? "bg-danger" :
@@ -1738,7 +1751,7 @@ export default function DoctorDashboard() {
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
                   <Shield className="w-3.5 h-3.5 text-primary" /> {text("Immutable Audit Trail — WHO · WHAT · WHEN · WHY", "سجل تدقيق غير قابل للتعديل — مَن · ماذا · متى · لماذا")}
                 </p>
-                {(!auditData || (auditData as { auditLog?: any[] })?.auditLog?.length === 0) ? (
+                {(!auditData || (auditData as { auditLog?: AuditEntry[] })?.auditLog?.length === 0) ? (
                   <div className="py-12 text-center">
                     <Shield className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
                     <p className="font-bold text-foreground">{text("No audit records yet", "لا توجد سجلات تدقيق بعد")}</p>
@@ -1746,7 +1759,7 @@ export default function DoctorDashboard() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {((auditData as { auditLog?: any[] })?.auditLog ?? []).map((log: any, i: number) => (
+                    {((auditData as { auditLog?: AuditEntry[] })?.auditLog ?? []).map((log: AuditEntry, i: number) => (
                       <div key={i} className="flex items-start gap-3 px-4 py-3 bg-secondary rounded-2xl border border-border">
                         <div className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
                         <div className="flex-1 min-w-0">
@@ -1924,7 +1937,7 @@ export default function DoctorDashboard() {
                         {text(`${riskScore.factors.length} Risk Factors Identified`, `${riskScore.factors.length} عامل خطورة مُحدّد`)}
                       </p>
                       <div className="space-y-2.5">
-                        {riskScore.factors.map((f: any, i: number) => (
+                        {riskScore.factors.map((f: RiskFactor, i: number) => (
                           <div key={i} className="flex items-start gap-3 p-3.5 bg-secondary rounded-2xl">
                             <div className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
                               f.impact === "high" ? "bg-danger" :
@@ -2001,7 +2014,7 @@ function PrescribeModal({ patientId, nationalId }: { patientId: number; national
     setDrugName(""); setDosage(""); setFrequency("");
     checkMutation.reset();
     // Inject the new medication directly into the cache — no refetch, no screen shake
-    qc.setQueryData(getGetPatientByNationalIdQueryKey(nationalId), (old: any) => {
+    qc.setQueryData(getGetPatientByNationalIdQueryKey(nationalId), (old: PatientDetail | undefined) => {
       if (!old) return old;
       return { ...old, medications: [result.medication, ...(old.medications ?? [])] };
     });
@@ -2080,7 +2093,7 @@ function PrescribeModal({ patientId, nationalId }: { patientId: number; national
                     </div>
                   ) : (
                     <div className="space-y-2.5">
-                      {checkMutation.data.warnings.map((w: any, i: number) => (
+                      {checkMutation.data.warnings.map((w: InteractionWarning, i: number) => (
                         <div key={i} className="p-4 bg-destructive/10 border border-danger/30 rounded-2xl">
                           <div className="flex items-center gap-2 mb-2">
                             <AlertCircle className="w-4 h-4 text-danger" />
