@@ -45,7 +45,21 @@ const STATUS_CONFIG = {
   "healthy": { bg: "bg-success-bg", border: "border-success/30", text: "text-success", ringColor: "ring-success/20", dotColor: "bg-success" },
 };
 
-function FamilyMemberCard({ member, isPatient = false }: { member: any; isPatient?: boolean }) {
+type FamilyMember = {
+  id: number; fullName: string; nationalId: string; relationship?: string;
+  age: number; gender: string; bloodType: string; riskScore: number;
+  chronicConditions: string[]; sharedConditions: string[];
+  status: "high-risk" | "moderate" | "healthy";
+};
+type GeneticRisk = {
+  condition: string; gene?: string; inheritanceType: string; inheritancePattern: string;
+  riskLevel: "low" | "medium" | "high"; penetrance: string; transmissionProb: number;
+  recommendation: string; affectedRelatives: string[]; icdCode: string;
+};
+type ConditionBurden = { condition: string; count: number; penetrance: string; familyLoad: number };
+type ScreeningRec = { test: string; for: string; frequency: string; priority: string; dueIn: string; members: string[] };
+
+function FamilyMemberCard({ member, isPatient = false }: { member: FamilyMember; isPatient?: boolean }) {
   const statusCfg = STATUS_CONFIG[member.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG["healthy"];
   const riskColor = member.riskScore >= 70 ? "text-danger" : member.riskScore >= 40 ? "text-risk-high" : "text-success";
   const riskBg = member.riskScore >= 70 ? "bg-danger-bg" : member.riskScore >= 40 ? "bg-risk-high-bg" : "bg-success-bg";
@@ -145,7 +159,24 @@ export default function FamilyPortal() {
       </div>
 
       <div className="flex items-start justify-between mb-5">
-        <PageHeader title={text("Family Health & Genetic Risk Portal", "بوابة صحة الأسرة والمخاطر الوراثية")} subtitle={text("Map familial disease inheritance, shared genetic risks, and coordinate family-wide preventive screening.", "رسم وراثة الأمراض العائلية، والمخاطر الجينية المشتركة، وتنسيق الفحص الوقائي على مستوى الأسرة.")} />
+          <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+            <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                    <Users className="w-6 h-6 text-primary" />
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                    {text("Family Health & Genetic Risk Portal", "بوابة صحة الأسرة والمخاطر الوراثية")}
+                  </h1>
+                </div>
+                <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+                  {text("Map familial disease inheritance, shared genetic risks, and coordinate family-wide preventive screening.", "رسم وراثة الأمراض العائلية، والمخاطر الجينية المشتركة، وتنسيق الفحص الوقائي على مستوى الأسرة.")}
+                </p>
+              </div>
+            </div>
+          </div>
         {data && (
           <div className="flex gap-1.5 shrink-0 ms-6">
             {tabs.map(t => (
@@ -245,7 +276,7 @@ export default function FamilyPortal() {
                         <span className="w-4 h-0.5 bg-border inline-block" /> {text("Parents (P1)", "الوالدان (P1)")}
                       </p>
                       <div className={`grid gap-4 ${data.parents.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-2"}`}>
-                        {data.parents.map((m: any) => <FamilyMemberCard key={m.id} member={m} />)}
+                        {data.parents.map((m: FamilyMember) => <FamilyMemberCard key={m.id} member={m} />)}
                       </div>
                     </div>
                   )}
@@ -264,7 +295,7 @@ export default function FamilyPortal() {
                     </p>
                     <div className={`grid gap-4 ${(data.siblings?.length + 1) <= 2 ? "grid-cols-2" : "grid-cols-3"}`}>
                       <FamilyMemberCard member={{ ...data.patient, relationship: text("Index Patient", "المريض الأساسي") }} isPatient />
-                      {data.siblings?.map((m: any) => <FamilyMemberCard key={m.id} member={m} />)}
+                      {data.siblings?.map((m: FamilyMember) => <FamilyMemberCard key={m.id} member={m} />)}
                     </div>
                   </div>
 
@@ -278,7 +309,7 @@ export default function FamilyPortal() {
                           <span className="w-4 h-0.5 bg-border inline-block" /> {text("Children (P3)", "الأبناء (P3)")}
                         </p>
                         <div className={`grid gap-4 ${data.children.length <= 2 ? "grid-cols-2" : "grid-cols-3"}`}>
-                          {data.children.map((m: any) => <FamilyMemberCard key={m.id} member={m} />)}
+                          {data.children.map((m: FamilyMember) => <FamilyMemberCard key={m.id} member={m} />)}
                         </div>
                       </div>
                     </>
@@ -314,11 +345,11 @@ export default function FamilyPortal() {
               <div className="flex items-center gap-2 mb-1">
                 <Dna className="w-4 h-4 text-primary" />
                 <p className="text-sm font-bold text-foreground">{text(`${data.geneticRisks?.length} Hereditary Risk Factors Identified`, `${data.geneticRisks?.length} عامل خطورة وراثي مُحدّد`)}</p>
-                <Badge variant={data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length > 0 ? "destructive" : "success"} className="ms-auto">
-                  {text(`${data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length} high-penetrance`, `${data.geneticRisks?.filter((r: any) => r.riskLevel === "high").length} عالية النفاذية`)}
+                <Badge variant={data.geneticRisks?.filter((r: GeneticRisk) => r.riskLevel === "high").length > 0 ? "destructive" : "success"} className="ms-auto">
+                  {text(`${data.geneticRisks?.filter((r: GeneticRisk) => r.riskLevel === "high").length} high-penetrance`, `${data.geneticRisks?.filter((r: GeneticRisk) => r.riskLevel === "high").length} عالية النفاذية`)}
                 </Badge>
               </div>
-              {data.geneticRisks?.map((risk: any, i: number) => {
+              {data.geneticRisks?.map((risk: GeneticRisk, i: number) => {
                 const cfg = RISK_CONFIG[risk.riskLevel as keyof typeof RISK_CONFIG] ?? RISK_CONFIG.low;
                 const isExpanded = expandedRisk === i;
                 return (
@@ -417,9 +448,9 @@ export default function FamilyPortal() {
                         <BarChart data={data.conditionBurden} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                           <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} domain={[0, 100]} />
                           <YAxis type="category" dataKey="condition" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={170} />
-                          <RechartsTooltip contentStyle={{ borderRadius: "12px", fontSize: 11 }} formatter={(v: any, n: string) => [n === "familyLoad" ? `${v}%` : v, n === "familyLoad" ? "Family Load" : "Count"]} />
+                          <RechartsTooltip contentStyle={{ borderRadius: "12px", fontSize: 11 }} formatter={(v: number | string, n: string) => [n === "familyLoad" ? `${v}%` : v, n === "familyLoad" ? "Family Load" : "Count"]} />
                           <Bar dataKey="familyLoad" name="Family Load %" radius={[0, 6, 6, 0]} barSize={16}>
-                            {data.conditionBurden?.map((_: any, i: number) => (
+                            {data.conditionBurden?.map((_: ConditionBurden, i: number) => (
                               <Cell key={i} fill={i === 0 ? "hsl(var(--destructive))" : i === 1 ? "hsl(var(--warning))" : i <= 3 ? "hsl(var(--info))" : "hsl(var(--primary))"} />
                             ))}
                           </Bar>
@@ -434,7 +465,7 @@ export default function FamilyPortal() {
                     <div className="flex items-center gap-2"><Brain className="w-4 h-4 text-primary" /><CardTitle>{text("Condition Details", "تفاصيل الأمراض")}</CardTitle></div>
                   </CardHeader>
                   <CardBody className="space-y-2.5">
-                    {data.conditionBurden?.slice(0, 6).map((c: any, i: number) => (
+                    {data.conditionBurden?.slice(0, 6).map((c: ConditionBurden, i: number) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-secondary rounded-2xl">
                         <div className={`w-2 h-2 rounded-full shrink-0 ${i === 0 ? "bg-danger" : i === 1 ? "bg-danger" : i <= 3 ? "bg-risk-high" : "bg-info"}`} />
                         <div className="flex-1 min-w-0">
@@ -491,7 +522,7 @@ export default function FamilyPortal() {
                 <Badge variant="success" className="ms-auto">{text(`${data.screeningRecommendations?.length} active recommendations`, `${data.screeningRecommendations?.length} توصية نشطة`)}</Badge>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                {data.screeningRecommendations?.map((rec: any, i: number) => {
+                {data.screeningRecommendations?.map((rec: ScreeningRec, i: number) => {
                   const priBg = rec.priority === "high" ? "bg-danger-bg border-danger/30" : rec.priority === "medium" ? "bg-info-bg border-info/30" : "bg-secondary border-border";
                   const priIcon = rec.priority === "high" ? <AlertTriangle className="w-4 h-4 text-danger shrink-0" /> : rec.priority === "medium" ? <Clock className="w-4 h-4 text-info shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-success shrink-0" />;
                   return (
@@ -535,7 +566,7 @@ export default function FamilyPortal() {
                 </CardHeader>
                 <CardBody className="p-0">
                   <div className="divide-y divide-border">
-                    {[{ ...data.patient, relationship: text("Index Patient (You)", "المريض الأساسي (أنت)") }, ...(data.familyMembers ?? [])].map((m: any, i: number) => {
+                    {[{ ...data.patient, relationship: text("Index Patient (You)", "المريض الأساسي (أنت)") }, ...(data.familyMembers ?? [])].map((m: FamilyMember, i: number) => {
                       const riskColor = m.riskScore >= 70 ? "text-danger bg-danger-bg" : m.riskScore >= 40 ? "text-risk-high bg-risk-high-bg" : "text-success bg-success-bg";
                       return (
                         <div key={i} className="flex items-center gap-4 px-5 py-3.5 hover:bg-secondary/30 transition-colors">
