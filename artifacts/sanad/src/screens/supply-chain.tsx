@@ -19,7 +19,27 @@ async function fetchInventory() {
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
-async function submitReorder(body: Record<string, any>) {
+type BadgeVariant = "success" | "warning" | "info" | "destructive" | "outline" | "default";
+type LowStockAlert = { id: string | number; message: string };
+type ReorderResult = { id?: string; orderId?: string };
+type InventoryItem = {
+  drugName: string; category: string; stock: number; minStock: number; unit: string;
+  supplier: string; leadTimeDays: number; avgMonthlyDemand: number; price: number;
+  daysOfStock: number; status: string; reorderNeeded: boolean;
+  projectedStockoutDays: number | null; monthlyValue: number;
+};
+type CriticalAlert = { drug: string; currentStock: number; minRequired: number; deficit: number; supplier: string; leadTimeDays: number; urgentOrder: boolean };
+type AiPrediction = { prediction: string; confidence: number; action: string };
+type DistributionCenter = { name: string; stock: string; capacity: string; nextDelivery: string };
+type SupplyChainSummary = { totalDrugs: number; criticalShortages: number; lowStock: number; adequate: number; totalInventoryValue: number; reorderAlerts: number };
+type SupplyChainData = { inventory: InventoryItem[]; shortagePredictions: ShortagePrediction[]; summary: SupplyChainSummary; criticalAlerts: CriticalAlert[]; aiPredictions: AiPrediction[]; distributionCenters: DistributionCenter[] };
+type RegionalDistributionItem = { region: string; population: number; stock: number; demand: number; gap: number; gapPct: number; color: string; criticalDrugs: number };
+type RegionalRec = { region: string; action: string; urgency: string; criticalDrugs: number };
+type PurchaseOrder = { id: string; drugName: string; quantity: number; supplier: string; status: string; requestedBy?: string; estimatedDelivery?: string; totalValue?: number };
+type ReorderBody = { drugName: string; quantity: number; supplier: string; requestedBy?: string };
+type CreateOrderBody = { drugName: string; quantity: number; supplier: string };
+
+async function submitReorder(body: ReorderBody) {
   const res = await apiFetch("/api/supply-chain/reorder", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -29,7 +49,7 @@ async function submitReorder(body: Record<string, any>) {
   return res.json();
 }
 
-const STATUS_CFG: Record<string, { bg: string; border: string; text: string; badge: any; dot: string }> = {
+const STATUS_CFG: Record<string, { bg: string; border: string; text: string; badge: BadgeVariant; dot: string }> = {
   critical: { bg: "bg-danger-bg", border: "border-danger/30", text: "text-danger", badge: "destructive" as const, dot: "bg-danger animate-pulse" },
   low: { bg: "bg-risk-high-bg", border: "border-risk-high/20", text: "text-risk-high", badge: "warning" as const, dot: "bg-risk-high" },
   adequate: { bg: "bg-success-bg", border: "border-success/30", text: "text-success", badge: "success" as const, dot: "bg-success" },
@@ -69,10 +89,10 @@ type ViewTab = "inventory" | "predictions" | "distribution" | "reorder";
 export default function SupplyChainPortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeTab, setActiveTab] = useState<ViewTab>("inventory");
-  const [reorderResults, setReorderResults] = useState<Record<string, any>>({});
+  const [reorderResults, setReorderResults] = useState<Record<string, ReorderResult>>({});
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newPO, setNewPO] = useState({ item: "", quantity: 1, supplier: "", urgency: "routine" as "routine" | "urgent" | "critical" });
-  const [lowStockAlerts, setLowStockAlerts] = useState<any[]>([]);
+  const [lowStockAlerts, setLowStockAlerts] = useState<LowStockAlert[]>([]);
 
   React.useEffect(() => {
     apiFetch("/api/alerts?type=LOW_STOCK&limit=10")
@@ -81,7 +101,7 @@ export default function SupplyChainPortal() {
   }, []);
 
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ["supply-inventory"], queryFn: fetchInventory, refetchInterval: 60000 });
+  const { data, isLoading } = useQuery<SupplyChainData>({ queryKey: ["supply-inventory"], queryFn: fetchInventory, refetchInterval: 60000 });
   const { data: regionalData, isLoading: loadingRegional } = useQuery({
     queryKey: ["supply-regional"],
     queryFn: fetchRegionalDistribution,
@@ -92,7 +112,7 @@ export default function SupplyChainPortal() {
   const regionalRecs = regionalData?.recommendations ?? [];
 
   const reorderMutation = useMutation({
-    mutationFn: (body: Record<string, any>) => submitReorder(body),
+    mutationFn: (body: ReorderBody) => submitReorder(body),
     onSuccess: (result, body) => {
       setReorderResults(prev => ({ ...prev, [body.drugName]: result }));
       qc.invalidateQueries({ queryKey: ["supply-inventory"] });
@@ -110,7 +130,7 @@ export default function SupplyChainPortal() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["supply-pos"] }),
   });
   const createMutation = useMutation({
-    mutationFn: (body: any) => apiFetch("/api/supply-chain/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
+    mutationFn: (body: CreateOrderBody) => apiFetch("/api/supply-chain/orders", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["supply-pos"] });
       setShowCreateForm(false);
@@ -146,7 +166,7 @@ export default function SupplyChainPortal() {
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <p className="text-xs font-bold uppercase tracking-widest">
             {text(`${criticals} CRITICAL SHORTAGE${criticals > 1 ? "S" : ""} —`, `${criticals} نقص حرج —`)}{" "}
-            {data?.criticalAlerts?.map((a: any) => a.drug).join(" · ")}
+            {data?.criticalAlerts?.map((a: CriticalAlert) => a.drug).join(" · ")}
           </p>
           <button onClick={() => setActiveTab("reorder")} className="ms-auto text-[11px] font-bold bg-card/20 hover:bg-card/30 px-3 py-1 rounded-full transition-colors">
             {text("Issue Purchase Orders →", "إصدار أوامر شراء ←")}
@@ -182,20 +202,34 @@ export default function SupplyChainPortal() {
         </div>
       )}
 
-      <PageHeader
-        title={text("National Drug Supply Chain", "سلسلة إمداد الأدوية الوطنية")}
-        subtitle={text("Real-time inventory · AI shortage prediction · Regional distribution optimization · Procurement management", "مخزون فوري · تنبؤ النقص بالذكاء · تحسين التوزيع الإقليمي · إدارة المشتريات")}
-      />
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Truck className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text("National Drug Supply Chain", "سلسلة إمداد الأدوية الوطنية")}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("Real-time inventory · AI shortage prediction · Regional distribution optimization · Procurement management", "مخزون فوري · تنبؤ النقص بالذكاء · تحسين التوزيع الإقليمي · إدارة المشتريات")}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <KpiCard title={text("Total Drug Lines", "إجمالي أصناف الأدوية")} value={data?.summary?.totalDrugs} sub={text("Tracked nationally", "متابَعة وطنيًا")} icon={Package} iconBg="bg-success-bg" iconColor="text-success" />
+        <KpiCard title={text("Total Drug Lines", "إجمالي أصناف الأدوية")} value={data?.summary?.totalDrugs ?? 0} sub={text("Tracked nationally", "متابَعة وطنيًا")} icon={Package} iconBg="bg-success-bg" iconColor="text-success" />
         <KpiCard
-          title={text("Critical Shortages", "النقص الحرج")} value={data?.summary?.criticalShortages}
+          title={text("Critical Shortages", "النقص الحرج")} value={data?.summary?.criticalShortages ?? 0}
           sub={text(`${data?.summary?.reorderAlerts} reorder alerts active`, `${data?.summary?.reorderAlerts} تنبيه إعادة طلب`)}
           icon={AlertTriangle} iconBg={criticals > 0 ? "bg-danger-bg" : "bg-success-bg"} iconColor={criticals > 0 ? "text-danger" : "text-success"}
         />
-        <KpiCard title={text("Adequate Stock", "مخزون كافٍ")} value={data?.summary?.adequate} sub={text("Lines fully stocked", "أصناف مكتملة المخزون")} icon={CheckCircle2} iconBg="bg-success-bg" iconColor="text-success" />
+        <KpiCard title={text("Adequate Stock", "مخزون كافٍ")} value={data?.summary?.adequate ?? 0} sub={text("Lines fully stocked", "أصناف مكتملة المخزون")} icon={CheckCircle2} iconBg="bg-success-bg" iconColor="text-success" />
         <KpiCard title={text("Inventory Value", "قيمة المخزون")} value={`${text("SAR", "ر.س")} ${data?.summary?.totalInventoryValue?.toLocaleString()}`} sub={text("Current stock value", "قيمة المخزون الحالية")} icon={BarChart2} iconBg="bg-primary/10" iconColor="text-primary" />
       </div>
 
@@ -246,7 +280,7 @@ export default function SupplyChainPortal() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {data?.inventory?.map((item: any, i: number) => {
+                    {data?.inventory?.map((item: InventoryItem, i: number) => {
                       const cfg = STATUS_CFG[item.status] ?? STATUS_CFG.adequate;
                       return (
                         <tr key={i} className={`${item.status === "critical" ? "bg-danger-bg/50" : ""} hover:bg-secondary/20`}>
@@ -288,7 +322,7 @@ export default function SupplyChainPortal() {
               <Card>
                 <CardHeader><MapPin className="w-4 h-4 text-primary" /><CardTitle>{text("Distribution Centers", "مراكز التوزيع")}</CardTitle></CardHeader>
                 <CardBody className="space-y-2.5">
-                  {data?.distributionCenters?.map((dc: any, i: number) => {
+                  {data?.distributionCenters?.map((dc: DistributionCenter, i: number) => {
                     const cfg = STATUS_CFG[dc.stock] ?? STATUS_CFG.adequate;
                     return (
                       <div key={i} className={`px-3.5 py-3 ${cfg.bg} border ${cfg.border} rounded-2xl`}>
@@ -350,7 +384,7 @@ export default function SupplyChainPortal() {
           <Card>
             <CardHeader><Brain className="w-4 h-4 text-primary" /><CardTitle>{text("AI Demand Predictions", "تنبؤات الطلب بالذكاء الاصطناعي")}</CardTitle></CardHeader>
             <CardBody className="space-y-3">
-              {data?.aiPredictions?.map((pred: any, i: number) => (
+              {data?.aiPredictions?.map((pred: AiPrediction, i: number) => (
                 <div key={i} className="flex items-start gap-4 px-4 py-3.5 bg-primary/10 border border-primary/20 rounded-2xl">
                   <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                     <Brain className="w-4 h-4 text-primary" />
@@ -395,7 +429,7 @@ export default function SupplyChainPortal() {
 
           {/* Critical shortages countdown */}
           <div className="grid grid-cols-2 gap-4">
-            {data?.inventory?.filter((i: any) => i.status !== "adequate").map((item: any, idx: number) => {
+            {data?.inventory?.filter((i: InventoryItem) => i.status !== "adequate").map((item: InventoryItem, idx: number) => {
               const cfg = STATUS_CFG[item.status] ?? STATUS_CFG.adequate;
               return (
                 <div key={idx} className={`px-4 py-3.5 ${cfg.bg} border ${cfg.border} rounded-2xl`}>
@@ -461,7 +495,7 @@ export default function SupplyChainPortal() {
                         <XAxis dataKey="region" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
                         <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }}
-                          formatter={(value: any, name: string) => [value.toLocaleString(), name]} />
+                          formatter={(value: number | string, name: string) => [typeof value === "number" ? value.toLocaleString() : value, name]} />
                         <Legend />
                         <ReferenceLine y={0} stroke="#94a3b8" strokeWidth={1} />
                         <Bar dataKey="stock" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} barSize={22} name="Stock (units)" />
@@ -489,7 +523,7 @@ export default function SupplyChainPortal() {
                   <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2" /> {text("Loading...", "جارٍ التحميل...")}
                   </div>
-                ) : regionalDistribution.map((r: any, i: number) => (
+                ) : (regionalDistribution as RegionalDistributionItem[]).map((r: RegionalDistributionItem, i: number) => (
                   <div key={i} className={`flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border ${r.gap < 0 ? "bg-danger-bg border-danger/30" : "bg-success-bg border-success/30"}`}>
                     <MapPin className={`w-3.5 h-3.5 shrink-0 ${r.gap < 0 ? "text-danger" : "text-success"}`} />
                     <div className="flex-1 min-w-0">
@@ -521,7 +555,7 @@ export default function SupplyChainPortal() {
                 <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" /> {text("Computing recommendations...", "جارٍ حساب التوصيات...")}
                 </div>
-              ) : regionalRecs.length > 0 ? regionalRecs.map((rec: any, i: number) => (
+              ) : regionalRecs.length > 0 ? (regionalRecs as RegionalRec[]).map((rec: RegionalRec, i: number) => (
                 <div key={i} className={`flex items-start gap-4 px-4 py-3.5 rounded-2xl border ${rec.urgency === "critical" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
                   <Truck className={`w-4 h-4 shrink-0 mt-0.5 ${rec.urgency === "critical" ? "text-danger" : "text-risk-high"}`} />
                   <div className="flex-1">
@@ -592,7 +626,7 @@ export default function SupplyChainPortal() {
             )}
             
             <div className="grid gap-3">
-              {poData?.orders?.map((order: any) => (
+              {poData?.orders?.map((order: PurchaseOrder) => (
                 <div key={order.id} className="p-4 rounded-xl border border-border bg-card flex justify-between items-center">
                   <div>
                     <div className="flex items-center gap-2">
@@ -619,11 +653,11 @@ export default function SupplyChainPortal() {
             </div>
           </div>
           {/* Critical alerts */}
-          {data?.criticalAlerts?.length > 0 && (
+          {(data?.criticalAlerts?.length ?? 0) > 0 && (
             <Card>
-              <CardHeader><AlertTriangle className="w-4 h-4 text-danger" /><CardTitle>{text("Emergency Purchase Orders Required", "أوامر شراء طارئة مطلوبة")}</CardTitle><Badge variant="destructive">{data.criticalAlerts.length} {text("critical", "critical")}</Badge></CardHeader>
+              <CardHeader><AlertTriangle className="w-4 h-4 text-danger" /><CardTitle>{text("Emergency Purchase Orders Required", "أوامر شراء طارئة مطلوبة")}</CardTitle><Badge variant="destructive">{data?.criticalAlerts?.length} {text("critical", "critical")}</Badge></CardHeader>
               <div className="divide-y divide-border">
-                {data.criticalAlerts.map((alert: any, i: number) => {
+                {data?.criticalAlerts?.map((alert: CriticalAlert, i: number) => {
                   const result = reorderResults[alert.drug];
                   return (
                     <div key={i} className="flex items-center gap-4 px-5 py-4 bg-danger-bg/30">
@@ -643,7 +677,7 @@ export default function SupplyChainPortal() {
                       ) : (
                         <button
                           onClick={() => {
-                            const drug = data.inventory?.find((d: any) => d.drugName === alert.drug);
+                            const drug = data?.inventory?.find((d: InventoryItem) => d.drugName === alert.drug);
                             reorderMutation.mutate({ drugName: alert.drug, quantity: (drug?.avgMonthlyDemand ?? alert.minRequired) * 3, supplier: alert.supplier, requestedBy: "Ibrahim Al-Dosari" });
                           }}
                           disabled={reorderMutation.isPending}
@@ -664,7 +698,7 @@ export default function SupplyChainPortal() {
           <Card>
             <CardHeader><ShoppingCart className="w-4 h-4 text-primary" /><CardTitle>{text("All Reorder Recommendations", "جميع توصيات إعادة الطلب")}</CardTitle><Badge variant="warning">{data?.summary?.reorderAlerts} {text("items", "items")}</Badge></CardHeader>
             <div className="divide-y divide-border">
-              {data?.inventory?.filter((i: any) => i.reorderNeeded).map((item: any, idx: number) => {
+              {data?.inventory?.filter((i: InventoryItem) => i.reorderNeeded).map((item: InventoryItem, idx: number) => {
                 const cfg = STATUS_CFG[item.status] ?? STATUS_CFG.low;
                 const result = reorderResults[item.drugName];
                 return (
