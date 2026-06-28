@@ -363,8 +363,8 @@ export default function AIControlCenter() {
       {activeTab === "engines" && (
         <div className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {metrics?.engines?.map((engine: any, i: number) => {
-              const driftInfo = driftEngines.find((d: any) => d.engine === engine.name);
+            {metrics?.engines?.map((engine: AiEngine, i: number) => {
+              const driftInfo = driftEngines.find((d: DriftEngine) => d.engine === engine.name);
               const hasDrift = driftInfo?.status === "drift_detected";
               const isMonitoring = driftInfo?.status === "monitoring";
               const statusCfg = STATUS_COLORS[hasDrift ? "drift_detected" : isMonitoring ? "monitoring" : engine.status] ?? STATUS_COLORS.operational;

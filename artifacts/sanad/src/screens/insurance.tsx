@@ -567,7 +567,7 @@ export default function InsurancePortal() {
                           <BarChart data={patient.premiumBreakdown} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                             <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--secondary))", fontSize: 10 }} />
                             <YAxis type="category" dataKey="factor" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 500 }} width={160} />
-                            <RechartsTooltip contentStyle={{ borderRadius: "10px", fontSize: 11 }} formatter={(v: any) => [`SAR ${v}`, "Amount"]} />
+                            <RechartsTooltip contentStyle={{ borderRadius: "10px", fontSize: 11 }} formatter={(v: number | string) => [`SAR ${v}`, "Amount"]} />
                             <Bar dataKey="amount" radius={[0, 6, 6, 0]} barSize={14}>
                               {patient.premiumBreakdown?.map((entry: PremiumBreakdownEntry, i: number) => <Cell key={i} fill={entry.color} />)}
                             </Bar>
