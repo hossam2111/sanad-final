@@ -1,8 +1,7 @@
 import { Router } from "express";
-import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { patientsTable, labResultsTable, visitsTable, medicationsTable, aiDecisionsTable } from "@workspace/db/schema";
-import { count, desc } from "drizzle-orm";
+import { count, sql } from "drizzle-orm";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 const router = Router();
@@ -24,7 +23,7 @@ router.get("/insights", async (req, res) => {
     [totalRow],
     labInsightRows,
     drugRows,
-    allDecisions,
+    [aiAgg],
     [labTotal],
     [visitTotal],
   ] = await Promise.all([
@@ -43,7 +42,11 @@ router.get("/insights", async (req, res) => {
     db.execute<{ drug_name: string; prescriptions: number }>(
       sql`SELECT drug_name, COUNT(*)::int AS prescriptions FROM medications GROUP BY drug_name ORDER BY prescriptions DESC LIMIT 10`
     ),
-    db.select().from(aiDecisionsTable).orderBy(desc(aiDecisionsTable.createdAt)).limit(200),
+    db.select({
+      totalDecisions: count(),
+      avgConf: sql<number>`ROUND(AVG(COALESCE(${aiDecisionsTable.confidence}, 0))::numeric, 4)::float`,
+      immediateCount: sql<number>`COUNT(*) FILTER (WHERE ${aiDecisionsTable.urgency} = 'immediate')::int`,
+    }).from(aiDecisionsTable),
     db.select({ count: count() }).from(labResultsTable),
     db.select({ count: count() }).from(visitsTable),
   ]);
@@ -81,10 +84,6 @@ router.get("/insights", async (req, res) => {
     prescriptions: r.prescriptions,
   }));
 
-  const avgConfidence = allDecisions.length > 0
-    ? Math.round(allDecisions.reduce((s, d) => s + (d.confidence ?? 0), 0) / allDecisions.length * 100)
-    : 0;
-
   res.json({
     totalAnonymizedRecords: total,
     totalLabResults: Number(labTotal?.count ?? 0),
@@ -94,9 +93,9 @@ router.get("/insights", async (req, res) => {
     drugPatterns,
     ageRiskData,
     aiMetrics: {
-      totalDecisions: allDecisions.length,
-      avgConfidence,
-      immediateDecisions: allDecisions.filter(d => d.urgency === "immediate").length,
+      totalDecisions: Number(aiAgg?.totalDecisions ?? 0),
+      avgConfidence: Math.round((aiAgg?.avgConf ?? 0) * 100),
+      immediateDecisions: Number(aiAgg?.immediateCount ?? 0),
     },
     clinicalFindings: [
       { finding: `Diabetes prevalence at ${conditionInsights.find(c => c.condition.toLowerCase().includes("diabetes"))?.prevalence ?? 0}% — exceeds national benchmark`, significance: "high", recommendation: "Launch targeted HbA1c screening program" },
