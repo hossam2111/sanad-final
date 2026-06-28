@@ -29,6 +29,13 @@
       "when": 1751155200000,
       "tag": "0004_appointments_avail_index",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1751241600000,
+      "tag": "0005_patients_hospital_index",
+      "breakpoints": true
     }
   ]
 }

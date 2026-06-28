@@ -21,6 +21,8 @@ export const patientsTable = pgTable("patients", {
 }, (t) => [
   index("idx_patients_risk_score").on(t.riskScore),
   index("idx_patients_gender").on(t.gender),
+  // hospital-scoped queries: WHERE hospital_id = ? [AND risk_score >= ?]
+  index("idx_patients_hospital_id").on(t.hospitalId),
 ]);
 
 export const insertPatientSchema = createInsertSchema(patientsTable).omit({ id: true, createdAt: true, updatedAt: true });

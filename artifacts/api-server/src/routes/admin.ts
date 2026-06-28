@@ -193,8 +193,10 @@ router.get("/population-health", async (req, res) => {
 });
 
 router.get("/intelligence", async (req, res) => {
-  const [recentDecisions, [auditCountRow], diseaseBurdenRows, riskCounts] = await Promise.all([
-    db.select().from(aiDecisionsTable).orderBy(desc(aiDecisionsTable.createdAt)).limit(100),
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [[auditCountRow], diseaseBurdenRows, riskCounts, [decisionAgg], [todayDecisionRow]] = await Promise.all([
     db.select({ count: count() }).from(auditLogTable),
     db.execute<{ condition: string; patient_count: number; avg_risk: number; total_risk: number }>(
       sql`SELECT elem AS condition, COUNT(*)::int AS patient_count, ROUND(AVG(COALESCE(risk_score, 0)))::int AS avg_risk, SUM(COALESCE(risk_score, 0))::int AS total_risk FROM patients, unnest(chronic_conditions) AS elem GROUP BY elem ORDER BY total_risk DESC LIMIT 6`
@@ -204,6 +206,16 @@ router.get("/intelligence", async (req, res) => {
       highRisk:  sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 50)`.mapWith(Number),
       total:     sql<number>`COUNT(*)`.mapWith(Number),
     }).from(patientsTable),
+    // Aggregate urgency breakdown + avg confidence in one pass (replaces 100-row in-memory scan)
+    db.select({
+      totalDecisions: count(),
+      avgConf: sql<number>`ROUND(AVG(COALESCE(${aiDecisionsTable.confidence}, 0))::numeric, 4)::float`,
+      immediate: sql<number>`COUNT(*) FILTER (WHERE ${aiDecisionsTable.urgency} = 'immediate')::int`,
+      urgent:    sql<number>`COUNT(*) FILTER (WHERE ${aiDecisionsTable.urgency} = 'urgent')::int`,
+      soon:      sql<number>`COUNT(*) FILTER (WHERE ${aiDecisionsTable.urgency} = 'soon')::int`,
+      routine:   sql<number>`COUNT(*) FILTER (WHERE ${aiDecisionsTable.urgency} = 'routine')::int`,
+    }).from(aiDecisionsTable),
+    db.select({ cnt: count() }).from(aiDecisionsTable).where(gte(aiDecisionsTable.createdAt, todayStart)),
   ]);
 
   const burdenRows = (Array.isArray(diseaseBurdenRows) ? diseaseBurdenRows : diseaseBurdenRows.rows) as Array<{ condition: string; patient_count: number; avg_risk: number; total_risk: number }>;
@@ -211,17 +223,15 @@ router.get("/intelligence", async (req, res) => {
   const criticalPatients = riskAgg?.critical ?? 0;
   const highRiskPatients = riskAgg?.highRisk ?? 0;
   const total = riskAgg?.total ?? 1;
+  const totalDecisions = Number(decisionAgg?.totalDecisions ?? 0);
+  const avgConfidence = decisionAgg?.avgConf ?? 0;
 
   const urgencyBreakdown = {
-    immediate: recentDecisions.filter(d => d.urgency === "immediate").length,
-    urgent:    recentDecisions.filter(d => d.urgency === "urgent").length,
-    soon:      recentDecisions.filter(d => d.urgency === "soon").length,
-    routine:   recentDecisions.filter(d => d.urgency === "routine").length,
+    immediate: Number(decisionAgg?.immediate ?? 0),
+    urgent:    Number(decisionAgg?.urgent ?? 0),
+    soon:      Number(decisionAgg?.soon ?? 0),
+    routine:   Number(decisionAgg?.routine ?? 0),
   };
-
-  const avgConfidence = recentDecisions.length > 0
-    ? recentDecisions.reduce((sum, d) => sum + (d.confidence ?? 0), 0) / recentDecisions.length
-    : 0;
 
   const diseaseBurden = burdenRows.map(r => ({
     condition: r.condition,
@@ -249,15 +259,11 @@ router.get("/intelligence", async (req, res) => {
     { insight: "AI Decision Engine confidence averaging above 80% — model performing well", priority: "low", action: "Continue monitoring; schedule quarterly model recalibration" },
   ];
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayDecisions = recentDecisions.filter(d => d.createdAt !== null && new Date(d.createdAt) >= today);
-
   res.json({
     urgencyBreakdown,
     avgAiConfidence: Math.round(avgConfidence * 100),
-    totalDecisions: recentDecisions.length,
-    aiDecisionsToday: todayDecisions.length,
+    totalDecisions,
+    aiDecisionsToday: Number(todayDecisionRow?.cnt ?? 0),
     criticalPatients,
     diseaseBurden,
     epidemicRadar,
