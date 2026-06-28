@@ -15,6 +15,49 @@ import { T } from "@/lib/terms";
 
 type TextFn = (en: string, ar: string) => string;
 
+type CitizenAppointment = {
+  id: string | number;
+  status: string;
+  date?: string;
+  department?: string;
+  hospital?: string;
+  time?: string;
+  referenceNo?: string;
+};
+
+type ConsentItem = {
+  type: string;
+  title: string;
+  description: string;
+  grantedTo: string;
+  legalBasis: string;
+  icon: string;
+  severity: string;
+  canRevoke: boolean;
+  granted: boolean;
+  grantedAt: string | null;
+  expiresAt: string | null;
+  revokedAt: string | null;
+  consentId: number | null;
+  isDefault: boolean;
+};
+
+type ConsentHistoryEntry = {
+  id: number;
+  type: string;
+  action: "granted" | "revoked";
+  granted: boolean;
+  grantedTo: string;
+  timestamp: string | null;
+  notes?: string | null;
+};
+
+type ConsentData = {
+  consents: ConsentItem[];
+  history: ConsentHistoryEntry[];
+  summary: { total: number; granted: number; revoked: number; pending: number };
+};
+
 const VISIT_TYPE_AR_C: Record<string, string> = {
   emergency: "طوارئ", inpatient: "تنويم", outpatient: "عيادات خارجية", "follow-up": "متابعة",
 };
@@ -41,7 +84,7 @@ async function fetchSlots(date: string, hospital: string, department: string) {
 async function fetchPatientAppointments(patientId: number) {
   const res = await apiFetch(`/api/appointments/patient/${patientId}`);
   if (!res.ok) throw new Error("Failed");
-  return res.json() as Promise<{ appointments: any[] }>;
+  return res.json() as Promise<{ appointments: CitizenAppointment[] }>;
 }
 async function bookAppointment(payload: object) {
   const res = await apiFetch("/api/appointments", {
@@ -121,7 +164,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
       setBookingError("");
       refetchApts();
     },
-    onError: (e: any) => setBookingError(e.message),
+    onError: (e: Error) => setBookingError(e.message),
   });
 
   const services = deptData?.services?.[department] ?? [];
@@ -145,7 +188,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
             <CalendarDays className="w-3.5 h-3.5" /> {text("My Appointments", "مواعيدي")}
           </p>
           <div className="space-y-2">
-            {myAppointments.map((apt: any) => (
+            {myAppointments.map((apt: CitizenAppointment) => (
               <div key={apt.id} className={`flex items-start gap-4 p-4 rounded-2xl border ${apt.status === "confirmed" ? "bg-success-bg border-success/30" : "bg-secondary border-border"}`}>
                 <div className="w-10 h-10 rounded-xl bg-card flex flex-col items-center justify-center shrink-0 border border-border">
                   <p className="text-[9px] font-bold text-muted-foreground uppercase">{apt.date ? new Date(apt.date).toLocaleString("en", { month: "short" }) : "-"}</p>
@@ -436,35 +479,48 @@ export default function CitizenPortal() {
 
   return (
     <Layout role="citizen" localized>
-      <PageHeader
-        title={text(`My Health — ${patient.fullName.split(" ")[0]}`, `صحتي — ${patient.fullName.split(" ")[0]}`)}
-        subtitle={text("Your personal AI health score, recommendations, and complete national health record.", "درجتك الصحية الذكية، والتوصيات، وسجلك الصحي الوطني الكامل.")}
-        action={
-          <div className="flex items-center gap-2">
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <User className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text(`My Health — ${patient.fullName.split(" ")[0]}`, `صحتي — ${patient.fullName.split(" ")[0]}`)}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("Your personal AI health score, recommendations, and complete national health record.", "درجتك الصحية الذكية، والتوصيات، وسجلك الصحي الوطني الكامل.")}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3 shrink-0 mt-4 md:mt-0">
             {/* SSE Live Alert Bell */}
             <div className="relative">
               <button
                 onClick={() => setShowSsePanel(p => !p)}
-                className={`relative flex items-center justify-center w-9 h-9 rounded-xl border transition-all ${
-                  sseUnread > 0 ? "bg-destructive/10 border-danger/30 hover:bg-danger-bg" : "bg-card border-border hover:bg-secondary"
+                className={`relative flex items-center justify-center w-11 h-11 rounded-xl border transition-all shadow-sm ${
+                  sseUnread > 0 ? "bg-destructive/10 border-danger/30 hover:bg-danger-bg text-danger" : "bg-card border-border hover:bg-secondary text-muted-foreground"
                 }`}
                 title={sseConnected ? text("Live health alerts", "تنبيهات صحية حيّة") : text("Connecting...", "جارٍ الاتصال...")}
               >
-                <Bell className={`w-4 h-4 ${sseUnread > 0 ? "text-danger" : "text-muted-foreground"}`} />
+                <Bell className="w-5 h-5" />
                 {sseUnread > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-danger text-white text-[9px] font-bold flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-danger text-white text-[10px] font-bold flex items-center justify-center shadow-md">
                     {sseUnread > 9 ? "9+" : sseUnread}
                   </span>
                 )}
               </button>
-              <div className={`absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border border-card ${sseConnected ? "bg-success" : "bg-muted"}`} />
+              <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${sseConnected ? "bg-success" : "bg-muted"}`} />
             </div>
-            <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }}>
+            <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }} className="h-11 px-5 rounded-xl text-sm font-bold shadow-sm">
               {text("Sign Out", "تسجيل الخروج")}
             </Button>
           </div>
-        }
-      />
+        </div>
+      </div>
 
       {/* SSE Real-time Lab Alert Panel */}
       {showSsePanel && sseAlerts.length > 0 && (
@@ -973,7 +1029,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
   const [toggling, setToggling] = React.useState<string | null>(null);
   const [toast, setToast] = React.useState<{ msg: string; ok: boolean } | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<ConsentData>({
     queryKey: ["consent", nationalId],
     queryFn: () => fetchConsent(nationalId),
     enabled: !!nationalId,
@@ -982,12 +1038,12 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
   const mutation = useMutation({
     mutationFn: updateConsent,
     onSuccess: (res, vars) => {
-      qc.setQueryData(["consent", nationalId], (old: any) => {
+      qc.setQueryData(["consent", nationalId], (old: ConsentData | undefined) => {
         if (!old) return old;
         return {
           ...old,
-          consents: old.consents?.map((c: any) =>
-            c.consentType === vars.consentType ? { ...c, granted: vars.granted } : c
+          consents: old.consents?.map((c: ConsentItem) =>
+            c.type === vars.consentType ? { ...c, granted: vars.granted } : c
           ) ?? [],
         };
       });
@@ -1034,7 +1090,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
   }
 
   const consents = data?.consents ?? [];
-  const summary = data?.summary ?? {};
+  const summary = data?.summary ?? { total: 0, granted: 0, revoked: 0, pending: 0 };
   const history = data?.history ?? [];
 
   return (
@@ -1080,7 +1136,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
 
       {/* Consent Cards Grid */}
       <div className="grid grid-cols-2 gap-4">
-        {consents.map((consent: any) => {
+        {consents.map((consent: ConsentItem) => {
           const Icon = CONSENT_ICONS[consent.type] ?? Shield;
           const sev = SEVERITY_CFG[consent.severity as keyof typeof SEVERITY_CFG] ?? SEVERITY_CFG.low;
           const isToggling = toggling === consent.type;
@@ -1165,7 +1221,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
             <Badge variant="outline" className="ms-auto text-[10px]">{text(`${history.length} events`, `${history.length} حدث`)}</Badge>
           </div>
           <div className="divide-y divide-border max-h-48 overflow-y-auto">
-            {history.map((h: any, i: number) => (
+            {history.map((h: ConsentHistoryEntry, i: number) => (
               <div key={i} className="flex items-center gap-3 px-4 py-2.5">
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
                   h.action === "granted" ? "bg-success-bg" : "bg-danger-bg"
