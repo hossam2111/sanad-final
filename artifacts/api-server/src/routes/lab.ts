@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { db } from "@workspace/db";
 import { patientsTable, labResultsTable, eventsTable, alertsTable } from "@workspace/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { broadcastToHospital, broadcastToPatient } from "../lib/sse.js";
 import { requireOwnNationalId, getStaffHospitalId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
@@ -122,12 +122,19 @@ router.get("/patient/:nationalId", async (req, res) => {
       return;
     }
   }
-  const labs = await db
-    .select()
-    .from(labResultsTable)
-    .where(eq(labResultsTable.patientId, patient.id))
-    .orderBy(desc(labResultsTable.testDate))
-    .limit(500);
+  const [labs, [labCounts]] = await Promise.all([
+    db.select()
+      .from(labResultsTable)
+      .where(eq(labResultsTable.patientId, patient.id))
+      .orderBy(desc(labResultsTable.testDate))
+      .limit(100),
+    db.select({
+      total:    sql<number>`COUNT(*)::int`.mapWith(Number),
+      critical: sql<number>`COUNT(*) FILTER (WHERE ${labResultsTable.status} = 'critical')::int`.mapWith(Number),
+      abnormal: sql<number>`COUNT(*) FILTER (WHERE ${labResultsTable.status} = 'abnormal')::int`.mapWith(Number),
+      normal:   sql<number>`COUNT(*) FILTER (WHERE ${labResultsTable.status} = 'normal')::int`.mapWith(Number),
+    }).from(labResultsTable).where(eq(labResultsTable.patientId, patient.id)),
+  ]);
 
   const labsWithInterpretation = labs.map(lab => ({
     ...lab,
@@ -147,10 +154,10 @@ router.get("/patient/:nationalId", async (req, res) => {
     },
     labs: labsWithInterpretation,
     summary: {
-      total: labs.length,
-      critical: labs.filter(l => l.status === "critical").length,
-      abnormal: labs.filter(l => l.status === "abnormal").length,
-      normal: labs.filter(l => l.status === "normal").length,
+      total:    labCounts?.total    ?? 0,
+      critical: labCounts?.critical ?? 0,
+      abnormal: labCounts?.abnormal ?? 0,
+      normal:   labCounts?.normal   ?? 0,
     },
   });
 
