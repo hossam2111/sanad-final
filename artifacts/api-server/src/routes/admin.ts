@@ -7,6 +7,7 @@ import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { patientsTable, visitsTable, alertsTable, aiDecisionsTable, auditLogTable } from "@workspace/db/schema";
 import { count, desc, eq, gte, lte, and, type SQL } from "drizzle-orm";
+import { computeAuditHash } from "../lib/audit.js";
 import type { AuditAction } from "../lib/audit.js";
 
 const router = Router();
@@ -279,7 +280,6 @@ router.get("/intelligence", async (req, res) => {
 });
 
 router.get("/audit-log/verify", async (_req, res) => {
-  const { computeAuditHash } = await import("../lib/audit.js");
 
   const records = await db
     .select({
