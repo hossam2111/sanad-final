@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, labResultsTable, visitsTable, aiDecisionsTable, eventsTable, auditLogTable } from "@workspace/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, count, sql, gte } from "drizzle-orm";
 import { checkDrugInteractions, calculateRiskScore, generatePredictions } from "../lib/ai-engine.js";
 import { runDecisionEngine } from "../lib/decision-engine.js";
 import { streamClinicalNarrative, askClinicalQuestion, type PatientContext } from "../lib/claude-brain.js";
@@ -93,24 +93,21 @@ router.get("/risk-score/:patientId", async (req, res) => {
     return;
   }
 
-  const [medications, labResults, visits] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)).orderBy(desc(medicationsTable.createdAt)).limit(50),
-    db.select().from(labResultsTable).where(eq(labResultsTable.patientId, patientId)).orderBy(desc(labResultsTable.testDate)).limit(10),
-    db.select().from(visitsTable).where(eq(visitsTable.patientId, patientId)).orderBy(desc(visitsTable.visitDate)).limit(50),
-  ]);
+  const oneYearAgoStr = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]!;
 
-  const abnormalLabs = labResults.filter(l => l.status !== "normal").length;
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const recentVisits = visits.filter(v => new Date(v.visitDate) >= oneYearAgo).length;
+  const [[activeMedsRow], [abnormalLabsRow], [recentVisitsRow]] = await Promise.all([
+    db.select({ cnt: count() }).from(medicationsTable).where(and(eq(medicationsTable.patientId, patientId), eq(medicationsTable.isActive, true))),
+    db.select({ cnt: count() }).from(labResultsTable).where(and(eq(labResultsTable.patientId, patientId), sql`${labResultsTable.status} != 'normal'`)),
+    db.select({ cnt: count() }).from(visitsTable).where(and(eq(visitsTable.patientId, patientId), gte(visitsTable.visitDate, oneYearAgoStr))),
+  ]);
 
   const result = calculateRiskScore({
     dateOfBirth: patient.dateOfBirth,
     chronicConditions: patient.chronicConditions,
     allergies: patient.allergies,
-    medicationCount: medications.filter(m => m.isActive).length,
-    recentAbnormalLabs: abnormalLabs,
-    visitFrequency: recentVisits,
+    medicationCount:    Number(activeMedsRow?.cnt  ?? 0),
+    recentAbnormalLabs: Number(abnormalLabsRow?.cnt ?? 0),
+    visitFrequency:     Number(recentVisitsRow?.cnt ?? 0),
   });
 
   res.json({
@@ -139,12 +136,12 @@ router.get("/predictions/:patientId", async (req, res) => {
   }
 
   const [medications, labResults, visits] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, patientId)).orderBy(desc(medicationsTable.createdAt)).limit(50),
+    db.select().from(medicationsTable).where(and(eq(medicationsTable.patientId, patientId), eq(medicationsTable.isActive, true))).orderBy(desc(medicationsTable.createdAt)).limit(50),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, patientId)).orderBy(desc(labResultsTable.testDate)).limit(20),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, patientId)).orderBy(desc(visitsTable.visitDate)).limit(20),
   ]);
 
-  const activeMedCount = medications.filter(m => m.isActive).length;
+  const activeMedCount = medications.length;
 
   const predictions = generatePredictions({
     dateOfBirth: patient.dateOfBirth,
