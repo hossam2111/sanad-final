@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, labResultsTable, visitsTable, aiDecisionsTable, eventsTable, auditLogTable } from "@workspace/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { checkDrugInteractions, calculateRiskScore, generatePredictions } from "../lib/ai-engine.js";
 import { runDecisionEngine } from "../lib/decision-engine.js";
 import { streamClinicalNarrative, askClinicalQuestion, type PatientContext } from "../lib/claude-brain.js";
@@ -34,11 +34,11 @@ router.post("/check-interaction", validate(checkInteractionSchema), async (req, 
   const medications = await db
     .select()
     .from(medicationsTable)
-    .where(eq(medicationsTable.patientId, patientId))
+    .where(and(eq(medicationsTable.patientId, patientId), eq(medicationsTable.isActive, true)))
     .orderBy(desc(medicationsTable.createdAt))
     .limit(100);
 
-  const activeMedNames = medications.filter(m => m.isActive).map(m => m.drugName);
+  const activeMedNames = medications.map(m => m.drugName);
   const allergies = patient?.allergies ?? [];
   const warnings = checkDrugInteractions(newDrug, activeMedNames, allergies);
 
