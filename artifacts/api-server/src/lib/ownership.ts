@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, consentTable, staffAssignmentsTable } from "@workspace/db/schema";
-import { eq, and, desc, isNull } from "drizzle-orm";
+import { eq, and, desc, isNull, inArray } from "drizzle-orm";
 
 // Roles that act on patients institutionally (treatment / operations).
 // Everyone else is bound to a single record (citizen) or to consent-gated
@@ -81,6 +81,37 @@ export async function getConsentState(patientId: number, consentType: string): P
     .orderBy(desc(consentTable.updatedAt))
     .limit(1);
   return row ? row.granted : null;
+}
+
+/**
+ * Batch variant of getConsentState — one DB round-trip for all patientIds.
+ * Returns a Map; patients with no consent record are absent from the Map
+ * (caller should apply the consent type's default in that case).
+ */
+export async function getConsentStateBulk(
+  patientIds: number[],
+  consentType: string,
+): Promise<Map<number, boolean>> {
+  if (patientIds.length === 0) return new Map();
+
+  const rows = await db
+    .select({ patientId: consentTable.patientId, granted: consentTable.granted })
+    .from(consentTable)
+    .where(and(
+      inArray(consentTable.patientId, patientIds),
+      eq(consentTable.consentType, consentType),
+      isNull(consentTable.revokedAt),
+    ))
+    .orderBy(desc(consentTable.updatedAt));
+
+  // Keep only the first (latest) row per patient — orderBy desc guarantees this.
+  const result = new Map<number, boolean>();
+  for (const row of rows) {
+    if (!result.has(row.patientId)) {
+      result.set(row.patientId, row.granted);
+    }
+  }
+  return result;
 }
 
 const hospitalIdCache = new Map<string, { hospitalId: string | null; ts: number }>();

@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, labResultsTable, visitsTable } from "@workspace/db/schema";
 import { eq, desc, between } from "drizzle-orm";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
-import { getConsentState, requireOwnNationalId } from "../lib/ownership.js";
+import { getConsentState, getConsentStateBulk, requireOwnNationalId } from "../lib/ownership.js";
 
 const router = Router();
 
@@ -185,14 +185,11 @@ router.get("/patient/:nationalId", async (req, res) => {
     .filter(fp => fp.id !== p.id && fp.id >= Math.max(1, p.id - 3) && fp.id <= p.id + 5)
     .slice(0, 6);
 
-  const allowedFamily = [];
-  for (const fp of rawFamily) {
-    const state = await getConsentState(fp.id, "family_linking");
-    const granted = state === null ? FAMILY_LINKING_DEFAULT_GRANTED : state;
-    if (granted) {
-      allowedFamily.push(fp);
-    }
-  }
+  const consentMap = await getConsentStateBulk(rawFamily.map(fp => fp.id), "family_linking");
+  const allowedFamily = rawFamily.filter(fp => {
+    const state = consentMap.has(fp.id) ? consentMap.get(fp.id)! : null;
+    return state === null ? FAMILY_LINKING_DEFAULT_GRANTED : state;
+  });
 
   const parents = allowedFamily.filter(fp => fp.id < p.id).slice(0, 2);
   const siblings = allowedFamily.filter(fp => fp.id > p.id && fp.id <= p.id + 2).slice(0, 2);
