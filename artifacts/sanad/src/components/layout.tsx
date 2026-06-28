@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 
 type Role = "emergency" | "doctor" | "citizen" | "admin" | "lab" | "pharmacy" | "hospital" | "insurance" | "ai-control" | "research" | "family" | "supply-chain";
 
@@ -148,14 +149,6 @@ const roleText: Record<Role, { sublabel: string; nav: string; userRole: string }
   "supply-chain": { sublabel: "سلسلة الإمداد", nav: "المخزون واللوجستيات", userRole: "مدير سلسلة إمداد الأدوية" },
 };
 
-/* Raw fetch calls bypass the generated API client, so they must attach the
-   session token themselves — without it the API answers 401 and features
-   silently render empty. */
-function authHeaders(): Record<string, string> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("sanad_jwt") : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
-
 /* Brand mark — the same pulse-tile used on the landing and sign-in pages. */
 function SanadMark({ size = 32 }: { size?: number }) {
   return (
@@ -189,7 +182,7 @@ export function Layout({ children, role, localized = false }: { children: React.
   const { data: alertsData } = useQuery({
     queryKey: ["system-alerts"],
     queryFn: async () => {
-      const res = await fetch("/api/alerts/system?limit=10", { headers: authHeaders() });
+      const res = await apiFetch("/api/alerts/system?limit=10");
       if (!res.ok) return { alerts: [], unreadCount: 0 };
       return res.json();
     },
@@ -198,9 +191,9 @@ export function Layout({ children, role, localized = false }: { children: React.
 
   const markAllReadMutation = useMutation({
     mutationFn: async () => {
-      await fetch("/api/alerts/read-all", {
+      await apiFetch("/api/alerts/read-all", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", ...authHeaders() },
+        headers: { "Content-Type": "application/json" },
         body: "{}",
       });
     },
