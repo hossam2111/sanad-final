@@ -10,7 +10,7 @@ import {
   Card, CardHeader, CardTitle, CardBody,
   Input, Button, Badge, PageHeader, StatusDot, DataLabel
 , SkeletonCard, ErrorBanner} from "@/components/shared";
-import { useEmergencyLookup, useListPatients } from "@workspace/api-client-react";
+import { useEmergencyLookup, useListPatients, type PatientDetail } from "@workspace/api-client-react";
 import { useLanguage } from "@/contexts/language-context";
 
 type TextFn = (en: string, ar: string) => string;
@@ -81,9 +81,9 @@ export default function EmergencyPage() {
     { query: { retry: false } }
   );
 
-  const criticalPatients = (patientsData?.patients ?? [])
-    .filter((p: any) => (p.riskScore ?? 0) >= 80)
-    .sort((a: any, b: any) => (b.riskScore ?? 0) - (a.riskScore ?? 0));
+  const criticalPatients = (patientsData?.patients as PatientDetail[] ?? [])
+    .filter((p: PatientDetail) => (p.riskScore ?? 0) >= 80)
+    .sort((a: PatientDetail, b: PatientDetail) => (b.riskScore ?? 0) - (a.riskScore ?? 0));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,10 +101,24 @@ export default function EmergencyPage() {
 
   return (
     <Layout role="emergency" localized>
-      <PageHeader
-        title={text("Emergency Patient Lookup", "استدعاء بيانات الطوارئ")}
-        subtitle={text("Life-critical patient information in under a second. Enter a National ID.", "معلومات المريض الحرجة في أقل من ثانية. أدخل رقم الهوية الوطنية.")}
-      />
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-danger/20 shadow-xl bg-gradient-to-br from-danger/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-danger/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-danger/20 flex items-center justify-center shrink-0">
+                <ShieldAlert className="w-6 h-6 text-danger" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text("Emergency Patient Lookup", "استدعاء بيانات الطوارئ")}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("Life-critical patient information in under a second. Enter a National ID.", "معلومات المريض الحرجة في أقل من ثانية. أدخل رقم الهوية الوطنية.")}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* The lookup is the job — it stays first, large, and keyboard-ready. */}
       <Card className="mb-4">
@@ -143,7 +157,7 @@ export default function EmergencyPage() {
             <Badge variant="destructive">{text(`${criticalPatients.length} patients · risk 80+`, `${criticalPatients.length} مريض · خطورة 80+`)}</Badge>
           </CardHeader>
           <CardBody className="p-2">
-            {criticalPatients.slice(0, 6).map((criticalPatient: any) => (
+            {criticalPatients.slice(0, 6).map((criticalPatient: PatientDetail) => (
               <button
                 key={criticalPatient.id ?? criticalPatient.nationalId}
                 type="button"

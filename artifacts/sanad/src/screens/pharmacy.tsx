@@ -35,6 +35,101 @@ async function dispenseMed(medicationId: number, pharmacistName: string) {
 
 type PharmTab = "prescriptions" | "matrix" | "history" | "stock";
 
+type DetailedWarning = {
+  text: string;
+  severity: "critical" | "high" | "moderate";
+  mechanism: string;
+  clinicalBasis: string;
+  source: string;
+  recommendation: string;
+  drugA?: string;
+  drugB?: string;
+};
+
+type DispenseCheck = {
+  safe: boolean;
+  warnings: string[];
+  detailedWarnings: DetailedWarning[];
+  allergyConflict: boolean;
+  interactionConflict: boolean;
+  confidenceScore: number;
+};
+
+type InsuranceInfo = {
+  eligible: boolean;
+  provider: string;
+  copay: number;
+  coveragePercent: number;
+  preAuthRequired?: boolean;
+  notes?: string;
+};
+
+type StockAvailability = {
+  stock: number;
+  unit: string;
+  status: string;
+  daysOfStock: number;
+} | null;
+
+type SupplyChainStatus = {
+  stock: number;
+  unit: string;
+  status: string;
+  warning?: string | null;
+} | null;
+
+type PharmacyPrescription = {
+  id: number;
+  patientId: number;
+  drugName: string;
+  dosage: string;
+  frequency: string;
+  prescribedBy: string;
+  hospital: string;
+  startDate: string;
+  endDate?: string | null;
+  isActive: boolean | null;
+  notes?: string | null;
+  createdAt?: string;
+  dispensedAt?: string | null;
+  dispenseCheck: DispenseCheck;
+  insurance: InsuranceInfo;
+  stockAvailability: StockAvailability;
+};
+
+type PharmacyMedication = {
+  id: number;
+  patientId: number;
+  drugName: string;
+  dosage: string;
+  frequency: string;
+  prescribedBy: string;
+  hospital: string;
+  startDate: string;
+  endDate?: string | null;
+  isActive: boolean | null;
+  notes?: string | null;
+  createdAt?: string;
+};
+
+type PharmacyPatient = {
+  id: number;
+  name: string;
+  nationalId: string;
+  age: number;
+  bloodType: string;
+  allergies?: string[] | null;
+  chronicConditions?: string[] | null;
+  riskScore?: number | null;
+};
+
+type PharmacyData = {
+  patient: PharmacyPatient;
+  prescriptions: PharmacyPrescription[];
+  allMedications?: PharmacyMedication[];
+  summary: { active: number; total: number; interactions: number; insuranceCovered: number };
+};
+
 interface DispenseReceipt {
   refNo: string;
   drugName: string;
@@ -45,7 +140,7 @@ interface DispenseReceipt {
   pharmacist: string;
   dispensedAt: string;
   insurance: { eligible: boolean; provider: string; copay: number; coveragePercent: number };
-  supplyChainStatus: any;
+  supplyChainStatus: SupplyChainStatus;
   safe: boolean;
 }
 
@@ -69,22 +164,22 @@ const SEVERITY_ORDER: Record<string, number> = {
   CONTRAINDICATED: 0, MAJOR: 1, HIGH: 2, MODERATE: 3, MINOR: 4,
 };
 
-function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
+function InteractionMatrix({ prescriptions }: { prescriptions: PharmacyPrescription[] }) {
   const { text, dir, locale, toggleLocale } = useLanguage();
 
   
 
   const drugs = prescriptions.map((p) => p.drugName);
-  const [selected, setSelected] = useState<{ a: string; b: string; warnings: any[] } | null>(null);
+  const [selected, setSelected] = useState<{ a: string; b: string; warnings: DetailedWarning[] } | null>(null);
 
   const matrix = useMemo(() => {
-    const m: Record<string, Record<string, any[]>> = {};
+    const m: Record<string, Record<string, DetailedWarning[]>> = {};
     for (const presc of prescriptions) {
       m[presc.drugName] = {};
       for (const other of prescriptions) {
         if (presc.drugName === other.drugName) continue;
         const dws = presc.dispenseCheck?.detailedWarnings ?? [];
-        m[presc.drugName]![other.drugName] = dws.filter((w: any) => {
+        m[presc.drugName]![other.drugName] = dws.filter((w: DetailedWarning) => {
           const b = other.drugName.toLowerCase();
           return (w.drugA && b.includes(w.drugA.toLowerCase())) || (w.drugB && b.includes(w.drugB.toLowerCase()));
         });
@@ -142,7 +237,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
                     );
                   }
                   const warnings = matrix[rowDrug]?.[colDrug] ?? [];
-                  const topSeverity = warnings.reduce((best: string, w: any) => {
+                  const topSeverity = warnings.reduce((best: string, w: DetailedWarning) => {
                     const s = w.severity ?? "MINOR";
                     return (SEVERITY_ORDER[s] ?? 99) < (SEVERITY_ORDER[best] ?? 99) ? s : best;
                   }, "");
@@ -173,7 +268,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
             </div>
             <button onClick={() => setSelected(null)} className="text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
           </div>
-          {selected.warnings.map((w: any, i: number) => (
+          {selected.warnings.map((w: DetailedWarning, i: number) => (
             <div key={i} className="bg-card rounded-xl border border-danger/20 p-3 mb-2 last:mb-0">
               <div className="flex items-center gap-2 mb-2">
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${SEVERITY_COLOR[w.severity] ?? "bg-muted"}`}>{w.severity}</span>
@@ -183,7 +278,7 @@ function InteractionMatrix({ prescriptions }: { prescriptions: any[] }) {
               <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "الأساس السريري:")}</span>{w.clinicalBasis}</p>
               <p className="text-[11px] font-semibold text-danger mb-2">{w.recommendation}</p>
               <div className="flex flex-wrap gap-1">
-                {(w.sources ?? [w.source]).filter(Boolean).map((src: string, si: number) => (
+                {[w.source].filter(Boolean).map((src: string, si: number) => (
                   <span key={si} className="text-[9px] font-mono bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded-md">{src}</span>
                 ))}
               </div>
@@ -323,7 +418,7 @@ export default function PharmacyPortal() {
   const printRef = useRef<HTMLDivElement>(null);
   const qc = useQueryClient();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<PharmacyData>({
     queryKey: ["pharmacy-patient", nationalId],
     queryFn: () => fetchPharmacyPatient(nationalId),
     enabled: !!nationalId,
@@ -335,16 +430,16 @@ export default function PharmacyPortal() {
     onSuccess: (result, { id }) => {
       setDispensedResults((prev) => ({ ...prev, [id]: result }));
       setDispensingId(null);
-      qc.setQueryData(["pharmacy-patient", nationalId], (old: any) => {
+      qc.setQueryData(["pharmacy-patient", nationalId], (old: PharmacyData | undefined) => {
         if (!old) return old;
         return {
           ...old,
-          prescriptions: old.prescriptions?.map((p: any) =>
+          prescriptions: old.prescriptions?.map((p: PharmacyPrescription) =>
             p.id === id ? { ...p, dispensedAt: result.dispensedAt } : p
           ) ?? [],
         };
       });
-      const presc = data?.prescriptions?.find((p: any) => p.id === id);
+      const presc = data?.prescriptions?.find((p: PharmacyPrescription) => p.id === id);
       if (presc && data?.patient) {
         const newReceipt: DispenseReceipt = {
           refNo: result.referenceNo, // server-issued — auditable against the dispense event
@@ -411,7 +506,7 @@ export default function PharmacyPortal() {
         <div><label>${locale === "ar" ? "فصيلة الدم" : "Blood Type"}</label><p>${data.patient.bloodType}</p></div>
       </div>
       <h3 style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">${locale === "ar" ? "الوصفات الفعّالة" : "Active Prescriptions"}</h3>
-      ${(data.prescriptions || []).map((p: any) => `
+      ${(data.prescriptions || []).map((p: PharmacyPrescription) => `
         <div class="rx-item">
           <div class="rx-drug">${p.drugName}</div>
           <div class="rx-details">${p.dosage} · ${p.frequency}${p.prescribedBy ? ` · ${p.prescribedBy}` : ""}</div>
@@ -435,29 +530,41 @@ export default function PharmacyPortal() {
   return (
     <Layout role="pharmacy" localized>
       {receipt && <ReceiptModal receipt={receipt} onClose={() => setReceipt(null)} />}
-
-      <div className="flex items-start justify-between mb-6">
-        <PageHeader
-          title={text("Pharmacy Portal", "بوابة الصيدلية")}
-          subtitle={text("Prescription dispensing · AI drug safety · Insurance verification", "صرف الوصفات · سلامة الدواء بالذكاء · التحقّق من التأمين")}
-        />
-        <div className="flex items-center gap-2 shrink-0 ms-4">
-          <button
-            onClick={() => setShowLog((v) => !v)}
-            className="relative flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-card hover:bg-secondary transition-colors"
-          >
-            <Receipt className="w-3.5 h-3.5 text-primary" />
-            {text("Today's Log", "سجل اليوم")}
-            {todayLog.length > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-primary text-primary-foreground text-[9px] font-bold rounded-full flex items-center justify-center">
-                {todayLog.length}
-              </span>
-            )}
-          </button>
-          <div className="flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-2xl border border-border bg-card">
-            <Bell className={`w-3.5 h-3.5 ${sseConnected ? "text-success" : "text-muted-foreground"}`} />
-            <div className={`w-1.5 h-1.5 rounded-full ${sseConnected ? "bg-success animate-pulse" : "bg-muted"}`} />
-            <span className="text-muted-foreground">{sseConnected ? text("Live", "مباشر") : text("Connecting...", "جارٍ الاتصال...")}</span>
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Pill className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text("Pharmacy Portal", "بوابة الصيدلية")}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("Prescription dispensing · AI drug safety · Insurance verification", "صرف الوصفات · سلامة الدواء بالذكاء · التحقّق من التأمين")}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => setShowLog((v) => !v)}
+              className="relative flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-xl border border-primary/30 bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-all shadow-sm"
+            >
+              <Receipt className="w-4 h-4" />
+              {text("Today's Log", "سجل اليوم")}
+              {todayLog.length > 0 && (
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-background/50 text-[10px] ms-1">
+                  {todayLog.length}
+                </span>
+              )}
+            </button>
+            <div className="flex items-center gap-2 px-4 py-2.5 text-[11px] font-bold rounded-xl border border-border bg-card shadow-sm">
+              <Bell className={`w-4 h-4 ${sseConnected ? "text-success" : "text-muted-foreground"}`} />
+              <div className={`w-2 h-2 rounded-full ${sseConnected ? "bg-success animate-pulse" : "bg-muted"}`} />
+              <span className="text-muted-foreground">{sseConnected ? text("Live", "مباشر") : text("Connecting...", "جارٍ الاتصال...")}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -517,8 +624,8 @@ export default function PharmacyPortal() {
           value={String(data?.summary?.interactions ?? 0)}
           sub={text("Drug conflicts flagged", "تعارضات دوائية موسومة")}
           icon={ShieldAlert}
-          iconBg={data?.summary?.interactions > 0 ? "bg-danger-bg" : "bg-secondary"}
-          iconColor={data?.summary?.interactions > 0 ? "text-danger" : "text-muted-foreground"}
+          iconBg={(data?.summary?.interactions ?? 0) > 0 ? "bg-danger-bg" : "bg-secondary"}
+          iconColor={(data?.summary?.interactions ?? 0) > 0 ? "text-danger" : "text-muted-foreground"}
         />
         <KpiCard title={text("Insured", "مؤمّن")} value={String(data?.summary?.insuranceCovered ?? 0)} sub={text("Coverage eligible", "مؤهّل للتغطية")} icon={CreditCard} iconBg="bg-success-bg" iconColor="text-success" />
       </div>
@@ -624,17 +731,17 @@ export default function PharmacyPortal() {
                 <span>·</span>
                 <span>{text("Risk", "الخطر")} {data.patient.riskScore ?? "—"}/100</span>
               </div>
-              {data.patient.chronicConditions?.length > 0 && (
+              {(data.patient.chronicConditions ?? []).length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {data.patient.chronicConditions.map((c: string) => (
+                  {(data.patient.chronicConditions ?? []).map((c: string) => (
                     <span key={c} className="text-[10px] font-bold bg-card/20 px-2 py-0.5 rounded-full">{c}</span>
                   ))}
                 </div>
               )}
-              {data.patient.allergies?.length > 0 && (
+              {(data.patient.allergies ?? []).length > 0 && (
                 <div className="mt-2 flex items-center gap-2 px-3 py-1.5 bg-card/20 rounded-xl w-fit">
                   <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                  <p className="text-xs font-bold">{text("ALLERGIES:", "الحساسية:")} {data.patient.allergies.join(", ")}</p>
+                  <p className="text-xs font-bold">{text("ALLERGIES:", "الحساسية:")} {(data.patient.allergies ?? []).join(", ")}</p>
                 </div>
               )}
             </div>
@@ -696,7 +803,7 @@ export default function PharmacyPortal() {
                     <p className="font-bold text-foreground">{text("No active prescriptions", "لا توجد وصفات نشطة")}</p>
                   </div>
                 ) : (
-                  data.prescriptions.map((presc: any) => {
+                  data.prescriptions.map((presc: PharmacyPrescription) => {
                     const isDispensed = !!dispensedResults[presc.id];
                     const check = presc.dispenseCheck;
                     const ins = presc.insurance;
@@ -758,7 +865,7 @@ export default function PharmacyPortal() {
                               </button>
                               {expandedWarnings[presc.id] && (
                                 <div className="mt-2 space-y-2">
-                                  {check.detailedWarnings.map((dw: any, wi: number) => (
+                                  {check.detailedWarnings.map((dw: DetailedWarning, wi: number) => (
                                     <div key={wi} className="rounded-xl bg-card/80 border border-danger/20 p-3">
                                       <div className="flex items-start justify-between gap-2 mb-1.5">
                                         <div className="flex items-center gap-1.5">
@@ -771,7 +878,7 @@ export default function PharmacyPortal() {
                                       <p className="text-[11px] text-muted-foreground mb-1"><span className="font-semibold text-foreground">{text("Clinical basis:", "الأساس السريري:")}</span>{dw.clinicalBasis}</p>
                                       <p className="text-[11px] font-semibold text-danger mb-2">{dw.recommendation}</p>
                                       <div className="flex flex-wrap gap-1">
-                                        {(dw.sources ?? [dw.source]).filter(Boolean).map((src: string, si: number) => (
+                                        {[dw.source].filter(Boolean).map((src: string, si: number) => (
                                           <span key={si} className="text-[9px] font-mono bg-primary/10 text-primary border border-primary/20 px-1.5 py-0.5 rounded-md">{src}</span>
                                         ))}
                                       </div>
@@ -822,7 +929,7 @@ export default function PharmacyPortal() {
                   <span className="ml-auto font-bold text-foreground">{(data.allMedications ?? data.prescriptions)?.length ?? 0} {text("total", "الإجمالي")}</span>
                 </div>
                 <div className="space-y-2">
-                  {(data.allMedications ?? data.prescriptions ?? []).map((med: any, i: number) => (
+                  {(data.allMedications ?? data.prescriptions ?? []).map((med: PharmacyMedication | PharmacyPrescription, i: number) => (
                     <div key={i} className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl border ${med.isActive ? "bg-card border-success/30" : "bg-muted/50 border-border opacity-70"}`}>
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${med.isActive ? "bg-secondary" : "bg-muted"}`}>
                         <Pill className={`w-4 h-4 ${med.isActive ? "text-secondary-foreground" : "text-muted-foreground"}`} />
@@ -848,7 +955,7 @@ export default function PharmacyPortal() {
                   <Package className="w-3.5 h-3.5" />
                   {text("Real-time inventory check for this patient's medications", "فحص المخزون اللحظي لأدوية هذا المريض")}
                 </div>
-                {(data.prescriptions ?? []).map((presc: any, i: number) => {
+                {(data.prescriptions ?? []).map((presc: PharmacyPrescription, i: number) => {
                   const avail = presc.stockAvailability;
                   const pct = avail ? Math.min(100, Math.round((avail.daysOfStock / 45) * 100)) : 0;
                   const barColor = !avail ? "bg-muted" : avail.status === "critical" ? "bg-danger" : avail.status === "low" ? "bg-risk-high" : "bg-success";
