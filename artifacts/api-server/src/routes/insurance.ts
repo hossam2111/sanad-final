@@ -13,6 +13,11 @@ const claimReviewSchema = z.object({
   reviewedBy: z.string().max(200).optional(),
 });
 
+const claimDecisionSchema = z.object({
+  decision: z.enum(["approved", "denied"]),
+  reason: z.string().max(2000).optional(),
+});
+
 const router = Router();
 
 async function getClaimOverrides(): Promise<Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }>> {
@@ -302,18 +307,13 @@ router.post("/claim/:claimId/review", validate(claimReviewSchema), async (req, r
   });
 });
 
-router.patch("/claims/:claimId", async (req, res) => {
+router.patch("/claims/:claimId", validate(claimDecisionSchema), async (req, res) => {
   if (req.role !== "insurance" && req.role !== "admin") {
     res.status(403).json({ error: "FORBIDDEN", message: "Insurance role required" });
     return;
   }
-  const claimId = req.params["claimId"]!;
-  const { decision, reason } = req.body as { decision: "approved" | "denied"; reason?: string };
-
-  if (!["approved", "denied"].includes(decision)) {
-    res.status(400).json({ error: "BAD_REQUEST", message: "decision must be approved or denied" });
-    return;
-  }
+  const claimId = String(req.params["claimId"]);
+  const { decision, reason } = req.body as z.infer<typeof claimDecisionSchema>;
 
   const [claim] = await db.update(claimReviewsTable)
     .set({
