@@ -329,25 +329,26 @@ router.post("/dispense/:medicationId", validate(dispenseSchema), async (req, res
   const dispenseCheck = aiDispenseCheck(med.drugName, { allergies: patient.allergies, medications: activeMeds });
   const insurance = checkInsuranceEligibility(med.drugName, patient.chronicConditions ?? [], patient.id);
 
-  await db.insert(eventsTable).values({
-    eventType: "DRUG_DISPENSED",
-    patientId: med.patientId,
-    payload: JSON.stringify({ drugName: med.drugName, dosage: med.dosage, frequency: med.frequency, pharmacist: pharmacistName }),
-    source: "pharmacy_portal",
-  }).catch(() => {});
-
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
-    who: pharmacistName ?? "Pharmacist (Pharmacy Portal)",
-    whoRole: "pharmacist",
-    action: "CREATE",
-    what: `Drug dispensed: ${med.drugName} ${med.dosage} — ${dispenseCheck.safe ? "CLEARED" : "WARNING OVERRIDDEN"}`,
-    patientId: med.patientId,
-    details: { drugName: med.drugName, dosage: med.dosage, safe: dispenseCheck.safe },
-    confidence: dispenseCheck.confidenceScore,
-    ipAddress,
-    userAgent,
-  });
+  void Promise.all([
+    db.insert(eventsTable).values({
+      eventType: "DRUG_DISPENSED",
+      patientId: med.patientId,
+      payload: JSON.stringify({ drugName: med.drugName, dosage: med.dosage, frequency: med.frequency, pharmacist: pharmacistName }),
+      source: "pharmacy_portal",
+    }).catch(() => {}),
+    writeAudit({
+      who: pharmacistName ?? "Pharmacist (Pharmacy Portal)",
+      whoRole: "pharmacist",
+      action: "CREATE",
+      what: `Drug dispensed: ${med.drugName} ${med.dosage} — ${dispenseCheck.safe ? "CLEARED" : "WARNING OVERRIDDEN"}`,
+      patientId: med.patientId,
+      details: { drugName: med.drugName, dosage: med.dosage, safe: dispenseCheck.safe },
+      confidence: dispenseCheck.confidenceScore,
+      ipAddress,
+      userAgent,
+    }),
+  ]);
 
   const DRUG_INVENTORY_KEY: Record<string, { stock: number; unit: string; status: string }> = {
     "warfarin": { stock: 1200, unit: "tablets", status: "critical" },

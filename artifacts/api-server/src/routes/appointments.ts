@@ -132,7 +132,7 @@ router.post("/", validate(createAppointmentSchema), async (req, res) => {
   // Log through the hash-chained audit writer — direct inserts would break
   // the tamper-evidence chain (Isnād).
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: `Patient ${patient[0]!.fullName} (${patient[0]!.nationalId})`,
     whoRole: req.role ?? "citizen",
     action: "CREATE",
@@ -175,7 +175,7 @@ router.patch("/:id/cancel", async (req, res) => {
   if (!updated) return res.status(404).json({ error: "Appointment not found" });
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
@@ -204,7 +204,7 @@ router.patch("/:id/complete", async (req, res) => {
   if (!updated) return res.status(404).json({ error: "Appointment not found" });
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",

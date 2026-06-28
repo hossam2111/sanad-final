@@ -206,7 +206,7 @@ router.post("/grant", validate(grantConsentSchema), async (req, res) => {
   // Log through the hash-chained audit writer — direct inserts would break
   // the tamper-evidence chain (Isnād).
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: `Patient ${patient.fullName} (${patient.nationalId})`,
     whoRole: "citizen",
     action: granted ? "CREATE" : "UPDATE",

@@ -195,7 +195,7 @@ router.post("/reorder", validate(reorderSchema), async (req, res) => {
   }, 5000);
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
@@ -314,7 +314,7 @@ router.post("/orders", validate(reorderSchema), async (req, res) => {
   }).returning();
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
@@ -341,7 +341,7 @@ router.patch("/orders/:id/approve", async (req, res) => {
   if (!order) return res.status(404).json({ error: "NOT_FOUND" });
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
@@ -368,7 +368,7 @@ router.patch("/orders/:id/reject", async (req, res) => {
   if (!order) return res.status(404).json({ error: "NOT_FOUND" });
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",

@@ -182,86 +182,84 @@ router.post("/result", validate(labResultSchema), async (req, res) => {
 
   const { patientId, testName, result, unit, referenceRange, status, hospital, notes } = req.body as z.infer<typeof labResultSchema>;
 
-  const [newResult] = await db.insert(labResultsTable).values({
-    patientId,
-    testName,
-    result,
-    unit: unit ?? "",
-    referenceRange: referenceRange ?? "",
-    status,
-    hospital: hospital ?? "SANAD Lab Network",
-    notes: notes ?? "",
-    testDate: new Date().toISOString().split("T")[0]!,
-  }).returning();
+  const needsAlert = status === "critical" || status === "abnormal";
+
+  // Insert lab result first (needed for response). While interpretation is
+  // synchronous, start patient lookup only if an alert will be needed.
+  const [[newResult], patients] = await Promise.all([
+    db.insert(labResultsTable).values({
+      patientId,
+      testName,
+      result,
+      unit: unit ?? "",
+      referenceRange: referenceRange ?? "",
+      status,
+      hospital: hospital ?? "SANAD Lab Network",
+      notes: notes ?? "",
+      testDate: new Date().toISOString().split("T")[0]!,
+    }).returning(),
+    needsAlert
+      ? db.select().from(patientsTable).where(eq(patientsTable.id, patientId)).limit(1)
+      : Promise.resolve([] as (typeof patientsTable.$inferSelect)[]),
+  ]);
 
   const interpretation = interpretLabResult(testName, result, unit ?? "", status);
 
-  const patients = await db.select().from(patientsTable).where(eq(patientsTable.id, patientId)).limit(1);
+  // Event log + optional alert fire in parallel; audit is fire-and-forget
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  const sideEffects: Promise<unknown>[] = [
+    db.insert(eventsTable).values({
+      eventType: "LAB_RESULT_RECEIVED",
+      patientId,
+      payload: JSON.stringify({ testName, result, unit, status, interpretation }),
+      source: "lab_portal",
+    }).catch(() => {}),
+    writeAudit({
+      who: req.userId ?? req.role ?? "unknown",
+      whoName: req.userName,
+      whoRole: req.role ?? "unknown",
+      action: "CREATE",
+      what: `Lab result uploaded: ${testName} = ${result} ${unit ?? ""} (${status.toUpperCase()})`,
+      patientId,
+      details: { testName, result, unit, status },
+      confidence: interpretation.confidence,
+      ipAddress,
+      userAgent,
+    }),
+  ];
 
-  await db.insert(eventsTable).values({
-    eventType: "LAB_RESULT_RECEIVED",
-    patientId,
-    payload: JSON.stringify({ testName, result, unit, status, interpretation }),
-    source: "lab_portal",
-  }).catch(() => {});
-
-  if (status === "critical" || status === "abnormal") {
-    const alerts = alertsTable;
+  if (needsAlert) {
     const severity = status === "critical" ? "critical" : "high";
     const title = status === "critical"
       ? `CRITICAL LAB: ${testName} requires immediate action`
       : `Abnormal Lab Result: ${testName} outside normal range`;
     const message = `${testName} = ${result} ${unit ?? ""}. ${interpretation.significance} Action: ${interpretation.action}`;
-    await db.insert(alerts).values({ patientId, alertType: "critical-lab", severity, title, message }).catch(() => {});
+    sideEffects.push(
+      db.insert(alertsTable).values({ patientId, alertType: "critical-lab", severity, title, message }).catch(() => {}),
+    );
 
     const patientName = patients[0]?.fullName ?? "Unknown Patient";
     const nationalId = patients[0]?.nationalId ?? "";
 
     if (patients[0]?.hospitalId) {
       broadcastToHospital(patients[0].hospitalId, "lab_alert", {
-        patientId,
-        patientName,
-        nationalId,
-        testName,
-        result: `${result} ${unit ?? ""}`.trim(),
-        status,
+        patientId, patientName, nationalId, testName,
+        result: `${result} ${unit ?? ""}`.trim(), status,
         severity: status === "critical" ? "critical" : "warning",
-        title,
-        significance: interpretation.significance,
-        action: interpretation.action,
+        title, significance: interpretation.significance, action: interpretation.action,
         timestamp: new Date().toISOString(),
       });
     }
-
-    // Also notify citizen (patient) via their SSE stream
     broadcastToPatient(patientId, "lab_alert", {
-      patientId,
-      patientName,
-      nationalId,
-      testName,
-      result: `${result} ${unit ?? ""}`.trim(),
-      status,
-      severity,
-      title,
+      patientId, patientName, nationalId, testName,
+      result: `${result} ${unit ?? ""}`.trim(), status, severity, title,
       significance: interpretation.significance,
       action: "Please contact your doctor as soon as possible.",
       timestamp: new Date().toISOString(),
     });
   }
 
-  const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
-    who: req.userId ?? req.role ?? "unknown",
-    whoName: req.userName,
-    whoRole: req.role ?? "unknown",
-    action: "CREATE",
-    what: `Lab result uploaded: ${testName} = ${result} ${unit ?? ""} (${status.toUpperCase()})`,
-    patientId,
-    details: { testName, result, unit, status },
-    confidence: interpretation.confidence,
-    ipAddress,
-    userAgent,
-  });
+  void Promise.all(sideEffects);
 
   res.json({
     result: newResult,
