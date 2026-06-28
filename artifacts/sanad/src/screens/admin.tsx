@@ -2,7 +2,101 @@ import React, { useState } from "react";
 import { apiFetch } from "@/lib/api";
 import { Layout } from "@/components/layout";
 import { PageHeader, Card, CardHeader, CardTitle, CardBody, KpiCard, Badge, AlertBanner , SkeletonCard, ErrorBanner} from "@/components/shared";
-import { useGetAdminStats, useGetPopulationHealth } from "@workspace/api-client-react";
+import { useGetAdminStats, useGetPopulationHealth, type BloodTypeStat } from "@workspace/api-client-react";
+
+type RegionalStat = {
+  region: string;
+  patients: number;
+  hospitals: number;
+  highRisk: number;
+  critical: number;
+  coverage: string;
+  population: number;
+  riskRate: number;
+  riskLevel: string;
+};
+
+type RiskDistributionEntry = {
+  level: string;
+  count: number;
+  color: string;
+};
+
+type AdminStatsExtended = {
+  totalPatients: number;
+  totalVisitsToday: number;
+  activeAlerts: number;
+  drugInteractionsBlocked: number;
+  aiDecisionsMade: number;
+  highRiskPatients: number;
+  criticalPatients: number;
+  systemUptimeSeconds: number;
+  systemUptimeHours: number;
+  nationalRiskRate: number;
+  riskDistribution: RiskDistributionEntry[];
+  regionalStats: RegionalStat[];
+  policyInsights: string[];
+};
+
+type Appointment = {
+  id: string | number;
+  patientName?: string;
+  doctor?: string;
+  department?: string;
+  date?: string;
+  time?: string;
+  appointmentDate?: string;
+  appointmentTime?: string;
+  referenceNo?: string;
+  status: string;
+  hospital: string;
+};
+
+type AdminUser = {
+  id: string;
+  username: string;
+  name: string;
+  role: string;
+  org?: string;
+  organization?: string;
+  title?: string;
+  status?: "active" | "revoked";
+};
+
+type NewUser = {
+  username: string;
+  password: string;
+  role: string;
+  name: string;
+  organization: string;
+  title: string;
+};
+
+type EpidemicRadarItem = {
+  condition: string;
+  count: number;
+  trend: string;
+  alert: string;
+};
+
+type PolicyInsight = {
+  insight: string;
+  priority: string;
+  action?: string;
+};
+
+type IntelligenceData = {
+  urgencyBreakdown: Record<string, number>;
+  avgAiConfidence: number;
+  totalDecisions: number;
+  aiDecisionsToday: number;
+  criticalPatients: number;
+  epidemicRadar: EpidemicRadarItem[];
+  policyInsights: PolicyInsight[];
+  auditRecords: number;
+  systemHealth: Record<string, string>;
+  diseaseBurden?: Array<{ condition: string; totalRisk: number; avgRisk: number }>;
+};
 import { useNationalIntelligence } from "@/hooks/use-ai-decision";
 import { Users, Activity, ShieldAlert, Building, TrendingUp, AlertTriangle, PieChart as PieIcon, Globe, Brain, Zap, Radio, Lightbulb, Target, MapPin, Calendar, RefreshCw, X, Server, Database, Download, CheckCircle2, XCircle, Clock, UserCheck, Shield, Wrench } from "lucide-react";
 import {
@@ -39,7 +133,7 @@ const RISK_FILL: Record<string, string> = {
   low:      "hsl(var(--risk-low))",
 };
 
-function KSAHeatmap({ regions }: { regions: any[] }) {
+function KSAHeatmap({ regions }: { regions: RegionalStat[] }) {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [hovered, setHovered] = useState<string | null>(null);
   const regionMap = Object.fromEntries(regions.map(r => [r.region, r]));
@@ -307,7 +401,7 @@ export default function AdminDashboard() {
   });
 
   const addUserMutation = useMutation({
-    mutationFn: async (user: any) => {
+    mutationFn: async (user: NewUser) => {
       const res = await apiFetch("/api/users", {
         method: "POST",
         body: JSON.stringify(user),
@@ -357,7 +451,7 @@ export default function AdminDashboard() {
     } finally { setExportingLogs(false); }
   };
 
-  const stats = statsRaw as Record<string, any>;
+  const stats = statsRaw as AdminStatsExtended | undefined;
 
   if (statsLoading || healthLoading) {
     return (
@@ -370,8 +464,8 @@ export default function AdminDashboard() {
     );
   }
 
-  const appointments = apptData?.appointments ?? [];
-  const upcomingAppts = appointments.filter((a: any) => a.status === "confirmed").slice(0, 6);
+  const appointments: Appointment[] = apptData?.appointments ?? [];
+  const upcomingAppts = appointments.filter((a: Appointment) => a.status === "confirmed").slice(0, 6);
 
   return (
     <Layout role="admin" localized>
@@ -385,23 +479,36 @@ export default function AdminDashboard() {
         </AlertBanner>
       )}
 
-      <div className="flex items-start justify-between mb-6">
-        <PageHeader
-          title={text("Ministry of Health — Analytics Command Center", "وزارة الصحة — مركز قيادة التحليلات")}
-          subtitle={text("Real-time national infrastructure metrics and population health intelligence.", "مؤشّرات البنية التحتية الوطنية الفورية وذكاء صحة السكان.")}
-        />
-        <div className="flex items-center gap-2 shrink-0 ms-4">
-          <span className="text-xs font-mono bg-card border border-border rounded-xl px-3 py-2 text-muted-foreground" dir="ltr">
-            {new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" })}
-          </span>
-          <button
-            onClick={() => { setShowResetModal(true); setResetState("idle"); setResetMsg(""); }}
-            className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border border-border bg-card text-muted-foreground hover:text-foreground hover:border-warning/50 hover:bg-warning-bg transition-colors"
-            title={text("Reset Demo Environment", "إعادة تعيين بيئة العرض")}
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            {text("Reset Demo", "إعادة العرض")}
-          </button>
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Target className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text("Ministry of Health Command Center", "وزارة الصحة — مركز القيادة")}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("Real-time national infrastructure metrics and population health intelligence.", "مؤشّرات البنية التحتية الوطنية الفورية وذكاء صحة السكان.")}
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-[11px] font-mono font-bold bg-background/50 border border-border rounded-xl px-4 py-2.5 text-foreground backdrop-blur-sm shadow-sm" dir="ltr">
+              {new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" })}
+            </span>
+            <button
+              onClick={() => { setShowResetModal(true); setResetState("idle"); setResetMsg(""); }}
+              className="flex items-center gap-2 text-[11px] font-bold px-4 py-2.5 rounded-xl border border-warning/30 bg-warning/10 text-warning hover:bg-warning hover:text-warning-foreground transition-all shadow-sm"
+              title={text("Reset Demo Environment", "إعادة تعيين بيئة العرض")}
+            >
+              <RefreshCw className="w-4 h-4" />
+              {text("Reset Demo", "إعادة العرض")}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -466,14 +573,14 @@ export default function AdminDashboard() {
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={popHealth.bloodTypeDistribution} innerRadius={50} outerRadius={70} paddingAngle={3} dataKey="count" nameKey="bloodType">
-                      {popHealth.bloodTypeDistribution.map((_: any, i: number) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
+                      {popHealth.bloodTypeDistribution.map((_: BloodTypeStat, i: number) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
                     </Pie>
                     <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                   </PieChart>
                 </ResponsiveContainer></div>
               </div>
               <div className="grid grid-cols-4 gap-x-2 gap-y-1.5 mt-1">
-                {popHealth.bloodTypeDistribution.map((d: any, i: number) => (
+                {popHealth.bloodTypeDistribution.map((d: BloodTypeStat, i: number) => (
                   <div key={i} className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-md shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
                     <span className="text-xs text-muted-foreground font-mono">{d.bloodType}</span>
@@ -490,7 +597,7 @@ export default function AdminDashboard() {
                 <MapPin className="w-4 h-4 text-primary" />
                 <CardTitle>{text("National Risk Heatmap — KSA", "خريطة الخطورة الوطنية — المملكة")}</CardTitle>
                 <Badge variant="outline" className="ms-auto text-[10px]">
-                  {text(`${stats.regionalStats.filter((r: any) => r.riskLevel === "critical").length} critical regions`, `${stats.regionalStats.filter((r: any) => r.riskLevel === "critical").length} مناطق حرجة`)}
+                  {text(`${stats.regionalStats.filter((r: RegionalStat) => r.riskLevel === "critical").length} critical regions`, `${stats.regionalStats.filter((r: RegionalStat) => r.riskLevel === "critical").length} مناطق حرجة`)}
                 </Badge>
               </CardHeader>
               <CardBody>
@@ -554,17 +661,17 @@ export default function AdminDashboard() {
                     <PieChart>
                       <Pie data={stats.riskDistribution} innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="count" nameKey="level"
                         label={({ percent }) => percent > 0.15 ? `${(percent * 100).toFixed(0)}%` : ""} labelLine={false}>
-                        {stats.riskDistribution.map((entry: any, i: number) => (
+                        {stats.riskDistribution.map((entry: RiskDistributionEntry, i: number) => (
                           <Cell key={i} fill={RISK_COLORS[entry.level as keyof typeof RISK_COLORS] || "hsl(var(--muted-foreground))"} />
                         ))}
                       </Pie>
-                      <RechartsTooltip formatter={(value: any, name: any) => [`${value} patients`, name]}
+                      <RechartsTooltip formatter={(value: number | string, name: string) => [`${value} patients`, name]}
                         contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} />
                     </PieChart>
                   </ResponsiveContainer></div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2">
-                  {stats.riskDistribution.map((d: any, i: number) => (
+                  {stats.riskDistribution.map((d: RiskDistributionEntry, i: number) => (
                     <div key={i} className="flex items-center justify-between px-3 py-2 bg-secondary rounded-xl">
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full" style={{ background: RISK_COLORS[d.level as keyof typeof RISK_COLORS] }} />
@@ -584,7 +691,7 @@ export default function AdminDashboard() {
               <CardHeader>
                 <Calendar className="w-4 h-4 text-info" />
                 <CardTitle>{text("National Appointments — Upcoming Confirmed", "المواعيد الوطنية — المؤكّدة القادمة")}</CardTitle>
-                <Badge variant="info" className="ms-auto">{text(`${appointments.filter((a: any) => a.status === "confirmed").length} total`, `${appointments.filter((a: any) => a.status === "confirmed").length} الإجمالي`)}</Badge>
+                <Badge variant="info" className="ms-auto">{text(`${appointments.filter((a: Appointment) => a.status === "confirmed").length} total`, `${appointments.filter((a: Appointment) => a.status === "confirmed").length} الإجمالي`)}</Badge>
               </CardHeader>
               <div className="overflow-x-auto"><table className="w-full data-table">
                 <thead>
@@ -599,7 +706,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {upcomingAppts.map((a: any, i: number) => (
+                  {upcomingAppts.map((a: Appointment, i: number) => (
                     <tr key={i}>
                       <td className="font-mono text-xs text-muted-foreground" dir="ltr">{a.referenceNo}</td>
                       <td className="font-bold text-foreground">{a.patientName}</td>
@@ -653,13 +760,13 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Epidemic Radar */}
-                {((intelligence as Record<string, any>))?.epidemicRadar && ((intelligence as Record<string, any>)).epidemicRadar.length > 0 && (
+                {(intelligence as IntelligenceData | undefined)?.epidemicRadar && (intelligence as IntelligenceData).epidemicRadar.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Radio className="w-3.5 h-3.5 text-danger" /> {text("Epidemic Radar — Disease Surveillance", "رادار الأوبئة — ترصّد الأمراض")}
                     </p>
                     <div className="grid grid-cols-2 gap-2.5">
-                      {((intelligence as Record<string, any>)).epidemicRadar.map((item: any, i: number) => (
+                      {(intelligence as IntelligenceData).epidemicRadar.map((item: EpidemicRadarItem, i: number) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${
                           item.alert === "high" ? "bg-destructive/10 border-danger/20" : item.alert === "medium" ? "bg-risk-high-bg border-risk-high/20" : "bg-secondary border-border"
                         }`}>
@@ -678,13 +785,13 @@ export default function AdminDashboard() {
                 )}
 
                 {/* Policy Insights */}
-                {((intelligence as Record<string, any>))?.policyInsights && ((intelligence as Record<string, any>)).policyInsights.length > 0 && (
+                {(intelligence as IntelligenceData | undefined)?.policyInsights && (intelligence as IntelligenceData).policyInsights.length > 0 && (
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Lightbulb className="w-3.5 h-3.5 text-primary" /> {text("AI Policy Intelligence Recommendations", "توصيات ذكاء السياسات الصحية")}
                     </p>
                     <div className="space-y-2">
-                      {((intelligence as Record<string, any>)).policyInsights.map((insight: any, i: number) => (
+                      {(intelligence as IntelligenceData).policyInsights.map((insight: PolicyInsight, i: number) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${insight.priority === "high" ? "bg-primary/5 border-primary/20" : "bg-secondary border-border"}`}>
                           <Target className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
                           <div className="flex-1 min-w-0">
@@ -703,10 +810,10 @@ export default function AdminDashboard() {
                 {/* National Metrics Footer */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
-                    { label: text("AI Decisions Today", "قرارات اليوم"), value: ((intelligence as Record<string, any>))?.aiDecisionsToday ?? "0", icon: Brain },
-                    { label: text("Event Bus Throughput", "إنتاجية ناقل الأحداث"), value: ((intelligence as Record<string, any>))?.eventBusThroughput ?? "—", icon: Zap },
-                    { label: text("Audit Records", "سجلات التدقيق"), value: ((intelligence as Record<string, any>))?.auditRecords ?? "0", icon: Target },
-                    { label: text("Avg Response Time", "متوسط زمن الاستجابة"), value: ((intelligence as Record<string, any>))?.avgResponseMs ? `${((intelligence as Record<string, any>)).avgResponseMs}ms` : "—", icon: Activity },
+                    { label: text("AI Decisions Today", "قرارات اليوم"), value: (intelligence as IntelligenceData | undefined)?.aiDecisionsToday ?? "0", icon: Brain },
+                    { label: text("Event Bus Throughput", "إنتاجية ناقل الأحداث"), value: "—", icon: Zap },
+                    { label: text("Audit Records", "سجلات التدقيق"), value: (intelligence as IntelligenceData | undefined)?.auditRecords ?? "0", icon: Target },
+                    { label: text("Avg Response Time", "متوسط زمن الاستجابة"), value: "—", icon: Activity },
                   ].map((m, i) => (
                     <div key={i} className="px-4 py-3.5 bg-secondary rounded-2xl border border-border">
                       <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
@@ -740,7 +847,7 @@ export default function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.regionalStats.map((r: any, i: number) => (
+                  {stats.regionalStats.map((r: RegionalStat, i: number) => (
                     <tr key={i}>
                       <td className="font-bold text-foreground">{r.region}</td>
                       <td className="font-mono tabular-nums text-muted-foreground text-xs">{r.population?.toLocaleString()}</td>
@@ -856,7 +963,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardBody className="space-y-2 text-sm">
                   {[
-                    [text("Total records","إجمالي السجلات"), (intelligence as Record<string,any>)?.auditRecords ?? "—"],
+                    [text("Total records","إجمالي السجلات"), (intelligence as IntelligenceData | undefined)?.auditRecords ?? "—"],
                     [text("Write failures","أخطاء الكتابة"), sysHealth?.services?.audit?.failureCount ?? "0"],
                     [text("Chain integrity","سلامة السلسلة"), (sysHealth?.services?.audit?.failureCount ?? 0) === 0 ? text("Intact","سليمة") : text("Check needed","تحتاج فحص")],
                     [text("Server uptime","وقت التشغيل"), sysHealth ? `${Math.floor((sysHealth.uptimeSeconds ?? 0) / 60)} min` : "—"],
@@ -899,7 +1006,7 @@ export default function AdminDashboard() {
         {/* ── AI Governance ─────────────────────────────────────── */}
         <TabsContent value="ai-gov">
           {(() => {
-            const intel = intelligence as Record<string, any> | undefined;
+            const intel = intelligence as IntelligenceData | undefined;
             const urgency = intel?.urgencyBreakdown ?? {};
             const insights = intel?.policyInsights ?? [];
             const sysFlags = intel?.systemHealth ?? {};
@@ -964,7 +1071,7 @@ export default function AdminDashboard() {
                     <Card>
                       <CardHeader><Lightbulb className="w-4 h-4 text-warning"/><CardTitle>{text("Policy Insights","رؤى السياسة الصحية")}</CardTitle></CardHeader>
                       <CardBody className="space-y-2">
-                        {insights.slice(0,3).map((ins: any, i: number)=>(
+                        {insights.slice(0,3).map((ins: PolicyInsight, i: number)=>(
                           <div key={i} className="text-[13px] border-b border-border last:border-0 pb-2 last:pb-0">
                             <div className="flex items-start gap-2">
                               <span className={`shrink-0 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded mt-0.5 ${ins.priority==="high"?"bg-danger-bg text-danger":ins.priority==="medium"?"bg-warning-bg text-warning":"bg-secondary text-muted-foreground"}`}>{ins.priority}</span>
@@ -1014,7 +1121,7 @@ export default function AdminDashboard() {
                       <tr><td colSpan={5} className="text-center py-4 text-muted-foreground">{text("Loading users...", "جاري تحميل المستخدمين...")}</td></tr>
                     ) : (usersData?.length === 0 && DEMO_USERS.length === 0) ? (
                       <tr><td colSpan={5} className="text-center py-4 text-muted-foreground">{text("No users found", "لا يوجد مستخدمين")}</td></tr>
-                    ) : (usersData?.length > 0 ? usersData : DEMO_USERS).map((u: any) => {
+                    ) : (usersData?.length > 0 ? usersData : DEMO_USERS).map((u: AdminUser) => {
                       const badge = ROLE_BADGE[u.role] ?? { label: u.role, labelAr: u.role, cls: "bg-secondary text-muted-foreground" };
                       // If it's a real user, status is active/revoked. Otherwise fallback to userEnabled map.
                       const enabled = u.status ? u.status === "active" : (userEnabled[u.id] ?? true);
