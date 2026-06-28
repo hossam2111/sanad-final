@@ -386,7 +386,7 @@ export default function AdminDashboard() {
   const [newUser, setNewUser] = useState({ username: "", password: "", role: "doctor", name: "", organization: "", title: "" });
 
   const queryClient = useQueryClient();
-  const { data: usersData, isLoading: usersLoading } = useQuery({ queryKey: ["admin-users"], queryFn: fetchUsers });
+  const { data: usersData, isLoading: usersLoading } = useQuery({ queryKey: ["admin-users"], queryFn: fetchUsers, staleTime: 30000 });
 
   const statusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "active" | "revoked" }) => {

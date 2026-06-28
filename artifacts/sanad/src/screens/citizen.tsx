@@ -142,8 +142,8 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
   const [booked, setBooked] = useState<any>(null);
   const [bookingError, setBookingError] = useState("");
 
-  const { data: hospData } = useQuery({ queryKey: ["apt-hospitals"], queryFn: fetchHospitals });
-  const { data: deptData } = useQuery({ queryKey: ["apt-departments"], queryFn: fetchDepartments });
+  const { data: hospData } = useQuery({ queryKey: ["apt-hospitals"], queryFn: fetchHospitals, staleTime: Infinity });
+  const { data: deptData } = useQuery({ queryKey: ["apt-departments"], queryFn: fetchDepartments, staleTime: Infinity });
   const { data: slotsData } = useQuery({
     queryKey: ["apt-slots", date, hospital, department],
     queryFn: () => fetchSlots(date, hospital, department),

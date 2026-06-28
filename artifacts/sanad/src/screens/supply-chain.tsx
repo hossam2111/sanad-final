@@ -119,7 +119,7 @@ export default function SupplyChainPortal() {
     },
   });
 
-  const { data: poData } = useQuery({ queryKey: ["supply-pos"], queryFn: async () => (await apiFetch("/api/supply-chain/purchase-orders")).json() });
+  const { data: poData } = useQuery({ queryKey: ["supply-pos"], queryFn: async () => (await apiFetch("/api/supply-chain/purchase-orders")).json(), staleTime: 30000 });
   
   const approveMutation = useMutation({
     mutationFn: (id: string) => apiFetch(`/api/supply-chain/orders/${id}/approve`, { method: "PATCH" }),

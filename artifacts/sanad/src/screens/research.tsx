@@ -143,7 +143,7 @@ export default function ResearchPortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeView, setActiveView] = useState<ViewTab>("overview");
   const [selectedConditions, setSelectedConditions] = useState<"conditions" | "labs" | "drugs" | "age">("conditions");
-  const { data, isLoading } = useQuery({ queryKey: ["research-insights"], queryFn: fetchResearchInsights });
+  const { data, isLoading } = useQuery({ queryKey: ["research-insights"], queryFn: fetchResearchInsights, staleTime: 300000 });
 
   const handleExport = async (format: "csv" | "json") => {
     const res = await apiFetch(`/api/research/export?format=${format}`);
