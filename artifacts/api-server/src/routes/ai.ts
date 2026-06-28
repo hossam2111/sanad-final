@@ -438,8 +438,8 @@ router.post("/chat/:patientId", validate(chatSchema), async (req, res) => {
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
   await writeAudit({
-    who: (req as any).userId ?? "Unknown",
-    whoRole: (req as any).role ?? "unknown",
+    who: req.userId ?? "Unknown",
+    whoRole: req.role ?? "unknown",
     action: "AI_CHAT_QUERY",
     what: `Clinical Q&A queried about patient ${patientId}`,
     patientId,

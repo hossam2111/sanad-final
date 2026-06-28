@@ -198,7 +198,7 @@ router.get("/patient/:nationalId", async (req, res) => {
   const siblings = allowedFamily.filter(fp => fp.id > p.id && fp.id <= p.id + 2).slice(0, 2);
   const children = allowedFamily.filter(fp => fp.id > p.id + 2).slice(0, 2);
 
-  const mapMember = (fp: any, relationship: string) => ({
+  const mapMember = (fp: typeof patientsTable.$inferSelect, relationship: string) => ({
     id: fp.id,
     fullName: fp.fullName,
     // Relatives have not consented to exposure here — mask their identifier.

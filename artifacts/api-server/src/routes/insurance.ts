@@ -24,7 +24,7 @@ async function getClaimOverrides(): Promise<Record<string, { status: string; rev
   return map;
 }
 
-function computeAnomalyScore(visits: any[], meds: any[], riskScore: number): { score: number; factors: Array<{ label: string; weight: number; value: string; flag: boolean }> } {
+function computeAnomalyScore(visits: (typeof visitsTable.$inferSelect)[], meds: (typeof medicationsTable.$inferSelect)[], riskScore: number): { score: number; factors: Array<{ label: string; weight: number; value: string; flag: boolean }> } {
   const factors: Array<{ label: string; weight: number; value: string; flag: boolean }> = [];
   const emergencyCount = visits.filter(v => v.visitType === "emergency").length;
   const emergencyFlag = emergencyCount >= 3;
@@ -40,7 +40,7 @@ function computeAnomalyScore(visits: any[], meds: any[], riskScore: number): { s
   const multiHospital = hospitals.length >= 4;
   factors.push({ label: "Multi-Hospital Routing", weight: multiHospital ? 18 : 4, value: `${hospitals.length} distinct hospitals`, flag: multiHospital });
 
-  const activeCount = meds.filter((m: any) => m.isActive).length;
+  const activeCount = meds.filter(m => m.isActive).length;
   const polyPharmacy = activeCount >= 7;
   factors.push({ label: "Polypharmacy Pattern", weight: polyPharmacy ? 15 : 5, value: `${activeCount} concurrent medications`, flag: polyPharmacy });
 
@@ -54,7 +54,7 @@ function computeAnomalyScore(visits: any[], meds: any[], riskScore: number): { s
   return { score, factors };
 }
 
-function computeClaimAnomalyScore(visit: any, allVisits: any[]): { score: number; reasons: string[] } {
+function computeClaimAnomalyScore(visit: typeof visitsTable.$inferSelect, allVisits: (typeof visitsTable.$inferSelect)[]): { score: number; reasons: string[] } {
   const reasons: string[] = [];
   let score = 0;
   if (visit.visitType === "emergency") {
@@ -152,7 +152,7 @@ router.get("/patient/:nationalId", async (req, res) => {
     riskMultiplier,
     premiumBreakdown,
     claims,
-    activeMeds: medications.filter((m: any) => m.isActive).length,
+    activeMeds: medications.filter(m => m.isActive).length,
     totalClaims: claims.length,
     totalClaimValue: claims.reduce((sum, c) => sum + c.estimatedCost, 0),
     coverageStatus: "active",

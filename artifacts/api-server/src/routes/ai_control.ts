@@ -149,7 +149,7 @@ router.get("/retrain-jobs", async (req, res) => {
 router.post("/retrain-jobs", validate(retrainJobSchema), async (req, res) => {
   const { model, reason } = req.body as z.infer<typeof retrainJobSchema>;
   const jobId = `job_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-  const triggeredByName = (req as any).userId ?? "AI Control Center";
+  const triggeredByName = req.userId ?? "AI Control Center";
   
   const [job] = await db.insert(aiRetrainJobsTable).values({
     id: jobId,
