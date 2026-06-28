@@ -257,7 +257,6 @@ router.post("/", validate(createPatientSchema), async (req, res) => {
   const body = req.body as z.infer<typeof createPatientSchema>;
   let hospitalId: string | undefined;
   if (req.username && req.role !== "admin") {
-    const { getStaffHospitalId } = await import("../lib/ownership.js");
     hospitalId = (await getStaffHospitalId(req.username)) ?? undefined;
   }
 

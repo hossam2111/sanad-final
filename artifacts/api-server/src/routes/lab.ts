@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { z } from "zod";
 import { db } from "@workspace/db";
-import { patientsTable, labResultsTable, eventsTable } from "@workspace/db/schema";
+import { patientsTable, labResultsTable, eventsTable, alertsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { broadcastToHospital, broadcastToPatient } from "../lib/sse.js";
-import { requireOwnNationalId } from "../lib/ownership.js";
+import { requireOwnNationalId, getStaffHospitalId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { validate } from "../middlewares/validate.js";
 
@@ -116,7 +116,6 @@ router.get("/patient/:nationalId", async (req, res) => {
       res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
       return;
     }
-    const { getStaffHospitalId } = await import("../lib/ownership.js");
     const hospitalId = await getStaffHospitalId(req.username);
     if (!hospitalId || (patient.hospitalId !== null && patient.hospitalId !== hospitalId)) {
       res.status(403).json({ error: "FORBIDDEN", message: "Patient is registered at a different hospital" });
@@ -200,7 +199,7 @@ router.post("/result", validate(labResultSchema), async (req, res) => {
   }).catch(() => {});
 
   if (status === "critical" || status === "abnormal") {
-    const { alertsTable: alerts } = await import("@workspace/db/schema");
+    const alerts = alertsTable;
     const severity = status === "critical" ? "critical" : "high";
     const title = status === "critical"
       ? `CRITICAL LAB: ${testName} requires immediate action`

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { visitsTable } from "@workspace/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { requireOwnPatient, isClinicalRole } from "../lib/ownership.js";
+import { requireOwnPatient, isClinicalRole, getStaffHospitalId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
@@ -53,7 +53,6 @@ router.post("/", validate(createVisitSchema), async (req, res) => {
       res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
       return;
     }
-    const { getStaffHospitalId } = await import("../lib/ownership.js");
     const staffHospitalId = await getStaffHospitalId(req.username);
     
     if (!staffHospitalId || staffHospitalId !== body.hospital) {

@@ -1,6 +1,10 @@
 import { Router } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
+import { db } from "@workspace/db";
+import { patientsTable } from "@workspace/db/schema";
+import { eq } from "drizzle-orm";
 import { registerSseClient, getConnectedCount } from "../lib/sse.js";
+import { getStaffHospitalId } from "../lib/ownership.js";
 import { randomUUID } from "crypto";
 
 const router = Router();
@@ -57,14 +61,10 @@ router.get("/stream", (req, res) => {
     let patientId: number | undefined;
     
     if (username) {
-      const { getStaffHospitalId } = await import("../lib/ownership.js");
       hospitalId = (await getStaffHospitalId(username)) ?? undefined;
     }
-    
+
     if (role === "citizen" && nationalId) {
-      const { db } = await import("@workspace/db");
-      const { patientsTable } = await import("@workspace/db/schema");
-      const { eq } = await import("drizzle-orm");
       const [row] = await db.select({ id: patientsTable.id }).from(patientsTable).where(eq(patientsTable.nationalId, nationalId)).limit(1);
       patientId = row?.id;
     }
