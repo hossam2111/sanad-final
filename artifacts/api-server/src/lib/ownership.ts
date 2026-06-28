@@ -116,6 +116,13 @@ export async function getConsentStateBulk(
 
 const hospitalIdCache = new Map<string, { hospitalId: string | null; ts: number }>();
 
+// Evict expired entries every 10 minutes so caches don't grow unboundedly.
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, v] of idCache) if (now - v.ts >= CACHE_TTL_MS) idCache.delete(k);
+  for (const [k, v] of hospitalIdCache) if (now - v.ts >= CACHE_TTL_MS) hospitalIdCache.delete(k);
+}, 10 * 60 * 1000).unref();
+
 export async function getStaffHospitalId(username: string): Promise<string | null> {
   const hit = hospitalIdCache.get(username);
   if (hit && Date.now() - hit.ts < CACHE_TTL_MS) return hit.hospitalId;
