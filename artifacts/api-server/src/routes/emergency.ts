@@ -79,7 +79,7 @@ router.get("/:nationalId", async (req, res) => {
   // consent is flagged for post-incident review).
   const consentState = await getConsentState(p.id, "emergency_access");
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "emergency",

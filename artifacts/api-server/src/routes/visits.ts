@@ -76,7 +76,7 @@ router.post("/", validate(createVisitSchema), async (req, res) => {
     .returning();
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",

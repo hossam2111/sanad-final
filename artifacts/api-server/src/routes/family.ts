@@ -160,7 +160,7 @@ router.get("/patient/:nationalId", async (req, res) => {
   // Family access is consent-based, not break-glass, but it still reads a full
   // clinical record — log it to the audit chain.
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "family",

@@ -189,7 +189,7 @@ router.post("/retrain-jobs", validate(retrainJobSchema), async (req, res) => {
   }).returning();
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: triggeredByName,
     whoRole: "ai_engineer",
     action: "CREATE",
@@ -228,7 +228,7 @@ router.post("/engines/:engineName/retrain", validate(engineRetrainSchema), async
   }).returning();
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: triggeredByName,
     whoRole: "ai_engineer",
     action: "CREATE",

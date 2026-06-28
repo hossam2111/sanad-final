@@ -45,25 +45,27 @@ router.post("/check-interaction", validate(checkInteractionSchema), async (req, 
   const safe = !warnings.some(w => w.severity === "critical" || w.severity === "high");
 
   if (patientId && !safe) {
-    await db.insert(eventsTable).values({
-      eventType: "DRUG_INTERACTION_DETECTED",
-      patientId: Number(patientId),
-      payload: { newDrug, warnings: warnings.map(w => ({ drug: w.conflictingDrug, severity: w.severity })) },
-      source: "physician_portal",
-    });
     const { ipAddress, userAgent } = extractRequestMeta(req);
-    await writeAudit({
-      who: req.userId ?? req.role ?? "unknown",
-      whoName: req.userName,
-      whoRole: req.role ?? "doctor",
-      action: "DRUG_CHECK",
-      what: `${newDrug} checked — ${warnings.length} conflict(s) found`,
-      patientId: Number(patientId),
-      details: { newDrug, conflictsFound: warnings.length, safe },
-      confidence: 0.95,
-      ipAddress,
-      userAgent,
-    });
+    void Promise.all([
+      db.insert(eventsTable).values({
+        eventType: "DRUG_INTERACTION_DETECTED",
+        patientId: Number(patientId),
+        payload: { newDrug, warnings: warnings.map(w => ({ drug: w.conflictingDrug, severity: w.severity })) },
+        source: "physician_portal",
+      }).catch(() => {}),
+      writeAudit({
+        who: req.userId ?? req.role ?? "unknown",
+        whoName: req.userName,
+        whoRole: req.role ?? "doctor",
+        action: "DRUG_CHECK",
+        what: `${newDrug} checked — ${warnings.length} conflict(s) found`,
+        patientId: Number(patientId),
+        details: { newDrug, conflictsFound: warnings.length, safe },
+        confidence: 0.95,
+        ipAddress,
+        userAgent,
+      }),
+    ]);
   }
 
   res.json({
@@ -425,7 +427,7 @@ router.post("/chat/:patientId", validate(chatSchema), async (req, res) => {
   const answer = await askClinicalQuestion(ctx, question);
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? "Unknown",
     whoRole: req.role ?? "unknown",
     action: "AI_CHAT_QUERY",

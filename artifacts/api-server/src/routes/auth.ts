@@ -94,7 +94,7 @@ router.post("/login", validate(loginSchema), async (req, res) => {
   const user = CREDENTIALS[username] as (UserCredential & { password: string }) | undefined;
   if (!user || user.password !== password) {
     const { ipAddress, userAgent } = extractRequestMeta(req);
-    await writeAudit({
+    void writeAudit({
       who: "system",
       whoName: "System",
       whoRole: "admin",
@@ -123,7 +123,7 @@ router.post("/login", validate(loginSchema), async (req, res) => {
   const token = jwt.sign(payload, secret, { expiresIn: EXPIRES_IN_SECONDS });
   const { ipAddress, userAgent } = extractRequestMeta(req);
 
-  await writeAudit({
+  void writeAudit({
     who: user.userId,
     whoName: user.name,
     whoRole: user.role,

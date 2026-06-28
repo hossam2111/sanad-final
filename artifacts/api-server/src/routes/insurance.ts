@@ -172,7 +172,7 @@ router.get("/patient/:nationalId", async (req, res) => {
   });
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
@@ -306,7 +306,7 @@ router.post("/claim/:claimId/review", validate(claimReviewSchema), async (req, r
     });
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
@@ -348,7 +348,7 @@ router.patch("/claims/:claimId", validate(claimDecisionSchema), async (req, res)
   if (!claim) { res.status(404).json({ error: "NOT_FOUND" }); return; }
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
+  void writeAudit({
     who: req.userId ?? req.role ?? "unknown",
     whoName: req.userName,
     whoRole: req.role ?? "unknown",
