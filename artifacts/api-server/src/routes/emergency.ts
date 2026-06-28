@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, alertsTable, labResultsTable, visitsTable } from "@workspace/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, or, count, gte, sql } from "drizzle-orm";
 import { calculateRiskScore, generateClinicalActions } from "../lib/ai-engine.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { getConsentState } from "../lib/ownership.js";
@@ -33,22 +33,27 @@ router.get("/:nationalId", async (req, res) => {
 
   const p = patient[0]!;
 
-  const [medications, alerts, labResults, visits] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(50),
-    db.select().from(alertsTable).where(eq(alertsTable.patientId, p.id)).orderBy(desc(alertsTable.createdAt)).limit(50),
-    db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(10),
-    db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(20),
+  const oneYearAgoStr = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]!;
+
+  const [activeMeds, criticalAlertRows, [abnormalLabsRow], [recentVisitsRow]] = await Promise.all([
+    db.select().from(medicationsTable)
+      .where(and(eq(medicationsTable.patientId, p.id), eq(medicationsTable.isActive, true)))
+      .orderBy(desc(medicationsTable.createdAt)).limit(50),
+    db.select({ message: alertsTable.message }).from(alertsTable)
+      .where(and(
+        eq(alertsTable.patientId, p.id),
+        or(eq(alertsTable.severity, "critical"), eq(alertsTable.severity, "high")),
+      ))
+      .orderBy(desc(alertsTable.createdAt)).limit(20),
+    db.select({ cnt: count() }).from(labResultsTable)
+      .where(and(eq(labResultsTable.patientId, p.id), sql`${labResultsTable.status} != 'normal'`)),
+    db.select({ cnt: count() }).from(visitsTable)
+      .where(and(eq(visitsTable.patientId, p.id), gte(visitsTable.visitDate, oneYearAgoStr))),
   ]);
 
-  const activeMeds = medications.filter(m => m.isActive);
-  const criticalAlerts = alerts
-    .filter(a => a.severity === "critical" || a.severity === "high")
-    .map(a => a.message);
-
-  const abnormalLabs = labResults.filter(l => l.status !== "normal").length;
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const recentVisitCount = visits.filter(v => new Date(v.visitDate) >= oneYearAgo).length;
+  const criticalAlerts = criticalAlertRows.map(a => a.message);
+  const abnormalLabs = Number(abnormalLabsRow?.cnt ?? 0);
+  const recentVisitCount = Number(recentVisitsRow?.cnt ?? 0);
 
   const riskData = calculateRiskScore({
     dateOfBirth: p.dateOfBirth,
