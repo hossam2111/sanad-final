@@ -102,35 +102,35 @@ router.post("/", validate(createMedicationSchema), async (req, res) => {
     })
     .returning();
 
-  for (const warning of interactionWarnings) {
-    if (warning.severity === "high" || warning.severity === "critical") {
-      await db.insert(alertsTable).values({
-        patientId,
-        alertType: "drug-interaction",
-        severity: warning.severity,
-        title: `Drug Interaction: ${body.drugName} + ${warning.conflictingDrug}`,
-        message: warning.description,
-        isRead: false,
-      });
-    }
-  }
-
   const safeToDispense = !interactionWarnings.some(
     w => w.severity === "critical" || w.severity === "high"
   );
 
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
-    who: req.userId ?? req.role ?? "unknown",
-    whoName: req.userName,
-    whoRole: req.role ?? "unknown",
-    action: "PRESCRIBE_MEDICATION",
-    what: `Medication prescribed: ${body.drugName} at ${body.hospital}`,
-    patientId,
-    details: { dosage: body.dosage, frequency: body.frequency, warningsCount: interactionWarnings.length, safeToDispense },
-    ipAddress,
-    userAgent,
-  });
+  void Promise.all([
+    // Insert all interaction alerts in parallel instead of sequentially
+    ...interactionWarnings
+      .filter(w => w.severity === "high" || w.severity === "critical")
+      .map(w => db.insert(alertsTable).values({
+        patientId,
+        alertType: "drug-interaction",
+        severity: w.severity,
+        title: `Drug Interaction: ${body.drugName} + ${w.conflictingDrug}`,
+        message: w.description,
+        isRead: false,
+      }).catch(() => {})),
+    writeAudit({
+      who: req.userId ?? req.role ?? "unknown",
+      whoName: req.userName,
+      whoRole: req.role ?? "unknown",
+      action: "PRESCRIBE_MEDICATION",
+      what: `Medication prescribed: ${body.drugName} at ${body.hospital}`,
+      patientId,
+      details: { dosage: body.dosage, frequency: body.frequency, warningsCount: interactionWarnings.length, safeToDispense },
+      ipAddress,
+      userAgent,
+    }),
+  ]);
 
   res.status(201).json({
     medication,
