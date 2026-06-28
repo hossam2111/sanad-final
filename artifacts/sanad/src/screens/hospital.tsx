@@ -42,6 +42,17 @@ const OR_STATUS = {
 
 type TabId = "overview" | "icu" | "or" | "readmission";
 
+type BedStatusUnit = { unit: string; unitKey: string; total: number; occupied: number; available: number; occupancyPct: number; status: string };
+type PriorityPatient = {
+  id: number; name: string; nationalId: string; age: number; riskScore: number;
+  riskLevel: string; chronicConditions: string[];
+  lastVisit: { date: string; type: string; department: string } | null;
+  suggestedWard: string; priority: "immediate" | "urgent" | "soon";
+};
+type IcuAlert = { patientId: number; name: string; nationalId: string; riskScore: number; conditions: string[]; alertType: string; severity: string; timeWindow: string };
+type OrProcedure = { id: string; patient: string; procedure: string; surgeon: string; room: string; scheduledTime: string; status: "in_progress" | "scheduled" | "emergency"; estimatedDuration: string };
+type ReadmissionRisk = { patientId: number; name: string; nationalId: string; readmissionRisk: number; lastDischarge: string; primaryReason: string; recommendedAction: string };
+
 export default function HospitalPortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabId>("overview");
@@ -62,7 +73,7 @@ export default function HospitalPortal() {
     );
   }
 
-  const icuCritical = (data?.icuAlerts ?? []).filter((a: any) => a.severity === "critical").length;
+  const icuCritical = (data?.icuAlerts as IcuAlert[] ?? []).filter((a: IcuAlert) => a.severity === "critical").length;
 
   return (
     <Layout role="hospital" localized>
@@ -87,10 +98,24 @@ export default function HospitalPortal() {
         <span className="text-[11px] font-mono text-muted-foreground">{text("Live · auto-refresh 60s", "مباشر · تحديث تلقائي 60ث")}</span>
       </div>
 
-      <PageHeader
-        title={data?.hospitalName ?? text("Hospital Portal", "بوابة المستشفى")}
-        subtitle={text("Bed management · ICU alerts · OR scheduling · Readmission risk", "إدارة الأسرّة · تنبيهات العناية المركزة · جدولة العمليات · خطر إعادة التنويم")}
-      />
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Building2 className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text("Hospital Command", "قيادة المستشفى")}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("Bed capacity, AI triage forecasting, and resource allocation.", "السعة السريرية، وتنبؤات الفرز بالذكاء الاصطناعي، وتخصيص الموارد.")}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* KPI row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
@@ -111,7 +136,7 @@ export default function HospitalPortal() {
           title={text("OR Today", "عمليات اليوم")}
           value={data?.pendingSurgeries ?? "—"}
           icon={Stethoscope}
-          sub={text(`${(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} in progress`, `${(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} قيد التنفيذ`)}
+          sub={text(`${(data?.orSchedule as OrProcedure[] ?? []).filter((s: OrProcedure) => s.status === "in_progress").length} in progress`, `${(data?.orSchedule as OrProcedure[] ?? []).filter((s: OrProcedure) => s.status === "in_progress").length} قيد التنفيذ`)}
         />
         <KpiCard
           title={text("Avg Length of Stay", "متوسط مدة الإقامة")}
@@ -155,7 +180,7 @@ export default function HospitalPortal() {
             </CardHeader>
             <CardBody>
               <div className="grid grid-cols-3 gap-3">
-                {data?.bedStatus?.map((unit: any) => {
+                {(data?.bedStatus as BedStatusUnit[] | undefined)?.map((unit: BedStatusUnit) => {
                   const color = UNIT_COLORS[unit.unit] ?? "hsl(var(--primary))";
                   return (
                     <div key={unit.unitKey} className={`p-4 rounded-2xl border ${
@@ -274,7 +299,7 @@ export default function HospitalPortal() {
                 </tr>
               </thead>
               <tbody>
-                {data?.priorityQueue?.map((p: any, i: number) => {
+                {(data?.priorityQueue as PriorityPatient[] | undefined)?.map((p: PriorityPatient, i: number) => {
                   const style = PRIORITY_COLORS[p.priority as keyof typeof PRIORITY_COLORS] ?? PRIORITY_COLORS.soon;
                   return (
                     <tr key={p.id} className={i < 3 ? "bg-destructive/10/20" : ""}>
@@ -326,7 +351,7 @@ export default function HospitalPortal() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {(data?.icuAlerts ?? []).map((alert: any, i: number) => (
+            {(data?.icuAlerts as IcuAlert[] ?? []).map((alert: IcuAlert, i: number) => (
               <div key={i} className={`p-5 rounded-2xl border-2 ${alert.severity === "critical" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
                 <div className="flex items-start gap-3 mb-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${alert.severity === "critical" ? "bg-danger-bg" : "bg-risk-high-bg"}`}>
@@ -370,7 +395,7 @@ export default function HospitalPortal() {
             <Stethoscope className="w-5 h-5 text-info shrink-0" />
             <div>
               <p className="text-sm font-bold text-info">{text("Operating Room Schedule — Today", "جدول غرف العمليات — اليوم")}</p>
-              <p className="text-xs text-info mt-0.5">{(data?.orSchedule ?? []).length} {text("procedures ·", "إجراء ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "in_progress").length} {text("in progress ·", "قيد التنفيذ ·")} {(data?.orSchedule ?? []).filter((s: any) => s.status === "emergency").length} {text("emergency", "طارئ")}</p>
+              <p className="text-xs text-info mt-0.5">{(data?.orSchedule ?? []).length} {text("procedures ·", "إجراء ·")} {(data?.orSchedule as OrProcedure[] ?? []).filter((s: OrProcedure) => s.status === "in_progress").length} {text("in progress ·", "قيد التنفيذ ·")} {(data?.orSchedule as OrProcedure[] ?? []).filter((s: OrProcedure) => s.status === "emergency").length} {text("emergency", "طارئ")}</p>
             </div>
           </div>
 
@@ -381,7 +406,7 @@ export default function HospitalPortal() {
               <Badge variant="outline" className="ml-auto">{(data?.orSchedule ?? []).length} {text("procedures today", "إجراء اليوم")}</Badge>
             </CardHeader>
             <div className="divide-y divide-border">
-              {(data?.orSchedule ?? []).map((op: any, i: number) => {
+              {(data?.orSchedule as OrProcedure[] ?? []).map((op: OrProcedure, i: number) => {
                 const cfg = OR_STATUS[op.status as keyof typeof OR_STATUS] ?? OR_STATUS.scheduled;
                 return (
                   <div key={i} className={`p-5 ${op.status === "emergency" ? "bg-destructive/10/30" : op.status === "in_progress" ? "bg-[hsl(var(--risk-low)/0.1)]/30" : ""}`}>
@@ -429,7 +454,7 @@ export default function HospitalPortal() {
               <Badge variant="outline" className="ml-auto">{text("Sorted by risk %", "مرتب حسب نسبة الخطر")}</Badge>
             </CardHeader>
             <div className="divide-y divide-border">
-              {(data?.readmissionRisks ?? []).map((p: any, i: number) => (
+              {(data?.readmissionRisks as ReadmissionRisk[] ?? []).map((p: ReadmissionRisk, i: number) => (
                 <div key={i} className={`p-5 ${p.readmissionRisk >= 80 ? "bg-destructive/10/30" : p.readmissionRisk >= 60 ? "bg-risk-high-bg/20" : ""}`}>
                   <div className="flex items-center gap-4">
                     <div className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center shrink-0 ${p.readmissionRisk >= 80 ? "bg-danger-bg" : p.readmissionRisk >= 60 ? "bg-risk-high-bg" : "bg-secondary"}`}>
