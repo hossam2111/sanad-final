@@ -22,6 +22,13 @@
       "when": 1751068800000,
       "tag": "0003_consent_composite_index",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1751155200000,
+      "tag": "0004_appointments_avail_index",
+      "breakpoints": true
     }
   ]
 }

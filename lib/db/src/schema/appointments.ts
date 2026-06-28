@@ -20,8 +20,8 @@ export const appointmentsTable = pgTable("appointments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (t) => [
   index("idx_appointments_patient_id").on(t.patientId),
-  index("idx_appointments_date").on(t.appointmentDate),
-  index("idx_appointments_status").on(t.status),
+  // Availability-check query: WHERE appointment_date=? AND hospital=? AND department=? AND status='confirmed'
+  index("idx_appointments_avail_check").on(t.appointmentDate, t.hospital, t.department),
 ]);
 
 export type Appointment = typeof appointmentsTable.$inferSelect;
