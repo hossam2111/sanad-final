@@ -71,8 +71,15 @@ export default function AIControlCenter() {
 
   const { data: metrics, isLoading: loadingMetrics } = useQuery<AiMetrics>({ queryKey: ["ai-metrics"], queryFn: fetchMetrics, refetchInterval: 30000 });
   const { data: drift, isLoading: loadingDrift } = useQuery<DriftData>({ queryKey: ["ai-drift"], queryFn: fetchDrift, refetchInterval: 30000 });
-  const { data: jobs } = useQuery({ queryKey: ["retraining-jobs-new"], queryFn: async () => apiFetch("/api/ai-control/retrain-jobs").then(r => r.json()), refetchInterval: 5000 });
-  const { data: featureData } = useQuery({ queryKey: ["ai-features"], queryFn: async () => apiFetch("/api/ai-control/features").then(r => r.json()), refetchInterval: 5000 });
+  const { data: jobs } = useQuery({
+    queryKey: ["retraining-jobs-new"],
+    queryFn: async () => apiFetch("/api/ai-control/retrain-jobs").then(r => r.json()),
+    refetchInterval: (query) => {
+      const jobList = (query.state.data as { jobs?: Array<{ status: string }> })?.jobs ?? [];
+      return jobList.some(j => j.status === "queued" || j.status === "running") ? 5000 : 60000;
+    },
+  });
+  const { data: featureData } = useQuery({ queryKey: ["ai-features"], queryFn: async () => apiFetch("/api/ai-control/features").then(r => r.json()), refetchInterval: 60000 });
 
   const featureToggles = featureData?.features ?? {};
 
