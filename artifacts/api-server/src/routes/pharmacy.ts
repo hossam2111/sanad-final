@@ -319,12 +319,14 @@ router.post("/dispense/:medicationId", validate(dispenseSchema), async (req, res
     .returning();
   if (!med) return res.status(404).json({ error: "Prescription not found" });
 
-  const patients = await db.select().from(patientsTable).where(eq(patientsTable.id, med.patientId)).limit(1);
+  const [patients, activeMeds] = await Promise.all([
+    db.select().from(patientsTable).where(eq(patientsTable.id, med.patientId)).limit(1),
+    db.select().from(medicationsTable).where(and(eq(medicationsTable.patientId, med.patientId), eq(medicationsTable.isActive, true))).limit(50),
+  ]);
   if (!patients.length) return res.status(404).json({ error: "Patient not found" });
 
   const patient = patients[0]!;
-  const allMeds = await db.select().from(medicationsTable).where(eq(medicationsTable.patientId, med.patientId));
-  const dispenseCheck = aiDispenseCheck(med.drugName, { allergies: patient.allergies, medications: allMeds });
+  const dispenseCheck = aiDispenseCheck(med.drugName, { allergies: patient.allergies, medications: activeMeds });
   const insurance = checkInsuranceEligibility(med.drugName, patient.chronicConditions ?? [], patient.id);
 
   await db.insert(eventsTable).values({
