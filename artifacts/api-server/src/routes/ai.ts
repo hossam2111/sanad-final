@@ -230,43 +230,34 @@ router.get("/decision/:patientId", async (req, res) => {
     behavioralFlags: decision.behavioralFlags,
   }).returning();
 
-  await db.insert(eventsTable).values({
-    eventType: "AI_DECISION_MADE",
-    patientId,
-    payload: {
-      urgency: decision.urgency,
-      riskScore: decision.riskScore,
-      riskLevel: decision.riskLevel,
-      primaryAction: decision.primaryAction,
-      confidence: decision.confidence,
-      decisionId: saved?.id,
-    },
-    aiDecisionId: saved?.id,
-    source: "decision_engine_v3",
-  });
-
-  await db.update(patientsTable)
-    .set({ riskScore: decision.riskScore, updatedAt: new Date() })
-    .where(eq(patientsTable.id, patientId));
-
+  const decisionId = saved?.id;
   const { ipAddress, userAgent } = extractRequestMeta(req);
-  await writeAudit({
-    who: "AI Decision Engine v3",
-    whoRole: "ai_system",
-    action: "AI_DECISION",
-    what: `Urgency=${decision.urgency.toUpperCase()} · Risk=${decision.riskScore}/100 · Action="${decision.primaryAction.substring(0, 80)}"`,
-    patientId,
-    details: {
-      decisionId: saved?.id,
-      factors: decision.whyFactors.length,
+
+  // event log, risk-score update, and audit all go in parallel — none depends on the others
+  await Promise.all([
+    db.insert(eventsTable).values({
+      eventType: "AI_DECISION_MADE",
+      patientId,
+      payload: { urgency: decision.urgency, riskScore: decision.riskScore, riskLevel: decision.riskLevel, primaryAction: decision.primaryAction, confidence: decision.confidence, decisionId },
+      aiDecisionId: decisionId,
+      source: "decision_engine_v3",
+    }).catch(() => {}),
+    db.update(patientsTable)
+      .set({ riskScore: decision.riskScore, updatedAt: new Date() })
+      .where(eq(patientsTable.id, patientId)),
+    writeAudit({
+      who: "AI Decision Engine v3",
+      whoRole: "ai_system",
+      action: "AI_DECISION",
+      what: `Urgency=${decision.urgency.toUpperCase()} · Risk=${decision.riskScore}/100 · Action="${decision.primaryAction.substring(0, 80)}"`,
+      patientId,
+      details: { decisionId, factors: decision.whyFactors.length, confidence: decision.confidence, urgency: decision.urgency },
+      aiDecisionId: decisionId,
       confidence: decision.confidence,
-      urgency: decision.urgency,
-    },
-    aiDecisionId: saved?.id,
-    confidence: decision.confidence,
-    ipAddress,
-    userAgent,
-  });
+      ipAddress,
+      userAgent,
+    }),
+  ]);
 
   res.json({
     patientId,
