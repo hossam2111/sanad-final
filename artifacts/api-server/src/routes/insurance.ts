@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, visitsTable, labResultsTable, claimReviewsTable } from "@workspace/db/schema";
-import { eq, desc, count, sql } from "drizzle-orm";
+import { eq, desc, count, sql, inArray } from "drizzle-orm";
 import { validate } from "../middlewares/validate.js";
 import { getConsentState, requireOwnNationalId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
@@ -20,11 +20,16 @@ const claimDecisionSchema = z.object({
 
 const router = Router();
 
-async function getClaimOverrides(): Promise<Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }>> {
-  const reviews = await db.select().from(claimReviewsTable).orderBy(desc(claimReviewsTable.reviewedAt)).limit(1000);
+async function getPatientClaimOverrides(claimIds: string[]): Promise<Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }>> {
+  if (claimIds.length === 0) return {};
+  const reviews = await db.select().from(claimReviewsTable)
+    .where(inArray(claimReviewsTable.claimId, claimIds))
+    .orderBy(desc(claimReviewsTable.reviewedAt));
   const map: Record<string, { status: string; reviewedBy: string; reviewedAt: string; notes: string; aiReason?: string }> = {};
   for (const r of reviews) {
-    map[r.claimId] = { status: r.status, reviewedBy: r.reviewedBy, reviewedAt: r.reviewedAt.toISOString(), notes: r.notes ?? "", aiReason: r.aiReason ?? undefined };
+    if (!(r.claimId in map)) {
+      map[r.claimId] = { status: r.status, reviewedBy: r.reviewedBy, reviewedAt: r.reviewedAt.toISOString(), notes: r.notes ?? "", aiReason: r.aiReason ?? undefined };
+    }
   }
   return map;
 }
@@ -122,9 +127,11 @@ router.get("/patient/:nationalId", async (req, res) => {
     { factor: "Behavioral Adjustment", amount: anomalyScore >= 30 ? 80 : 0, color: "#06b6d4" },
   ].filter(x => x.amount > 0);
 
-  const claimOverrides = await getClaimOverrides();
-  const claims = visits.slice(0, 10).map((v, i) => {
-    const overrideKey = `CLM-2025-${String(p.id).padStart(3, "0")}${String(i + 1).padStart(2, "0")}`;
+  const claimSlice = visits.slice(0, 10);
+  const claimIds = claimSlice.map((_, i) => `CLM-2025-${String(p.id).padStart(3, "0")}${String(i + 1).padStart(2, "0")}`);
+  const claimOverrides = await getPatientClaimOverrides(claimIds);
+  const claims = claimSlice.map((v, i) => {
+    const overrideKey = claimIds[i]!;
     const override = claimOverrides[overrideKey];
     const claimAnomaly = computeClaimAnomalyScore(v, visits);
     return {
@@ -183,40 +190,53 @@ router.get("/dashboard", async (req, res) => {
     return;
   }
 
-  const [allVisits, [riskAgg], [totalPatientsRow]] = await Promise.all([
-    db.select().from(visitsTable).orderBy(desc(visitsTable.visitDate)).limit(200),
+  const [[visitAgg], [riskAgg], monthRows] = await Promise.all([
     db.select({
-      total:    sql<number>`COUNT(*)`.mapWith(Number),
-      highRisk: sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 70)`.mapWith(Number),
-      critical: sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 85)`.mapWith(Number),
-      low:      sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} < 40)`.mapWith(Number),
-      medium:   sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 40 AND ${patientsTable.riskScore} < 70)`.mapWith(Number),
+      total:     sql<number>`COUNT(*)::int`.mapWith(Number),
+      emergency: sql<number>`COUNT(*) FILTER (WHERE ${visitsTable.visitType} = 'emergency')::int`.mapWith(Number),
+      inpatient: sql<number>`COUNT(*) FILTER (WHERE ${visitsTable.visitType} = 'inpatient')::int`.mapWith(Number),
+      outpatient:sql<number>`COUNT(*) FILTER (WHERE ${visitsTable.visitType} = 'outpatient')::int`.mapWith(Number),
+    }).from(visitsTable),
+    db.select({
+      total:    sql<number>`COUNT(*)::int`.mapWith(Number),
+      highRisk: sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 70)::int`.mapWith(Number),
+      critical: sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 85)::int`.mapWith(Number),
+      low:      sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} < 40)::int`.mapWith(Number),
+      medium:   sql<number>`COUNT(*) FILTER (WHERE ${patientsTable.riskScore} >= 40 AND ${patientsTable.riskScore} < 70)::int`.mapWith(Number),
     }).from(patientsTable),
-    db.select({ count: count() }).from(patientsTable),
+    db.select({
+      monthIdx:  sql<number>`EXTRACT(MONTH FROM ${visitsTable.visitDate}::date)::int`.mapWith(Number),
+      total:     sql<number>`COUNT(*)::int`.mapWith(Number),
+      emergency: sql<number>`COUNT(*) FILTER (WHERE ${visitsTable.visitType} = 'emergency')::int`.mapWith(Number),
+      inpatient: sql<number>`COUNT(*) FILTER (WHERE ${visitsTable.visitType} = 'inpatient')::int`.mapWith(Number),
+      outpatient:sql<number>`COUNT(*) FILTER (WHERE ${visitsTable.visitType} = 'outpatient')::int`.mapWith(Number),
+    }).from(visitsTable).groupBy(sql`EXTRACT(MONTH FROM ${visitsTable.visitDate}::date)`),
   ]);
 
-  const totalPolicies = Number(totalPatientsRow?.count ?? 0);
+  const totalPolicies = riskAgg?.total ?? 0;
   const highRiskPatients = riskAgg?.highRisk ?? 0;
   const criticalPatients = riskAgg?.critical ?? 0;
 
-  const totalClaims = allVisits.length;
+  const emergencyVisits = visitAgg?.emergency ?? 0;
+  const inpatientVisits = visitAgg?.inpatient ?? 0;
+  const outpatientVisits = visitAgg?.outpatient ?? 0;
+  const totalClaims = visitAgg?.total ?? 0;
   const pendingClaims = Math.round(totalClaims * 0.12);
   const approvedClaims = Math.round(totalClaims * 0.76);
   const rejectedClaims = Math.round(totalClaims * 0.08);
   const fraudSuspected = Math.max(1, Math.round(totalClaims * 0.05));
-  const emergencyVisits = allVisits.filter(v => v.visitType === "emergency").length;
-  const inpatientVisits = allVisits.filter(v => v.visitType === "inpatient").length;
-  const outpatientVisits = allVisits.filter(v => v.visitType === "outpatient").length;
   const totalPayout = emergencyVisits * 3200 + inpatientVisits * 8500 + outpatientVisits * 450;
 
-  const trendData = Array.from({ length: 12 }, (_, i) => {
-    const month = new Date(2025, i, 1).toLocaleString("en", { month: "short" });
-    const monthVisits = allVisits.filter(v => new Date(v.visitDate).getMonth() === i);
-    const monthPayout = monthVisits.filter(v => v.visitType === "emergency").length * 3200
-      + monthVisits.filter(v => v.visitType === "inpatient").length * 8500
-      + monthVisits.filter(v => v.visitType === "outpatient").length * 450;
-    const monthFraud = monthVisits.filter(v => computeClaimAnomalyScore(v, allVisits).score >= 50).length;
-    return { month, claims: monthVisits.length, fraud: monthFraud, payout: monthPayout };
+  const monthByIdx = new Map(monthRows.map(r => [r.monthIdx, r]));
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const trendData = MONTHS.map((month, i) => {
+    const row = monthByIdx.get(i + 1);
+    const e = row?.emergency ?? 0;
+    const ip = row?.inpatient ?? 0;
+    const op = row?.outpatient ?? 0;
+    const claims = row?.total ?? 0;
+    const payout = e * 3200 + ip * 8500 + op * 450;
+    return { month, claims, fraud: Math.round(claims * 0.05), payout };
   });
 
   res.json({
