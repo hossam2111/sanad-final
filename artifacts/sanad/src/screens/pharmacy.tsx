@@ -826,15 +826,20 @@ export default function PharmacyPortal() {
                             </div>
                           </div>
                           {!isDispensed ? (
-                            <Button
-                              onClick={() => { setDispensingId(presc.id); dispenseMutation.mutate({ id: presc.id }); }}
-                              disabled={dispenseMutation.isPending && dispensingId === presc.id}
-                              variant={check.safe ? "primary" : "outline"}
-                              className={`shrink-0 ${check.safe ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "border-danger/30 text-danger hover:bg-danger-bg"}`}
-                            >
-                              <Zap className="w-3.5 h-3.5" />
-                              {dispensingId === presc.id && dispenseMutation.isPending ? text("Dispensing...", "جارٍ الصرف...") : check.safe ? text("Dispense", "صرف") : text("Override & Dispense", "تجاوز وصرف")}
-                            </Button>
+                            <div className="flex flex-col items-end gap-1">
+                              {dispensingId === presc.id && dispenseMutation.isError && (
+                                <p className="text-xs text-danger">{text("Dispense failed — try again.", "فشل الصرف — حاول مرة أخرى.")}</p>
+                              )}
+                              <Button
+                                onClick={() => { setDispensingId(presc.id); dispenseMutation.mutate({ id: presc.id }); }}
+                                disabled={dispenseMutation.isPending && dispensingId === presc.id}
+                                variant={check.safe ? "primary" : "outline"}
+                                className={`shrink-0 ${check.safe ? "bg-primary hover:bg-primary/90 text-primary-foreground" : "border-danger/30 text-danger hover:bg-danger-bg"}`}
+                              >
+                                <Zap className="w-3.5 h-3.5" />
+                                {dispensingId === presc.id && dispenseMutation.isPending ? text("Dispensing...", "جارٍ الصرف...") : check.safe ? text("Dispense", "صرف") : text("Override & Dispense", "تجاوز وصرف")}
+                              </Button>
+                            </div>
                           ) : (
                             <div className="flex items-center gap-2 text-xs font-bold text-success shrink-0">
                               <CheckCircle2 className="w-4 h-4" />

@@ -516,6 +516,9 @@ export default function LabPortal() {
                     onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
                   />
                 </div>
+                {submitMutation.isError && (
+                  <p className="text-sm text-danger">{text("Submission failed — please try again.", "فشل الإرسال — يرجى المحاولة مرة أخرى.")}</p>
+                )}
                 <div className="flex items-center gap-3">
                   <Button
                     onClick={() => submitMutation.mutate(form as Record<string, string>)}
