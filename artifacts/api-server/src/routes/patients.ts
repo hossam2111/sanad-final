@@ -2,9 +2,9 @@ import { Router } from "express";
 import { z } from "zod";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, visitsTable, labResultsTable, alertsTable } from "@workspace/db/schema";
-import { eq, ilike, or, and, desc, count, isNull } from "drizzle-orm";
+import { eq, ilike, or, and, desc, count, isNull, sql, gte } from "drizzle-orm";
 import { calculateRiskScore } from "../lib/ai-engine.js";
-import { writeAudit, writeAuditAsync, extractRequestMeta } from "../lib/audit.js";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { validate } from "../middlewares/validate.js";
 import { CLINICAL_ROLES, getStaffHospitalId } from "../lib/ownership.js";
 
@@ -22,6 +22,65 @@ const createPatientSchema = z.object({
 });
 
 const router = Router();
+
+async function sendPatientDetail(
+  req: import("express").Request,
+  res: import("express").Response,
+  p: typeof patientsTable.$inferSelect,
+  auditLabel: string,
+): Promise<void> {
+  const oneYearAgo = new Date();
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+  const oneYearAgoStr = oneYearAgo.toISOString().split("T")[0]!;
+
+  const [
+    medications, visits, labResults, alerts,
+    [activeMedsRow], [abnormalLabsRow], [recentVisitsRow],
+  ] = await Promise.all([
+    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(100),
+    db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(100),
+    db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(100),
+    db.select().from(alertsTable).where(eq(alertsTable.patientId, p.id)).orderBy(desc(alertsTable.createdAt)).limit(50),
+    db.select({ cnt: count() }).from(medicationsTable).where(and(eq(medicationsTable.patientId, p.id), eq(medicationsTable.isActive, true))),
+    db.select({ cnt: count() }).from(labResultsTable).where(and(eq(labResultsTable.patientId, p.id), sql`${labResultsTable.status} != 'normal'`)),
+    db.select({ cnt: count() }).from(visitsTable).where(and(eq(visitsTable.patientId, p.id), gte(visitsTable.visitDate, oneYearAgoStr))),
+  ]);
+
+  const riskData = calculateRiskScore({
+    dateOfBirth: p.dateOfBirth,
+    chronicConditions: p.chronicConditions,
+    allergies: p.allergies,
+    medicationCount:    Number(activeMedsRow?.cnt  ?? 0),
+    recentAbnormalLabs: Number(abnormalLabsRow?.cnt ?? 0),
+    visitFrequency:     Number(recentVisitsRow?.cnt ?? 0),
+  });
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+
+  if (riskData.riskScore !== p.riskScore) {
+    db.update(patientsTable).set({ riskScore: riskData.riskScore }).where(eq(patientsTable.id, p.id)).catch(() => {});
+  }
+
+  void writeAudit({
+    who: req.userId ?? req.role ?? "unknown",
+    whoName: req.userName,
+    whoRole: req.role ?? "unknown",
+    action: "READ",
+    what: auditLabel,
+    patientId: p.id,
+    ipAddress,
+    userAgent,
+  }).then(() => {}).catch(() => {});
+
+  res.json({
+    ...p,
+    medications,
+    visits,
+    labResults,
+    alerts,
+    riskScore: riskData.riskScore,
+  });
+}
 
 router.get("/", async (req, res) => {
   // Citizens can only search their own record (BOLA enforcement on list endpoint)
@@ -112,54 +171,7 @@ router.get("/national/:nationalId", async (req, res) => {
       return;
     }
   }
-  const [medications, visits, labResults, alerts] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(200),
-    db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(200),
-    db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(200),
-    db.select().from(alertsTable).where(eq(alertsTable.patientId, p.id)).orderBy(desc(alertsTable.createdAt)).limit(100),
-  ]);
-
-  const abnormalLabs = labResults.filter(l => l.status !== "normal").length;
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const recentVisits = visits.filter(v => new Date(v.visitDate) >= oneYearAgo).length;
-
-  const riskData = calculateRiskScore({
-    dateOfBirth: p.dateOfBirth,
-    chronicConditions: p.chronicConditions,
-    allergies: p.allergies,
-    medicationCount: medications.filter(m => m.isActive).length,
-    recentAbnormalLabs: abnormalLabs,
-    visitFrequency: recentVisits,
-  });
-
-  const { ipAddress, userAgent } = extractRequestMeta(req);
-
-  // Only persist risk score when it changed — saves one write per request
-  if (riskData.riskScore !== p.riskScore) {
-    db.update(patientsTable).set({ riskScore: riskData.riskScore }).where(eq(patientsTable.id, p.id)).catch(() => {});
-  }
-
-  // Audit runs in parallel with risk-score write — both after we have all data
-  void writeAudit({
-    who: req.userId ?? req.role ?? "unknown",
-    whoName: req.userName,
-    whoRole: req.role ?? "unknown",
-    action: "READ",
-    what: `Patient record accessed: ${p.fullName} (${nationalId})`,
-    patientId: p.id,
-    ipAddress,
-    userAgent,
-  }).then(() => {}).catch(() => {});
-
-  res.json({
-    ...p,
-    medications,
-    visits,
-    labResults,
-    alerts,
-    riskScore: riskData.riskScore,
-  });
+  await sendPatientDetail(req, res, p, `Patient record accessed: ${p.fullName} (${nationalId})`);
 });
 
 router.get("/:id", async (req, res) => {
@@ -199,52 +211,7 @@ router.get("/:id", async (req, res) => {
       return;
     }
   }
-  const [medications, visits, labResults, alerts] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(200),
-    db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(200),
-    db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(200),
-    db.select().from(alertsTable).where(eq(alertsTable.patientId, p.id)).orderBy(desc(alertsTable.createdAt)).limit(100),
-  ]);
-
-  const abnormalLabs = labResults.filter(l => l.status !== "normal").length;
-  const oneYearAgo = new Date();
-  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-  const recentVisits = visits.filter(v => new Date(v.visitDate) >= oneYearAgo).length;
-
-  const riskData = calculateRiskScore({
-    dateOfBirth: p.dateOfBirth,
-    chronicConditions: p.chronicConditions,
-    allergies: p.allergies,
-    medicationCount: medications.filter(m => m.isActive).length,
-    recentAbnormalLabs: abnormalLabs,
-    visitFrequency: recentVisits,
-  });
-
-  const { ipAddress, userAgent } = extractRequestMeta(req);
-
-  if (riskData.riskScore !== p.riskScore) {
-    db.update(patientsTable).set({ riskScore: riskData.riskScore }).where(eq(patientsTable.id, p.id)).catch(() => {});
-  }
-
-  void writeAudit({
-    who: req.userId ?? req.role ?? "unknown",
-    whoName: req.userName,
-    whoRole: req.role ?? "unknown",
-    action: "READ",
-    what: `Patient record accessed: ${p.fullName} (ID: ${id})`,
-    patientId: p.id,
-    ipAddress,
-    userAgent,
-  }).then(() => {}).catch(() => {});
-
-  res.json({
-    ...p,
-    medications,
-    visits,
-    labResults,
-    alerts,
-    riskScore: riskData.riskScore,
-  });
+  await sendPatientDetail(req, res, p, `Patient record accessed: ${p.fullName} (ID: ${id})`);
 });
 
 router.post("/", validate(createPatientSchema), async (req, res) => {
