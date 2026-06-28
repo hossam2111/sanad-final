@@ -126,7 +126,11 @@ const COHORT_RADAR = [
   { metric: "Heart Disease", A: 22, B: 10 },
 ];
 
-const STATUS_CONFIG: Record<string, { bg: string; border: string; badge: any; dot: string; label: string; labelAr: string }> = {
+type BadgeVariant = "success" | "warning" | "info" | "destructive" | "outline" | "default";
+type ClinicalFinding = { finding: string; significance: string; recommendation: string };
+type ConditionInsight = { condition: string; prevalence: number; avgRiskScore: number; patientCount: number; trend: string };
+
+const STATUS_CONFIG: Record<string, { bg: string; border: string; badge: BadgeVariant; dot: string; label: string; labelAr: string }> = {
   active: { bg: "bg-success-bg", border: "border-success/30", badge: "success" as const, dot: "bg-success animate-pulse", label: "Active", labelAr: "نشط" },
   recruiting: { bg: "bg-info-bg", border: "border-info/20", badge: "info" as const, dot: "bg-info animate-pulse", label: "Recruiting", labelAr: "في طور التجنيد" },
   completed: { bg: "bg-secondary", border: "border-border", badge: "outline" as const, dot: "bg-muted-foreground", label: "Completed", labelAr: "مكتمل" },
@@ -201,10 +205,24 @@ export default function ResearchPortal() {
         </div>
       </div>
 
-      <PageHeader
-        title={text("Clinical Research & Population Analytics", "البحث السريري وتحليلات السكان")}
-        subtitle={text("Anonymized population-level health intelligence · Clinical study management · Disease correlation engine · National insights", "ذكاء صحي مجهّل على مستوى السكان · إدارة الدراسات السريرية · محرك ارتباط الأمراض · رؤى وطنية")}
-      />
+      <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
+        <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                <Microscope className="w-6 h-6 text-primary" />
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                {text("Clinical Research & Population Analytics", "البحث السريري وتحليلات السكان")}
+              </h1>
+            </div>
+            <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+              {text("Anonymized population-level health intelligence · Clinical study management · Disease correlation engine · National insights", "ذكاء صحي مجهّل على مستوى السكان · إدارة الدراسات السريرية · محرك ارتباط الأمراض · رؤى وطنية")}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -243,7 +261,7 @@ export default function ResearchPortal() {
               <Badge variant="warning">{data?.clinicalFindings?.length} {text("insights", "رؤية")}</Badge>
             </CardHeader>
             <CardBody className="space-y-3">
-              {data?.clinicalFindings?.map((f: any, i: number) => (
+              {data?.clinicalFindings?.map((f: ClinicalFinding, i: number) => (
                 <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${f.significance === "high" ? "bg-risk-high-bg border-risk-high/20" : "bg-info-bg border-info/20"}`}>
                   <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${f.significance === "high" ? "bg-risk-high" : "bg-info"}`} />
                   <div className="flex-1">
@@ -285,7 +303,7 @@ export default function ResearchPortal() {
                           <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
                           <XAxis type="number" hide />
                           <YAxis dataKey="condition" type="category" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--foreground))", fontSize: 10, fontWeight: 500 }} width={155} />
-                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any) => [`${v}%`, "Prevalence"]} />
+                          <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: number | string) => [`${v}%`, "Prevalence"]} />
                           <Bar dataKey="prevalence" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={14} />
                         </BarChart>
                       </ResponsiveContainer></div>
@@ -295,7 +313,7 @@ export default function ResearchPortal() {
                 <Card className="col-span-full lg:col-span-5">
                   <CardHeader><CardTitle>{text("Condition Trend Analysis", "تحليل اتجاهات الحالات")}</CardTitle></CardHeader>
                   <CardBody className="space-y-2 max-h-72 overflow-y-auto">
-                    {data?.conditionInsights?.map((c: any, i: number) => {
+                    {data?.conditionInsights?.map((c: ConditionInsight, i: number) => {
                       const cfg = TREND_CONFIG[c.trend as keyof typeof TREND_CONFIG] ?? TREND_CONFIG.stable;
                       return (
                         <div key={i} className={`flex items-center gap-3 px-3 py-2.5 ${cfg.bg} border ${cfg.border} rounded-xl`}>
@@ -325,7 +343,7 @@ export default function ResearchPortal() {
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                         <XAxis dataKey="test" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} angle={-20} textAnchor="end" dy={8} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                        <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n === "abnormalRate" ? "Abnormal Rate" : "Critical Rate"]} />
+                        <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: number | string, n: string) => [`${v}%`, n === "abnormalRate" ? "Abnormal Rate" : "Critical Rate"]} />
                         <Legend />
                         <Bar dataKey="abnormalRate" fill="hsl(var(--warning))" radius={[4, 4, 0, 0]} barSize={28} name="Abnormal Rate" />
                         <Bar dataKey="criticalRate" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} barSize={28} name="Critical Rate" />
@@ -498,7 +516,7 @@ export default function ResearchPortal() {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                     <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} unit="%" />
-                    <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n]} />
+                    <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: number | string, n: string) => [`${v}%`, n]} />
                     <Legend />
                     <Area type="monotone" dataKey="diabetes" stroke="hsl(var(--warning))" fill="url(#colorDiabetes)" strokeWidth={2.5} name="Type-2 Diabetes" />
                     <Area type="monotone" dataKey="hypertension" stroke="hsl(var(--destructive))" fill="url(#colorHypertension)" strokeWidth={2.5} name="Hypertension" />
@@ -643,7 +661,7 @@ export default function ResearchPortal() {
                       <Radar name="AI Cohort" dataKey="A" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive))" fillOpacity={0.15} strokeWidth={2} />
                       <Radar name="Standard Care" dataKey="B" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} strokeWidth={2} />
                       <Legend />
-                      <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: any, n: string) => [`${v}%`, n]} />
+                      <RechartsTooltip contentStyle={{ borderRadius: "12px", border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 12 }} formatter={(v: number | string, n: string) => [`${v}%`, n]} />
                     </RadarChart>
                   </ResponsiveContainer></div>
                 </div>
