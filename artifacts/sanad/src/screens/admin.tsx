@@ -513,8 +513,8 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="dashboard" dir={dir}>
-        <div className="mb-6">
-          <TabsList>
+        <div className="mb-6 overflow-x-auto pb-1">
+          <TabsList className="min-w-max">
             <TabsTrigger value="dashboard">{text("Dashboard", "لوحة القيادة")}</TabsTrigger>
             <TabsTrigger value="system">{text("System Health", "صحة النظام")}</TabsTrigger>
             <TabsTrigger value="ai-gov">{text("AI Governance", "حوكمة الذكاء")}</TabsTrigger>
@@ -736,7 +736,7 @@ export default function AdminDashboard() {
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                     <Zap className="w-3.5 h-3.5 text-risk-high" /> {text("AI Engine Cluster — 9 Active Engines", "عنقود محرّكات الذكاء — 9 محرّكات نشطة")}
                   </p>
-                  <div className="grid grid-cols-3 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
                     {[
                       { name: "Risk Scoring Engine", status: "online", version: "v4.2" },
                       { name: "Decision Engine", status: "online", version: "v3.0" },
@@ -765,7 +765,7 @@ export default function AdminDashboard() {
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Radio className="w-3.5 h-3.5 text-danger" /> {text("Epidemic Radar — Disease Surveillance", "رادار الأوبئة — ترصّد الأمراض")}
                     </p>
-                    <div className="grid grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {(intelligence as IntelligenceData).epidemicRadar.map((item: EpidemicRadarItem, i: number) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3.5 rounded-2xl border ${
                           item.alert === "high" ? "bg-destructive/10 border-danger/20" : item.alert === "medium" ? "bg-risk-high-bg border-risk-high/20" : "bg-secondary border-border"
@@ -1024,7 +1024,7 @@ export default function AdminDashboard() {
                   <KpiCard title={text("Critical Patients","المرضى الحرجون")} value={critPts.toLocaleString()} sub={text("Score ≥ 70 — immediate action","نتيجة ≥ 70 — تدخل فوري")} icon={AlertTriangle} iconBg="bg-danger-bg" iconColor="text-danger" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Urgency breakdown */}
                   <Card>
                     <CardHeader><Zap className="w-4 h-4 text-warning"/><CardTitle>{text("Decision Urgency Breakdown","توزيع إلحاحية القرارات")}</CardTitle></CardHeader>
@@ -1091,15 +1091,15 @@ export default function AdminDashboard() {
         {/* ── Identity & Access Management (IAM) ─────────────────────────────────────── */}
         <TabsContent value="users">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
                 <p className="font-bold text-foreground text-lg flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-primary" />
-                  {text("Identity & Access Management (IAM)", "إدارة الهوية والصلاحيات (IAM)")}
+                  <Shield className="w-5 h-5 text-primary shrink-0" />
+                  <span className="truncate">{text("Identity & Access Management (IAM)", "إدارة الهوية والصلاحيات (IAM)")}</span>
                 </p>
                 <p className="text-sm text-muted-foreground mt-0.5">{text("Role-Based Access Control (RBAC) securely integrated with national ID systems.", "نظام إدارة صلاحيات آمن (RBAC) متصل مع أنظمة الهوية الوطنية.")}</p>
               </div>
-              <button onClick={() => setShowAddUserModal(true)} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors">
+              <button onClick={() => setShowAddUserModal(true)} className="shrink-0 flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors">
                 {text("+ Add User / Invite", "+ إضافة مستخدم / دعوة")}
               </button>
             </div>
@@ -1194,7 +1194,7 @@ export default function AdminDashboard() {
 
         {/* ── Maintenance ───────────────────────────────────────── */}
         <TabsContent value="maintenance">
-          <div className="grid grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {/* Reset Demo */}
             <Card>
               <CardHeader><RefreshCw className="w-4 h-4 text-warning"/><CardTitle>{text("Demo Environment","بيئة العرض")}</CardTitle></CardHeader>
