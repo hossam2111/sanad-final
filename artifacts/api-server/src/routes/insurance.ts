@@ -2,7 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { db } from "@workspace/db";
 import { patientsTable, medicationsTable, visitsTable, labResultsTable, claimReviewsTable } from "@workspace/db/schema";
-import { eq, desc, count, sql, inArray } from "drizzle-orm";
+import { eq, desc, count, sql, inArray, and } from "drizzle-orm";
 import { validate } from "../middlewares/validate.js";
 import { getConsentState, requireOwnNationalId } from "../lib/ownership.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
@@ -34,7 +34,7 @@ async function getPatientClaimOverrides(claimIds: string[]): Promise<Record<stri
   return map;
 }
 
-function computeAnomalyScore(visits: (typeof visitsTable.$inferSelect)[], meds: (typeof medicationsTable.$inferSelect)[], riskScore: number): { score: number; factors: Array<{ label: string; weight: number; value: string; flag: boolean }> } {
+function computeAnomalyScore(visits: (typeof visitsTable.$inferSelect)[], activeMedCount: number, riskScore: number): { score: number; factors: Array<{ label: string; weight: number; value: string; flag: boolean }> } {
   const factors: Array<{ label: string; weight: number; value: string; flag: boolean }> = [];
   const emergencyCount = visits.filter(v => v.visitType === "emergency").length;
   const emergencyFlag = emergencyCount >= 3;
@@ -50,9 +50,8 @@ function computeAnomalyScore(visits: (typeof visitsTable.$inferSelect)[], meds: 
   const multiHospital = hospitals.length >= 4;
   factors.push({ label: "Multi-Hospital Routing", weight: multiHospital ? 18 : 4, value: `${hospitals.length} distinct hospitals`, flag: multiHospital });
 
-  const activeCount = meds.filter(m => m.isActive).length;
-  const polyPharmacy = activeCount >= 7;
-  factors.push({ label: "Polypharmacy Pattern", weight: polyPharmacy ? 15 : 5, value: `${activeCount} concurrent medications`, flag: polyPharmacy });
+  const polyPharmacy = activeMedCount >= 7;
+  factors.push({ label: "Polypharmacy Pattern", weight: polyPharmacy ? 15 : 5, value: `${activeMedCount} concurrent medications`, flag: polyPharmacy });
 
   const highCost = visits.filter(v => v.visitType === "inpatient").length >= 3;
   factors.push({ label: "High-Cost Admission Pattern", weight: highCost ? 12 : 3, value: `${visits.filter(v => v.visitType === "inpatient").length} inpatient admissions`, flag: highCost });
@@ -97,14 +96,15 @@ router.get("/patient/:nationalId", async (req, res) => {
     });
     return;
   }
-  const [medications, visits, labs] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(200),
+  const [[activeMedsRow], visits, labs] = await Promise.all([
+    db.select({ cnt: count() }).from(medicationsTable).where(and(eq(medicationsTable.patientId, p.id), eq(medicationsTable.isActive, true))),
     db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(20),
     db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(10),
   ]);
+  const activeMedCount = activeMedsRow?.cnt ?? 0;
   const riskScore = p.riskScore ?? 0;
   const age = new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear();
-  const { score: anomalyScore, factors: anomalyFactors } = computeAnomalyScore(visits, medications, riskScore);
+  const { score: anomalyScore, factors: anomalyFactors } = computeAnomalyScore(visits, activeMedCount, riskScore);
   const fraudRisk = anomalyScore >= 50 ? "high" : anomalyScore >= 25 ? "medium" : "low";
   const fraudFlags: string[] = anomalyFactors.filter(f => f.flag).map(f => f.label + " — " + f.value);
 
@@ -164,7 +164,7 @@ router.get("/patient/:nationalId", async (req, res) => {
     riskMultiplier,
     premiumBreakdown,
     claims,
-    activeMeds: medications.filter(m => m.isActive).length,
+    activeMeds: activeMedCount,
     totalClaims: claims.length,
     totalClaimValue: claims.reduce((sum, c) => sum + c.estimatedCost, 0),
     coverageStatus: "active",
