@@ -557,7 +557,7 @@ export default function DoctorDashboard() {
         </div>
       )}
 
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-6 gap-4">
         <PageHeader
           title={text("Physician Dashboard", "لوحة الطبيب")}
           subtitle={text(
@@ -565,7 +565,7 @@ export default function DoctorDashboard() {
             "السجلات السريرية للمرضى، ووصف الأدوية، وتحليل المخاطر بمساعدة الذكاء الاصطناعي، والتنبيهات التنبؤية.",
           )}
         />
-        <div className="flex items-center gap-2 shrink-0 ml-6">
+        <div className="flex flex-wrap items-center gap-2 shrink-0 sm:ml-6">
           {/* SSE Real-time Alert Bell */}
           <div className="relative">
             <button
@@ -593,7 +593,7 @@ export default function DoctorDashboard() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder={text("Name or National ID...", "الاسم أو رقم الهوية...")}
-              className="pl-9 w-64"
+              className="pl-9 w-48 sm:w-64"
               value={searchQuery || searchId}
               onChange={(e) => {
                 const v = e.target.value;
@@ -1106,7 +1106,7 @@ export default function DoctorDashboard() {
                 )}
 
                 {/* Conditions + Allergies */}
-                <div className="grid grid-cols-2 divide-x divide-border">
+                <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-border">
                   <div className="p-5">
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Activity className="w-3.5 h-3.5" /> {text("Chronic Conditions", "الأمراض المزمنة")}
@@ -1562,7 +1562,7 @@ export default function DoctorDashboard() {
                     </div>
 
                     {/* WHY Factors */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                           <TriangleAlert className="w-3.5 h-3.5 text-risk-high" /> {text("WHY — Clinical Factors", "المُبرّرات — العوامل السريرية")}
@@ -1913,8 +1913,8 @@ export default function DoctorDashboard() {
 
             {activeTab === "intelligence" && riskScore && (
               <div className="p-5">
-                <div className="flex items-start gap-6">
-                  <div className="rounded-2xl p-6 min-w-[200px] text-center border"
+                <div className="flex flex-col sm:flex-row items-start gap-6">
+                  <div className="rounded-2xl p-6 w-full sm:min-w-[200px] sm:w-auto text-center border"
                     style={{
                       background: `hsl(var(--risk-${riskScore.riskLevel}-bg))`,
                       borderColor: `hsl(var(--risk-${riskScore.riskLevel}) / 0.2)`,

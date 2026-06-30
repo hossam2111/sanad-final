@@ -223,7 +223,7 @@ export default function EmergencyPage() {
                 <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Triage Level", "مستوى الفرز")}</p>
                 <p className="text-2xl font-bold uppercase tracking-wide">{text(`${((patient as unknown as EmergencyPatient).riskLevel ?? "unknown").toUpperCase()} RISK`, `خطورة ${riskLabel((patient as unknown as EmergencyPatient).riskLevel ?? "unknown", text)}`)}</p>
               </div>
-              <div className="flex shrink-0 items-center gap-8">
+              <div className="flex shrink-0 items-center gap-6 sm:gap-8">
                 <div className="text-center">
                   <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest mb-1">{text("Priority Index", "مؤشر الأولوية")}</p>
                   <p className="text-4xl font-bold tabular-nums" dir="ltr">{(patient as unknown as EmergencyPatient).riskScore ?? "—"}</p>

@@ -142,43 +142,43 @@ export default function FamilyPortal() {
 
   return (
     <Layout role="family" localized>
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex flex-wrap items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-danger text-danger-foreground text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Users className="w-4 h-4" /> {text("Family Records", "سجلات الأسرة")}
         </div>
         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-primary bg-primary/10 px-3 py-1.5 rounded-full">
           <Dna className="w-3 h-3" /> {text("Genetic Risk Intelligence Active", "ذكاء المخاطر الوراثية نشط")}
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); if (searchId.trim()) { setNationalId(searchId.trim()); setActiveTab("tree"); } }} className="flex items-center gap-2 ms-auto">
-          <div className="relative">
+        <form onSubmit={(e) => { e.preventDefault(); if (searchId.trim()) { setNationalId(searchId.trim()); setActiveTab("tree"); } }} className="flex items-center gap-2 ms-auto w-full sm:w-auto mt-2 sm:mt-0">
+          <div className="relative flex-1 sm:flex-none">
             <Search className="absolute start-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input placeholder={text("National ID...", "رقم الهوية...")} className="ps-9 w-52" value={searchId} onChange={(e) => setSearchId(e.target.value)} />
+            <Input placeholder={text("National ID...", "رقم الهوية...")} className="ps-9 w-full sm:w-52" value={searchId} onChange={(e) => setSearchId(e.target.value)} />
           </div>
           <Button type="submit" size="md">{text("Load Family Profile", "تحميل ملف الأسرة")}</Button>
         </form>
       </div>
 
-      <div className="flex items-start justify-between mb-5">
-          <div className="mb-8 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8">
-            <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
-                    <Users className="w-6 h-6 text-primary" />
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-                    {text("Family Health & Genetic Risk Portal", "بوابة صحة الأسرة والمخاطر الوراثية")}
-                  </h1>
+      <div className="mb-5">
+        <div className="mb-4 relative rounded-3xl overflow-hidden glass-panel border border-primary/20 shadow-xl bg-gradient-to-br from-primary/10 via-background to-background p-4 sm:p-6 md:p-8">
+          <div className="absolute top-0 ltr:right-0 rtl:left-0 w-[500px] h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0">
+                  <Users className="w-6 h-6 text-primary" />
                 </div>
-                <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
-                  {text("Map familial disease inheritance, shared genetic risks, and coordinate family-wide preventive screening.", "رسم وراثة الأمراض العائلية، والمخاطر الجينية المشتركة، وتنسيق الفحص الوقائي على مستوى الأسرة.")}
-                </p>
+                <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+                  {text("Family Health & Genetic Risk Portal", "بوابة صحة الأسرة والمخاطر الوراثية")}
+                </h1>
               </div>
+              <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
+                {text("Map familial disease inheritance, shared genetic risks, and coordinate family-wide preventive screening.", "رسم وراثة الأمراض العائلية، والمخاطر الجينية المشتركة، وتنسيق الفحص الوقائي على مستوى الأسرة.")}
+              </p>
             </div>
           </div>
+        </div>
         {data && (
-          <div className="flex gap-1.5 shrink-0 ms-6">
+          <div className="flex flex-wrap gap-1.5">
             {tabs.map(t => (
               <button key={t.id} onClick={() => setActiveTab(t.id)}
                 className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full transition-all ${activeTab === t.id ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
@@ -275,7 +275,7 @@ export default function FamilyPortal() {
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
                         <span className="w-4 h-0.5 bg-border inline-block" /> {text("Parents (P1)", "الوالدان (P1)")}
                       </p>
-                      <div className={`grid gap-4 ${data.parents.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-2"}`}>
+                      <div className={`grid gap-4 ${data.parents.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-1 sm:grid-cols-2"}`}>
                         {data.parents.map((m: FamilyMember) => <FamilyMemberCard key={m.id} member={m} />)}
                       </div>
                     </div>
@@ -293,7 +293,7 @@ export default function FamilyPortal() {
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
                       <span className="w-4 h-0.5 bg-border inline-block" /> {text("Index Patient + Siblings (P2)", "المريض الأساسي والأشقّاء (P2)")}
                     </p>
-                    <div className={`grid gap-4 ${(data.siblings?.length + 1) <= 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+                    <div className={`grid gap-4 ${(data.siblings?.length + 1) <= 2 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
                       <FamilyMemberCard member={{ ...data.patient, relationship: text("Index Patient", "المريض الأساسي") }} isPatient />
                       {data.siblings?.map((m: FamilyMember) => <FamilyMemberCard key={m.id} member={m} />)}
                     </div>
@@ -308,7 +308,7 @@ export default function FamilyPortal() {
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-1.5">
                           <span className="w-4 h-0.5 bg-border inline-block" /> {text("Children (P3)", "الأبناء (P3)")}
                         </p>
-                        <div className={`grid gap-4 ${data.children.length <= 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+                        <div className={`grid gap-4 ${data.children.length <= 2 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
                           {data.children.map((m: FamilyMember) => <FamilyMemberCard key={m.id} member={m} />)}
                         </div>
                       </div>
@@ -521,7 +521,7 @@ export default function FamilyPortal() {
                 <p className="text-sm font-bold text-foreground">{text("Family-Wide Screening Protocol", "بروتوكول الفحص على مستوى الأسرة")}</p>
                 <Badge variant="success" className="ms-auto">{text(`${data.screeningRecommendations?.length} active recommendations`, `${data.screeningRecommendations?.length} توصية نشطة`)}</Badge>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {data.screeningRecommendations?.map((rec: ScreeningRec, i: number) => {
                   const priBg = rec.priority === "high" ? "bg-danger-bg border-danger/30" : rec.priority === "medium" ? "bg-info-bg border-info/30" : "bg-secondary border-border";
                   const priIcon = rec.priority === "high" ? <AlertTriangle className="w-4 h-4 text-danger shrink-0" /> : rec.priority === "medium" ? <Clock className="w-4 h-4 text-info shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-success shrink-0" />;
