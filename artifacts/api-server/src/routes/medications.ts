@@ -41,12 +41,13 @@ router.get("/", async (req, res) => {
   res.json({ medications });
 });
 
-router.post("/", validate(createMedicationSchema), async (req, res) => {
-  // Prescribing is a clinical act — non-clinical roles cannot write medications.
+router.post("/", (req, res, next) => {
   if (!isClinicalRole(req.role)) {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may prescribe medications" });
     return;
   }
+  next();
+}, validate(createMedicationSchema), async (req, res) => {
   const body = req.body as z.infer<typeof createMedicationSchema>;
   
   // Enforce hospital assignment

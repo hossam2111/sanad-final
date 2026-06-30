@@ -38,13 +38,13 @@ router.get("/", async (req, res) => {
   res.json({ visits });
 });
 
-router.post("/", validate(createVisitSchema), async (req, res) => {
-  // Recording a visit is a clinical act — non-clinical roles cannot write visits.
+router.post("/", (req, res, next) => {
   if (!isClinicalRole(req.role)) {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record visits" });
     return;
   }
-  
+  next();
+}, validate(createVisitSchema), async (req, res) => {
   const body = req.body as z.infer<typeof createVisitSchema>;
   
   // Enforce hospital assignment

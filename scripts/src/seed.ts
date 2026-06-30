@@ -575,6 +575,11 @@ async function seed() {
     { patientId: id(3), consentType: "data_sharing", purpose: "Allow SANAD Clinical Network to access medical records", grantedTo: "SANAD Clinical Network", granted: true, notes: "Granted at registration" },
     { patientId: id(3), consentType: "emergency_access", purpose: "Allow SRCA emergency access during medical emergency", grantedTo: "SRCA Emergency Services", granted: true, notes: "Granted at registration" },
     { patientId: id(3), consentType: "insurance", purpose: "Allow Tawuniya Insurance to access records for claims", grantedTo: "Tawuniya Insurance", granted: true, notes: "Granted at registration" },
+    { patientId: id(3), consentType: "family_linking", purpose: "Link health record to family for genetic risk analysis", grantedTo: "SANAD Family Health Module", granted: true, notes: "Granted by patient" },
+    // 4, 5, 6
+    { patientId: id(4), consentType: "family_linking", purpose: "Link health record to family for genetic risk analysis", grantedTo: "SANAD Family Health Module", granted: true, notes: "Granted by patient" },
+    { patientId: id(5), consentType: "family_linking", purpose: "Link health record to family for genetic risk analysis", grantedTo: "SANAD Family Health Module", granted: true, notes: "Granted by patient" },
+    { patientId: id(6), consentType: "family_linking", purpose: "Link health record to family for genetic risk analysis", grantedTo: "SANAD Family Health Module", granted: true, notes: "Granted by patient" },
     // لطيفة (8): insurance REVOKED → insurer portal returns 403 CONSENT_REVOKED
     { patientId: id(8), consentType: "insurance", purpose: "Allow Tawuniya Insurance to access records for claims", grantedTo: "Tawuniya Insurance", granted: false, notes: "Revoked by patient — privacy preference" },
   ];

@@ -38,12 +38,13 @@ router.get("/", async (req, res) => {
   res.json({ labResults });
 });
 
-router.post("/", validate(createLabResultSchema), async (req, res) => {
-  // Publishing lab results is a clinical act — non-clinical roles cannot write results.
+router.post("/", (req, res, next) => {
   if (!isClinicalRole(req.role)) {
     res.status(403).json({ error: "FORBIDDEN", message: "Only clinical roles may record lab results" });
     return;
   }
+  next();
+}, validate(createLabResultSchema), async (req, res) => {
   const body = req.body as z.infer<typeof createLabResultSchema>;
   const [labResult] = await db
     .insert(labResultsTable)
