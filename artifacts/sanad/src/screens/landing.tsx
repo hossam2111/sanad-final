@@ -44,8 +44,8 @@ function Eyebrow({ en, ar }: { en: string; ar: string }) {
 
 function Section({ id, children, className = "" }: { id?: string; children: React.ReactNode; className?: string }) {
   return (
-    <section id={id} className={`scroll-mt-20 ${className}`}>
-      <div className="mx-auto w-full max-w-[1120px] px-6 lg:px-8">{children}</div>
+    <section id={id} className={`scroll-mt-20 overflow-x-hidden ${className}`}>
+      <div className="mx-auto w-full max-w-[1120px] px-4 sm:px-6 lg:px-8">{children}</div>
     </section>
   );
 }
@@ -314,7 +314,7 @@ function Nav() {
       className="fixed inset-x-0 top-0 z-50 border-b border-white/[0.06]"
       style={{ background: "rgba(5,7,12,0.72)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)" }}
     >
-      <div className="mx-auto flex h-16 w-full max-w-[1120px] items-center justify-between px-6 lg:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1120px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <Wordmark />
         <nav className="hidden items-center gap-8 md:flex">
           {links.map((l) => (
@@ -386,7 +386,7 @@ function Hero() {
         />
       </div>
 
-      <Section className="relative z-10 pb-0 pt-24 lg:pt-36">
+      <Section className="relative z-10 pb-0 pt-20 sm:pt-24 lg:pt-36">
         <div className="grid items-center gap-12 lg:grid-cols-[1fr_400px] lg:gap-16">
           {/* Left: copy */}
           <div>
@@ -617,22 +617,22 @@ function Thesis() {
         </h2>
       </Reveal>
 
-      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:grid-rows-2">
+      <div className="grid gap-6 grid-cols-1 lg:grid-cols-[1.2fr_1fr] lg:grid-rows-2">
         <Reveal delay={0.15} className="lg:row-span-2">
-          <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-10 shadow-2xl backdrop-blur-xl">
-            <h3 className="mb-6 text-[22px] font-bold text-white">{text(gaps[0]!.en, gaps[0]!.ar)}</h3>
-            <p className="text-[16px] leading-relaxed text-[#94A3B8]">{text(gaps[0]!.enBody, gaps[0]!.arBody)}</p>
+          <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-6 sm:p-10 shadow-2xl backdrop-blur-xl">
+            <h3 className="mb-6 text-[20px] sm:text-[22px] font-bold text-white">{text(gaps[0]!.en, gaps[0]!.ar)}</h3>
+            <p className="text-[15px] sm:text-[16px] leading-relaxed text-[#94A3B8]">{text(gaps[0]!.enBody, gaps[0]!.arBody)}</p>
             <div className="mt-12"><BrokenTrace /></div>
           </div>
         </Reveal>
         <Reveal delay={0.25} className="h-full">
-          <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-bl from-white/[0.04] to-transparent p-10 shadow-2xl backdrop-blur-xl transition-all hover:bg-white/[0.06]">
+          <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-bl from-white/[0.04] to-transparent p-6 sm:p-10 shadow-2xl backdrop-blur-xl transition-all hover:bg-white/[0.06]">
             <h3 className="mb-4 text-[20px] font-bold text-[#7CB9FF]">{text(gaps[1]!.en, gaps[1]!.ar)}</h3>
             <p className="text-[15px] leading-relaxed text-[#94A3B8]">{text(gaps[1]!.enBody, gaps[1]!.arBody)}</p>
           </div>
         </Reveal>
         <Reveal delay={0.35} className="h-full">
-          <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-tl from-white/[0.04] to-transparent p-10 shadow-2xl backdrop-blur-xl transition-all hover:bg-white/[0.06]">
+          <div className="h-full rounded-3xl border border-white/[0.08] bg-gradient-to-tl from-white/[0.04] to-transparent p-6 sm:p-10 shadow-2xl backdrop-blur-xl transition-all hover:bg-white/[0.06]">
             <h3 className="mb-4 text-[20px] font-bold text-[#7CB9FF]">{text(gaps[2]!.en, gaps[2]!.ar)}</h3>
             <p className="text-[15px] leading-relaxed text-[#94A3B8]">{text(gaps[2]!.enBody, gaps[2]!.arBody)}</p>
           </div>
@@ -717,7 +717,7 @@ function Intelligence() {
   ];
 
   return (
-    <Section id="intelligence" className="relative border-t border-white/[0.06] py-28 lg:py-36">
+    <Section id="intelligence" className="relative overflow-hidden border-t border-white/[0.06] py-28 lg:py-36">
       <div className="absolute top-0 left-1/2 h-[500px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0A84FF]/[0.08] blur-[120px] pointer-events-none" />
 
       <div className="relative z-10 mb-20 flex flex-col items-center text-center">
@@ -1011,7 +1011,7 @@ function Footer() {
   const { text, locale } = useLanguage();
   return (
     <footer className="border-t border-white/[0.06]">
-      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-6 py-10 lg:px-8">
+      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6 px-4 sm:px-6 py-10 lg:px-8">
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-center">
           <Wordmark />
           <p className="text-[12px] text-white/50">
@@ -1038,9 +1038,9 @@ function Footer() {
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-[#05070C] text-[#F4F6FA] antialiased selection:bg-[#0A84FF]/30">
+    <div className="min-h-screen overflow-x-hidden bg-[#05070C] text-[#F4F6FA] antialiased selection:bg-[#0A84FF]/30">
       <Nav />
-      <main>
+      <main className="overflow-x-hidden">
         <Hero />
         <NationalFabric />
         <Thesis />
