@@ -124,23 +124,23 @@ const TRACE_CASES: TraceCase[] = [
 
 function TraceRows({ rows, animate }: { rows: TraceRow[]; animate: boolean }) {
   return (
-    <div aria-hidden className="px-5 py-4">
+    <div aria-hidden className="overflow-hidden px-3 sm:px-5 py-4">
       {rows.map((r, i) => (
         <motion.div
           key={i}
           initial={animate ? { opacity: 0, x: -8 } : false}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.45, delay: animate ? 0.2 + i * 0.26 : 0, ease: EASE }}
-          className="flex items-baseline gap-4 border-b border-white/[0.04] py-2.5 font-mono text-[12px] last:border-b-0"
+          className="flex min-w-0 items-baseline gap-2 sm:gap-4 border-b border-white/[0.04] py-2.5 font-mono text-[12px] last:border-b-0"
         >
-          <span className={`w-14 shrink-0 text-[10.5px] tracking-[0.1em] ${r.accent ? "text-[#7CB9FF]" : r.seal ? "text-[#22c55e]" : "text-white/50"}`}>
+          <span className={`w-12 sm:w-14 shrink-0 text-[10px] sm:text-[10.5px] tracking-[0.1em] ${r.accent ? "text-[#7CB9FF]" : r.seal ? "text-[#22c55e]" : "text-white/50"}`}>
             {r.tag}
           </span>
-          <span className="min-w-0 flex-1">
+          <span className="min-w-0 flex-1 overflow-hidden">
             <span className="block truncate text-white/90">{r.main}</span>
             <span className="block truncate text-[11px] text-white/40">{r.note}</span>
           </span>
-          <span className="shrink-0 tabular-nums text-[11px] text-white/35">{r.time}</span>
+          <span className="shrink-0 tabular-nums text-[10px] sm:text-[11px] text-white/35">{r.time}</span>
         </motion.div>
       ))}
     </div>
@@ -674,15 +674,15 @@ function BrokenTrace() {
           <span>WITHOUT A TRACE</span>
           <span className="text-white/25">no record</span>
         </div>
-        <div aria-hidden className="px-5 py-4">
+        <div aria-hidden className="overflow-hidden px-3 sm:px-5 py-4">
           {rows.map((r) => (
-            <div key={r.tag} className="flex items-baseline gap-4 border-b border-white/[0.03] py-2.5 font-mono text-[12px] last:border-b-0">
-              <span className={`w-[72px] shrink-0 text-[10.5px] tracking-[0.1em] ${r.tag === "OUTCOME" ? "text-[#ef4444]/70" : "text-white/30"}`}>{r.tag}</span>
-              <span className="min-w-0 flex-1">
+            <div key={r.tag} className="flex min-w-0 items-baseline gap-2 sm:gap-4 border-b border-white/[0.03] py-2.5 font-mono text-[12px] last:border-b-0">
+              <span className={`w-16 shrink-0 text-[10px] sm:text-[10.5px] tracking-[0.1em] ${r.tag === "OUTCOME" ? "text-[#ef4444]/70" : "text-white/30"}`}>{r.tag}</span>
+              <span className="min-w-0 flex-1 overflow-hidden">
                 <span className={`block truncate ${r.dead ? "text-white/40" : "text-white/65"}`}>{r.main}</span>
                 <span className="block truncate text-[11px] text-white/25">{r.note}</span>
               </span>
-              <span className="shrink-0 tabular-nums text-[11px] text-white/25">{r.time}</span>
+              <span className="shrink-0 tabular-nums text-[10px] sm:text-[11px] text-white/25">{r.time}</span>
             </div>
           ))}
         </div>
@@ -745,25 +745,25 @@ function Intelligence() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {engines.map((e, i) => (
-          <Reveal key={e.en} delay={0.08 + i * 0.04} className={e.span === 2 ? "sm:col-span-2" : ""}>
+          <Reveal key={e.en} delay={0.08 + i * 0.04} className={`min-w-0 ${e.span === 2 ? "sm:col-span-2" : ""}`}>
             <motion.div
               whileHover={{ y: -4 }}
               transition={{ duration: 0.2 }}
-              className="group relative h-full overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0F1A]/80 p-7 shadow-xl backdrop-blur-md transition-colors hover:border-[#0A84FF]/35"
+              className="group relative h-full w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0F1A]/80 p-5 sm:p-7 shadow-xl backdrop-blur-md transition-colors hover:border-[#0A84FF]/35"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-[#0A84FF]/8 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-              <div className="relative z-10">
+              <div className="relative z-10 min-w-0">
                 <p className="mb-3 font-mono text-[12px] font-bold text-[#4D9FFF]">{String(i + 1).padStart(2, "0")}</p>
                 <h3 className={`mb-4 font-bold text-white ${e.span === 2 ? "text-[18px]" : "text-[16px]"}`}>
                   {text(e.en, e.ar)}
                 </h3>
-                <p
+                <div
                   dir="ltr"
-                  className="truncate rounded-xl border border-white/[0.05] bg-black/40 px-4 py-3 text-left font-mono text-[11px] leading-relaxed text-[#94A3B8] shadow-inner"
+                  className="w-full overflow-hidden rounded-xl border border-white/[0.05] bg-black/40 px-3 py-3 text-left font-mono text-[11px] leading-relaxed text-[#94A3B8] shadow-inner"
                 >
                   <span aria-hidden className="me-2 font-bold text-[#0A84FF]">›</span>
-                  {e.out}
-                </p>
+                  <span className="truncate">{e.out}</span>
+                </div>
               </div>
             </motion.div>
           </Reveal>
