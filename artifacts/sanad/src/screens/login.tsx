@@ -322,7 +322,7 @@ export default function PortalAccess() {
                 transition={{ duration: 0.2 }}
                 className="mt-2 overflow-hidden rounded-xl border border-white/[0.07]"
               >
-                <div className="grid grid-cols-4 gap-px bg-white/[0.06]">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-px bg-white/[0.06]">
                   {DEMO_ACCOUNTS.map((account) => {
                     const Icon = account.icon;
                     const isActive = username === account.username;

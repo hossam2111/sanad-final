@@ -616,7 +616,7 @@ export default function PharmacyPortal() {
       )}
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-5">
         <KpiCard title={text("Dispensed Today", "صُرف اليوم")} value={String(todayLog.length)} sub={text("Medications issued", "أدوية مصروفة")} icon={Receipt} iconBg="bg-primary/10" iconColor="text-primary" />
         <KpiCard title={text("Queue", "قائمة الانتظار")} value={String(queue.length)} sub={text("Patients waiting", "مرضى منتظرون")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
         <KpiCard
@@ -633,7 +633,7 @@ export default function PharmacyPortal() {
       {/* Search + Queue */}
       <Card className="mb-5">
         <CardBody>
-          <form onSubmit={handleSearch} className="flex gap-3 mb-3">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 mb-3">
             <div className="relative flex-1">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -643,7 +643,7 @@ export default function PharmacyPortal() {
                 className="ps-9"
               />
             </div>
-            <Button type="submit" disabled={!searchId.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button type="submit" disabled={!searchId.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground sm:shrink-0">
               <Search className="w-4 h-4 me-1.5" /> {text("Retrieve Prescriptions", "استدعاء الوصفات")}
             </Button>
           </form>
@@ -716,19 +716,19 @@ export default function PharmacyPortal() {
       {data && (
         <div className="space-y-4" ref={printRef}>
           {/* Patient Header */}
-          <div className={`rounded-3xl p-5 flex items-start justify-between gap-5 ${
+          <div className={`rounded-3xl p-5 flex flex-col sm:flex-row items-start justify-between gap-5 ${
             data.summary.interactions > 0 ? "bg-danger" : "bg-primary"
           } text-white`}>
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Patient Record", "سجل المريض")}</p>
               <p className="text-xl font-bold">{data.patient.name}</p>
-              <div className="flex items-center gap-4 mt-1.5 text-sm text-white/80">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-white/80">
                 <span className="font-mono">{data.patient.nationalId}</span>
-                <span>·</span>
+                <span className="hidden sm:inline">·</span>
                 <span>{data.patient.age}{text("y", "سنة")}</span>
-                <span>·</span>
+                <span className="hidden sm:inline">·</span>
                 <span>{data.patient.bloodType}</span>
-                <span>·</span>
+                <span className="hidden sm:inline">·</span>
                 <span>{text("Risk", "الخطر")} {data.patient.riskScore ?? "—"}/100</span>
               </div>
               {(data.patient.chronicConditions ?? []).length > 0 && (
@@ -745,7 +745,7 @@ export default function PharmacyPortal() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-5 shrink-0">
+            <div className="flex items-center gap-3 sm:gap-5 shrink-0 flex-wrap">
               <div className="text-center">
                 <p className="text-[10px] text-white/70">{text("Active Rx", "وصفات نشطة")}</p>
                 <p className="text-3xl font-bold">{data.summary.active}</p>
@@ -771,14 +771,14 @@ export default function PharmacyPortal() {
 
           {/* Tabs Card */}
           <Card>
-            <div className="flex border-b border-border">
+            <div className="flex border-b border-border overflow-x-auto">
               {TABS.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 px-5 py-3.5 text-sm font-semibold transition-colors border-b-2 -mb-px ${
+                    className={`flex items-center gap-2 px-4 sm:px-5 py-3.5 text-sm font-semibold transition-colors border-b-2 -mb-px whitespace-nowrap ${
                       activeTab === tab.id
                         ? "border-primary text-primary bg-primary/10"
                         : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/50"
@@ -896,13 +896,15 @@ export default function PharmacyPortal() {
                         </div>
 
                         {/* Insurance Row */}
-                        <div className="flex items-center gap-4 px-3.5 py-2.5 bg-secondary rounded-2xl border border-border">
-                          <CreditCard className="w-3.5 h-3.5 text-primary shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">{text("Insurance ·", "التأمين ·")} {ins.provider}</p>
-                            <p className="text-xs text-foreground truncate">{ins.notes}</p>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-3.5 py-2.5 bg-secondary rounded-2xl border border-border">
+                          <div className="flex items-center gap-2">
+                            <CreditCard className="w-3.5 h-3.5 text-primary shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">{text("Insurance ·", "التأمين ·")} {ins.provider}</p>
+                              <p className="text-xs text-foreground truncate">{ins.notes}</p>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3 shrink-0 text-xs">
+                          <div className="flex items-center gap-3 sm:ms-auto shrink-0 text-xs flex-wrap">
                             <div className="text-center">
                               <p className="text-[10px] text-muted-foreground">{text("Coverage", "التغطية")}</p>
                               <p className="font-bold text-foreground">{ins.eligible ? `${ins.coveragePercent}%` : "None"}</p>

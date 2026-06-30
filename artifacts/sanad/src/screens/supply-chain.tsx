@@ -222,7 +222,7 @@ export default function SupplyChainPortal() {
       </div>
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <KpiCard title={text("Total Drug Lines", "إجمالي أصناف الأدوية")} value={data?.summary?.totalDrugs ?? 0} sub={text("Tracked nationally", "متابَعة وطنيًا")} icon={Package} iconBg="bg-success-bg" iconColor="text-success" />
         <KpiCard
           title={text("Critical Shortages", "النقص الحرج")} value={data?.summary?.criticalShortages ?? 0}
@@ -234,14 +234,14 @@ export default function SupplyChainPortal() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
         {TABS.map(tab => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+              className={`relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap ${
                 activeTab === tab.id ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -428,7 +428,7 @@ export default function SupplyChainPortal() {
           </Card>
 
           {/* Critical shortages countdown */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {data?.inventory?.filter((i: InventoryItem) => i.status !== "adequate").map((item: InventoryItem, idx: number) => {
               const cfg = STATUS_CFG[item.status] ?? STATUS_CFG.adequate;
               return (
@@ -594,7 +594,7 @@ export default function SupplyChainPortal() {
             {showCreateForm && (
               <Card className="border-primary/30 bg-primary/5" dir={dir}>
                 <CardBody className="p-4 space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input placeholder={text("Item name", "اسم المادة")} value={newPO.item}
                       onChange={e => setNewPO(p => ({...p, item: e.target.value}))}
                       className="rounded-md border border-border bg-background text-foreground px-3 py-2 text-sm" />
@@ -627,9 +627,9 @@ export default function SupplyChainPortal() {
             
             <div className="grid gap-3">
               {poData?.orders?.map((order: PurchaseOrder) => (
-                <div key={order.id} className="p-4 rounded-xl border border-border bg-card flex justify-between items-center">
+                <div key={order.id} className="p-4 rounded-xl border border-border bg-card flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold">{order.drugName}</span>
                       <span className="text-xs text-muted-foreground">x{order.quantity}</span>
                       <Badge variant="outline">{order.status}</Badge>
@@ -637,7 +637,7 @@ export default function SupplyChainPortal() {
                     <p className="text-xs text-muted-foreground mt-1">{order.supplier} • {order.id}</p>
                   </div>
                   {order.status === "submitted" && (
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-2">
                       <button onClick={() => approveMutation.mutate(order.id)} disabled={approveMutation.isPending}
                         className="text-xs rounded bg-primary/10 text-primary px-3 py-1.5 hover:bg-primary/20">
                         {text("Approve", "اعتماد")}
