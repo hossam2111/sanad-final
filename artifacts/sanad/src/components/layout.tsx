@@ -469,7 +469,7 @@ export function Layout({ children, role, localized = false }: { children: React.
             `localized` flag and stay pinned LTR so their English content isn't
             bidi-mangled inside the RTL chrome. `text-start` resolves to the
             correct edge under either direction. */}
-        <main dir={localized ? dir : "ltr"} className="page-enter flex-1 overflow-y-auto p-4 text-start sm:p-5 lg:p-7">
+        <main dir={localized ? dir : "ltr"} className="page-enter flex-1 overflow-y-auto overflow-x-hidden p-4 text-start sm:p-5 lg:p-7">
           {children}
         </main>
       </div>

@@ -550,7 +550,7 @@ export default function AdminDashboard() {
               </div>
             </CardHeader>
             <CardBody>
-              <div className="min-h-[300px] h-full w-full py-4">
+              <div className="h-[300px] w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <LineChart data={popHealth.monthlyVisitTrend} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
@@ -569,7 +569,7 @@ export default function AdminDashboard() {
           <Card className="col-span-full lg:col-span-4">
             <CardHeader><CardTitle>{text("Blood Type Distribution", "توزيع فصائل الدم")}</CardTitle></CardHeader>
             <CardBody>
-              <div className="min-h-[280px] h-full w-full py-4">
+              <div className="h-[280px] w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie data={popHealth.bloodTypeDistribution} innerRadius={50} outerRadius={70} paddingAngle={3} dataKey="count" nameKey="bloodType">
@@ -616,7 +616,7 @@ export default function AdminDashboard() {
               <Badge variant="default">{text(`${popHealth.conditionBreakdown?.length} tracked`, `${popHealth.conditionBreakdown?.length} متابَع`)}</Badge>
             </CardHeader>
             <CardBody>
-              <div className="min-h-[350px] h-full w-full py-4">
+              <div className="h-[350px] w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={popHealth.conditionBreakdown} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(var(--border))" />
@@ -634,7 +634,7 @@ export default function AdminDashboard() {
           <Card className="col-span-full lg:col-span-6">
             <CardHeader><CardTitle>{text("Population Age Distribution", "التوزيع العمري للسكان")}</CardTitle></CardHeader>
             <CardBody>
-              <div className="min-h-[320px] h-full w-full py-4">
+              <div className="h-[320px] w-full py-4">
                 <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                   <BarChart data={popHealth.ageDistribution} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
@@ -656,7 +656,7 @@ export default function AdminDashboard() {
                 <Badge variant="warning">{text(`${stats.highRiskPatients} high/critical`, `${stats.highRiskPatients} مرتفعة/حرجة`)}</Badge>
               </CardHeader>
               <CardBody>
-                <div className="min-h-[280px] h-full w-full py-4">
+                <div className="h-[280px] w-full py-4">
                   <div dir="ltr" className="w-full h-full"><ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={stats.riskDistribution} innerRadius={50} outerRadius={75} paddingAngle={3} dataKey="count" nameKey="level"
