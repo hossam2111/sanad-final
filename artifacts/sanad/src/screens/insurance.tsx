@@ -223,7 +223,7 @@ export default function InsurancePortal() {
 
   return (
     <Layout role="insurance" localized>
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex flex-wrap items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-primary text-primary-foreground text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Shield className="w-3 h-3" /> {text("Insurance Operations Center", "مركز عمليات التأمين")}
         </div>
@@ -231,7 +231,7 @@ export default function InsurancePortal() {
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse inline-block" />
           {text(`AI Fraud Engine: Active · ${dashboard?.fraudSuspected ?? "—"} cases flagged`, `محرك كشف الاحتيال: نشط · ${dashboard?.fraudSuspected ?? "—"} حالة موسومة`)}
         </div>
-        <div className="ms-auto flex gap-1.5">
+        <div className="ms-auto flex flex-wrap gap-1.5">
           {tabs.map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full transition-all ${activeTab === t.id ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
@@ -470,7 +470,7 @@ export default function InsurancePortal() {
               {/* Policy Header */}
               <Card>
                 <CardBody className="p-0">
-                  <div className="flex items-stretch divide-x divide-border">
+                  <div className="flex flex-col sm:flex-row sm:items-stretch sm:divide-x divide-border divide-y sm:divide-y-0">
                     <div className="flex-1 p-5">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("Policy Holder", "صاحب الوثيقة")}</p>
                       <h2 className="text-xl font-bold text-foreground mb-1">{patient.patient?.fullName}</h2>
@@ -540,7 +540,7 @@ export default function InsurancePortal() {
                       <div className="flex items-center gap-2"><Eye className="w-4 h-4 text-primary" /><CardTitle>{text("Behavioral Profile", "الملف السلوكي")}</CardTitle></div>
                     </CardHeader>
                     <CardBody>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
                           { label: text("Visit Pattern", "نمط الزيارات"), value: patient.behaviorProfile?.visitPattern },
                           { label: text("Preferred Hospital", "المستشفى المفضّل"), value: patient.behaviorProfile?.preferredHospital },
@@ -585,7 +585,7 @@ export default function InsurancePortal() {
                   <ShieldAlert className="w-5 h-5 text-risk-high shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-bold text-risk-high mb-2">{text("AI Fraud Detection Flags (", "إشارات كشف الاحتيال بالذكاء الاصطناعي (")}{patient.fraudFlags.length})</p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {patient.fraudFlags.map((flag: string, i: number) => (
                         <div key={i} className="flex items-center gap-2 text-sm text-risk-high">
                           <div className="w-1.5 h-1.5 rounded-full bg-risk-high shrink-0" />{flag}
@@ -697,7 +697,7 @@ export default function InsurancePortal() {
                                     <MessageSquare className="w-3 h-3" /> {text("Review Notes (optional)", "ملاحظات المراجعة (اختياري)")}
                                   </p>
                                   <Input placeholder={text("Add review notes...", "أضف ملاحظات المراجعة...")} value={reviewNotes} onChange={e => setReviewNotes(e.target.value)} className="mb-3 text-xs" />
-                                  <div className="flex gap-2">
+                                  <div className="flex flex-wrap gap-2">
                                     <button onClick={() => reviewMutation.mutate({ claimId: claim.claimId, action: "approve" })}
                                       disabled={reviewMutation.isPending}
                                       className="flex-1 flex items-center justify-center gap-1.5 text-xs font-bold px-3 py-2 bg-success text-white rounded-xl hover:bg-success/90 transition-colors disabled:opacity-50">

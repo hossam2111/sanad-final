@@ -77,7 +77,7 @@ export default function HospitalPortal() {
 
   return (
     <Layout role="hospital" localized>
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex flex-wrap items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-primary text-white text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <Building2 className="w-3 h-3" />
           {text("Hospital Operations Center", "مركز عمليات المستشفى")}
@@ -147,7 +147,7 @@ export default function HospitalPortal() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex items-center gap-2 mb-5 overflow-x-auto pb-1">
         {([
           { id: "overview", label: "Bed Overview", labelAr: "نظرة عامة على الأسرة" },
           { id: "icu", label: `ICU Alerts${icuCritical > 0 ? ` (${icuCritical} critical)` : ""}`, labelAr: `تنبيهات العناية المركزة${icuCritical > 0 ? ` (${icuCritical} حرج)` : ""}` },
@@ -179,7 +179,7 @@ export default function HospitalPortal() {
               <span className="ml-auto text-[10px] font-mono text-muted-foreground">{text("Live data", "بيانات مباشرة")}</span>
             </CardHeader>
             <CardBody>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {(data?.bedStatus as BedStatusUnit[] | undefined)?.map((unit: BedStatusUnit) => {
                   const color = UNIT_COLORS[unit.unit] ?? "hsl(var(--primary))";
                   return (
@@ -269,7 +269,7 @@ export default function HospitalPortal() {
               <Badge variant="outline" className="ml-auto">{text("Predictive Analysis", "تحليل تنبؤي")}</Badge>
             </CardHeader>
             <CardBody>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {data?.aiCapacityInsights?.map((insight: string, i: number) => (
                   <div key={i} className="flex items-start gap-3 px-4 py-3.5 bg-secondary rounded-2xl border border-border">
                     <Lightbulb className="w-4 h-4 text-risk-high shrink-0 mt-0.5" />
@@ -350,7 +350,7 @@ export default function HospitalPortal() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {(data?.icuAlerts as IcuAlert[] ?? []).map((alert: IcuAlert, i: number) => (
               <div key={i} className={`p-5 rounded-2xl border-2 ${alert.severity === "critical" ? "bg-danger-bg border-danger/30" : "bg-risk-high-bg border-risk-high/20"}`}>
                 <div className="flex items-start gap-3 mb-3">

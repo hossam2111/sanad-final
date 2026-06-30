@@ -221,7 +221,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
             <div className="bg-card/70 rounded-xl p-2.5 text-center">
               <p className="text-[9px] text-muted-foreground">{text("Date", "التاريخ")}</p>
               <p className="text-xs font-bold text-foreground">{booked.date}</p>
@@ -253,7 +253,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
           <Stethoscope className="w-3.5 h-3.5" /> {text("Book New Appointment", "حجز موعد جديد")}
         </p>
-        <div className="grid grid-cols-2 gap-3 mb-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <div>
             <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Hospital *", "المستشفى *")}</p>
             <select
@@ -761,7 +761,7 @@ export default function CitizenPortal() {
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                       <Activity className="w-3.5 h-3.5 text-primary" /> {text("Key Health Drivers", "أبرز محرّكات صحتك")}
                     </p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {aiDecision.digitalTwin.keyDrivers.map((driver, i) => (
                         <div key={i} className="flex items-start gap-2.5 px-3.5 py-3 bg-secondary border border-border rounded-xl">
                           <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
@@ -843,7 +843,7 @@ export default function CitizenPortal() {
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                 <Star className="w-3.5 h-3.5" /> {text("Score Breakdown", "تفصيل الدرجة")}
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
                   { label: text("Chronic Conditions", "الأمراض المزمنة"), value: patient.chronicConditions?.length ?? 0, max: 5, good: 0, icon: Activity },
                   { label: text("Active Medications", "الأدوية الفعّالة"), value: activeMeds.length, max: 8, good: 2, icon: Pill },
@@ -882,7 +882,7 @@ export default function CitizenPortal() {
         )}
 
         {activeTab === "overview" && (
-          <div className="grid grid-cols-2 divide-x divide-border">
+          <div className="grid grid-cols-1 sm:grid-cols-2 sm:divide-x divide-border divide-y sm:divide-y-0">
             <div className="p-5">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
                 <Activity className="w-3.5 h-3.5" /> {text("Chronic Conditions", "الأمراض المزمنة")}
@@ -1106,7 +1106,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       )}
 
       {/* Header */}
-      <div className="flex items-start gap-4 px-5 py-4 rounded-2xl bg-gradient-to-r from-primary/10 to-secondary/30 border border-info/30">
+      <div className="flex flex-wrap items-start gap-4 px-5 py-4 rounded-2xl bg-gradient-to-r from-primary/10 to-secondary/30 border border-info/30">
         <div className="w-10 h-10 rounded-2xl bg-info-bg flex items-center justify-center shrink-0">
           <Lock className="w-5 h-5 text-primary" />
         </div>
@@ -1135,7 +1135,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       </div>
 
       {/* Consent Cards Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {consents.map((consent: ConsentItem) => {
           const Icon = CONSENT_ICONS[consent.type] ?? Shield;
           const sev = SEVERITY_CFG[consent.severity as keyof typeof SEVERITY_CFG] ?? SEVERITY_CFG.low;

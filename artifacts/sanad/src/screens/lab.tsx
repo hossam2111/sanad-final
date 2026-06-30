@@ -265,7 +265,7 @@ export default function LabPortal() {
       {data && (
         <div className="space-y-4">
           {/* Patient Strip */}
-          <div className={`rounded-3xl p-5 flex items-center justify-between gap-5 ${
+          <div className={`rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 ${
             data.patient.riskLevel === "critical" ? "bg-danger" :
             data.patient.riskLevel === "high" ? "bg-risk-high" :
             "bg-primary"
@@ -273,7 +273,7 @@ export default function LabPortal() {
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">{text("Patient Identified", "تم تحديد المريض")}</p>
               <p className="text-xl font-bold">{data.patient.name}</p>
-              <div className="flex items-center gap-4 mt-1.5 text-sm text-white/80">
+              <div className="flex flex-wrap items-center gap-4 mt-1.5 text-sm text-white/80">
                 <span dir="ltr">{text("ID:", "الهوية:")} {data.patient.nationalId}</span>
                 <span>{text("Age:", "العمر:")} {data.patient.age}</span>
                 <span>{text("Blood:", "الفصيلة:")} {data.patient.bloodType}</span>
@@ -285,7 +285,7 @@ export default function LabPortal() {
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-6 shrink-0">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 shrink-0">
               <div className="text-center">
                 <p className="text-[10px] text-white/70">{text("Labs on Record", "تحاليل مُسجّلة")}</p>
                 <p className="text-3xl font-bold">{data.summary.total}</p>
@@ -318,7 +318,7 @@ export default function LabPortal() {
                 </span>
               </CardHeader>
               <CardBody>
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {chartsToShow.map(testName => {
                     const points = trendChartData[testName]!;
                     const color = CHART_COLORS[testName] ?? "hsl(var(--primary))";
@@ -436,7 +436,7 @@ export default function LabPortal() {
                 </button>
               </CardHeader>
               <CardBody>
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                   <div>
                     <p className="text-xs font-semibold text-muted-foreground mb-1.5">{text("Test Name *", "اسم الفحص *")}</p>
                     <select
