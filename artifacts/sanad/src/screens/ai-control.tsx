@@ -177,7 +177,7 @@ export default function AIControlCenter() {
         </div>
       )}
 
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5">
         <div className="flex items-center gap-2 glass-panel border border-danger/30 text-danger text-[11px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest drop-shadow-[0_0_8px_rgba(239,68,68,0.3)]">
           <Brain className="w-3.5 h-3.5" />
           {text("AI Control Center", "مركز التحكم بالذكاء")}
@@ -186,7 +186,7 @@ export default function AIControlCenter() {
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.8)]" />
           {text(`${metrics?.engines?.filter((e: AiEngine) => e.status === "operational").length} / ${metrics?.engines?.length} engines operational`, `${metrics?.engines?.filter((e: AiEngine) => e.status === "operational").length} / ${metrics?.engines?.length} محرك يعمل`)}
         </div>
-        <div className="ms-auto font-mono text-[11px] text-muted-foreground glass-panel border border-white/10 px-4 py-1.5 rounded-full" dir={dir}>
+        <div className="sm:ms-auto font-mono text-[11px] text-muted-foreground glass-panel border border-white/10 px-4 py-1.5 rounded-full" dir={dir}>
           {text("Uptime", "التشغيل")} <span className="text-foreground">{metrics?.systemHealth?.uptime}</span> <span className="text-white/20 mx-1">·</span> {text("Last retrain:", "آخر تدريب:")} <span className="text-foreground">{metrics?.systemHealth?.lastRetraining}</span>
         </div>
       </div>
@@ -547,12 +547,12 @@ export default function AIControlCenter() {
       {/* ─── RETRAINING PANEL ─── */}
       {activeTab === "retraining" && (
         <div className="space-y-5">
-          <div className="grid grid-cols-3 gap-4 p-4 bg-secondary border border-border rounded-2xl">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-secondary border border-border rounded-2xl">
             <div className="text-center">
               <p className="text-xl font-bold text-foreground">{metrics?.systemHealth?.lastRetraining}</p>
               <p className="text-xs text-muted-foreground">{text("Last Retraining", "آخر إعادة تدريب")}</p>
             </div>
-            <div className="text-center border-x border-border">
+            <div className="text-center sm:border-x border-border">
               <p className="text-xl font-bold text-foreground">{metrics?.systemHealth?.nextScheduledReview}</p>
               <p className="text-xs text-muted-foreground">{text("Next Scheduled Review", "المراجعة المجدولة القادمة")}</p>
             </div>
@@ -784,7 +784,7 @@ export default function AIControlCenter() {
 
       {/* ─── FOOTER ─── */}
 
-      <div className="px-5 py-3.5 bg-secondary border border-border rounded-2xl flex items-center gap-4 mt-5">
+      <div className="px-5 py-3.5 bg-secondary border border-border rounded-2xl flex flex-wrap items-center gap-4 mt-5">
         <Shield className="w-4 h-4 text-muted-foreground shrink-0" />
         <p className="flex-1 text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">{text("Audit Status:", "حالة التدقيق:")}</span> {text(`All AI decisions fully traceable · ${metrics?.auditRecords?.toLocaleString()} audit records · Aligned with MOH AI Governance Framework 1445 · ISO/IEC 42001 AI Management compliance target 2026`, `جميع قرارات الذكاء قابلة للتتبّع · ${metrics?.auditRecords?.toLocaleString()} سجل تدقيق · متوافقة مع إطار حوكمة الذكاء الاصطناعي لوزارة الصحة 1445 · مستهدف الامتثال لمعيار ISO/IEC 42001 لعام 2026`)}

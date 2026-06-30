@@ -332,23 +332,23 @@ export function Layout({ children, role, localized = false }: { children: React.
             >
               <Menu className="h-4.5 w-4.5" style={{ width: 18, height: 18 }} />
             </button>
-            <div className="flex items-center gap-2">
-              <Activity className="hidden h-4 w-4 text-muted-foreground sm:block" />
-              <span className="text-sm font-medium text-muted-foreground">
+            <div className="flex items-center gap-2 min-w-0">
+              <Activity className="hidden h-4 w-4 shrink-0 text-muted-foreground sm:block" />
+              <span className="hidden truncate text-sm font-medium text-muted-foreground sm:block">
                 {locale === "ar" ? roleText[role].sublabel : config.sublabel}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={toggleLocale}
-              className="flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-3 text-[12px] font-semibold text-muted-foreground shadow-sm transition-colors hover:bg-secondary hover:text-foreground"
+              className="flex h-8 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 sm:px-3 text-[12px] font-semibold text-muted-foreground shadow-sm transition-colors hover:bg-secondary hover:text-foreground"
               title={text("Switch language", "تغيير اللغة")}
             >
               <Languages className="h-3.5 w-3.5" />
-              {locale === "ar" ? "EN" : "عربي"}
+              <span className="hidden xs:inline">{locale === "ar" ? "EN" : "عربي"}</span>
             </button>
 
             <Button
