@@ -178,7 +178,7 @@ export default function ResearchPortal() {
   return (
     <Layout role="research" localized>
       {/* Header Strip */}
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex flex-wrap items-center gap-2 mb-5">
         <div className="flex items-center gap-2 bg-primary text-primary-foreground text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-widest">
           <FlaskConical className="w-3 h-3" />
           {text("Research Portal", "بوابة الأبحاث")}
@@ -225,7 +225,7 @@ export default function ResearchPortal() {
       </div>
 
       {/* KPI Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <KpiCard title={text("Anonymized Records", "سجلات مجهّلة")} value={data?.totalAnonymizedRecords?.toLocaleString()} sub={text("Fully de-identified", "مجهّلة الهوية بالكامل")} icon={Users} iconBg="bg-primary/10" iconColor="text-primary" />
         <KpiCard title={text("Active Studies", "الدراسات النشطة")} value={CLINICAL_STUDIES.filter(s => s.status === "active").length} sub={text(`${CLINICAL_STUDIES.length} total registered`, `${CLINICAL_STUDIES.length} مُسجّلة إجمالًا`)} icon={BookOpen} iconBg="bg-secondary" iconColor="text-secondary-foreground" />
         <KpiCard title={text("AI Decisions Analyzed", "قرارات ذكاء مُحلّلة")} value={data?.aiMetrics?.totalDecisions?.toLocaleString()} sub={text(`${data?.aiMetrics?.avgConfidence}% avg confidence`, `${data?.aiMetrics?.avgConfidence}% متوسط الثقة`)} icon={Brain} iconBg="bg-risk-high-bg" iconColor="text-risk-high" />
@@ -278,14 +278,14 @@ export default function ResearchPortal() {
           </Card>
 
           {/* Data Charts */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1">
             {([
               { id: "conditions", label: "Disease Prevalence", labelAr: "انتشار الأمراض" },
               { id: "labs", label: "Lab Abnormality Rates", labelAr: "معدلات شذوذ المختبر" },
               { id: "drugs", label: "Drug Utilization", labelAr: "استخدام الأدوية" },
               { id: "age", label: "Age × Risk", labelAr: "العمر × الخطر" },
             ] as const).map(tab => (
-              <button key={tab.id} onClick={() => setSelectedConditions(tab.id)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors ${selectedConditions === tab.id ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
+              <button key={tab.id} onClick={() => setSelectedConditions(tab.id)} className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors whitespace-nowrap ${selectedConditions === tab.id ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"}`}>
                 {locale === "ar" ? tab.labelAr : tab.label}
               </button>
             ))}
@@ -444,7 +444,7 @@ export default function ResearchPortal() {
                     </div>
                   </div>
 
-                  <div className="px-5 py-4 grid grid-cols-2 gap-4">
+                  <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1.5 flex items-center gap-1">
                         <Target className="w-3 h-3" /> {text("Primary Endpoint", "النقطة النهائية الأساسية")}
@@ -717,7 +717,7 @@ export default function ResearchPortal() {
                 <Badge variant="success">{text("PDPL Compliant", "متوافق مع نظام PDPL")}</Badge>
               </CardHeader>
               <CardBody>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {[
                     { title: "Full Anonymized Dataset", desc: `${data?.totalAnonymizedRecords?.toLocaleString()} records · All conditions · Risk scores`, format: "JSON", size: "~2.4 MB", onclick: () => handleExport("json") },
                     { title: "Population Summary CSV", desc: "Age groups · Gender breakdown · Condition prevalence · Risk distribution", format: "CSV", size: "~180 KB", onclick: () => handleExport("csv") },

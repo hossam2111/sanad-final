@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Activity, ArrowRight, ArrowUpRight, Eye, Landmark, Languages,
-  Lock, ScrollText, ShieldCheck, UserCheck,
+  Lock, Menu, ScrollText, ShieldCheck, UserCheck, X as XIcon,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 
@@ -302,6 +302,7 @@ function LiveMetricsPanel() {
 
 function Nav() {
   const { text, locale, toggleLocale } = useLanguage();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const links = [
     { href: "#why", en: "Why SANAD", ar: "لماذا سند" },
     { href: "#intelligence", en: "Intelligence", ar: "الذكاء" },
@@ -338,8 +339,32 @@ function Nav() {
             {text("Sign in", "تسجيل الدخول")}
             <ArrowRight className="h-3.5 w-3.5 rtl:-scale-x-100" />
           </Link>
+          <button
+            type="button"
+            onClick={() => setMobileOpen((v) => !v)}
+            className={`flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/60 transition-colors hover:border-white/25 hover:text-white md:hidden ${FOCUS}`}
+            aria-label="Toggle navigation"
+          >
+            {mobileOpen ? <XIcon className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
         </div>
       </div>
+      {mobileOpen && (
+        <div className="border-t border-white/[0.06] md:hidden" style={{ background: "rgba(5,7,12,0.95)" }}>
+          <nav className="mx-auto flex flex-col gap-1 px-6 py-4 max-w-[1120px]">
+            {links.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setMobileOpen(false)}
+                className={`rounded-lg px-3 py-3 text-[14px] font-medium text-white/70 transition-colors hover:bg-white/[0.05] hover:text-white ${FOCUS}`}
+              >
+                {text(l.en, l.ar)}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
@@ -402,17 +427,17 @@ function Hero() {
               </p>
             </Reveal>
 
-            <Reveal delay={0.3} className="flex flex-wrap gap-4">
+            <Reveal delay={0.3} className="flex flex-col sm:flex-row flex-wrap gap-4">
               <Link
                 href="/login"
-                className={`group flex h-12 items-center gap-2.5 rounded-full bg-white px-8 text-[15px] font-bold text-black transition-all hover:scale-[1.02] hover:shadow-[0_0_28px_rgba(255,255,255,0.25)] ${FOCUS}`}
+                className={`group flex h-12 items-center justify-center gap-2.5 rounded-full bg-white px-8 text-[15px] font-bold text-black transition-all hover:scale-[1.02] hover:shadow-[0_0_28px_rgba(255,255,255,0.25)] ${FOCUS}`}
               >
                 {text("Enter Workspace", "دخول مساحة العمل")}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1" />
               </Link>
               <a
                 href="#intelligence"
-                className={`flex h-12 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-8 text-[15px] font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 ${FOCUS}`}
+                className={`flex h-12 items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-8 text-[15px] font-semibold text-white backdrop-blur-md transition-all hover:bg-white/10 ${FOCUS}`}
               >
                 {text("Explore the Engine", "استكشف المحرك")}
               </a>
@@ -969,7 +994,7 @@ function FinalCall() {
           </h2>
         </Reveal>
         <Reveal delay={0.1} className="flex flex-col items-center gap-5">
-          <Link href="/login" className={`flex h-12 items-center gap-2 rounded-full bg-white px-7 text-[15px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}>
+          <Link href="/login" className={`flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-full bg-white px-7 text-[15px] font-bold text-[#05070C] transition-opacity hover:opacity-85 ${FOCUS}`}>
             {text("Enter your workspace", "ادخل إلى مساحة عملك")}
             <ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
           </Link>
