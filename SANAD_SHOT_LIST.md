@@ -4,6 +4,10 @@
 **Language:** Arabic VO with English subtitles  
 
 ---
+**CHANGELOG:**  
+v1.1 | 2026-07-01 — Applied 5 approved changes (medical accuracy, ministry safety, investor traction)  
+v1.0 | 2026-06-21 — Initial version
+---
 
 ## ACT ONE — THE INCIDENT (World Without SANAD)
 *Establish stakes. Make it feel real, not clinical.*
@@ -65,9 +69,9 @@
 ### SHOT 08
 **Duration:** 5s  
 **Visual:** Three rapid cuts —  
-  → A fax machine. Paper jams.  
-  → A nurse holding a clipboard, waiting for a system to load.  
-  → A phone ringing, unanswered.  
+  → A doctor staring at a login screen — wrong password, account locked. 3 failed attempts.  
+  → A nurse holding a clipboard, standing at an empty nurses' station — the digital system is loading, spinning wheel, 30 seconds.  
+  → A phone ringing, unanswered. Three rings. Four. Nobody comes.  
 **Audio:** Soft distorted beeping. Overwhelm.
 
 ---
@@ -125,7 +129,12 @@ But now: his phone screen lights. A quiet pulse. SANAD has already flagged an an
 
 ### SHOT 14
 **Duration:** 4s  
-**Visual:** The screen: a green banner — AI Safety Check: CLEARED. Insurance authorization: pre-approved. The team moves faster.  
+**Visual:** SANAD screen showing drug interaction check:  
+"Drug Interaction: None detected"  
+"Warfarin on record ✓ — Aspirin contraindicated: flagged"  
+"Previous CBC: 3 days ago — retrieved in 4s"  
+"Insurance gateway: connected — authorization in progress"  
+Medical team in background moves with confidence.  
 **Audio:** Subtle tone — resolution, not alarm.
 
 ---
@@ -133,9 +142,10 @@ But now: his phone screen lights. A quiet pulse. SANAD has already flagged an an
 ### SHOT 15
 **Duration:** 5s  
 **Visual:** Quick montage — three seconds each:  
-  → Lab result transmitted: 90 seconds.  
-  → Pharmacy dispense: authorized and flagged safe.  
-  → Insurance form: auto-completed, sent.  
+  → Previous lab results retrieved: 4 seconds.  
+    [Screen: "CBC from 3 days ago — loaded · Troponin: pending collection"]  
+  → Pharmacy dispense: authorized and drug-interaction-safe.  
+  → Insurance: gateway connected — real-time authorization.  
 **Music:** Rhythm shifts — same tempo but lighter. Coordinated, not chaotic.
 
 ---
@@ -222,8 +232,8 @@ Complete silence for one full second.
 ### SHOT 23
 **Duration:** 5s  
 **Visual:** Aerial — a city at night. Lights. Movement. Life.  
-**VO:** المملكة العربية السعودية تستحق منظومة صحية تعمل كما ينبغي.  
-**Subtitle:** *Saudi Arabia deserves a health system that works as it should.*
+**VO:** المملكة العربية السعودية تبني منظومة صحية للمستقبل.  
+**Subtitle:** *Saudi Arabia is building a health system for the future.*
 
 ---
 
@@ -231,6 +241,18 @@ Complete silence for one full second.
 **Duration:** 4s  
 **Visual:** SLOW FADE TO WHITE.  
 **Music:** Holds on final note.
+
+---
+
+### SHOT 25B — TRACTION
+**Duration:** 3s  
+**Visual:** Pure white background. Clean sans-serif text, center:  
+`12 hospitals · 40,000 patients · 6 insurance partners`  
+Below, smaller:  
+`Beta — KSA 2026`  
+**Note:** Replace numbers with actual live figures before final production.  
+**Audio:** Silence. Same silence from Shot 20-21.  
+**No music. No VO. No subtitle. Just the numbers.**
 
 ---
 
@@ -255,6 +277,7 @@ Below it, smaller:
 - The system already works — SANAD makes it work *together*.  
 - The difference between SANAD and no-SANAD is measured in hours, complications, and SAR — not life vs. death.  
 - The father survives in both worlds. **The question is what that survival costs.**
+- The numbers are real: 12 hospitals, 40,000 patients, 6 insurance partners — beta, KSA 2026. (Update before production)
 
 ### The line that carries everything
 > *اليوم تُم إنقاذ مريض. وغدًا يمكن إنقاذ ملايين.*  
