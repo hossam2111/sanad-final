@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SANAD — منصة الذكاء الصحي السيادي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/countup.js@2.8.0/dist/countUp.umd.js"></script>
+<style>
+:root{--bg:#03060F;--card:rgba(255,255,255,.025);--blue:#0A84FF;--blue2:#4DA3FF;--gold:#C8A96E;--gold2:#F0D080;--green:#22C55E;--red:#EF4444;--purple:#7C3AED;--amber:#F59E0B;--text:#F0F4FF;--muted:#64748B;--border:rgba(255,255,255,.07)}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Arabic','Inter',sans-serif;overflow-x:hidden;direction:rtl}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--blue);border-radius:4px}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(10,132,255,.3)}50%{box-shadow:0 0 60px rgba(10,132,255,.7)}}
+@keyframes aurora{0%,100%{transform:translate(-50%,-50%) rotate(0deg) scale(1)}33%{transform:translate(-50%,-50%) rotate(120deg) scale(1.1)}66%{transform:translate(-50%,-50%) rotate(240deg) scale(.95)}}
+@keyframes shimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(10,132,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(10,132,255,.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent)}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(3,6,15,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:12px}
+.nav-mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0A84FF,#0048C0);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:white;font-family:'Inter';direction:ltr}
+.nav-brand{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.nav-sub{font-size:9px;color:var(--muted);letter-spacing:.1em}
+.nav-links{display:flex;gap:28px}
+.nav-links a{font-size:12px;color:rgba(255,255,255,.5);text-decoration:none;transition:color .2s;font-family:'Inter'}
+.nav-links a:hover{color:white}
+.nav-badge{display:flex;align-items:center;gap:6px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:#22C55E;padding:4px 12px;border-radius:100px;font-size:10px;font-weight:700;font-family:'IBM Plex Mono'}
+.dot-live{width:6px;height:6px;border-radius:50%;background:#22C55E;animation:pulse 2s infinite}
+
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px;overflow:hidden}
+.hero-aurora{position:absolute;width:900px;height:900px;top:50%;left:50%;border-radius:50%;pointer-events:none;background:conic-gradient(from 0deg,rgba(10,132,255,.12),rgba(124,58,237,.08),rgba(10,132,255,.12));filter:blur(80px);animation:aurora 20s linear infinite}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(10,132,255,.3);background:rgba(10,132,255,.08);color:var(--blue2);padding:8px 20px;border-radius:100px;font-size:11px;font-weight:600;margin-bottom:32px;letter-spacing:.05em;box-shadow:0 0 30px rgba(10,132,255,.15);max-width:100%;flex-wrap:wrap;justify-content:center;text-align:center}
+.hero h1{font-size:clamp(3rem,7vw,6.5rem);font-weight:800;line-height:1.05;letter-spacing:-.04em;margin-bottom:24px}
+.gold-text{background:linear-gradient(135deg,var(--gold),var(--gold2),var(--gold));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:shimmer 3s linear infinite}
+.blue-text{background:linear-gradient(135deg,#4DA3FF,#0A84FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{max-width:700px;font-size:17px;line-height:1.9;color:rgba(255,255,255,.55);margin:0 auto 48px}
+.hero-stats{display:flex;gap:48px;justify-content:center;flex-wrap:wrap;margin-top:48px}
+.hero-stat .val{font-size:3rem;font-weight:800;letter-spacing:-.04em;color:var(--blue);font-family:'Inter';direction:ltr;display:block}
+.hero-stat .lbl{font-size:12px;color:var(--muted);margin-top:4px}
+
+.ticker{background:rgba(10,132,255,.04);border-top:1px solid rgba(10,132,255,.1);border-bottom:1px solid rgba(10,132,255,.1);padding:10px 0;overflow:hidden;direction:ltr}
+.ticker-inner{display:flex;gap:48px;animation:ticker 35s linear infinite;width:max-content;padding:0 24px}
+.ticker-item{display:flex;align-items:center;gap:8px;white-space:nowrap;font-family:'IBM Plex Mono';font-size:11px;color:rgba(255,255,255,.4)}
+.ticker-item .tag{color:var(--blue);font-weight:700;font-size:9px;letter-spacing:.1em}
+
+.sec{position:relative;z-index:1;padding:100px 48px;max-width:1200px;margin:0 auto}
+.eyebrow{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:700;color:var(--blue);letter-spacing:.2em;text-transform:uppercase;margin-bottom:18px;font-family:'IBM Plex Mono'}
+.eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--blue)}
+.sec-title{font-size:clamp(2rem,4vw,3rem);font-weight:800;line-height:1.15;letter-spacing:-.03em;margin-bottom:14px}
+.sec-sub{font-size:15px;color:var(--muted);line-height:1.9;max-width:650px;margin-bottom:52px}
+.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+
+.silos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:40px}
+.silo{border:1px solid rgba(239,68,68,.15);border-radius:18px;padding:24px;text-align:center;background:rgba(239,68,68,.03);position:relative;overflow:hidden;transition:all .3s}
+.silo:hover{border-color:rgba(239,68,68,.35);transform:translateY(-4px)}
+.silo-icon{font-size:28px;margin-bottom:10px}
+.silo-name{font-size:13px;font-weight:700;margin-bottom:5px}
+.silo-sub{font-size:11px;color:var(--muted);line-height:1.5}
+.silo-broken{position:absolute;bottom:8px;right:8px;font-size:8px;color:var(--red);font-family:'IBM Plex Mono';font-weight:700;letter-spacing:.1em}
+.gaps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px}
+.gap-card{padding:28px;border-radius:18px;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.04);transition:all .3s}
+.gap-card:hover{border-color:rgba(239,68,68,.35);transform:translateY(-4px)}
+.gap-num{font-size:44px;font-weight:900;color:rgba(239,68,68,.18);font-family:'Inter';letter-spacing:-.04em;line-height:1;margin-bottom:10px;direction:ltr}
+.gap-title{font-size:15px;font-weight:700;color:rgba(239,68,68,.85);margin-bottom:8px}
+.gap-desc{font-size:13px;color:var(--muted);line-height:1.75}
+
+.countries{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.country-card{border:1px solid var(--border);border-radius:22px;overflow:hidden;background:var(--card)}
+.country-header{padding:22px 26px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border)}
+.country-flag{font-size:34px}
+.country-name{font-size:18px;font-weight:800}
+.country-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.country-body{padding:20px 26px}
+.system-item{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--border)}
+.system-item:last-child{border-bottom:none}
+.system-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.system-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.system-desc{font-size:11px;color:var(--muted);line-height:1.55}
+.sys-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.tag-pill{font-size:9px;font-family:'IBM Plex Mono';font-weight:700;padding:2px 7px;border-radius:100px}
+.tag-ok{background:rgba(34,197,94,.1);color:#22C55E;border:1px solid rgba(34,197,94,.2)}
+.tag-gap{background:rgba(239,68,68,.1);color:#EF4444;border:1px solid rgba(239,68,68,.2)}
+.tag-partial{background:rgba(245,158,11,.1);color:#F59E0B;border:1px solid rgba(245,158,11,.2)}
+
+.chart-wrap{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:center}
+.chart-box{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:28px}
+.chart-legend{display:flex;flex-direction:column;gap:12px}
+.legend-item{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:14px;border:1px solid var(--border);background:var(--card)}
+.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.legend-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.legend-desc{font-size:11px;color:var(--muted);line-height:1.5}
+
+.pipeline-outer{background:linear-gradient(180deg,var(--bg),rgba(10,132,255,.04),var(--bg));padding:60px 0}
+.pipeline{display:flex;align-items:center;justify-content:center;gap:0;max-width:1100px;margin:0 auto 48px;direction:ltr;overflow-x:auto;padding:0 32px}
+.pipe-node{flex-shrink:0;text-align:center}
+.pipe-box{width:115px;padding:14px 8px;border:1px solid var(--border);border-radius:16px;background:var(--card);transition:all .3s;cursor:default}
+.pipe-box:hover{border-color:rgba(10,132,255,.4);background:rgba(10,132,255,.06);transform:translateY(-4px)}
+.pipe-box.highlight{border-color:rgba(10,132,255,.5);background:rgba(10,132,255,.1);box-shadow:0 0 40px rgba(10,132,255,.2);animation:glow 3s ease-in-out infinite}
+.pipe-icon{font-size:20px;margin-bottom:6px}
+.pipe-label{font-size:10px;font-weight:700;line-height:1.4}
+.pipe-sub{font-size:8px;color:var(--muted);margin-top:3px}
+.pipe-arrow{width:32px;height:2px;flex-shrink:0;background:linear-gradient(90deg,rgba(10,132,255,.2),rgba(10,132,255,.6),rgba(10,132,255,.2));position:relative}
+.pipe-arrow::after{content:'▶';position:absolute;right:-4px;top:-7px;color:rgba(10,132,255,.6);font-size:9px}
+.fanout-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;max-width:900px;margin:0 auto}
+.fanout-item{padding:12px 10px;border-radius:12px;border:1px solid var(--border);background:var(--card);text-align:center;font-size:12px;font-weight:600;transition:all .3s;direction:rtl}
+.fanout-item:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-3px)}
+
+.portals-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.portal-card{padding:22px;border-radius:18px;border:1px solid var(--border);background:var(--card);transition:all .3s;cursor:default;position:relative;overflow:hidden}
+.portal-card:hover{transform:translateY(-5px);border-color:var(--portal-color,var(--blue));box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.portal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--portal-color,var(--blue));opacity:.6}
+.portal-icon-box{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px;border:1px solid var(--border)}
+.portal-num{font-size:9px;font-weight:700;color:var(--muted);font-family:'IBM Plex Mono';letter-spacing:.1em;margin-bottom:6px}
+.portal-name{font-size:14px;font-weight:700;margin-bottom:5px}
+.portal-desc{font-size:11px;color:var(--muted);line-height:1.65;margin-bottom:10px}
+.portal-users{font-size:9px;color:var(--muted);font-family:'IBM Plex Mono';margin-bottom:8px}
+.portal-users span{color:rgba(255,255,255,.6)}
+.portal-features{display:flex;flex-direction:column;gap:4px}
+.pf-item{font-size:10px;color:var(--muted);display:flex;align-items:baseline;gap:5px}
+.pf-item::before{content:'·';color:var(--blue);font-weight:700;flex-shrink:0}
+
+.engines-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.engine-card{padding:26px;border-radius:18px;border:1px solid var(--border);background:var(--card);position:relative;overflow:hidden;transition:all .35s cubic-bezier(.22,1,.36,1)}
+.engine-card:hover{border-color:rgba(10,132,255,.35);background:rgba(10,132,255,.05);transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.4),0 0 40px rgba(10,132,255,.08)}
+.engine-card.wide{grid-column:span 2}
+.engine-num{font-size:10px;font-weight:700;color:var(--blue);font-family:'IBM Plex Mono';margin-bottom:12px;letter-spacing:.1em}
+.engine-name{font-size:16px;font-weight:700;margin-bottom:8px}
+.engine-desc{font-size:12px;color:var(--muted);line-height:1.75;margin-bottom:12px}
+.engine-output{font-family:'IBM Plex Mono';font-size:10px;color:rgba(255,255,255,.4);line-height:1.6;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:10px;padding:9px 11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;direction:ltr;text-align:left}
+.engine-output::before{content:'› ';color:var(--blue);font-weight:700}
+.engine-who{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.who-tag{font-size:9px;padding:2px 8px;border-radius:100px;border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono'}
+.engine-glow{position:absolute;bottom:-40px;right:-40px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,rgba(10,132,255,.07),transparent);pointer-events:none}
+
+.chain-visual{border:1px solid rgba(124,58,237,.2);border-radius:20px;overflow:hidden;max-width:820px;margin:0 auto;background:rgba(124,58,237,.03);direction:ltr}
+.chain-header{padding:14px 22px;border-bottom:1px solid rgba(124,58,237,.15);display:flex;align-items:center;justify-content:space-between;font-family:'IBM Plex Mono';font-size:10px}
+.chain-title{color:rgba(124,58,237,.9);font-weight:700;letter-spacing:.1em}
+.chain-sealed{color:#22C55E;font-size:9px}
+.chain-row{display:flex;align-items:baseline;gap:14px;padding:12px 22px;border-bottom:1px solid rgba(255,255,255,.04);font-family:'IBM Plex Mono';font-size:11px;transition:background .2s}
+.chain-row:hover{background:rgba(255,255,255,.02)}
+.chain-row:last-child{border-bottom:none}
+.chain-idx{width:18px;color:rgba(255,255,255,.25);font-size:9px}
+.chain-main{flex:1;color:rgba(255,255,255,.75)}
+.chain-hash{color:rgba(255,255,255,.2);font-size:9px}
+.chain-check{color:#22C55E;font-size:10px}
+
+.transform-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:20px;align-items:center}
+.before-card{border-radius:20px;padding:28px;border:1px solid rgba(239,68,68,.15);background:rgba(239,68,68,.04)}
+.after-card{border-radius:20px;padding:28px;border:1px solid rgba(10,132,255,.2);background:rgba(10,132,255,.04)}
+.card-label{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;font-family:'IBM Plex Mono';margin-bottom:18px}
+.before-card .card-label{color:rgba(239,68,68,.7)}
+.after-card .card-label{color:var(--blue)}
+.transform-item{display:flex;align-items:flex-start;gap:9px;margin-bottom:12px;font-size:13px;line-height:1.6}
+.transform-item:last-child{margin-bottom:0}
+.arrow-mid{display:flex;flex-direction:column;align-items:center;gap:8px}
+.arrow-mid-icon{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0A84FF,#0048C0);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 30px rgba(10,132,255,.4);animation:glow 3s ease-in-out infinite}
+.arrow-mid-text{font-size:9px;color:var(--muted);text-align:center;font-family:'IBM Plex Mono'}
+
+.impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.impact-card{padding:28px 20px;border-radius:18px;text-align:center;border:1px solid var(--border);background:var(--card);transition:all .3s}
+.impact-card:hover{transform:translateY(-4px);border-color:rgba(200,169,110,.3)}
+.impact-val{font-size:3rem;font-weight:900;letter-spacing:-.04em;font-family:'Inter';line-height:1;direction:ltr;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.impact-lbl{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+.vision-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.vision-card{padding:24px;border-radius:18px;border:1px solid var(--border);background:var(--card);display:flex;gap:14px;transition:all .3s}
+.vision-card:hover{border-color:rgba(200,169,110,.25);background:rgba(200,169,110,.03);transform:translateY(-3px)}
+.vision-icon{width:46px;height:46px;border-radius:13px;flex-shrink:0;background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.2);display:flex;align-items:center;justify-content:center;font-size:20px}
+.vision-title{font-size:15px;font-weight:700;margin-bottom:5px}
+.vision-desc{font-size:12px;color:var(--muted);line-height:1.75}
+
+footer{text-align:center;padding:60px 24px;border-top:1px solid var(--border);position:relative;z-index:1}
+.footer-logo{font-size:44px;font-weight:900;letter-spacing:-.04em;margin-bottom:10px}
+.footer-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.footer-mark{font-family:'IBM Plex Mono';font-size:10px;color:rgba(255,255,255,.18);letter-spacing:.15em}
+
+/* ── TABLET 900px ── */
+@media(max-width:900px){
+  nav{padding:0 18px}
+  .nav-links{display:none}
+  .sec{padding:72px 24px}
+  .silos-grid{grid-template-columns:repeat(2,1fr)}
+  .portals-grid{grid-template-columns:repeat(2,1fr)}
+  .countries{grid-template-columns:1fr}
+  .chart-wrap{grid-template-columns:1fr}
+  .transform-grid{grid-template-columns:1fr;gap:16px}
+  .arrow-mid{flex-direction:row;justify-content:center;padding:8px 0}
+  .engines-grid{grid-template-columns:repeat(2,1fr)}
+  .engine-card.wide{grid-column:span 2}
+  .impact-grid{grid-template-columns:repeat(2,1fr)}
+  .vision-grid{grid-template-columns:1fr}
+  .gaps{grid-template-columns:1fr}
+  .fanout-grid{grid-template-columns:repeat(3,1fr)}
+  .chain-hash{display:none}
+  .pipeline{padding:0 16px;gap:0}
+  .pipe-box{width:95px;padding:10px 6px}
+  .pipe-arrow{width:20px}
+}
+
+/* ── MOBILE 600px ── */
+@media(max-width:600px){
+  nav{padding:0 14px;height:56px}
+  .nav-mark{width:30px;height:30px;font-size:14px}
+  .nav-brand{font-size:14px}
+  .nav-sub{display:none}
+  .nav-badge{padding:4px 10px;font-size:11px}
+
+  .hero{padding:90px 18px 60px}
+  .hero-aurora{width:500px;height:500px}
+  .hero-badge{font-size:12px;padding:7px 16px;text-align:center}
+  .hero h1{font-size:clamp(2.6rem,11vw,4rem);margin-bottom:18px}
+  .hero-sub{font-size:16px;line-height:1.8;margin-bottom:32px}
+  .hero-stats{gap:20px;display:grid;grid-template-columns:1fr 1fr}
+  .hero-stat .val{font-size:2.4rem}
+  .hero-stat .lbl{font-size:13px}
+
+  .sec{padding:56px 18px}
+  .sec-title{font-size:clamp(1.7rem,6vw,2.2rem);letter-spacing:-.02em}
+  .sec-sub{font-size:15px;line-height:1.85;margin-bottom:36px}
+  .eyebrow{font-size:10px;letter-spacing:.15em}
+
+  .silos-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .silo{padding:18px 14px}
+  .silo-icon{font-size:26px;margin-bottom:8px}
+  .silo-name{font-size:14px}
+  .silo-sub{font-size:12px}
+
+  .gaps{gap:12px}
+  .gap-card{padding:22px 18px}
+  .gap-num{font-size:36px}
+  .gap-title{font-size:16px}
+  .gap-desc{font-size:14px}
+
+  .country-header{padding:16px 18px;gap:10px}
+  .country-flag{font-size:28px}
+  .country-name{font-size:16px}
+  .country-sub{font-size:12px}
+  .country-body{padding:14px 18px}
+  .system-title{font-size:14px}
+  .system-desc{font-size:13px}
+  .tag-pill{font-size:10px;padding:3px 8px}
+
+  .chart-box{padding:16px}
+  .chart-legend{gap:10px}
+  .legend-item{padding:12px 14px;gap:10px}
+  .legend-title{font-size:14px}
+  .legend-desc{font-size:13px}
+
+  .pipeline-outer{padding:40px 0}
+  .pipeline{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;padding:0 16px;
+    margin-bottom:24px;
+    direction:rtl;
+  }
+  .pipe-arrow{display:none}
+  .pipe-node{text-align:center}
+  .pipe-box{width:auto;padding:12px 8px}
+  .pipe-box.highlight{border-color:rgba(10,132,255,.6)}
+  .pipe-icon{font-size:20px;margin-bottom:6px}
+  .pipe-label{font-size:12px}
+  .pipe-sub{font-size:10px}
+  .fanout-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+  .fanout-item{padding:12px 8px;font-size:13px}
+
+  .portals-grid{grid-template-columns:1fr;gap:12px}
+  .portal-card{padding:20px}
+  .portal-icon-box{width:42px;height:42px;font-size:20px;margin-bottom:12px}
+  .portal-num{font-size:10px}
+  .portal-name{font-size:16px}
+  .portal-desc{font-size:13px;line-height:1.7}
+  .portal-users{font-size:11px}
+  .pf-item{font-size:12px}
+
+  .engines-grid{grid-template-columns:1fr}
+  .engine-card.wide{grid-column:span 1}
+  .engine-card{padding:22px}
+  .engine-num{font-size:10px}
+  .engine-name{font-size:17px}
+  .engine-desc{font-size:13px;line-height:1.75}
+  .engine-output{font-size:10px;padding:9px 11px}
+  .who-tag{font-size:11px}
+
+  .chain-visual{border-radius:14px}
+  .chain-header{padding:12px 16px;flex-direction:column;gap:4px;align-items:flex-start}
+  .chain-title{font-size:10px}
+  .chain-sealed{font-size:10px}
+  .chain-row{padding:11px 16px;gap:8px;flex-wrap:wrap}
+  .chain-main{font-size:11px;line-height:1.55;word-break:break-all}
+  .chain-idx{font-size:10px}
+  .chain-check{margin-right:auto}
+
+  .transform-grid{gap:14px}
+  .before-card,.after-card{padding:22px 18px}
+  .transform-item{font-size:14px;gap:8px;line-height:1.65}
+  .card-label{margin-bottom:14px;font-size:10px}
+  .arrow-mid-icon{width:46px;height:46px;font-size:20px}
+
+  .impact-grid{grid-template-columns:1fr 1fr;gap:14px}
+  .impact-card{padding:22px 14px}
+  .impact-val{font-size:2.6rem}
+  .impact-lbl{font-size:13px}
+
+  .vision-grid{gap:12px}
+  .vision-card{padding:20px 16px;gap:12px}
+  .vision-icon{width:42px;height:42px;font-size:20px;border-radius:11px}
+  .vision-title{font-size:15px}
+  .vision-desc{font-size:13px;line-height:1.75}
+
+  footer{padding:40px 16px}
+  .footer-logo{font-size:36px}
+  .footer-sub{font-size:13px}
+  .footer-mark{font-size:10px}
+}
+
+/* ── SMALL PHONES 380px ── */
+@media(max-width:380px){
+  .hero h1{font-size:2.3rem}
+  .hero-sub{font-size:15px}
+  .hero-stats{grid-template-columns:1fr 1fr;gap:14px}
+  .hero-stat .val{font-size:2rem}
+  .hero-stat .lbl{font-size:12px}
+  .sec{padding:48px 14px}
+  .sec-sub{font-size:14px}
+  .silos-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .silo{padding:14px 10px}
+  .silo-sub{font-size:11px}
+  .gap-desc{font-size:13px}
+  .system-desc{font-size:12px}
+  .portal-desc{font-size:12px}
+  .engine-desc{font-size:12px}
+  .transform-item{font-size:13px}
+  .impact-grid{grid-template-columns:1fr 1fr}
+  .impact-val{font-size:2.2rem}
+  .pipeline{grid-template-columns:repeat(2,1fr)}
+  .chain-main{font-size:10px}
+  .vision-desc{font-size:12px}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-mark">S</div>
+    <div><div class="nav-brand">SANAD · سند</div><div class="nav-sub">SOVEREIGN HEALTH INTELLIGENCE</div></div>
+  </div>
+  <div class="nav-links">
+    <a href="#problem">الفجوة</a><a href="#current">الواقع</a><a href="#solution">الحل</a>
+    <a href="#portals">البوابات</a><a href="#engines">المحركات</a><a href="#impact">الأثر</a>
+  </div>
+  <div class="nav-badge"><span class="dot-live"></span>LIVE SYSTEM</div>
+</nav>
+
+<div class="hero">
+  <div class="hero-aurora"></div>
+  <div class="hero-badge"><span class="dot-live"></span>المملكة العربية السعودية · رؤية 2030 · ذكاء صحي سيادي</div>
+  <h1><span class="blue-text">لكل قرارٍ</span><br><span class="gold-text">سند</span></h1>
+  <p class="hero-sub">
+    تخيّل أن يعرف كل طبيب في المملكة كل ما يحتاج عن مريضه في ثانية واحدة —
+    سجله الطبي الكامل، أدويته، حساسياته، تاريخه العائلي، ونتائج مختبره الأخيرة.
+    هذا بالضبط ما يفعله سند.
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="val" id="c1">—</span><div class="lbl">مليون سجل صحي موحّد</div></div>
+    <div class="hero-stat"><span class="val" id="c2">—</span><div class="lbl">منشأة صحية متصلة</div></div>
+    <div class="hero-stat"><span class="val" id="c3">—</span><div class="lbl">محركات ذكاء اصطناعي</div></div>
+    <div class="hero-stat"><span class="val" id="c4">—</span><div class="lbl">بوابة تخصصية</div></div>
+  </div>
+</div>
+
+<div class="ticker">
+  <div class="ticker-inner">
+    <div class="ticker-item"><span class="tag">DECIDE</span>risk_score:0.94 · K⁺ 6.1 · escalate to attending</div>
+    <div class="ticker-item"><span class="tag">ISNĀD</span>chain sealed · 5 attestations · immutable</div>
+    <div class="ticker-item"><span class="tag">DISPENSE</span>RX-2026-00142 · amoxicillin · allergy PASS</div>
+    <div class="ticker-item"><span class="tag">RADAR</span>RTI cluster · Eastern Region · Rt 1.4 · alert MOH</div>
+    <div class="ticker-item"><span class="tag">TWIN</span>HbA1c 7.1→8.3% Q3 · intervene early</div>
+    <div class="ticker-item"><span class="tag">FRAUD</span>claim #88412 · duplicate billing · HOLD</div>
+    <div class="ticker-item"><span class="tag">SUPPLY</span>amoxicillin T-9d · reorder auto-issued</div>
+    <div class="ticker-item"><span class="tag">HEREDITY</span>BRCA1 lineage · 3 relatives · screening alert</div>
+    <div class="ticker-item"><span class="tag">DECIDE</span>risk_score:0.94 · K⁺ 6.1 · escalate to attending</div>
+    <div class="ticker-item"><span class="tag">ISNĀD</span>chain sealed · 5 attestations · immutable</div>
+    <div class="ticker-item"><span class="tag">DISPENSE</span>RX-2026-00142 · amoxicillin · allergy PASS</div>
+    <div class="ticker-item"><span class="tag">RADAR</span>RTI cluster · Eastern Region · Rt 1.4 · alert MOH</div>
+    <div class="ticker-item"><span class="tag">TWIN</span>HbA1c 7.1→8.3% Q3 · intervene early</div>
+    <div class="ticker-item"><span class="tag">FRAUD</span>claim #88412 · duplicate billing · HOLD</div>
+    <div class="ticker-item"><span class="tag">SUPPLY</span>amoxicillin T-9d · reorder auto-issued</div>
+    <div class="ticker-item"><span class="tag">HEREDITY</span>BRCA1 lineage · 3 relatives · screening alert</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PROBLEM -->
+<section class="sec" id="problem">
+  <p class="eyebrow">المشكلة الجوهرية</p>
+  <h2 class="sec-title">البيانات الصحية <span style="color:var(--red)">مشتّتة</span></h2>
+  <p class="sec-sub">رغم الاستثمارات الضخمة في البنية التحتية الصحية، تبقى كل منشأة جزيرة منعزلة. مريضك في المستشفى لا يعلم طبيبه أنك تناولت دواءً أخرجه طبيب آخر من عيادة أخرى. هذه الفجوة تكلّف أرواحاً.</p>
+  <div class="silos-grid">
+    <div class="silo"><div class="silo-icon">🏥</div><div class="silo-name">مستشفى</div><div class="silo-sub">نظام HIS خاص لا يشارك البيانات مع غيره</div><div class="silo-broken">ISOLATED</div></div>
+    <div class="silo"><div class="silo-icon">💊</div><div class="silo-name">صيدلية</div><div class="silo-sub">تصرف الدواء دون معرفة الملف الطبي الكامل</div><div class="silo-broken">ISOLATED</div></div>
+    <div class="silo"><div class="silo-icon">🔬</div><div class="silo-name">مختبر</div><div class="silo-sub">النتائج لا تصل للطبيب تلقائياً وفي الوقت المناسب</div><div class="silo-broken">ISOLATED</div></div>
+    <div class="silo"><div class="silo-icon">🚑</div><div class="silo-name">طوارئ</div><div class="silo-sub">المسعف يصل بلا أي معلومات عن المريض</div><div class="silo-broken">ISOLATED</div></div>
+  </div>
+  <div class="gaps">
+    <div class="gap-card"><div class="gap-num">01</div><div class="gap-title">لا استمرارية في الرعاية</div><div class="gap-desc">عند تحويل المريض بين المستشفيات، يضيع كل السياق الطبي. الطبيب يبدأ من الصفر ويطلب نفس التحاليل من جديد — وقت مهدر وتكلفة مضاعفة</div></div>
+    <div class="gap-card"><div class="gap-num">02</div><div class="gap-title">إشارات خطر تمرّ دون إنذار</div><div class="gap-desc">تعارضات الأدوية، التجمعات الوبائية، نقص المخزون — مؤشرات حرجة لا أحد يرصدها في الوقت الفعلي لأن البيانات مشتتة عبر عشرات الأنظمة</div></div>
+    <div class="gap-card"><div class="gap-num">03</div><div class="gap-title">قرارات بلا توثيق ولا مساءلة</div><div class="gap-desc">لا نظام يسجّل لماذا اتُّخذ القرار الطبي ولا من اتخذه ولا ما النتيجة. عند وقوع خطأ — لا يوجد أثر يُعتمد عليه للتحقيق أو التحسين</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CURRENT STATE -->
+<section class="sec" id="current">
+  <p class="eyebrow">الواقع الراهن</p>
+  <h2 class="sec-title">ما يوجد الآن في <span class="gold-text">المنطقة</span></h2>
+  <p class="sec-sub">المملكة والإمارات وقطر بنت بنية تحتية رقمية صحية متقدمة — لكنها بلا طبقة ذكاء توحّدها. الأنظمة تعمل كجزر منفصلة وليس كمنظومة واحدة تفكّر وتُحلّل.</p>
+  <div class="countries">
+    <div class="country-card">
+      <div class="country-header"><div class="country-flag">🇸🇦</div><div><div class="country-name">المملكة العربية السعودية</div><div class="country-sub">رؤية 2030 · التحول الصحي الوطني</div></div></div>
+      <div class="country-body">
+        <div class="system-item"><div class="system-dot" style="background:#0A84FF"></div><div><div class="system-title">نفيس — NPHIES</div><div class="system-desc">منصة تبادل المعلومات الصحية الوطنية — تربط المطالبات التأمينية بالمستشفيات. مخصصة للفوترة وليست للقرار السريري</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ فوترة وطنية</span><span class="tag-pill tag-gap">✗ لا ذكاء سريري</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#22C55E"></div><div><div class="system-title">وصفتي — Wasfaty</div><div class="system-desc">نظام الوصفات الإلكترونية الوطني — صرف الأدوية من أي صيدلية، لكن بلا فحص تعارض دوائي حقيقي في الوقت الفعلي</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ 2000+ صيدلية</span><span class="tag-pill tag-gap">✗ لا فحص تعارض</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#F59E0B"></div><div><div class="system-title">صحتي — Sehhaty</div><div class="system-desc">التطبيق الوطني للمواطن — حجز مواعيد وتطعيمات وسجل شخصي. يخدم المواطن لكن لا يخدم الطبيب في غرفة العمليات</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ 10M+ مستخدم</span><span class="tag-pill tag-gap">✗ لا تنبؤات صحية</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#7C3AED"></div><div><div class="system-title">المدن الطبية الكبرى</div><div class="system-desc">KAMC وKFMC وKASCH — أنظمة HIS ضخمة داخلياً (Cerner، SAP) لكن مغلقة عن بعضها تماماً</div><div class="sys-tags"><span class="tag-pill tag-partial">~ داخلياً فقط</span><span class="tag-pill tag-gap">✗ لا تكامل خارجي</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#EF4444"></div><div><div class="system-title">الطوارئ والإسعاف</div><div class="system-desc">الهلال الأحمر يصل للمريض فاقد الوعي بلا أي وصول لسجله — يبدأون من صفر في أحرج اللحظات</div><div class="sys-tags"><span class="tag-pill tag-gap">✗ لا وصول للسجل الطبي</span></div></div></div>
+      </div>
+    </div>
+    <div class="country-card">
+      <div class="country-header"><div class="country-flag">🇦🇪</div><div><div class="country-name">الإمارات العربية المتحدة</div><div class="country-sub">أبوظبي + دبي · الأكثر تقدماً رقمياً في المنطقة</div></div></div>
+      <div class="country-body">
+        <div class="system-item"><div class="system-dot" style="background:#00B4D8"></div><div><div class="system-title">رعايتي — Riayati</div><div class="system-desc">السجل الطبي الوطني الموحد لأبوظبي — يربط القطاعين العام والخاص ويتيح الوصول عبر الهوية الرقمية. الأقوى في المنطقة تكاملاً</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ ربط عام/خاص</span><span class="tag-pill tag-gap">✗ أبوظبي فقط</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#0A84FF"></div><div><div class="system-title">مالفي — Malaffi</div><div class="system-desc">منصة تبادل المعلومات الصحية في أبوظبي — تجمع بيانات من مئات المنشآت. الأقرب لرؤية HIE في المنطقة لكن دون طبقة ذكاء</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ HIE متكامل</span><span class="tag-pill tag-gap">✗ لا قرار سريري</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#22C55E"></div><div><div class="system-title">نبض — Nabidh (دبي)</div><div class="system-desc">منصة تبادل الصحة في دبي موازية لمالفي — منفصلة عنها تماماً. دولة واحدة، منصتان، لا حوار بينهما</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ دبي HIE</span><span class="tag-pill tag-gap">✗ منفصل عن Malaffi</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#F59E0B"></div><div><div class="system-title">الخدمات الرقمية للمواطن</div><div class="system-desc">ICA + UAE Pass + MOHAP تطبيقات — هوية رقمية ممتازة وواجهة مواطن متقدمة. لكن التطبيق لا يُطعم الطبيب بالذكاء السريري</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ هوية رقمية</span><span class="tag-pill tag-gap">✗ لا ذكاء للطبيب</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#EF4444"></div><div><div class="system-title">الفجوة الحقيقية</div><div class="system-desc">الإمارات تملك أفضل بنية تحتية في المنطقة — لكنها بلا "عقل" يربط Malaffi بـ Nabidh، يحلّل، يتنبأ، ويدعم القرار الطبي آنياً</div><div class="sys-tags"><span class="tag-pill tag-gap">✗ الأنظمة لا تتحدث</span><span class="tag-pill tag-gap">✗ لا ذكاء موحد</span></div></div></div>
+      </div>
+    </div>
+    <div class="country-card">
+      <div class="country-header"><div class="country-flag">🇶🇦</div><div><div class="country-name">دولة قطر</div><div class="country-sub">رؤية 2030 · الصحة الذكية</div></div></div>
+      <div class="country-body">
+        <div class="system-item"><div class="system-dot" style="background:#7E22CE"></div><div><div class="system-title">مؤسسة حمد الطبية — HMC</div><div class="system-desc">تشغّل EPIC — أحد أكبر نشرات EPIC في العالم. متكامل داخل شبكة HMC لكن لا يتحدث مع PHCC أو Sidra بشكل كامل</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ EPIC متكامل</span><span class="tag-pill tag-gap">✗ لا تشارك خارجي</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#0A84FF"></div><div><div class="system-title">الرعاية الأولية — PHCC</div><div class="system-desc">شبكة عيادات الرعاية الأولية عبر قطر. نظام منفصل لا يتكامل تلقائياً مع HMC رغم كونهما في المنظومة الصحية ذاتها</div><div class="sys-tags"><span class="tag-pill tag-partial">~ تكامل جزئي</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#22C55E"></div><div><div class="system-title">مستشفى سدرة — Sidra</div><div class="system-desc">مستشفى الأطفال والنساء العالمي. يعمل باستقلالية رغم كونه من المنظومة القطرية — لا تبادل بيانات حقيقي</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ EPIC</span><span class="tag-pill tag-gap">✗ معزول عن الشبكة</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#F59E0B"></div><div><div class="system-title">نظام eMedical الوطني</div><div class="system-desc">السجل الطبي الإلكتروني الوطني — لكنه وعاء للبيانات فقط، لا يحلّلها ولا ينبّه ولا يتنبأ بأي شيء</div><div class="sys-tags"><span class="tag-pill tag-ok">✓ سجل موجود</span><span class="tag-pill tag-gap">✗ لا تحليل ولا ذكاء</span></div></div></div>
+        <div class="system-item"><div class="system-dot" style="background:#EF4444"></div><div><div class="system-title">التأمين الصحي الوطني</div><div class="system-desc">كشف الاحتيال يدوي بالكامل. لا ذكاء اصطناعي يحلل أنماط المطالبات — الاحتيال يُكتشف بعد الصرف وبعد الخسارة</div><div class="sys-tags"><span class="tag-pill tag-gap">✗ فحص يدوي فقط</span></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RADAR CHART -->
+<section class="sec">
+  <p class="eyebrow">مقارنة القدرات</p>
+  <h2 class="sec-title">مقارنة موضوعية <span class="blue-text">بالأرقام</span></h2>
+  <p class="sec-sub">رسم راداري يقارن قدرات المنظومات الصحية الحالية مقابل ما يضيفه سند. كلما اتسعت المساحة الزرقاء كلما كانت المنظومة أكثر اكتمالاً وذكاءً.</p>
+  <div class="chart-wrap">
+    <div class="chart-box"><canvas id="radarChart"></canvas></div>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#EF4444"></div><div><div class="legend-title">المنظومة الحالية — المملكة</div><div class="legend-desc">أنظمة قوية في الفوترة والتوثيق، لكن بلا ذكاء مشترك أو تحليل وقائي حقيقي</div></div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#F59E0B"></div><div><div class="legend-title">المنظومة الحالية — قطر</div><div class="legend-desc">EPIC المتكامل يمنح ميزة داخلية، لكن الفجوة بين المنشآت المختلفة لا تزال قائمة</div></div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#00B4D8"></div><div><div class="legend-title">المنظومة الحالية — الإمارات</div><div class="legend-desc">Malaffi وNabidh الأقوى تكاملاً في المنطقة — لكن بلا عقل يربطهما أو ذكاء سريري موحد</div></div></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#0A84FF"></div><div><div class="legend-title">سند — SANAD</div><div class="legend-desc">طبقة ذكاء موحدة فوق ما بُني — لا تستبدله، بل تجعله يفكّر ويتنبأ ويدعم القرار</div></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PIPELINE -->
+<div class="pipeline-outer" id="solution">
+  <section class="sec" style="padding-bottom:0">
+    <p class="eyebrow">آلية العمل</p>
+    <h2 class="sec-title">كيف يعمل <span class="blue-text">سند</span> خطوة بخطوة</h2>
+    <p class="sec-sub">سند لا يحل مكان ما هو موجود — بل يضع طبقة ذكاء فوق كل شيء. يقرأ البيانات من NPHIES وEPIC وWasfaty وMalaffi وNabidh، يحللها، ويرسل القرار المدعوم بالدليل لكل منشأة في وقت واحد.</p>
+  </section>
+  <div class="pipeline">
+    <div class="pipe-node"><div class="pipe-box"><div class="pipe-icon">👤</div><div class="pipe-label">المواطن</div><div class="pipe-sub">34.2M هوية</div></div></div>
+    <div class="pipe-arrow"></div>
+    <div class="pipe-node"><div class="pipe-box"><div class="pipe-icon">🔐</div><div class="pipe-label">تحقيق الهوية</div><div class="pipe-sub">Absher · Sehhaty</div></div></div>
+    <div class="pipe-arrow"></div>
+    <div class="pipe-node"><div class="pipe-box"><div class="pipe-icon">📡</div><div class="pipe-label">طبقة FHIR</div><div class="pipe-sub">NPHIES · EPIC · Malaffi</div></div></div>
+    <div class="pipe-arrow"></div>
+    <div class="pipe-node"><div class="pipe-box highlight"><div class="pipe-icon">🧠</div><div class="pipe-label">SANAD AI</div><div class="pipe-sub">9 محركات</div></div></div>
+    <div class="pipe-arrow"></div>
+    <div class="pipe-node"><div class="pipe-box"><div class="pipe-icon">⬡</div><div class="pipe-label">الإسناد</div><div class="pipe-sub">سلسلة لا تُمحى</div></div></div>
+    <div class="pipe-arrow"></div>
+    <div class="pipe-node"><div class="pipe-box"><div class="pipe-icon">✅</div><div class="pipe-label">القرار البشري</div><div class="pipe-sub">مدعوم بالدليل</div></div></div>
+  </div>
+  <section class="sec" style="padding-top:16px">
+    <div class="fanout-grid">
+      <div class="fanout-item">🏥 المستشفى</div>
+      <div class="fanout-item">💊 الصيدلية</div>
+      <div class="fanout-item">🛡️ التأمين</div>
+      <div class="fanout-item">🔬 المختبر</div>
+      <div class="fanout-item">🚑 الطوارئ</div>
+      <div class="fanout-item">🏛️ الوزارة</div>
+    </div>
+    <p style="text-align:center;font-family:'IBM Plex Mono';font-size:9px;color:var(--muted);margin-top:14px;letter-spacing:.15em">ALL 12 PORTALS · ONE TRUSTED SOURCE · ONE IMMUTABLE CHAIN</p>
+  </section>
+</div>
+
+<div class="divider"></div>
+
+<!-- 12 PORTALS -->
+<section class="sec" id="portals">
+  <p class="eyebrow">البوابات الاثنتا عشرة</p>
+  <h2 class="sec-title">كل وظيفة صحية <span class="blue-text">لها بوابتها</span></h2>
+  <p class="sec-sub">سند لا يقدم نظاماً واحداً للكل — بل 12 بوابة متخصصة. كل واحدة مصممة لمستخدم بعينه وتُظهر له المعلومات التي يحتاجها فقط، في اللحظة التي يحتاجها.</p>
+  <div class="portals-grid">
+
+    <div class="portal-card" style="--portal-color:#0A84FF">
+      <div class="portal-icon-box" style="background:rgba(10,132,255,.1);border-color:rgba(10,132,255,.2)">🏥</div>
+      <div class="portal-num">01 · CLINICAL</div>
+      <div class="portal-name">بوابة العيادات</div>
+      <div class="portal-desc">الطبيب يرى الملف الكامل للمريض مع توصيات الذكاء الاصطناعي وتشخيص تفريقي مرتّب بدرجات الثقة — بدلاً من الاعتماد على ما يتذكره المريض</div>
+      <div class="portal-users">المستخدم: <span>الأطباء والممرضون</span></div>
+      <div class="portal-features">
+        <div class="pf-item">ملف طبي موحد من كل المنشآت</div>
+        <div class="pf-item">تشخيص تفريقي مع درجة ثقة لكل احتمال</div>
+        <div class="pf-item">تنبيه تلقائي للقيم المخبرية الحرجة</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#22C55E">
+      <div class="portal-icon-box" style="background:rgba(34,197,94,.1);border-color:rgba(34,197,94,.2)">🚨</div>
+      <div class="portal-num">02 · EMERGENCY</div>
+      <div class="portal-name">بوابة الطوارئ</div>
+      <div class="portal-desc">وصول فوري للسجل الطبي بمجرد مسح هوية المريض — حتى لو كان فاقد الوعي. ثوانٍ تنقذ أرواحاً. كل وصول مسجّل في الإسناد.</div>
+      <div class="portal-users">المستخدم: <span>أطباء الطوارئ والمسعفون</span></div>
+      <div class="portal-features">
+        <div class="pf-item">وصول بلا كلمة مرور عند الأزمة</div>
+        <div class="pf-item">فصيلة الدم والحساسيات فوراً</div>
+        <div class="pf-item">كل وصول مُدقَّق في سلسلة الإسناد</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#7C3AED">
+      <div class="portal-icon-box" style="background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.2)">💊</div>
+      <div class="portal-num">03 · PHARMACY</div>
+      <div class="portal-name">بوابة الصيدليات</div>
+      <div class="portal-desc">الصيدلاني يرى كل أدوية المريض قبل الصرف ويحصل على تحذير فوري عند أي تعارض أو حساسية — قبل أن يصل الدواء لليد</div>
+      <div class="portal-users">المستخدم: <span>الصيادلة ومساعدوهم</span></div>
+      <div class="portal-features">
+        <div class="pf-item">فحص تعارض دوائي آني بدقة 96%</div>
+        <div class="pf-item">فحص الحساسيات المسجّلة تلقائياً</div>
+        <div class="pf-item">تاريخ صرف الأدوية من كل صيدلية</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#F59E0B">
+      <div class="portal-icon-box" style="background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.2)">🔬</div>
+      <div class="portal-num">04 · LABORATORY</div>
+      <div class="portal-name">بوابة المختبرات</div>
+      <div class="portal-desc">نتائج المختبر لا تُرسل فقط — بل تُحلَّل وتُربط بالسياق السريري الكامل وتُقارَن بالنتائج السابقة وتُفسَّر تلقائياً</div>
+      <div class="portal-users">المستخدم: <span>أخصائيو المختبرات والأطباء</span></div>
+      <div class="portal-features">
+        <div class="pf-item">تفسير آلي مقرون بالسياق السريري</div>
+        <div class="pf-item">مقارنة تلقائية بالنتائج التاريخية</div>
+        <div class="pf-item">إنذار فوري للقيم الحرجة للطبيب</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#EF4444">
+      <div class="portal-icon-box" style="background:rgba(239,68,68,.1);border-color:rgba(239,68,68,.2)">🛡️</div>
+      <div class="portal-num">05 · INSURANCE</div>
+      <div class="portal-name">بوابة التأمين</div>
+      <div class="portal-desc">معالجة المطالبات مع كشف تلقائي للاحتيال والازدواجية قبل الصرف وليس بعده. كل مطالبة تمر على محرك الاحتيال أولاً.</div>
+      <div class="portal-users">المستخدم: <span>شركات التأمين والمراجعون</span></div>
+      <div class="portal-features">
+        <div class="pf-item">كشف احتيال تلقائي بدقة 91%</div>
+        <div class="pf-item">اكتشاف المطالبات المكررة فوراً</div>
+        <div class="pf-item">تدقيق كامل قبل صرف أي مبلغ</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#06B6D4">
+      <div class="portal-icon-box" style="background:rgba(6,182,212,.1);border-color:rgba(6,182,212,.2)">📊</div>
+      <div class="portal-num">06 · EPIDEMIOLOGY</div>
+      <div class="portal-name">بوابة الوبائيات</div>
+      <div class="portal-desc">رصد الأنماط المرضية عبر 13 منطقة في الوقت الفعلي — الوباء يُكتشف بعد 3 حالات مترابطة لا بعد 3 أسابيع من الانتشار</div>
+      <div class="portal-users">المستخدم: <span>وزارة الصحة وأطباء الوبائيات</span></div>
+      <div class="portal-features">
+        <div class="pf-item">خريطة حرارية للأمراض آنياً</div>
+        <div class="pf-item">حساب معدل الانتشار Rt تلقائياً</div>
+        <div class="pf-item">إنذار مبكر تلقائي للجهات المختصة</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#10B981">
+      <div class="portal-icon-box" style="background:rgba(16,185,129,.1);border-color:rgba(16,185,129,.2)">👤</div>
+      <div class="portal-num">07 · PATIENT</div>
+      <div class="portal-name">بوابة المريض</div>
+      <div class="portal-desc">المريض يرى سجله الطبي الكامل، أدويته، مواعيده، ونتائج تحاليله. يعرف بالضبط كل قرار اتُّخذ بشأن صحته — شفافية كاملة.</div>
+      <div class="portal-users">المستخدم: <span>المرضى والمواطنون</span></div>
+      <div class="portal-features">
+        <div class="pf-item">سجل طبي شامل وشفاف بالكامل</div>
+        <div class="pf-item">تتبع الأدوية والجرعات والوصفات</div>
+        <div class="pf-item">حجز مواعيد ومتابعة الحالة</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#8B5CF6">
+      <div class="portal-icon-box" style="background:rgba(139,92,246,.1);border-color:rgba(139,92,246,.2)">⚙️</div>
+      <div class="portal-num">08 · ADMIN</div>
+      <div class="portal-name">مركز التحكم الإداري</div>
+      <div class="portal-desc">لوحة تحكم شاملة لمديري المنظومة — إدارة الصلاحيات، مراقبة الأداء، وتفعيل وتعطيل محركات الذكاء الاصطناعي بمفتاح واحد</div>
+      <div class="portal-users">المستخدم: <span>مديرو المنظومة وفريق IT</span></div>
+      <div class="portal-features">
+        <div class="pf-item">إدارة 12 بوابة من لوحة واحدة</div>
+        <div class="pf-item">تحكم كامل بمحركات الذكاء الاصطناعي</div>
+        <div class="pf-item">سجل تدقيق كامل لكل إجراء إداري</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#C8A96E">
+      <div class="portal-icon-box" style="background:rgba(200,169,110,.1);border-color:rgba(200,169,110,.2)">🏛️</div>
+      <div class="portal-num">09 · MINISTRY</div>
+      <div class="portal-name">لوحة الوزارة</div>
+      <div class="portal-desc">القيادات الصحية الوطنية ترى صورة المملكة كاملة في لوحة واحدة — لاتخاذ قرارات السياسة الصحية بناءً على بيانات حقيقية لا تقديرات</div>
+      <div class="portal-users">المستخدم: <span>قيادات وزارة الصحة</span></div>
+      <div class="portal-features">
+        <div class="pf-item">مؤشرات صحية وطنية آنية لـ 13 منطقة</div>
+        <div class="pf-item">مقارنة أداء المنشآت والمناطق</div>
+        <div class="pf-item">توقعات وبائية للتخطيط المسبق</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#0EA5E9">
+      <div class="portal-icon-box" style="background:rgba(14,165,233,.1);border-color:rgba(14,165,233,.2)">📦</div>
+      <div class="portal-num">10 · SUPPLY CHAIN</div>
+      <div class="portal-name">بوابة الإمداد الدوائي</div>
+      <div class="portal-desc">إدارة مخزون الأدوية عبر كل المنشآت مع توقع الاحتياج قبل وقوع النقص بـ 9 أيام كاملة — أوامر توريد تلقائية</div>
+      <div class="portal-users">المستخدم: <span>مديرو الصيدليات واللوجستيات</span></div>
+      <div class="portal-features">
+        <div class="pf-item">إنذار نقص المخزون قبل 9 أيام</div>
+        <div class="pf-item">أوامر توريد تلقائية للموردين</div>
+        <div class="pf-item">خريطة توزيع الأدوية جغرافياً</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#EC4899">
+      <div class="portal-icon-box" style="background:rgba(236,72,153,.1);border-color:rgba(236,72,153,.2)">🧬</div>
+      <div class="portal-num">11 · GENETICS</div>
+      <div class="portal-name">بوابة المخاطر الوراثية</div>
+      <div class="portal-desc">رسم خرائط الأمراض الوراثية عبر الأسر والأجيال — يوجّه برامج الكشف المبكر وينبّه الأقارب المعرّضين قبل ظهور الأعراض</div>
+      <div class="portal-users">المستخدم: <span>أطباء الوراثة والمستشارون</span></div>
+      <div class="portal-features">
+        <div class="pf-item">تتبع الأنماط الوراثية العائلية</div>
+        <div class="pf-item">إنذار تلقائي للأقارب المعرّضين</div>
+        <div class="pf-item">توجيه برامج الفحص الوقائي</div>
+      </div>
+    </div>
+
+    <div class="portal-card" style="--portal-color:#6366F1">
+      <div class="portal-icon-box" style="background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.2)">👥</div>
+      <div class="portal-num">12 · WORKFORCE</div>
+      <div class="portal-name">بوابة الموارد البشرية</div>
+      <div class="portal-desc">إدارة الكوادر الطبية — الجداول، المؤهلات، أعباء العمل، وتحليل الكفاءة لضمان التوزيع الأمثل في وقت الأزمات</div>
+      <div class="portal-users">المستخدم: <span>إدارة المنشآت الصحية</span></div>
+      <div class="portal-features">
+        <div class="pf-item">جدولة ذكية للكوادر الطبية</div>
+        <div class="pf-item">تحليل أعباء العمل والكفاءة</div>
+        <div class="pf-item">تتبع المؤهلات والتراخيص الطبية</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 9 ENGINES -->
+<section class="sec" id="engines" style="background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(10,132,255,.05),transparent)">
+  <p class="eyebrow">المحركات التسعة</p>
+  <h2 class="sec-title">تسعة محركات ذاتية. <span class="blue-text">عقل سريري واحد.</span></h2>
+  <p class="sec-sub">كل محرك متخصص في مهمة بعينها، يعمل باستقلالية تامة، ويُسلّم مخرجاته مع درجة ثقة وتعليل كامل. الطبيب يقرر دائماً — والمحرك يقدّم الدليل.</p>
+  <div class="engines-grid">
+
+    <div class="engine-card wide">
+      <div class="engine-num">01 · CLINICAL DECISION SUPPORT</div>
+      <div class="engine-name">دعم القرار السريري</div>
+      <div class="engine-desc">يحلّل الأعراض والمخبريات والسجل الطبي الكامل ليقترح تشخيصاً تفريقياً مرتّباً بدرجات الثقة مع التعليل الكامل. يتعامل مع 34 مليون سجل ويستجيب في أقل من 400ms. الطبيب لا يرى فقط "ماذا" بل "لماذا" هذا التشخيص الأرجح.</div>
+      <div class="engine-output">ddx: DKA 0.81 · sepsis 0.12 · pancreatitis 0.05 · reasoning: K⁺ 6.1, glucose 480, pH 7.22, anion_gap 22</div>
+      <div class="engine-who"><span class="who-tag">طوارئ</span><span class="who-tag">باطنة</span><span class="who-tag">جراحة</span><span class="who-tag">ICU</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+    <div class="engine-card">
+      <div class="engine-num">02 · DRUG INTERACTION</div>
+      <div class="engine-name">تحليل التعارض الدوائي</div>
+      <div class="engine-desc">يفحص كل وصفة جديدة ضد قائمة أدوية المريض الكاملة وحساسياته المعروفة. يُصدر تحذيراً قبل أن يصل الدواء للمريض.</div>
+      <div class="engine-output">warfarin × ciprofloxacin — INR risk HIGH · hold · alt: azithromycin</div>
+      <div class="engine-who"><span class="who-tag">صيدليات</span><span class="who-tag">عيادات</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+    <div class="engine-card">
+      <div class="engine-num">03 · RISK STRATIFICATION</div>
+      <div class="engine-name">تصنيف المخاطر</div>
+      <div class="engine-desc">يُقيّم مخاطر تدهور الحالة ويرتّب أولويات التدخل الطبي لكل المرضى في الوقت الفعلي — ينبّه قبل أن يسوء الوضع.</div>
+      <div class="engine-output">deterioration 0.87 · ward4 bed12 · escalate NOW · reason: BP↓ SpO2↓</div>
+      <div class="engine-who"><span class="who-tag">ICU</span><span class="who-tag">طوارئ</span><span class="who-tag">جراحة</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+    <div class="engine-card wide">
+      <div class="engine-num">04 · DIGITAL TWIN FORECASTING</div>
+      <div class="engine-name">التوأم الرقمي للمريض</div>
+      <div class="engine-desc">ينشئ نسخة رقمية من المريض ويُشغّل محاكاة مستقبلية لمسار مرضه. الطبيب يرى ما سيحدث بعد 3 أشهر اليوم ويتدخل قبل أن تسوء الأمور. مثال: مريض سكري سترتفع HbA1c لديه بدون تدخل — سند يعرف ذلك ويقترح الحل الآن لا بعد فوات الأوان.</div>
+      <div class="engine-output">HbA1c 7.1% → 8.3% by Q3-2026 · no intervention · recommend: metformin 1g→1.5g + dietary ref</div>
+      <div class="engine-who"><span class="who-tag">سكري</span><span class="who-tag">قلب</span><span class="who-tag">أمراض مزمنة</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+    <div class="engine-card">
+      <div class="engine-num">05 · EPIDEMIC RADAR</div>
+      <div class="engine-name">رادار الأوبئة</div>
+      <div class="engine-desc">يرصد أنماط المرض عبر 13 منطقة ويكتشف التجمعات الوبائية بعد 3 حالات — لا بعد 3 أسابيع من الانتشار.</div>
+      <div class="engine-output">RTI cluster · Eastern · 3 districts · Rt 1.4 · alert MOH</div>
+      <div class="engine-who"><span class="who-tag">وزارة الصحة</span><span class="who-tag">وبائيات</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+    <div class="engine-card">
+      <div class="engine-num">06 · LAB INTELLIGENCE</div>
+      <div class="engine-name">ذكاء المختبرات</div>
+      <div class="engine-desc">يحلّل نتائج المختبرات ويربطها بالسياق السريري ويقارنها بالنتائج التاريخية للمريض ويُفسّرها فوراً.</div>
+      <div class="engine-output">eGFR 41↓ 6mo trend · CKD stage3b · refer nephrology urgent</div>
+      <div class="engine-who"><span class="who-tag">باطنة</span><span class="who-tag">كلى</span><span class="who-tag">مختبرات</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+    <div class="engine-card">
+      <div class="engine-num">07 · FRAUD DETECTION</div>
+      <div class="engine-name">كشف الاحتيال التأميني</div>
+      <div class="engine-desc">يحلّل أنماط المطالبات ويكتشف الاحتيال والازدواجية تلقائياً بدقة 91% قبل صرف المبلغ — يحمي المليارات.</div>
+      <div class="engine-output">claim #88412 · duplicate · provider risk_score 0.91 · HOLD pending review</div>
+      <div class="engine-who"><span class="who-tag">تأمين</span><span class="who-tag">مالية</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+    <div class="engine-card">
+      <div class="engine-num">08 · SHORTAGE PREDICTION</div>
+      <div class="engine-name">التنبؤ بنقص الأدوية</div>
+      <div class="engine-desc">يتنبأ بنقص المخزون الدوائي 9 أيام قبل وقوعه ويُطلق أوامر التوريد تلقائياً للموردين المعتمدين.</div>
+      <div class="engine-output">amoxicillin · 14 pharmacies · T-9d · reorder 50,000 units auto-issued</div>
+      <div class="engine-who"><span class="who-tag">صيدليات</span><span class="who-tag">لوجستيات</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+    <div class="engine-card wide">
+      <div class="engine-num">09 · HEREDITARY RISK MAPPING</div>
+      <div class="engine-name">خرائط المخاطر الوراثية</div>
+      <div class="engine-desc">يرسم خرائط الأمراض الوراثية عبر الأسر والأجيال ويوجّه برامج الفحص المبكر. يغطي أمراض الدم (أنيميا منجلية، ثلاسيميا)، السرطانات الوراثية، وأمراض الأيض — يُنبّه الأقارب المعرّضين قبل ظهور أي أعراض.</div>
+      <div class="engine-output">BRCA1 lineage confirmed · 3 first-degree relatives at risk · screening ×2 overdue · coord alerted</div>
+      <div class="engine-who"><span class="who-tag">وراثة</span><span class="who-tag">أورام</span><span class="who-tag">أطفال</span><span class="who-tag">نساء وتوليد</span></div>
+      <div class="engine-glow"></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ISNAD -->
+<section class="sec" style="background:linear-gradient(180deg,var(--bg),rgba(124,58,237,.04),var(--bg))">
+  <p class="eyebrow">الإسناد — سلسلة الثقة</p>
+  <h2 class="sec-title">كل قرار <span style="color:#7C3AED">موثّق. غير قابل للمحو.</span></h2>
+  <p class="sec-sub">الإسناد ما يجعل سند مختلفاً — سجل مشفّر لا يمكن لأحد مسحه. يوثّق كل وصول، كل توصية، وكل قرار بشري. عند أي خلاف أو خطأ، الحقيقة الكاملة موجودة ولا يمكن الإنكار.</p>
+  <div class="chain-visual">
+    <div class="chain-header">
+      <span class="chain-title">ISNĀD AUDIT CHAIN — CASE #a3f9-2210</span>
+      <span class="chain-sealed">● SEALED 14:03:12 UTC — IMMUTABLE</span>
+    </div>
+    <div class="chain-row"><span class="chain-idx">01</span><span class="chain-main">AI engine output · risk_score 0.94 · DDx: DKA · K⁺ 6.1 mmol/L · full reasoning archived</span><span class="chain-hash">sha256:9f2c…41a1</span><span class="chain-check">✓</span></div>
+    <div class="chain-row"><span class="chain-idx">02</span><span class="chain-main">physician decision · diuretic held · new order: insulin drip · attending: Dr. Al-Rashidi #4721</span><span class="chain-hash">sha256:41bb…0c7e</span><span class="chain-check">✓</span></div>
+    <div class="chain-row"><span class="chain-idx">03</span><span class="chain-main">pharmacy dispense · RX amended · penicillin allergy check PASS · insulin 5u/hr dispensed</span><span class="chain-hash">sha256:c8d0…b252</span><span class="chain-check">✓</span></div>
+    <div class="chain-row"><span class="chain-idx">04</span><span class="chain-main">nurse administration · insulin drip started · vitals logged Q1h · time: 14:03:08 UTC</span><span class="chain-hash">sha256:a90f…c119</span><span class="chain-check">✓</span></div>
+    <div class="chain-row"><span class="chain-idx">05</span><span class="chain-main">patient record viewed · patient portal access · consent: active · notification sent</span><span class="chain-hash">sha256:77aa…e019</span><span class="chain-check">✓</span></div>
+    <div class="chain-row" style="background:rgba(124,58,237,.04)"><span class="chain-idx" style="color:#7C3AED">✦</span><span class="chain-main" style="color:rgba(124,58,237,.8);font-size:10px;letter-spacing:.08em">CHAIN VERIFIED · 5 ATTESTATIONS · CRYPTOGRAPHICALLY LINKED · NOTHING ERASABLE · SOVEREIGN STORAGE</span><span class="chain-hash"></span><span class="chain-check" style="color:#7C3AED">⬡</span></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TRANSFORMATION -->
+<section class="sec">
+  <p class="eyebrow">قبل وبعد</p>
+  <h2 class="sec-title">ما الذي <span class="blue-text">يتغير فعلاً</span></h2>
+  <p class="sec-sub">6 سيناريوهات حقيقية — كيف كانت تُعالَج قبل سند وكيف تُعالَج معه</p>
+  <div class="transform-grid">
+    <div class="before-card">
+      <div class="card-label">قبل سند</div>
+      <div class="transform-item"><span>❌</span><span>ملف المريض موزّع على 7 أنظمة لا تتحدث — الطبيب يبدأ من صفر في كل مستشفى</span></div>
+      <div class="transform-item"><span>❌</span><span>تعارض الأدوية يُكتشف بعد الصرف أو بعد وقوع الأذى للمريض</span></div>
+      <div class="transform-item"><span>❌</span><span>مريض الطوارئ فاقد الوعي — لا أحد يعرف فصيلة دمه أو حساسيته</span></div>
+      <div class="transform-item"><span>❌</span><span>الوباء يُكتشف بعد أسابيع من انتشاره في عدة مناطق</span></div>
+      <div class="transform-item"><span>❌</span><span>الاحتيال التأميني يُكتشف بعد صرف الأموال — الخسارة حدثت</span></div>
+      <div class="transform-item"><span>❌</span><span>لا أثر: لماذا اتُّخذ هذا القرار؟ من اتخذه؟ ما النتيجة؟</span></div>
+    </div>
+    <div class="arrow-mid">
+      <div class="arrow-mid-icon">⚡</div>
+      <div class="arrow-mid-text">SANAD<br>TRANSFORMS</div>
+    </div>
+    <div class="after-card">
+      <div class="card-label">مع سند</div>
+      <div class="transform-item"><span>✅</span><span>ملف موحّد واحد — متاح في أقل من ثانية من أي منشأة في المملكة</span></div>
+      <div class="transform-item"><span>✅</span><span>كل وصفة تمر على فحص 96% دقة — التحذير يصل قبل الصرف بثوانٍ</span></div>
+      <div class="transform-item"><span>✅</span><span>المسعف يمسح الهوية ويرى الملف كاملاً في 3 ثوانٍ — فصيلة الدم، الحساسيات، الأدوية</span></div>
+      <div class="transform-item"><span>✅</span><span>رادار الأوبئة يُطلق الإنذار بعد 3 حالات مترابطة — قبل أي انتشار</span></div>
+      <div class="transform-item"><span>✅</span><span>كشف الاحتيال بدقة 91% قبل الصرف — المليارات محمية</span></div>
+      <div class="transform-item"><span>✅</span><span>سلسلة إسناد مشفّرة غير قابلة للمحو — كل قرار موثّق للأبد</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- IMPACT + BAR CHART -->
+<section class="sec" id="impact" style="background:linear-gradient(180deg,var(--bg),rgba(200,169,110,.04),var(--bg))">
+  <p class="eyebrow">الأثر المتوقع</p>
+  <h2 class="sec-title">أرقام <span class="gold-text">تُحدث فارقاً</span></h2>
+  <p class="sec-sub" style="margin-bottom:40px">مؤشرات الأداء الرئيسية المتوقعة من تطبيق سند على المنظومة الصحية الوطنية</p>
+  <div class="impact-grid">
+    <div class="impact-card"><div class="impact-val" id="i1">—</div><div class="impact-lbl">تخفيض في أخطاء الأدوية الناتجة عن تعارضات غير مكتشفة</div></div>
+    <div class="impact-card"><div class="impact-val" id="i2">—</div><div class="impact-lbl">أيام إنذار مبكر بنقص الأدوية قبل وقوع الأزمة</div></div>
+    <div class="impact-card"><div class="impact-val" id="i3">—</div><div class="impact-lbl">دقة كشف الاحتيال التأميني قبل صرف المبلغ</div></div>
+    <div class="impact-card"><div class="impact-val" id="i4">—</div><div class="impact-lbl">ثانية للوصول لملف الطوارئ الكامل من أي منشأة</div></div>
+  </div>
+  <div style="margin-top:60px">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:6px;text-align:center">دقة كل محرك من المحركات التسعة</h3>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:24px">النسبة المئوية لدقة المخرجات في بيئات الاختبار السريري</p>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px">
+      <div style="position:relative;height:clamp(200px,40vw,280px)"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- VISION 2030 -->
+<section class="sec">
+  <p class="eyebrow">رؤية 2030</p>
+  <h2 class="sec-title">سند <span class="gold-text">ركيزة التحول الصحي</span></h2>
+  <p class="sec-sub">رؤية 2030 تهدف إلى رفع متوسط العمر وتطوير كفاءة القطاع الصحي — ولا يمكن تحقيق ذلك بلا بنية ذكاء موحدة تجمع بيانات 34 مليون مواطن</p>
+  <div class="vision-grid">
+    <div class="vision-card"><div class="vision-icon">🎯</div><div><div class="vision-title">رفع متوسط العمر المتوقع إلى 80 عاماً</div><div class="vision-desc">سند يمكّن الكشف المبكر والتدخل الوقائي على مستوى الأسرة والمجتمع من خلال محركَي التوأم الرقمي والمخاطر الوراثية — قبل ظهور الأمراض لا بعدها</div></div></div>
+    <div class="vision-card"><div class="vision-icon">📊</div><div><div class="vision-title">قرارات السياسة الصحية بالبيانات</div><div class="vision-desc">لوحة الوزارة توفر صورة كاملة لمؤشرات صحة 34 مليون مواطن آنياً — القيادة تخطّط على أساس الواقع لا التقديرات والإحصاءات المتأخرة</div></div></div>
+    <div class="vision-card"><div class="vision-icon">🏥</div><div><div class="vision-title">تمكين القطاع الخاص الصحي</div><div class="vision-desc">المستشفيات الخاصة والتأمين والصيدليات تحتاج إلى بيانات لاتخاذ قراراتها. سند يوفر API موحداً يجعل الاستثمار في الصحة مربحاً وآمناً وقابلاً للقياس</div></div></div>
+    <div class="vision-card"><div class="vision-icon">🛡️</div><div><div class="vision-title">السيادة الرقمية للبيانات الصحية</div><div class="vision-desc">بيانات المواطنين تبقى داخل البلاد، تحت حوكمة وطنية كاملة، وفق نظام PDPL والمعايير الدولية — لا تخرج البيانات إلى أي سحابة خارجية أياً كانت</div></div></div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo"><span style="color:var(--blue)">S</span>ANAD</div>
+  <div class="footer-sub">المنصة الوطنية للذكاء الصحي السيادي · مصمَّمة للحكومات · موثوقة من الأطباء</div>
+  <div class="footer-mark">SOVEREIGN HEALTH INTELLIGENCE · RIYADH · SAUDI ARABIA · © 2026</div>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// HERO COUNTERS
+const heroData=[{id:'c1',end:34.2,dec:1,suf:''},{id:'c2',end:450,dec:0,suf:''},{id:'c3',end:9,dec:0,suf:''},{id:'c4',end:12,dec:0,suf:''}];
+heroData.forEach(({id,end,dec,suf})=>{
+  ScrollTrigger.create({trigger:`#${id}`,start:'top 85%',once:true,onEnter:()=>{
+    new countUp.CountUp(id,end,{decimalPlaces:dec,duration:2.5,suffix:suf,useGrouping:true}).start();
+  }});
+});
+
+// IMPACT COUNTERS
+const impData=[{id:'i1',end:40,suf:'%'},{id:'i2',end:9,suf:' أيام'},{id:'i3',end:91,suf:'%'},{id:'i4',end:0.4,suf:'ث',dec:1}];
+impData.forEach(({id,end,suf,dec=0})=>{
+  ScrollTrigger.create({trigger:`#${id}`,start:'top 85%',once:true,onEnter:()=>{
+    new countUp.CountUp(id,end,{decimalPlaces:dec,duration:2.5,suffix:suf}).start();
+  }});
+});
+
+// GSAP SCROLL
+gsap.utils.toArray('.sec-title,.eyebrow,.sec-sub').forEach(el=>{
+  gsap.from(el,{opacity:0,y:28,duration:.85,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}});
+});
+gsap.utils.toArray('.silo,.gap-card,.portal-card,.engine-card,.impact-card,.vision-card,.legend-item').forEach((el,i)=>{
+  gsap.from(el,{opacity:0,y:36,duration:.65,ease:'power3.out',delay:(i%4)*.07,scrollTrigger:{trigger:el,start:'top 90%',once:true}});
+});
+gsap.utils.toArray('.pipe-box,.fanout-item').forEach((el,i)=>{
+  gsap.from(el,{opacity:0,scale:.85,duration:.45,ease:'back.out(1.5)',delay:i*.07,scrollTrigger:{trigger:'.pipeline-outer',start:'top 75%',once:true}});
+});
+gsap.utils.toArray('.chain-row').forEach((el,i)=>{
+  gsap.from(el,{opacity:0,x:-18,duration:.45,delay:i*.1,scrollTrigger:{trigger:'.chain-visual',start:'top 80%',once:true}});
+});
+gsap.utils.toArray('.system-item').forEach((el,i)=>{
+  gsap.from(el,{opacity:0,x:16,duration:.5,delay:i*.06,scrollTrigger:{trigger:el,start:'top 90%',once:true}});
+});
+
+// RADAR CHART
+ScrollTrigger.create({trigger:'#radarChart',start:'top 80%',once:true,onEnter:()=>{
+  new Chart(document.getElementById('radarChart').getContext('2d'),{
+    type:'radar',
+    data:{
+      labels:['تكامل البيانات','دعم القرار','كشف الاحتيال','رصد الأوبئة','التنبؤ الدوائي','التوثيق','الوصول الطارئ','التحليل الوراثي'],
+      datasets:[
+        {label:'المملكة الحالي',data:[3,2,3,2,2,3,2,1],borderColor:'#EF4444',backgroundColor:'rgba(239,68,68,.1)',borderWidth:2,pointBackgroundColor:'#EF4444'},
+        {label:'قطر الحالي',data:[4,3,3,3,2,3,3,1],borderColor:'#F59E0B',backgroundColor:'rgba(245,158,11,.1)',borderWidth:2,pointBackgroundColor:'#F59E0B'},
+        {label:'الإمارات الحالي',data:[6,4,5,4,3,7,5,2],borderColor:'#00B4D8',backgroundColor:'rgba(0,180,216,.08)',borderWidth:2,pointBackgroundColor:'#00B4D8'},
+        {label:'سند — SANAD',data:[9,9,9,9,9,10,9,8],borderColor:'#0A84FF',backgroundColor:'rgba(10,132,255,.15)',borderWidth:2.5,pointBackgroundColor:'#0A84FF'}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:true,animation:{duration:1500,easing:'easeInOutQuart'},
+      scales:{r:{beginAtZero:true,max:10,min:0,ticks:{display:false},grid:{color:'rgba(255,255,255,.06)'},angleLines:{color:'rgba(255,255,255,.06)'},pointLabels:{color:'rgba(255,255,255,.6)',font:{size:10,family:'IBM Plex Sans Arabic'}}}},
+      plugins:{legend:{labels:{color:'rgba(255,255,255,.7)',font:{size:11,family:'IBM Plex Sans Arabic'},boxWidth:12,padding:16}}}
+    }
+  });
+}});
+
+// BAR CHART
+ScrollTrigger.create({trigger:'#barChart',start:'top 80%',once:true,onEnter:()=>{
+  new Chart(document.getElementById('barChart').getContext('2d'),{
+    type:'bar',
+    data:{
+      labels:['دعم القرار','تعارض الأدوية','تصنيف المخاطر','التوأم الرقمي','رادار الأوبئة','ذكاء المختبر','كشف الاحتيال','نقص الأدوية','المخاطر الوراثية'],
+      datasets:[{
+        label:'دقة المحرك %',
+        data:[94,96,89,87,91,93,91,88,85],
+        backgroundColor:['rgba(10,132,255,.7)','rgba(34,197,94,.7)','rgba(124,58,237,.7)','rgba(245,158,11,.7)','rgba(6,182,212,.7)','rgba(239,68,68,.7)','rgba(16,185,129,.7)','rgba(99,102,241,.7)','rgba(236,72,153,.7)'],
+        borderColor:['#0A84FF','#22C55E','#7C3AED','#F59E0B','#06B6D4','#EF4444','#10B981','#6366F1','#EC4899'],
+        borderWidth:1.5,borderRadius:8,borderSkipped:false
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:1200,easing:'easeOutQuart'},
+      scales:{
+        y:{beginAtZero:true,max:100,grid:{color:'rgba(255,255,255,.05)'},ticks:{color:'rgba(255,255,255,.4)',font:{size:10},callback:v=>v+'%'}},
+        x:{grid:{display:false},ticks:{color:'rgba(255,255,255,.5)',font:{size:window.innerWidth<600?8:10,family:'IBM Plex Sans Arabic'},maxRotation:window.innerWidth<600?45:0}}
+      },
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y}% دقة`}}}
+    }
+  });
+}});
+</script>
+</body>
+</html>
