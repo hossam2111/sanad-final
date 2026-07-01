@@ -37,7 +37,8 @@ import {
   db, pool,
   patientsTable, medicationsTable, visitsTable, labResultsTable,
   alertsTable, consentTable, appointmentsTable, aiDecisionsTable,
-  staffAssignmentsTable, purchaseOrdersTable, aiRetrainJobsTable
+  staffAssignmentsTable, purchaseOrdersTable, aiRetrainJobsTable,
+  familyRelationshipsTable
 } from "@workspace/db";
 
 // ── Deterministic PRNG ────────────────────────────────────────────────────────
@@ -98,7 +99,8 @@ async function reset() {
   await pool.query(`
     TRUNCATE TABLE
       audit_log, events, ai_decisions, alerts, lab_results, visits,
-      medications, consent_records, appointments, claim_reviews, purchase_orders, patients
+      medications, consent_records, appointments, claim_reviews, purchase_orders, patients,
+      family_relationships
     RESTART IDENTITY CASCADE
   `);
   console.log("Database reset (identities restarted)");
@@ -614,6 +616,30 @@ async function seed() {
   ];
   await db.insert(aiRetrainJobsTable).values(retrainJobs).onConflictDoNothing();
   console.log("Inserted 3 retrain jobs");
+
+  // ════════════════════════════════════════════════════════════════════════════
+  // FAMILY RELATIONSHIPS — relationship-based family portal query logic (Sprint 2)
+  // ════════════════════════════════════════════════════════════════════════════
+  const familyRelationships = [
+    { patientId: id(1), relativeId: id(2), relationshipType: "Sibling" },
+    { patientId: id(1), relativeId: id(3), relationshipType: "Sibling" },
+    { patientId: id(1), relativeId: id(4), relationshipType: "Child" },
+    { patientId: id(1), relativeId: id(5), relationshipType: "Child" },
+
+    { patientId: id(2), relativeId: id(1), relationshipType: "Sibling" },
+    { patientId: id(2), relativeId: id(3), relationshipType: "Sibling" },
+
+    { patientId: id(3), relativeId: id(1), relationshipType: "Sibling" },
+    { patientId: id(3), relativeId: id(2), relationshipType: "Sibling" },
+
+    { patientId: id(4), relativeId: id(1), relationshipType: "Parent" },
+    { patientId: id(4), relativeId: id(5), relationshipType: "Sibling" },
+
+    { patientId: id(5), relativeId: id(1), relationshipType: "Parent" },
+    { patientId: id(5), relativeId: id(4), relationshipType: "Sibling" },
+  ];
+  await db.insert(familyRelationshipsTable).values(familyRelationships);
+  console.log(`Inserted ${familyRelationships.length} family relationships`);
 
   // ai_decisions / events / audit_log start EMPTY — they accumulate from real
   // engine runs during the demo (no fabricated decision history).

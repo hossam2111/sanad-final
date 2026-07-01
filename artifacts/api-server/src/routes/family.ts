@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { patientsTable, medicationsTable, labResultsTable, visitsTable } from "@workspace/db/schema";
-import { eq, desc, between } from "drizzle-orm";
+import { patientsTable, medicationsTable, labResultsTable, visitsTable, familyRelationshipsTable } from "@workspace/db/schema";
+import { eq, desc, between, inArray } from "drizzle-orm";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { getConsentState, getConsentStateBulk, requireOwnNationalId } from "../lib/ownership.js";
 
@@ -171,36 +171,62 @@ router.get("/patient/:nationalId", async (req, res) => {
     userAgent,
   });
 
-  const [medications, labResults, visits, allPatients] = await Promise.all([
-    db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(50),
-    db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(20),
-    db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(20),
-    db.select().from(patientsTable).where(between(patientsTable.id, Math.max(1, p.id - 3), p.id + 5)).limit(50),
-  ]);
+  const relationships = await db.select().from(familyRelationshipsTable).where(eq(familyRelationshipsTable.patientId, p.id));
+  const relativeIds = relationships.map(r => r.relativeId);
+
+  let allowedFamily: (typeof patientsTable.$inferSelect & { relationship: string })[] = [];
+  let medications: typeof medicationsTable.$inferSelect[] = [];
+  let labResults: typeof labResultsTable.$inferSelect[] = [];
+  let visits: typeof visitsTable.$inferSelect[] = [];
+
+  if (relativeIds.length > 0) {
+    const [medsRes, labsRes, visitsRes, patientsRes] = await Promise.all([
+      db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(50),
+      db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(20),
+      db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(20),
+      db.select().from(patientsTable).where(inArray(patientsTable.id, relativeIds)).limit(50),
+    ]);
+    medications = medsRes;
+    labResults = labsRes;
+    visits = visitsRes;
+
+    const consentMap = await getConsentStateBulk(patientsRes.map(fp => fp.id), "family_linking");
+    const allowedPatients = patientsRes.filter(fp => {
+      const state = consentMap.has(fp.id) ? consentMap.get(fp.id)! : null;
+      return state === null ? FAMILY_LINKING_DEFAULT_GRANTED : state;
+    });
+
+    allowedFamily = allowedPatients.map(fp => {
+      const rel = relationships.find(r => r.relativeId === fp.id);
+      return {
+        ...fp,
+        relationship: rel ? rel.relationshipType : "Relative",
+      };
+    });
+  } else {
+    const [medsRes, labsRes, visitsRes] = await Promise.all([
+      db.select().from(medicationsTable).where(eq(medicationsTable.patientId, p.id)).orderBy(desc(medicationsTable.createdAt)).limit(50),
+      db.select().from(labResultsTable).where(eq(labResultsTable.patientId, p.id)).orderBy(desc(labResultsTable.testDate)).limit(20),
+      db.select().from(visitsTable).where(eq(visitsTable.patientId, p.id)).orderBy(desc(visitsTable.visitDate)).limit(20),
+    ]);
+    medications = medsRes;
+    labResults = labsRes;
+    visits = visitsRes;
+  }
 
   const conditions = p.chronicConditions ?? [];
   const age = new Date().getFullYear() - new Date(p.dateOfBirth).getFullYear();
 
-  const rawFamily = allPatients
-    .filter(fp => fp.id !== p.id && fp.id >= Math.max(1, p.id - 3) && fp.id <= p.id + 5)
-    .slice(0, 6);
+  const parents = allowedFamily.filter(fp => fp.relationship === "Parent").slice(0, 2);
+  const siblings = allowedFamily.filter(fp => fp.relationship === "Sibling").slice(0, 2);
+  const children = allowedFamily.filter(fp => fp.relationship === "Child").slice(0, 2);
 
-  const consentMap = await getConsentStateBulk(rawFamily.map(fp => fp.id), "family_linking");
-  const allowedFamily = rawFamily.filter(fp => {
-    const state = consentMap.has(fp.id) ? consentMap.get(fp.id)! : null;
-    return state === null ? FAMILY_LINKING_DEFAULT_GRANTED : state;
-  });
-
-  const parents = allowedFamily.filter(fp => fp.id < p.id).slice(0, 2);
-  const siblings = allowedFamily.filter(fp => fp.id > p.id && fp.id <= p.id + 2).slice(0, 2);
-  const children = allowedFamily.filter(fp => fp.id > p.id + 2).slice(0, 2);
-
-  const mapMember = (fp: typeof patientsTable.$inferSelect, relationship: string) => ({
+  const mapMember = (fp: typeof patientsTable.$inferSelect & { relationship: string }) => ({
     id: fp.id,
     fullName: fp.fullName,
     // Relatives have not consented to exposure here — mask their identifier.
     nationalId: maskNationalId(fp.nationalId),
-    relationship,
+    relationship: fp.relationship,
     age: new Date().getFullYear() - new Date(fp.dateOfBirth).getFullYear(),
     gender: fp.gender,
     bloodType: fp.bloodType,
@@ -211,9 +237,9 @@ router.get("/patient/:nationalId", async (req, res) => {
   });
 
   const familyMembers = [
-    ...parents.map(fp => mapMember(fp, "Parent")),
-    ...siblings.map(fp => mapMember(fp, "Sibling")),
-    ...children.map(fp => mapMember(fp, "Child")),
+    ...parents.map(fp => mapMember(fp)),
+    ...siblings.map(fp => mapMember(fp)),
+    ...children.map(fp => mapMember(fp)),
   ];
 
   const familyConditionMatrix = familyMembers.map(m => m.chronicConditions);

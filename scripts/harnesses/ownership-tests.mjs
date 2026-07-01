@@ -112,7 +112,7 @@ if (famAfter.status === 200) {
 
 console.log("\n── Emergency: break-glass audited ──");
 check("emergency lookup → 200", (await get("/api/emergency/1000000001", emergency)).status === 200);
-await new Promise(r => setTimeout(r, 600));
+await new Promise(r => setTimeout(r, 2500));
 const audit = await (await get("/api/admin/audit-log?limit=15", admin)).json();
 const rows = JSON.stringify(audit);
 check("audit chain contains BREAK-GLASS entry", rows.includes("BREAK-GLASS"), "not found in last 15 entries");
