@@ -319,6 +319,173 @@ function AuditFeed() {
   );
 }
 
+function ComplianceDashboard() {
+  const { text, dir } = useLanguage();
+  const [data, setData] = React.useState<any>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    apiFetch("/api/admin/compliance")
+      .then(r => r.json())
+      .then(d => { setData(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div className="flex items-center justify-center h-64 text-muted-foreground">{text("Loading compliance data…","جارٍ تحميل بيانات الامتثال…")}</div>;
+  if (!data) return <div className="text-center text-danger py-16">{text("Failed to load compliance data","تعذّر تحميل بيانات الامتثال")}</div>;
+
+  const TIER_COLORS: Record<string, string> = {
+    "Critical — PHI": "bg-danger/10 text-danger border-danger/30",
+    "Sensitive — PII": "bg-warning-bg text-warning border-warning/30",
+    "Internal — Clinical": "bg-info-bg text-info border-info/30",
+    "Restricted — Aggregate": "bg-primary/10 text-primary border-primary/30",
+    "Public": "bg-success-bg text-success border-success/30",
+  };
+
+  return (
+    <div className="space-y-6" dir={dir}>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-lg bg-primary/10"><Shield className="w-6 h-6 text-primary" /></div>
+        <div>
+          <h2 className="text-xl font-bold text-foreground">{text("Data Sovereignty & PDPL Compliance","السيادة الرقمية والامتثال لنظام PDPL")}</h2>
+          <p className="text-sm text-muted-foreground">{text("Saudi Personal Data Protection Law — SDAIA Certified","نظام حماية البيانات الشخصية السعودي — معتمد من هيئة SDAIA")}</p>
+        </div>
+        <div className="ms-auto">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-success-bg text-success border border-success/30">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            {text("COMPLIANT","ممتثل")}
+          </span>
+        </div>
+      </div>
+
+      {/* PDPL Articles */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-primary" />
+            {text("PDPL Articles Coverage","تغطية مواد نظام PDPL")}
+          </CardTitle>
+        </CardHeader>
+        <CardBody>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {(data.pdpl?.articlesCovered ?? []).map((a: any) => (
+              <div key={a.article} className="flex items-start gap-2 p-3 rounded-lg border border-border bg-muted/30">
+                <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-foreground">{text(a.article, a.article)}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{text(a.description, a.description)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Data Residency */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-primary" />
+            {text("Data Residency — KSA Sovereign Cloud","إقامة البيانات — السحابة السيادية السعودية")}
+          </CardTitle>
+        </CardHeader>
+        <CardBody>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              [text("Primary Region","المنطقة الأساسية"), data.dataResidency?.primaryRegion],
+              [text("Disaster Recovery","التعافي من الكوارث"), data.dataResidency?.disasterRecovery],
+              [text("Cross-Border Transfer","النقل عبر الحدود"), data.dataResidency?.crossBorderTransfer],
+              [text("Encryption at Rest","التشفير في حالة السكون"), data.dataResidency?.encryptionAtRest],
+              [text("Encryption in Transit","التشفير أثناء النقل"), data.dataResidency?.encryptionInTransit],
+            ].map(([label, value]) => (
+              <div key={String(label)} className="p-3 rounded-lg border border-border bg-muted/20">
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wide mb-1">{label}</p>
+                <p className="text-sm font-semibold text-foreground">{value ?? "—"}</p>
+              </div>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Data Classification */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database className="w-4 h-4 text-primary" />
+            {text("Data Classification Matrix","مصفوفة تصنيف البيانات")}
+          </CardTitle>
+        </CardHeader>
+        <CardBody>
+          <div className="space-y-2">
+            {(data.dataClassification ?? []).map((tier: any) => (
+              <div key={tier.tier} className={`flex items-center justify-between p-3 rounded-lg border ${TIER_COLORS[tier.tier] ?? "bg-muted/20 border-border text-foreground"}`}>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-bold">{text(tier.tier, tier.tier)}</span>
+                  <span className="text-xs opacity-70">{text(tier.examples, tier.examples)}</span>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-xs font-semibold">{text("Retention","الاحتفاظ")}: {tier.retention}</p>
+                  <p className="text-[11px] opacity-70">{tier.accessControl}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Audit Metrics + Consent */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-primary" />
+              {text("Audit Metrics","مقاييس التدقيق")}
+            </CardTitle>
+          </CardHeader>
+          <CardBody>
+            <div className="space-y-3">
+              {[
+                [text("Total Audited Events","إجمالي الأحداث المدققة"), (data.auditMetrics?.totalAuditedEvents ?? 0).toLocaleString()],
+                [text("Total Patient Records","إجمالي سجلات المرضى"), (data.auditMetrics?.totalPatientRecords ?? 0).toLocaleString()],
+                [text("Hash-Chain Integrity","سلامة سلسلة التجزئة"), data.auditMetrics?.hashChainIntegrity ?? "—"],
+              ].map(([k, v]) => (
+                <div key={String(k)} className="flex justify-between items-center py-2 border-b border-border last:border-0">
+                  <span className="text-sm text-muted-foreground">{k}</span>
+                  <span className="text-sm font-bold text-foreground">{v}</span>
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="w-4 h-4 text-primary" />
+              {text("Consent Framework","إطار الموافقة")}
+            </CardTitle>
+          </CardHeader>
+          <CardBody>
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{text("Model","النموذج")}</p>
+              <p className="text-sm font-semibold text-foreground">{data.consentFramework?.model ?? "—"}</p>
+            </div>
+            <div className="space-y-1">
+              {(data.consentFramework?.granularity ?? []).map((g: string) => (
+                <div key={g} className="flex items-center gap-2 text-xs text-foreground">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
+                  <span>{g}</span>
+                </div>
+              ))}
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 async function fetchAppointmentsSummary() {
   const res = await apiFetch("/api/appointments/all?limit=100");
   if (!res.ok) return { appointments: [] };
@@ -521,6 +688,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="users">{text("User Registry", "سجل المستخدمين")}</TabsTrigger>
             <TabsTrigger value="audit">{text("Audit Trail", "سجل التدقيق")}</TabsTrigger>
             <TabsTrigger value="maintenance">{text("Maintenance", "الصيانة")}</TabsTrigger>
+            <TabsTrigger value="compliance">{text("Data Sovereignty", "السيادة الرقمية")}</TabsTrigger>
           </TabsList>
         </div>
 
@@ -1256,6 +1424,10 @@ export default function AdminDashboard() {
 
         <TabsContent value="audit">
           <AuditFeed />
+        </TabsContent>
+
+        <TabsContent value="compliance">
+          <ComplianceDashboard />
         </TabsContent>
       </Tabs>
 
