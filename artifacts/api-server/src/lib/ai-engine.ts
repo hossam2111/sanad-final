@@ -80,6 +80,194 @@ const INTERACTION_DATABASE: Record<string, Array<{
     { drug: "theophylline", severity: "high", description: "Ciprofloxacin inhibits theophylline metabolism — risk of toxicity (seizures, arrhythmias).", recommendation: "Reduce theophylline dose by 50%. Monitor theophylline levels." },
     { drug: "antacids", severity: "moderate", description: "Antacids reduce ciprofloxacin absorption.", recommendation: "Take ciprofloxacin 2 hours before or 6 hours after antacids." },
   ],
+
+  // ── Anticoagulants ──────────────────────────────────────────────────────────
+  heparin: [
+    { drug: "aspirin", severity: "high", description: "Additive anticoagulation and antiplatelet effects increase hemorrhage risk.", recommendation: "Avoid unless post-cardiac stenting. Monitor bleeding parameters." },
+    { drug: "clopidogrel", severity: "high", description: "Combined antiplatelet + anticoagulant therapy markedly raises bleeding risk.", recommendation: "Use only when clearly indicated (ACS). Monitor closely." },
+    { drug: "warfarin", severity: "high", description: "Additive anticoagulant effect — unintended supratherapeutic anticoagulation.", recommendation: "Transition protocols require careful INR monitoring. Do not overlap without plan." },
+    { drug: "ibuprofen", severity: "high", description: "NSAIDs increase GI bleeding risk in anticoagulated patients.", recommendation: "Use paracetamol for analgesia. Avoid NSAIDs." },
+  ],
+  dabigatran: [
+    { drug: "amiodarone", severity: "high", description: "Amiodarone inhibits P-glycoprotein, increasing dabigatran plasma levels and bleeding risk.", recommendation: "Reduce dabigatran dose. Monitor for bleeding signs." },
+    { drug: "aspirin", severity: "high", description: "Combined use increases bleeding risk significantly.", recommendation: "Avoid unless indicated for dual therapy (ACS). Use GI protection." },
+    { drug: "clarithromycin", severity: "high", description: "P-gp inhibitor increases dabigatran exposure by ~15-20%.", recommendation: "Monitor for bleeding. Consider dose reduction." },
+    { drug: "rifampicin", severity: "high", description: "P-gp inducer markedly reduces dabigatran levels — loss of anticoagulation.", recommendation: "Avoid combination. Consider alternative anticoagulant." },
+  ],
+  rivaroxaban: [
+    { drug: "clarithromycin", severity: "high", description: "Combined CYP3A4/P-gp inhibition increases rivaroxaban levels, raising bleeding risk.", recommendation: "Monitor for bleeding. Short courses usually acceptable." },
+    { drug: "itraconazole", severity: "critical", description: "Strong CYP3A4/P-gp inhibitor markedly increases rivaroxaban — potentially fatal bleeding.", recommendation: "Contraindicated combination." },
+    { drug: "rifampicin", severity: "critical", description: "Strong CYP3A4/P-gp inducer reduces rivaroxaban by ~50% — loss of efficacy.", recommendation: "Avoid combination. Risk of stroke/thrombosis." },
+    { drug: "aspirin", severity: "moderate", description: "Additive antiplatelet effect increases bleeding risk.", recommendation: "Use with caution. Assess risk/benefit. Add GI protection." },
+  ],
+
+  // ── Cardiac ─────────────────────────────────────────────────────────────────
+  digoxin: [
+    { drug: "amiodarone", severity: "high", description: "Amiodarone increases digoxin levels by ~70% via P-gp inhibition — toxicity risk.", recommendation: "Reduce digoxin dose by 50%. Monitor digoxin levels and ECG." },
+    { drug: "verapamil", severity: "high", description: "Verapamil increases digoxin levels and has additive AV node depression.", recommendation: "Reduce digoxin dose. Monitor ECG. Avoid in severe AV block." },
+    { drug: "clarithromycin", severity: "high", description: "P-gp inhibitor increases digoxin absorption and reduces renal clearance.", recommendation: "Monitor digoxin levels. Consider dose reduction." },
+    { drug: "spironolactone", severity: "moderate", description: "Spironolactone may falsely elevate digoxin assay results and alter renal clearance.", recommendation: "Interpret digoxin levels cautiously. Monitor for toxicity signs." },
+    { drug: "furosemide", severity: "moderate", description: "Diuretic-induced hypokalemia potentiates digoxin toxicity.", recommendation: "Monitor electrolytes. Maintain K⁺ > 3.5 mmol/L." },
+  ],
+  verapamil: [
+    { drug: "metoprolol", severity: "critical", description: "Combined AV node blockade — severe bradycardia and complete heart block.", recommendation: "Avoid IV verapamil in patients on beta-blockers. Contraindicated IV." },
+    { drug: "digoxin", severity: "high", description: "Additive AV node suppression and increased digoxin levels.", recommendation: "Monitor ECG and digoxin levels. Reduce digoxin dose." },
+    { drug: "simvastatin", severity: "high", description: "CYP3A4 inhibition increases simvastatin exposure — myopathy risk.", recommendation: "Limit simvastatin to 10mg/day. Consider pravastatin instead." },
+    { drug: "carbamazepine", severity: "moderate", description: "CYP3A4 induction reduces verapamil levels — loss of antihypertensive effect.", recommendation: "Monitor blood pressure. May need dose increase." },
+    { drug: "rifampicin", severity: "high", description: "Rifampicin markedly reduces verapamil levels — loss of efficacy.", recommendation: "Avoid combination or use alternative calcium channel blocker." },
+  ],
+  diltiazem: [
+    { drug: "metoprolol", severity: "high", description: "Additive AV node suppression — bradycardia and heart block.", recommendation: "Monitor heart rate and ECG. Use lowest effective doses." },
+    { drug: "simvastatin", severity: "high", description: "CYP3A4 inhibition — increased simvastatin levels, myopathy risk.", recommendation: "Limit simvastatin to 10mg/day or switch to pravastatin." },
+    { drug: "digoxin", severity: "moderate", description: "May increase digoxin levels via P-gp inhibition.", recommendation: "Monitor digoxin levels when starting or stopping diltiazem." },
+    { drug: "carbamazepine", severity: "moderate", description: "Diltiazem inhibits carbamazepine metabolism, increasing toxicity risk.", recommendation: "Monitor carbamazepine levels. Reduce dose if signs of toxicity." },
+  ],
+  furosemide: [
+    { drug: "digoxin", severity: "moderate", description: "Diuretic-induced hypokalemia potentiates digoxin toxicity (arrhythmias).", recommendation: "Monitor electrolytes. Keep K⁺ > 3.5 mmol/L. Consider potassium supplementation." },
+    { drug: "lithium", severity: "high", description: "Loop diuretics reduce renal lithium clearance — lithium toxicity risk.", recommendation: "Monitor lithium levels closely. Patient should maintain adequate salt intake." },
+    { drug: "aminoglycosides", severity: "high", description: "Additive ototoxicity — permanent hearing loss risk.", recommendation: "Avoid combination if possible. Monitor hearing if unavoidable." },
+    { drug: "nsaids", severity: "moderate", description: "NSAIDs blunt diuretic response and worsen renal function.", recommendation: "Avoid NSAIDs in patients on diuretics. Use paracetamol." },
+    { drug: "ibuprofen", severity: "moderate", description: "Reduces furosemide efficacy and increases risk of acute kidney injury.", recommendation: "Avoid combination. Use paracetamol for analgesia." },
+  ],
+  spironolactone: [
+    { drug: "lisinopril", severity: "high", description: "ACE inhibitor + potassium-sparing diuretic — risk of dangerous hyperkalemia.", recommendation: "Monitor potassium closely every 1-2 weeks initially. Avoid if K⁺ > 5.0." },
+    { drug: "potassium", severity: "high", description: "Additive hyperkalemia risk — can cause fatal cardiac arrhythmias.", recommendation: "Avoid routine potassium supplementation. Monitor K⁺ regularly." },
+    { drug: "digoxin", severity: "moderate", description: "Spironolactone may interfere with digoxin assay and alter clearance.", recommendation: "Use RIA assay for digoxin if available. Monitor clinically." },
+    { drug: "nsaids", severity: "moderate", description: "NSAIDs reduce spironolactone efficacy and worsen renal function.", recommendation: "Avoid NSAIDs. Monitor renal function if unavoidable." },
+  ],
+
+  // ── Statins ──────────────────────────────────────────────────────────────────
+  atorvastatin: [
+    { drug: "clarithromycin", severity: "high", description: "CYP3A4 inhibition significantly increases atorvastatin levels — myopathy and rhabdomyolysis risk.", recommendation: "Use lowest atorvastatin dose or temporarily hold. Use azithromycin as alternative." },
+    { drug: "itraconazole", severity: "critical", description: "Potent CYP3A4 inhibitor — markedly increases atorvastatin. High rhabdomyolysis risk.", recommendation: "Avoid combination. Switch to fluvastatin or rosuvastatin." },
+    { drug: "rifampicin", severity: "high", description: "CYP3A4/P-gp induction reduces atorvastatin levels by >80% — loss of lipid-lowering effect.", recommendation: "Monitor lipid profile. Increase atorvastatin dose or switch statin." },
+    { drug: "amiodarone", severity: "moderate", description: "May increase atorvastatin exposure via P-gp inhibition.", recommendation: "Monitor for myalgia. Limit atorvastatin dose." },
+    { drug: "cyclosporine", severity: "critical", description: "CYP3A4/P-gp inhibition drastically increases atorvastatin — rhabdomyolysis.", recommendation: "Contraindicated. Use pravastatin or rosuvastatin at lowest dose." },
+  ],
+
+  // ── Antibiotics ──────────────────────────────────────────────────────────────
+  clarithromycin: [
+    { drug: "warfarin", severity: "high", description: "CYP3A4 inhibition increases warfarin levels — INR elevation, bleeding risk.", recommendation: "Monitor INR closely during and after course. Adjust warfarin dose." },
+    { drug: "simvastatin", severity: "critical", description: "Markedly raises simvastatin levels — rhabdomyolysis risk.", recommendation: "Hold simvastatin during clarithromycin course." },
+    { drug: "atorvastatin", severity: "high", description: "Significant CYP3A4 inhibition raises atorvastatin levels.", recommendation: "Temporarily hold or reduce atorvastatin. Resume after course." },
+    { drug: "digoxin", severity: "high", description: "P-gp inhibition increases digoxin absorption and reduces clearance.", recommendation: "Monitor digoxin levels and ECG during antibiotic course." },
+    { drug: "carbamazepine", severity: "high", description: "CYP3A4 inhibition increases carbamazepine — toxicity (diplopia, ataxia, nausea).", recommendation: "Monitor carbamazepine levels. Reduce dose if needed." },
+    { drug: "colchicine", severity: "critical", description: "P-gp/CYP3A4 inhibition dramatically increases colchicine — life-threatening toxicity.", recommendation: "Contraindicated in renal impairment. Reduce colchicine dose in normal renal function." },
+  ],
+  rifampicin: [
+    { drug: "warfarin", severity: "critical", description: "Potent CYP450 inducer reduces warfarin levels by up to 90% — stroke or clot risk.", recommendation: "INR may drop within days. Monitor INR daily when starting/stopping. Major dose adjustment needed." },
+    { drug: "oral contraceptives", severity: "critical", description: "CYP3A4 induction reduces contraceptive efficacy — unintended pregnancy.", recommendation: "Use barrier contraception during and for 28 days after rifampicin." },
+    { drug: "verapamil", severity: "high", description: "Reduces verapamil AUC by >90% — loss of antihypertensive and antiarrhythmic effect.", recommendation: "Avoid combination. Use alternative antihypertensive." },
+    { drug: "dabigatran", severity: "high", description: "P-gp induction reduces dabigatran levels — loss of anticoagulation.", recommendation: "Avoid combination. Risk of stroke/DVT." },
+    { drug: "rivaroxaban", severity: "critical", description: "Reduces rivaroxaban by ~50% via CYP3A4/P-gp induction.", recommendation: "Avoid. Alternative anticoagulant required." },
+    { drug: "tacrolimus", severity: "critical", description: "CYP3A4 induction reduces tacrolimus levels by >80% — transplant rejection risk.", recommendation: "Intensive tacrolimus level monitoring. Dose increases of 3-5× may be required." },
+  ],
+  metronidazole: [
+    { drug: "warfarin", severity: "high", description: "Inhibits CYP2C9 — significantly enhances warfarin anticoagulation.", recommendation: "Reduce warfarin dose by ~25-50%. Monitor INR every 2-3 days." },
+    { drug: "alcohol", severity: "high", description: "Disulfiram-like reaction — flushing, nausea, vomiting, tachycardia.", recommendation: "Advise patient to avoid ALL alcohol during treatment and for 48h after completion." },
+    { drug: "lithium", severity: "moderate", description: "May increase lithium levels by reducing renal clearance.", recommendation: "Monitor lithium levels during metronidazole course." },
+  ],
+
+  // ── Antiepileptics ───────────────────────────────────────────────────────────
+  carbamazepine: [
+    { drug: "clarithromycin", severity: "high", description: "CYP3A4 inhibition raises carbamazepine to toxic levels — ataxia, diplopia, vomiting.", recommendation: "Monitor carbamazepine levels. Avoid if possible; use azithromycin." },
+    { drug: "verapamil", severity: "moderate", description: "Verapamil inhibits carbamazepine metabolism — toxicity risk.", recommendation: "Monitor carbamazepine levels. Use amlodipine as alternative." },
+    { drug: "warfarin", severity: "high", description: "CYP3A4 induction reduces warfarin effect — thrombosis risk.", recommendation: "Monitor INR closely. Warfarin dose may need significant increase." },
+    { drug: "oral contraceptives", severity: "high", description: "CYP3A4 induction reduces contraceptive hormone levels — contraceptive failure.", recommendation: "Use barrier methods or higher-dose contraceptive. Advise patient." },
+    { drug: "lithium", severity: "moderate", description: "Additive neurotoxicity risk (tremor, confusion) even with normal drug levels.", recommendation: "Monitor for neurotoxicity signs. Check both drug levels." },
+  ],
+  phenytoin: [
+    { drug: "warfarin", severity: "high", description: "Complex bidirectional interaction — initially potentiates then reduces warfarin effect.", recommendation: "Monitor INR frequently when starting or stopping phenytoin." },
+    { drug: "fluoxetine", severity: "moderate", description: "Fluoxetine inhibits phenytoin metabolism — toxicity risk.", recommendation: "Monitor phenytoin levels. Reduce dose if signs of toxicity appear." },
+    { drug: "rifampicin", severity: "high", description: "Rifampicin induces phenytoin metabolism — loss of seizure control.", recommendation: "Monitor phenytoin levels closely. May need significant dose increase." },
+    { drug: "oral contraceptives", severity: "high", description: "CYP3A4 induction reduces contraceptive efficacy.", recommendation: "Use non-hormonal or barrier contraception." },
+    { drug: "omeprazole", severity: "moderate", description: "Omeprazole inhibits CYP2C19 — may increase phenytoin levels.", recommendation: "Monitor phenytoin levels. Use pantoprazole as alternative." },
+  ],
+
+  // ── Psychiatric ──────────────────────────────────────────────────────────────
+  lithium: [
+    { drug: "ibuprofen", severity: "high", description: "NSAIDs reduce renal lithium clearance — lithium toxicity (tremor, confusion, nausea).", recommendation: "Avoid NSAIDs. Use paracetamol for analgesia." },
+    { drug: "naproxen", severity: "high", description: "NSAID-induced reduction in renal lithium clearance — toxicity risk.", recommendation: "Avoid. Use paracetamol instead." },
+    { drug: "furosemide", severity: "high", description: "Loop diuretics reduce lithium clearance — toxicity.", recommendation: "Monitor lithium levels closely. Maintain adequate sodium intake." },
+    { drug: "lisinopril", severity: "high", description: "ACE inhibitors reduce lithium clearance — toxicity risk.", recommendation: "Monitor lithium levels weekly when ACE inhibitor added." },
+    { drug: "metronidazole", severity: "moderate", description: "May increase lithium levels via reduced renal clearance.", recommendation: "Monitor lithium levels during course." },
+    { drug: "carbamazepine", severity: "moderate", description: "Additive neurotoxicity despite normal levels — tremor, ataxia.", recommendation: "Monitor neurological status. Levels may not reflect toxicity." },
+  ],
+  tramadol: [
+    { drug: "fluoxetine", severity: "critical", description: "Serotonin syndrome and reduced tramadol analgesic efficacy via CYP2D6 inhibition.", recommendation: "Avoid combination. Use alternative analgesic (paracetamol, NSAIDs if appropriate)." },
+    { drug: "ssri", severity: "critical", description: "Serotonin syndrome risk — hyperthermia, agitation, clonus, seizures.", recommendation: "Avoid. Use non-serotonergic analgesic." },
+    { drug: "maoi", severity: "critical", description: "Life-threatening serotonin syndrome.", recommendation: "Absolutely contraindicated. Allow 14-day washout after MAOIs." },
+    { drug: "carbamazepine", severity: "moderate", description: "Carbamazepine induces tramadol metabolism — reduced analgesia and increased seizure risk.", recommendation: "Use alternative analgesic. Avoid combination." },
+  ],
+
+  // ── PPIs ─────────────────────────────────────────────────────────────────────
+  omeprazole: [
+    { drug: "clopidogrel", severity: "moderate", description: "CYP2C19 inhibition reduces clopidogrel activation — reduced antiplatelet effect.", recommendation: "Switch to pantoprazole or rabeprazole if PPI needed." },
+    { drug: "phenytoin", severity: "moderate", description: "CYP2C19 inhibition may increase phenytoin levels — toxicity risk.", recommendation: "Monitor phenytoin levels. Consider pantoprazole." },
+    { drug: "methotrexate", severity: "moderate", description: "Proton pump inhibitors may reduce renal methotrexate excretion.", recommendation: "Monitor methotrexate levels and toxicity signs, especially with high-dose therapy." },
+  ],
+
+  // ── Immunosuppressants ───────────────────────────────────────────────────────
+  cyclosporine: [
+    { drug: "clarithromycin", severity: "critical", description: "CYP3A4/P-gp inhibition increases cyclosporine levels by 2-3× — nephrotoxicity and toxicity.", recommendation: "Monitor cyclosporine levels daily. Dose reduction required. Use azithromycin if possible." },
+    { drug: "rifampicin", severity: "critical", description: "CYP3A4/P-gp induction reduces cyclosporine by 80% — transplant rejection.", recommendation: "Avoid combination. If unavoidable, monitor levels and increase dose massively." },
+    { drug: "atorvastatin", severity: "critical", description: "Cyclosporine inhibits statin metabolism — rhabdomyolysis.", recommendation: "Contraindicated. Use pravastatin at lowest dose." },
+    { drug: "nsaids", severity: "high", description: "Additive nephrotoxicity — acute kidney injury risk.", recommendation: "Avoid NSAIDs. Use paracetamol for analgesia." },
+    { drug: "ibuprofen", severity: "high", description: "Additive nephrotoxicity in transplant patients.", recommendation: "Avoid. Use paracetamol." },
+  ],
+  tacrolimus: [
+    { drug: "clarithromycin", severity: "critical", description: "CYP3A4/P-gp inhibition increases tacrolimus levels dramatically — nephrotoxicity, neurotoxicity.", recommendation: "Monitor tacrolimus levels daily. Significant dose reduction required." },
+    { drug: "rifampicin", severity: "critical", description: "CYP3A4 induction reduces tacrolimus by >80% — transplant rejection.", recommendation: "Avoid. If unavoidable, increase dose 3-5× and monitor daily levels." },
+    { drug: "fluconazole", severity: "high", description: "CYP3A4 inhibition increases tacrolimus — toxicity.", recommendation: "Monitor tacrolimus levels closely. Reduce dose." },
+    { drug: "ibuprofen", severity: "moderate", description: "Additive nephrotoxicity in transplant recipients.", recommendation: "Avoid NSAIDs. Use paracetamol." },
+  ],
+
+  // ── Diabetes ─────────────────────────────────────────────────────────────────
+  glibenclamide: [
+    { drug: "fluconazole", severity: "high", description: "CYP2C9 inhibition increases glibenclamide levels — severe prolonged hypoglycemia.", recommendation: "Monitor blood glucose closely. Reduce glibenclamide dose." },
+    { drug: "ciprofloxacin", severity: "moderate", description: "Fluoroquinolones can cause both hypoglycemia and hyperglycemia in patients on sulfonylureas.", recommendation: "Monitor blood glucose carefully during antibiotic course." },
+    { drug: "alcohol", severity: "moderate", description: "Alcohol potentiates hypoglycemic effect and masks symptoms.", recommendation: "Advise patient to avoid alcohol. Educate about altered hypoglycemia symptoms." },
+  ],
+  insulin: [
+    { drug: "alcohol", severity: "high", description: "Alcohol inhibits gluconeogenesis — severe prolonged hypoglycemia, especially overnight.", recommendation: "Educate patient. Reduce insulin if alcohol consumed. Snack before bed." },
+    { drug: "beta blockers", severity: "moderate", description: "Beta-blockers mask tachycardia and sweating of hypoglycemia — delayed recognition.", recommendation: "Educate on remaining symptoms (pallor, confusion). Use cardioselective beta-blocker if needed." },
+    { drug: "corticosteroids", severity: "high", description: "Corticosteroids cause hyperglycemia — insulin requirements increase significantly.", recommendation: "Increase insulin monitoring. May need 20-50% dose increase. Taper steroids carefully." },
+  ],
+
+  // ── Analgesics ───────────────────────────────────────────────────────────────
+  paracetamol: [
+    { drug: "warfarin", severity: "moderate", description: "Regular high-dose paracetamol (> 2g/day) can potentiate warfarin — INR elevation.", recommendation: "Limit paracetamol to ≤ 2g/day in anticoagulated patients. Monitor INR." },
+    { drug: "alcohol", severity: "high", description: "Chronic alcohol use combined with paracetamol causes hepatotoxicity at standard doses.", recommendation: "Avoid combination in heavy drinkers. Limit to 1-2g/day maximum." },
+    { drug: "rifampicin", severity: "moderate", description: "CYP450 induction increases hepatotoxic paracetamol metabolite formation.", recommendation: "Reduce paracetamol dose. Monitor liver function." },
+  ],
+  colchicine: [
+    { drug: "clarithromycin", severity: "critical", description: "P-gp/CYP3A4 inhibition dramatically increases colchicine — life-threatening toxicity (marrow suppression, multi-organ failure).", recommendation: "Contraindicated in renal impairment. Reduce colchicine to single 0.6mg dose in normal renal function." },
+    { drug: "cyclosporine", severity: "critical", description: "P-gp inhibition increases colchicine — severe toxicity.", recommendation: "Contraindicated combination. Avoid." },
+    { drug: "verapamil", severity: "high", description: "P-gp inhibition increases colchicine levels — neuromuscular toxicity.", recommendation: "Reduce colchicine dose significantly. Monitor closely." },
+  ],
+
+  // ── Respiratory ──────────────────────────────────────────────────────────────
+  theophylline: [
+    { drug: "ciprofloxacin", severity: "high", description: "CYP1A2 inhibition raises theophylline to toxic levels — seizures, arrhythmias.", recommendation: "Reduce theophylline dose by 50%. Monitor levels. Use alternative antibiotic." },
+    { drug: "clarithromycin", severity: "high", description: "CYP3A4 inhibition increases theophylline — toxicity risk.", recommendation: "Monitor theophylline levels closely during antibiotic course." },
+    { drug: "rifampicin", severity: "high", description: "CYP1A2 induction reduces theophylline levels — loss of bronchodilation.", recommendation: "Monitor theophylline levels. May need dose increase." },
+    { drug: "fluoxetine", severity: "moderate", description: "CYP1A2 inhibition may increase theophylline levels.", recommendation: "Monitor theophylline levels when starting or changing fluoxetine dose." },
+  ],
+
+  // ── Antifungals ──────────────────────────────────────────────────────────────
+  fluconazole: [
+    { drug: "warfarin", severity: "critical", description: "CYP2C9 inhibition dramatically increases warfarin levels — severe bleeding risk.", recommendation: "Monitor INR daily when fluconazole added. Warfarin dose reduction often 25-50%." },
+    { drug: "phenytoin", severity: "high", description: "CYP2C9 inhibition increases phenytoin — toxicity risk.", recommendation: "Monitor phenytoin levels. Dose reduction likely needed." },
+    { drug: "glibenclamide", severity: "high", description: "CYP2C9 inhibition increases sulfonylurea levels — severe hypoglycemia.", recommendation: "Monitor blood glucose closely. Reduce sulfonylurea dose." },
+    { drug: "tacrolimus", severity: "high", description: "CYP3A4 inhibition increases tacrolimus — nephrotoxicity.", recommendation: "Monitor tacrolimus levels. Reduce dose." },
+    { drug: "carbamazepine", severity: "moderate", description: "May increase carbamazepine levels via CYP3A4 inhibition.", recommendation: "Monitor carbamazepine levels." },
+  ],
+  itraconazole: [
+    { drug: "simvastatin", severity: "critical", description: "Potent CYP3A4 inhibitor — markedly increases simvastatin. Rhabdomyolysis risk.", recommendation: "Contraindicated. Hold simvastatin during treatment." },
+    { drug: "atorvastatin", severity: "critical", description: "Potent CYP3A4 inhibitor increases atorvastatin dramatically — rhabdomyolysis.", recommendation: "Contraindicated. Switch to pravastatin or rosuvastatin." },
+    { drug: "rivaroxaban", severity: "critical", description: "CYP3A4/P-gp inhibition — markedly increases rivaroxaban. Fatal bleeding risk.", recommendation: "Contraindicated combination. Use alternative antifungal." },
+    { drug: "digoxin", severity: "moderate", description: "P-gp inhibition increases digoxin levels.", recommendation: "Monitor digoxin levels and ECG." },
+  ],
 };
 
 const ARABIC_CONDITIONS_MAP: Record<string, string> = {
