@@ -59,13 +59,16 @@ stable execution. Skipping this step may cause ECONNRESET on the first request.
    - Step 3: AI Assessment → HIGH priority
 
 ### Safety & Compliance — 2 min
-9. Drug interaction: check Metronidazole on patient 1000000003 → CRITICAL serotonin flag
+9. Drug interactions — two scenarios:
+   - Search `1000000003` (خالد الغامدي) → Medications tab → **Warfarin + Amiodarone** → CRITICAL anticoagulation alert (INR 3.8, supratherapeutic)
+   - Search `1000000006` (سارة العتيبي) → Medications tab → **Fluoxetine + Tramadol** → CRITICAL serotonin syndrome flag
 10. Admin → **Audit Trail** → show Isnād chain (break-glass, consent, dispense events)
 11. Admin → **Maintenance** → Export Audit Logs → download CSV
 
 ### Closing — 1 min
-12. Admin → **User Registry** → 12 roles, all portals
-13. Admin → Reset Demo Environment (if needed for next session)
+12. Admin → **Data Sovereignty tab** → PDPL compliance (6 articles), KSA sovereign cloud, data classification matrix
+13. Admin → **User Registry** → 12 roles, all portals
+14. Admin → Reset Demo Environment (if needed for next session)
 
 ---
 
@@ -113,6 +116,10 @@ The "Demo Mode" badge is displayed on that tab.
   46/46 scenario-tests  (S1–S7 clinical scenarios + JWT refresh)
   42/42 ownership-tests (BOLA + hospital scoping)
 ```
+
+> **Since last verify:** Added Data Sovereignty tab (Admin → tab 8), expanded drug
+> interaction DB to 30+ drug classes, added UAE to presentation comparison.
+> Re-run `verify-and-publish.ps1 -DryRun` to refresh gate count.
 
 Re-run anytime with:
 ```powershell
