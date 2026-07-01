@@ -14,7 +14,7 @@ export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: Number(process.env.DB_POOL_MAX) || 10,
   idleTimeoutMillis: Number(process.env.DB_POOL_IDLE_TIMEOUT_MS) || 60_000,
-  connectionTimeoutMillis: Number(process.env.DB_POOL_CONNECT_TIMEOUT_MS) || 5_000,
+  connectionTimeoutMillis: Number(process.env.DB_POOL_CONNECT_TIMEOUT_MS) || 15_000,
   keepAlive: true,
   keepAliveInitialDelayMillis: 10_000,
   ssl: process.env.DB_SSL === "false" ? false : process.env.DATABASE_URL?.includes("sslmode=") ? undefined : { rejectUnauthorized: false },
