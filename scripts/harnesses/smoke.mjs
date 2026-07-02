@@ -14,59 +14,45 @@ function check(msg, cond) {
   }
 }
 
+// All 12 portals — credentials mirror DEMO_RUNBOOK.md
+const PORTALS = [
+  { label: "Citizen",      username: "citizen_demo",    password: "Citizen@2026",   path: "/citizen" },
+  { label: "Doctor",       username: "dr.rashidi",      password: "Doctor@2026",    path: "/doctor" },
+  { label: "Admin",        username: "admin.saad",      password: "Admin@2026",     path: "/admin" },
+  { label: "Emergency",    username: "emergency_unit7", password: "Emergency@2026", path: "/emergency" },
+  { label: "Lab",          username: "lab.sara",        password: "Lab@2026",       path: "/lab" },
+  { label: "Pharmacy",     username: "pharm.hassan",    password: "Pharmacy@2026",  path: "/pharmacy" },
+  { label: "Hospital",     username: "hosp.ops",        password: "Hospital@2026",  path: "/hospital" },
+  { label: "Insurance",    username: "ins.nora",        password: "Insurance@2026", path: "/insurance" },
+  { label: "AI Control",   username: "ai.khalid",       password: "AiControl@2026", path: "/ai-control" },
+  { label: "Research",     username: "research.reem",   password: "Research@2026",  path: "/research" },
+  { label: "Family",       username: "family.fatima",   password: "Family@2026",    path: "/family" },
+  { label: "Supply Chain", username: "supply.ibrahim",  password: "Supply@2026",    path: "/supply-chain" },
+];
+
 async function runTests() {
-  console.log("\n══ Playwright Smoke Tests ══");
-  
+  console.log("\n══ Playwright Smoke Tests — all 12 portals ══");
+
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext();
 
-  try {
-    console.log("── Citizen Portal ──");
-    const page1 = await context.newPage();
-    await page1.goto(`${baseURL}/login`);
-    await page1.fill('input[type="text"]', 'citizen_demo');
-    await page1.fill('input[type="password"]', 'Citizen@2026');
-    await page1.click('button[type="submit"]');
-    await page1.waitForURL('**/citizen*', { timeout: 10000 });
-    check("Citizen login navigated to /citizen", page1.url().includes('/citizen'));
-    await page1.close();
-
-    console.log("── Doctor Portal ──");
-    const page2 = await context.newPage();
-    await page2.goto(`${baseURL}/login`);
-    await page2.fill('input[type="text"]', 'dr.rashidi');
-    await page2.fill('input[type="password"]', 'Doctor@2026');
-    await page2.click('button[type="submit"]');
-    await page2.waitForURL('**/doctor*', { timeout: 10000 });
-    check("Doctor login navigated to /doctor", page2.url().includes('/doctor'));
-    await page2.close();
-
-    console.log("── Admin Portal ──");
-    const page3 = await context.newPage();
-    await page3.goto(`${baseURL}/login`);
-    await page3.fill('input[type="text"]', 'admin.saad');
-    await page3.fill('input[type="password"]', 'Admin@2026');
-    await page3.click('button[type="submit"]');
-    await page3.waitForURL('**/admin*', { timeout: 10000 });
-    check("Admin login navigated to /admin", page3.url().includes('/admin'));
-    await page3.close();
-
-    console.log("── Supply Chain Portal ──");
-    const page4 = await context.newPage();
-    await page4.goto(`${baseURL}/login`);
-    await page4.fill('input[type="text"]', 'supply.ibrahim');
-    await page4.fill('input[type="password"]', 'Supply@2026');
-    await page4.click('button[type="submit"]');
-    await page4.waitForURL('**/supply-chain*', { timeout: 10000 });
-    check("Supply Chain login navigated to /supply-chain", page4.url().includes('/supply-chain'));
-    await page4.close();
-
-  } catch (err) {
-    console.error(err);
-    fail++;
-  } finally {
-    await browser.close();
+  for (const p of PORTALS) {
+    try {
+      const page = await context.newPage();
+      await page.goto(`${baseURL}/login`);
+      await page.fill('input[type="text"]', p.username);
+      await page.fill('input[type="password"]', p.password);
+      await page.click('button[type="submit"]');
+      await page.waitForURL(`**${p.path}*`, { timeout: 15000 });
+      check(`${p.label} login navigated to ${p.path}`, page.url().includes(p.path));
+      await page.close();
+    } catch (err) {
+      check(`${p.label} login navigated to ${p.path}`, false);
+      console.error(`        ${err.message?.split("\n")[0]}`);
+    }
   }
+
+  await browser.close();
 
   console.log(`\n══ ${pass} passed, ${fail} failed ══`);
   process.exitCode = fail ? 1 : 0;
