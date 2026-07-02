@@ -67,8 +67,12 @@ stable execution. Skipping this step may cause ECONNRESET on the first request.
 
 ### Closing — 1 min
 12. Admin → **Data Sovereignty tab** → PDPL compliance (6 articles), KSA sovereign cloud, data classification matrix
-13. Admin → **User Registry** → 12 roles, all portals
-14. Admin → Reset Demo Environment (if needed for next session)
+13. Admin → **Maintenance → AI Brain** → show runtime model/key management (provider dropdown,
+    encrypted key, Test Connection) — "the Ministry controls the brain, not the vendor"
+14. Admin header → **Region switcher** (🇸🇦→🇦🇪→🇶🇦) → ministry name/ID label/currency re-brand live —
+    "one platform, exportable across the GCC"
+15. Admin → **User Registry** → 12 roles, all portals
+16. Admin → Reset Demo Environment (if needed for next session)
 
 ---
 

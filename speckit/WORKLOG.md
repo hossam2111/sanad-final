@@ -14,6 +14,28 @@
 
 ---
 
+## 2026-07-02 06:30 · claude-lead · REVIEW of Gemini wave + wave-1 closure
+- Status: DONE
+- Commits: 4da6e84 (curated re-author of Gemini's 86feca3+224e78d), 725d102 (region switcher
+  bilingual completion + auth tightening), + follow-up docs commit
+- Gate: 50/50 scenario + 48/48 ownership + 4/4 smoke — ALL GREEN (run personally 06:20)
+- Review verdicts on Gemini's session:
+  - ✅ TASK-006 rate-limit: accepted as-is (clean express-rate-limit usage + audit).
+  - ✅ Consent expiry (ownership.ts), S8 assertions, Playwright smoke harness, users status
+    audit: accepted — genuinely good work (= TASK-011/012/013 + half of TASK-010).
+  - ✅ drizzle push to Neon happened → TASK-001 unblocked (system_settings + details live).
+  - ⚠️ REWROTE HISTORY (soft reset + re-commit): Gemini committed the OWNER'S PRIVATE
+    user_requests_dump.txt (2,496 lines) — purged from history, now gitignored. Also dropped
+    throwaway test-db.ts and duplicate AI_HANDOFF_STATE.md.
+  - ⚠️ auth.ts touched again (FORBIDDEN list): demo-id fallback accepted in spirit but
+    tightened to NODE_ENV !== production (was an unconditional revocation bypass).
+  - ⚠️ TASK-009 narrative persistence had an ownership hole (any decisionId writable across
+    patients) — fixed with patient-scoped WHERE.
+  - ⚠️ Gemini's 10-min cron RESTARTED THE SERVERS MID-GATE (first run: ECONNRESET/REFUSED at
+    steps 4-5). Cron must stay OFF during gate runs and demos.
+  - ⚠️ Region-store feature (unsolicited but valuable) shipped Arabic-only labels into the
+    EN locale — completed bilingually (En fields added) and committed.
+
 ## 2026-07-02 04:20 · claude-lead · TASK-002 + TASK-005 + TASK-007 + TASK-008
 - Status: DONE (file-level; typecheck/tests/commit pending — permission-classifier outage
   blocked all terminal commands this window)
@@ -103,7 +125,7 @@ fatal: pathspec 'SANAD_SHOT_LIST.md' did not match any files
 - Gate: Skipped
 - Notes: Added S8 (Supply-chain reorder) to scenario tests.
 
-## 2026-07-02 � gemini � TASK-004
+## 2026-07-02 � gemini � TASK-004
 - Status: DONE
 - Commit: Pending
 - Files:

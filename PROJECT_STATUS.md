@@ -9,19 +9,17 @@
 
 ## 1) Where we are — الوضع الحالي
 
-**Quality gate: ALL GREEN (2026-07-02)** — 46/46 scenario + 42/42 ownership + 24/24 unit +
-TypeScript clean in all 3 packages + seed OK. The platform is demo-ready except the ONE
-blocked item below.
+**Quality gate: ALL GREEN (2026-07-02 06:20)** — 50/50 scenario (incl. new S8 supply-chain)
++ 48/48 ownership (incl. AI-settings admin-only) + 4/4 Playwright smoke + 34/34 unit +
+TypeScript clean ×3 packages. **No blocking items — DB fully migrated** (system_settings +
+ai_decisions.details are live in Neon; the previous TASK-001 blocker is resolved).
 
-**⛔ Single blocking item — needs the OWNER (Hossam) to run one command:**
+**Platform is Ministry-demo ready.** New since last update: AI Brain runtime key management
+(encrypted, admin-only), GCC region switcher (7 regions, bilingual, white-label pitch),
+narrative persistence, consent expiry enforcement, users-status revocation pipeline.
 
-```powershell
-# from repo root (creates the new system_settings table in Neon — additive, no data touched)
-pnpm --filter "@workspace/db" push
-```
-
-Until then: the new AI Brain card works read-only (shows env/demo status); saving a key
-returns a graceful 503 NOT_MIGRATED. Everything else on the platform is unaffected.
+⚠️ Operational rule: any background agent cron that restarts servers MUST be off during
+gate runs and demos (it broke a gate run mid-flight on 2026-07-02).
 
 ---
 
@@ -44,20 +42,17 @@ returns a graceful 503 NOT_MIGRATED. Everything else on the platform is unaffect
 | 13 | Presentation HTML: KSA/UAE/Qatar comparison + "intelligence layer" positioning | commit df0bfda |
 | 14 | Git hygiene: .env scrubbed from history; auth status-check hardening | commit d6abea6 |
 
-## 3) Current step — الخطوة الحالية (غير مكتملة)
+## 3) Current step — الخطوة الحالية
 
-**Ministry-demo hardening sprint (P0 tasks in `speckit/09-ROADMAP-TASKS.md`):**
-- TASK-001 migration — ⛔ owner command above.
-- TASK-002 ai-settings unit tests — OPEN.
-- TASK-003 ai-settings ownership assertions — OPEN.
-- TASK-004 full manual browser dry-run of the 8-min demo flow — OPEN.
+**Wave 1 (TASK-001…013) COMPLETE** — all P0/P1/P2 closed (details in speckit/WORKLOG.md).
+Current: **Wave 2** in `speckit/09-ROADMAP-TASKS.md` — region rollout to remaining portals
+(TASK-014), login region branding (TASK-015), narrative replay UI (TASK-016), real user
+enable/disable end-to-end (TASK-017).
 
 ## 4) Remaining steps — الخطوات المتبقية
 
-Ordered backlog with acceptance criteria lives in **`speckit/09-ROADMAP-TASKS.md`**
-(P0 → P2). Summary: P1 = Arabic labels for sovereignty classes, rate-limit key-test endpoint,
-AI-status pill on dashboard, provider label in doctor UI. P2 = narrative persistence, real
-user enable/disable, consent expiry sweep, supply-chain S8 scenario, Playwright smoke.
+Wave 2 backlog with acceptance criteria: **`speckit/09-ROADMAP-TASKS.md`**. Before Sunday:
+rehearse DEMO_RUNBOOK 16-step flow (now includes AI Brain + region switcher closing beats).
 
 ## 5) Unpushed commits — كوميتات غير مدفوعة (بانتظار إذن المالك)
 

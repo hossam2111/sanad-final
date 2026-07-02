@@ -46,13 +46,46 @@ GET /ai-settings (React Query, 60s refetch). Reuse AiBrainCard chip styling.
 Verified: doctor.tsx already captures `provider` from SSE chunks (narrativeProvider state)
 and renders it in the AI-narrative header caption (~L1796). No change needed.
 
-## P2 — post-Sunday
+## P2 — completed 2026-07-02 (wave 1 wrap-up)
 
-- TASK-009 · Persist narrative transcripts to ai_decisions.details for audit replay.
-- TASK-010 · Admin UI for users table (real enable/disable → users.status, replacing demo-only toggles) + audit.
-- TASK-011 · Consent expiry sweep job (expires_at honored server-side).
-- TASK-012 · Supply-chain reorder → purchase_orders end-to-end demo scenario (S8) + assertions.
-- TASK-013 · e2e Playwright smoke (login each portal, 1 assertion each) wired into gate as step 6.
+- TASK-009 · DONE(gemini + lead fix) — narrative transcript persisted to ai_decisions.details
+  via ?decisionId=; lead added patient-scoping so a caller can't write to a foreign decision row.
+- TASK-010 · PARTIAL — users API PUT /:id/status audited + status in registry (gemini);
+  admin UI toggles still demo-local → finish in TASK-017.
+- TASK-011 · DONE(gemini) — expires_at enforced in getConsentState/getConsentStateBulk.
+- TASK-012 · DONE(gemini) — S8 supply-chain assertions in scenario harness (50 total now).
+- TASK-013 · DONE(gemini) — Playwright smoke as gate step 6/6 (4 portal logins).
+- TASK-001 · DONE(gemini) — drizzle push applied (system_settings + ai_decisions.details live
+  in Neon; evidenced by green gate through those code paths).
+
+## Wave 2 — bigger tasks (set 2026-07-02, pre-Sunday polish then expansion)
+
+### TASK-014 · Region switcher rollout to remaining portals — OPEN
+useRegionStore is live in admin/citizen/doctor/supply-chain. Extend to pharmacy, insurance,
+lab, hospital, emergency: ID labels, currency (insurance claim amounts), ministry naming in
+headers. Same bilingual rule: text(configEn, configAr). **Acceptance**: switching region in
+admin re-brands every portal after reload; both locales correct; tsc clean; gate green.
+
+### TASK-015 · Login screen region branding — OPEN
+Login page shows region flag + countryName + ministryName from useRegionStore (bilingual).
+GENERIC region shows the neutral globe branding. **Acceptance**: switcher effect visible
+pre-login; no layout shift; RTL safe.
+
+### TASK-016 · Narrative replay in doctor UI — OPEN
+Doctor AI tab: if the current decision has details.narrative, offer "عرض آخر ملخص محفوظ /
+Show last saved summary" (instant, no stream) with regenerate button. Uses TASK-009 data.
+**Acceptance**: saved narrative renders instantly; regenerate still streams; provider caption kept.
+
+### TASK-017 · Real user enable/disable from Admin UI — OPEN
+Wire the User Registry toggles to PUT /api/users/:id/status (exists, audited). Revoked user
+gets 401 within 60s (status cache). Remove the "Demo Mode" badge from that tab. Add ownership
+assertions: revoked doctor token → 401; re-enable → 200 again. **Acceptance**: end-to-end
+disable/enable demo-able live; assertions green.
+
+### TASK-018 · Insurance claim amounts region-currency — OPEN (part of 014, callable separately)
+
+## Recently completed (wave 1) — for reviewer reference
+All of P0/P1 (TASK-001…008) + P2 above: see WORKLOG entries of 2026-07-02.
 
 ## Explicitly OUT of scope for sub-agents (owner/lead only)
 

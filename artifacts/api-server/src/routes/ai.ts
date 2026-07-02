@@ -383,13 +383,17 @@ router.get("/narrative/:patientId", async (req, res) => {
         
         if (!isNaN(decisionId)) {
           try {
-            const [existing] = await db.select().from(aiDecisionsTable).where(eq(aiDecisionsTable.id, decisionId));
+            // Scope to THIS patient's decision — the patientId is already
+            // ownership-checked above, so a caller can never attach a
+            // transcript to another patient's decision row.
+            const [existing] = await db.select().from(aiDecisionsTable)
+              .where(and(eq(aiDecisionsTable.id, decisionId), eq(aiDecisionsTable.patientId, patientId)));
             if (existing) {
-              const currentDetails = existing.details ? (existing.details as any) : {};
-              currentDetails.narrative = fullTranscript;
+              const currentDetails = existing.details ? (existing.details as Record<string, unknown>) : {};
+              currentDetails["narrative"] = fullTranscript;
               await db.update(aiDecisionsTable)
                 .set({ details: currentDetails })
-                .where(eq(aiDecisionsTable.id, decisionId));
+                .where(and(eq(aiDecisionsTable.id, decisionId), eq(aiDecisionsTable.patientId, patientId)));
             }
           } catch (dbErr) {
             console.error("Failed to persist narrative:", dbErr);
