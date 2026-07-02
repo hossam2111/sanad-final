@@ -3,6 +3,7 @@ import { spawn } from "child_process";
 import { fileURLToPath } from "url";
 import path from "path";
 import { Router } from "express";
+import { rateLimit } from "express-rate-limit";
 import { sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { patientsTable, visitsTable, alertsTable, aiDecisionsTable, auditLogTable } from "@workspace/db/schema";
@@ -647,9 +648,18 @@ router.put("/ai-settings", async (req, res) => {
   res.json({ ok: true, provider, model: resolvedModel, maskedKey: maskKey(apiKey.trim()) });
 });
 
+const aiSettingsTestLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "TOO_MANY_REQUESTS", message: "Too many AI settings test attempts" },
+  skip: (req) => process.env["NODE_ENV"] === "test",
+});
+
 // POST /api/admin/ai-settings/test — verify a key works before/after saving.
 // Body may carry a candidate config; otherwise tests the effective settings.
-router.post("/ai-settings/test", async (req, res) => {
+router.post("/ai-settings/test", aiSettingsTestLimiter, async (req, res) => {
   if (!requireAdminRole(req, res)) return;
 
   const { provider, model, apiKey, baseUrl } = (req.body ?? {}) as { provider?: string; model?: string; apiKey?: string; baseUrl?: string };
@@ -667,6 +677,19 @@ router.post("/ai-settings/test", async (req, res) => {
   }
 
   const result = await testAiSettings(candidate);
+
+  const { ipAddress, userAgent } = extractRequestMeta(req);
+  void writeAudit({
+    who: req.userId ?? "admin",
+    whoName: req.userName,
+    whoRole: req.role ?? "admin",
+    action: "UPDATE",
+    what: "AI settings test",
+    details: { provider: candidate.provider, model: candidate.model, success: result.ok },
+    ipAddress,
+    userAgent,
+  });
+
   res.status(result.ok ? 200 : 502).json(result);
 });
 
