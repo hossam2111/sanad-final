@@ -253,7 +253,8 @@ export default function DoctorDashboard() {
     setNarrativeLoading(true);
     setChatAnswer("");
     try {
-      const res = await apiFetch(`/api/ai/narrative/${patient.id}`);
+      const qs = aiDecision?.decisionId ? `?decisionId=${aiDecision.decisionId}` : "";
+      const res = await apiFetch(`/api/ai/narrative/${patient.id}${qs}`);
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
       const reader = res.body.getReader();
       const decoder = new TextDecoder();

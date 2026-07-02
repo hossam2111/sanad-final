@@ -13,6 +13,7 @@
     "@workspace/db": "workspace:*"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "@types/node": "catalog:",
     "tsx": "catalog:"
   }

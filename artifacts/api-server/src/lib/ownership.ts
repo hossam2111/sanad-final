@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { db } from "@workspace/db";
 import { patientsTable, consentTable, staffAssignmentsTable } from "@workspace/db/schema";
-import { eq, and, desc, isNull, inArray } from "drizzle-orm";
+import { eq, and, desc, isNull, inArray, or, gt } from "drizzle-orm";
 
 // Roles that act on patients institutionally (treatment / operations).
 // Everyone else is bound to a single record (citizen) or to consent-gated
@@ -77,6 +77,7 @@ export async function getConsentState(patientId: number, consentType: string): P
       eq(consentTable.patientId, patientId),
       eq(consentTable.consentType, consentType),
       isNull(consentTable.revokedAt),
+      or(isNull(consentTable.expiresAt), gt(consentTable.expiresAt, new Date())),
     ))
     .orderBy(desc(consentTable.updatedAt))
     .limit(1);
@@ -101,6 +102,7 @@ export async function getConsentStateBulk(
       inArray(consentTable.patientId, patientIds),
       eq(consentTable.consentType, consentType),
       isNull(consentTable.revokedAt),
+      or(isNull(consentTable.expiresAt), gt(consentTable.expiresAt, new Date())),
     ))
     .orderBy(desc(consentTable.updatedAt));
 

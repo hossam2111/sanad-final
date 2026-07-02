@@ -54,3 +54,9 @@ Thumbs.db
 .cache/
 .local/
 .vercel
+
+# private session dumps + test artifacts
+user_requests_dump.txt
+test-results/
+scripts/test-results/
+.last-run.json

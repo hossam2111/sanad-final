@@ -4,6 +4,7 @@ import { usersTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 
 export const usersRouter = Router();
 
@@ -25,6 +26,7 @@ usersRouter.get("/", async (req, res) => {
       fullName: usersTable.fullName,
       role: usersTable.role,
       hospitalId: usersTable.hospitalId,
+      status: usersTable.status,
       createdAt: usersTable.createdAt,
     }).from(usersTable);
     res.json(users);
@@ -100,6 +102,17 @@ usersRouter.put("/:id/status", async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    const { ipAddress, userAgent } = extractRequestMeta(req);
+    await writeAudit({
+      who: (req as any).userId ?? (req as any).role ?? "admin", // use role or admin if user ID not parsed in this router
+      whoRole: (req as any).role ?? "admin",
+      action: "UPDATE",
+      what: `Changed user ${id} status to ${status}`,
+      ipAddress,
+      userAgent,
+      details: { userId: id, newStatus: status }
+    });
 
     res.json(updatedUser);
   } catch (error) {

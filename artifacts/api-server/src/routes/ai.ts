@@ -340,6 +340,8 @@ router.get("/narrative/:patientId", async (req, res) => {
   // Provider resolution (admin-configured key → env key → Demo Mode) happens
   // inside streamClinicalNarrative — no env gate here.
   const patientId = parseInt(req.params["patientId"]!);
+  const decisionId = parseInt(req.query["decisionId"] as string);
+  
   if (isNaN(patientId)) {
     res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patientId" });
     return;
@@ -366,15 +368,33 @@ router.get("/narrative/:patientId", async (req, res) => {
   res.setHeader("X-Accel-Buffering", "no");
   res.flushHeaders();
 
+  let fullTranscript = "";
+
   try {
     await streamClinicalNarrative(
       ctx,
       (chunk, provider) => {
+        fullTranscript += chunk;
         res.write(`data: ${JSON.stringify({ text: chunk, provider })}\n\n`);
       },
-      () => {
+      async () => {
         res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
         res.end();
+        
+        if (!isNaN(decisionId)) {
+          try {
+            const [existing] = await db.select().from(aiDecisionsTable).where(eq(aiDecisionsTable.id, decisionId));
+            if (existing) {
+              const currentDetails = existing.details ? (existing.details as any) : {};
+              currentDetails.narrative = fullTranscript;
+              await db.update(aiDecisionsTable)
+                .set({ details: currentDetails })
+                .where(eq(aiDecisionsTable.id, decisionId));
+            }
+          } catch (dbErr) {
+            console.error("Failed to persist narrative:", dbErr);
+          }
+        }
       },
       (err) => {
         if (!res.writableEnded) {

@@ -136,5 +136,18 @@ check("refreshed token is immediately usable", afterRefresh.status === 200, `sta
 const expiredAttempt = await fetch(`${API}/api/auth/refresh`, { method: "POST", headers: { Authorization: "Bearer not.a.valid.token" } });
 check("refresh rejects invalid token with 401", expiredAttempt.status === 401, `status=${expiredAttempt.status}`);
 
+const supply = await login("supply.ibrahim", "Supply@2026");
+
+console.log("\n══ S8 · Supply Chain Reorder ══");
+const invRes = await get("/api/supply-chain/inventory", supply);
+check("inventory endpoint loads", invRes.status === 200);
+const invData = await invRes.json();
+check("has critical alerts", invData.criticalAlerts?.length > 0);
+
+const poRes = await post("/api/supply-chain/reorder", supply, { drugName: "Warfarin 5mg", quantity: 5000 });
+check("purchase order created successfully", poRes.status === 200);
+const poData = await poRes.json();
+check("PO generated with order ID", !!poData.id);
+
 console.log(`\n══ ${pass} passed, ${fail} failed ══`);
 process.exitCode = fail ? 1 : 0; // let the event loop drain instead of hard-exiting

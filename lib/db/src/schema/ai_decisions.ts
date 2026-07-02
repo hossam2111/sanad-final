@@ -15,6 +15,7 @@ export const aiDecisionsTable = pgTable("ai_decisions", {
   recommendations: jsonb("recommendations").notNull(),
   digitalTwinProjection: jsonb("digital_twin_projection"),
   behavioralFlags: jsonb("behavioral_flags"),
+  details: jsonb("details"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (t) => [
   index("idx_ai_decisions_patient_id").on(t.patientId),

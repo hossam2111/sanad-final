@@ -12,6 +12,7 @@ import { useSseAlerts } from "@/hooks/use-sse-alerts";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
 import { T } from "@/lib/terms";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 type TextFn = (en: string, ar: string) => string;
 
@@ -675,7 +676,8 @@ export default function CitizenPortal() {
 
         {/* Record sub-views: one tab, three lenses on the same record. */}
         {activeTab === "record" && (
-          <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-secondary/40 px-5 py-3">
+          <ErrorBoundary>
+            <div className="flex flex-wrap items-center gap-1.5 border-b border-border bg-secondary/40 px-5 py-3">
             {([
               { id: "medications", label: text(`Prescriptions · ${activeMeds.length}`, `الوصفات · ${activeMeds.length}`) },
               { id: "labs", label: text(`Lab Results · ${labResults.length}`, `نتائج المختبر · ${labResults.length}`) },
@@ -695,10 +697,12 @@ export default function CitizenPortal() {
               </button>
             ))}
           </div>
+          </ErrorBoundary>
         )}
 
         {activeTab === "overview" && (
-          <div className="p-5">
+          <ErrorBoundary>
+            <div className="p-5">
             {!aiDecision ? (
               <div className="py-12 text-center">
                 <Brain className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
@@ -798,10 +802,12 @@ export default function CitizenPortal() {
                 </div>
               </div>
             )}
-          </div>
+            </div>
+          </ErrorBoundary>
         )}
 
         {activeTab === "overview" && healthScore && (
+          <ErrorBoundary>
           <div className="p-5 space-y-5">
             {/* Score interpretation */}
             <div className={`flex items-start gap-4 p-5 ${healthScore.bg} border border-border rounded-2xl`}>
@@ -875,13 +881,17 @@ export default function CitizenPortal() {
 
             {/* Server-side AI Recommendations are rendered above in the overview tab */}
           </div>
+          </ErrorBoundary>
         )}
 
         {activeTab === "appointments" && (
-          <AppointmentBooking patientId={(patient as { id?: number }).id || 0} />
+          <ErrorBoundary>
+            <AppointmentBooking patientId={(patient as { id?: number }).id || 0} />
+          </ErrorBoundary>
         )}
 
         {activeTab === "overview" && (
+          <ErrorBoundary>
           <div className="grid grid-cols-1 sm:grid-cols-2 sm:divide-x divide-border divide-y sm:divide-y-0">
             <div className="p-5">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -914,9 +924,11 @@ export default function CitizenPortal() {
               ) : <p className="text-sm text-muted-foreground">{text("No known allergies.", "لا توجد حساسية معروفة.")}</p>}
             </div>
           </div>
+          </ErrorBoundary>
         )}
 
         {activeTab === "record" && recordView === "medications" && (
+          <ErrorBoundary>
           <div className="overflow-x-auto"><table className="w-full data-table">
             <thead><tr>
               <th>{text("Drug Name", "اسم الدواء")}</th><th>{text("Dosage", "الجرعة")}</th><th>{text("Frequency", "التكرار")}</th><th>{text("Prescribed By", "الطبيب الواصف")}</th><th>{text("Facility", "المنشأة")}</th><th>{text("Status", "الحالة")}</th>
@@ -934,9 +946,11 @@ export default function CitizenPortal() {
               ))}
             </tbody>
           </table></div>
+          </ErrorBoundary>
         )}
 
         {activeTab === "record" && recordView === "labs" && (
+          <ErrorBoundary>
           <div className="overflow-x-auto"><table className="w-full data-table">
             <thead><tr>
               <th>{text("Test Name", "اسم الفحص")}</th><th>{text("Result", "النتيجة")}</th><th>{text("Reference Range", "النطاق المرجعي")}</th><th>{text("Date", "التاريخ")}</th><th>{text("Status", "الحالة")}</th>
@@ -958,9 +972,11 @@ export default function CitizenPortal() {
               ))}
             </tbody>
           </table></div>
+          </ErrorBoundary>
         )}
 
         {activeTab === "record" && recordView === "visits" && (
+          <ErrorBoundary>
           <div className="overflow-x-auto"><table className="w-full data-table">
             <thead><tr>
               <th>{text("Hospital", "المستشفى")}</th><th>{text("Department", "القسم")}</th><th>{text("Visit Type", "نوع الزيارة")}</th><th>{text("Diagnosis", "التشخيص")}</th><th>{text("Date", "التاريخ")}</th>
@@ -977,10 +993,13 @@ export default function CitizenPortal() {
               ))}
             </tbody>
           </table></div>
+          </ErrorBoundary>
         )}
 
         {activeTab === "consent" && (
-          <ConsentTab nationalId={loginId} patientName={patient.fullName} />
+          <ErrorBoundary>
+            <ConsentTab nationalId={loginId} patientName={patient.fullName} />
+          </ErrorBoundary>
         )}
       </Card>
     </Layout>

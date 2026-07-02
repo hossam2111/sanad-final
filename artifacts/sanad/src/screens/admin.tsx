@@ -708,6 +708,15 @@ async function fetchUsers() {
   const res = await apiFetch("/api/users");
   if (!res.ok) throw new Error("Failed to fetch users");
   const data = await res.json();
+  if (Array.isArray(data)) {
+    return data.map((u: any) => ({
+      ...u,
+      name: u.fullName,
+      username: u.nationalId,
+      org: u.hospitalId || "Sanad Health System",
+      title: "System User",
+    }));
+  }
   return data.users ?? [];
 }
 
