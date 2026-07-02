@@ -103,6 +103,16 @@ Acceptance:
 - No overclaiming production deployment.
 - Useful live in the meeting.
 
+### TASK-034 · Full project verification after readiness work — DONE(local verification, commit pending)
+Run full verification after all current readiness tasks.
+
+Acceptance:
+- `lib/db` TypeScript passes.
+- `api-server` TypeScript passes.
+- `api-server` Vitest passes.
+- `sanad` TypeScript passes.
+- Full gate passes 50/50 + 53/53 + 12/12.
+
 ## P2 — Post-Meeting Product Expansion
 
 ### TASK-040 · Doctor Morning Rounds queue — OPEN

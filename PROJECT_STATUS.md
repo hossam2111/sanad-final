@@ -14,7 +14,7 @@
 + 34/34 unit + TypeScript clean ×3 packages. **No blocking items — DB fully migrated** (system_settings +
 ai_decisions.details are live in Neon; the previous TASK-001 blocker is resolved).
 
-**Platform is global leadership meeting ready; critical-path rehearsal passed, freeze active.** New since last update: AI Brain runtime key management
+**Platform is global leadership meeting ready; full verification passed after readiness work, freeze active.** New since last update: AI Brain runtime key management
 (encrypted, admin-only), GCC region switcher (7 regions, bilingual, white-label pitch),
 narrative persistence, consent expiry enforcement, users-status revocation pipeline.
 
@@ -46,7 +46,7 @@ gate runs and demos (it broke a gate run mid-flight on 2026-07-02).
 
 **Waves 1 AND 2 COMPLETE (TASK-001…019)** — tag `demo-ready-v9`. Latest gate:
 50/50 scenario + 53/53 ownership (incl. live user-revocation) + 12/12 portal smoke.
-Current mode: **SUNDAY GLOBAL LEADERSHIP FREEZE** — gate green, critical-path rehearsal passed, avoid code changes unless a rehearsal-blocking issue appears. SANAD identity is global; KSA is the reference demo dataset.
+Current mode: **SUNDAY GLOBAL LEADERSHIP FREEZE** — gate green, critical-path rehearsal passed, avoid code changes unless a rehearsal-blocking issue appears. SANAD identity is global; KSA is the reference demo dataset. Latest verification: 2026-07-03 01:16, full gate 50/50 + 53/53 + 12/12 plus TypeScript/Vitest green.
 
 ## 4) Remaining steps — الخطوات المتبقية
 
@@ -62,6 +62,7 @@ Current mode: **SUNDAY GLOBAL LEADERSHIP FREEZE** — gate green, critical-path 
 Local `main` is ahead by readiness commits for global identity correction, TASK-021 rehearsal, and TASK-024 freeze.
 The global identity correction includes one small verified landing-page copy change (`artifacts/sanad` tsc PASS).
 Additional local readiness docs now include region-profile audit, stakeholder cue cards, and a country-neutral leadership one-pager.
+Latest local verification commit records full project review after those tasks.
 Do not push without explicit owner authorization.
 
 ## 6) Rules for whoever picks this up — قواعد لمن يستكمل
