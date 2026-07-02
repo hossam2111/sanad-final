@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Legend
@@ -107,6 +108,7 @@ const TEST_DEFAULTS: Record<string, { unit: string; referenceRange: string }> = 
 
 export default function LabPortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { config: regionConfig } = useRegionStore();
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -232,7 +234,7 @@ export default function LabPortal() {
             <div className="relative flex-1">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder={text("Patient National ID", "رقم هوية المريض")}
+                placeholder={text(`Patient ${regionConfig.idLabelEn}`, `${regionConfig.idLabel} للمريض`)}
                 value={searchId}
                 onChange={e => setSearchId(e.target.value)}
                 className="ps-9"

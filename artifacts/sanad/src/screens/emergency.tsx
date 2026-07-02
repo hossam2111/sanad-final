@@ -12,6 +12,7 @@ import {
 , SkeletonCard, ErrorBanner} from "@/components/shared";
 import { useEmergencyLookup, useListPatients, type PatientDetail } from "@workspace/api-client-react";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 
 type TextFn = (en: string, ar: string) => string;
 
@@ -69,6 +70,7 @@ const priorityBadge: Record<ClinicalAction["priority"], string> = {
 
 export default function EmergencyPage() {
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { config: regionConfig } = useRegionStore();
   const [nationalId, setNationalId] = useState("");
   const [submittedId, setSubmittedId] = useState<string | null>(null);
 
@@ -114,7 +116,7 @@ export default function EmergencyPage() {
               </h1>
             </div>
             <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
-              {text("Life-critical patient information in under a second. Enter a National ID.", "معلومات المريض الحرجة في أقل من ثانية. أدخل رقم الهوية الوطنية.")}
+              {text(`Life-critical patient information in under a second. Enter a ${regionConfig.idLabelEn}.`, `معلومات المريض الحرجة في أقل من ثانية. أدخل ${regionConfig.idLabel}.`)}
             </p>
           </div>
         </div>
@@ -131,7 +133,7 @@ export default function EmergencyPage() {
                 inputMode="numeric"
                 value={nationalId}
                 onChange={(e) => setNationalId(e.target.value)}
-                placeholder={text("National ID (e.g. 1000000001)", "رقم الهوية (مثال: 1000000001)")}
+                placeholder={text(`${regionConfig.idLabelEn} (e.g. 1000000001)`, `${regionConfig.idLabel} (مثال: 1000000001)`)}
                 className="h-12 ps-10 font-mono text-base"
                 dir="ltr"
               />

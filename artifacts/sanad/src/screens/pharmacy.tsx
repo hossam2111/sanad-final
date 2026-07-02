@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 import { useAuth } from "@/contexts/auth-context";
 import { format } from "date-fns";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
@@ -397,6 +398,8 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
 
 export default function PharmacyPortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { config: regionConfig } = useRegionStore();
+  const CUR = text(regionConfig.currencyEn, regionConfig.currency);
 
   
 
@@ -637,7 +640,7 @@ export default function PharmacyPortal() {
             <div className="relative flex-1">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder={text("Enter Patient National ID", "أدخل رقم هوية المريض")}
+                placeholder={text(`Enter Patient ${regionConfig.idLabelEn}`, `أدخل ${regionConfig.idLabel} للمريض`)}
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
                 className="ps-9"
@@ -911,7 +914,7 @@ export default function PharmacyPortal() {
                             </div>
                             <div className="text-center">
                               <p className="text-[10px] text-muted-foreground">{text("Copay", "المشاركة")}</p>
-                              <p className="font-bold text-foreground">{text("SAR", "ر.س")} {ins.copay}</p>
+                              <p className="font-bold text-foreground">{CUR} {ins.copay}</p>
                             </div>
                             {ins.preAuthRequired && <Badge variant="warning" className="text-[9px]">{text("Pre-Auth", "موافقة مسبقة")}</Badge>}
                             <Badge variant={ins.eligible ? "success" : "destructive"} className="text-[9px]">{ins.eligible ? text("Eligible", "مؤهل") : text("Not Eligible", "غير مؤهل")}</Badge>
