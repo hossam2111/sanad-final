@@ -91,7 +91,7 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
       status = hit.status;
     } else {
       const [user] = await db.select({ status: usersTable.status }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-      status = user?.status ?? "revoked"; // if deleted from db, treat as revoked
+      status = user?.status ?? (userId.match(/^[A-Z]{3}-\d{3}$/) ? "active" : "revoked"); // if deleted from db, treat as revoked (but allow demo mock users)
       userStatusCache.set(userId, { status, ts: Date.now() });
     }
     
