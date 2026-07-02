@@ -66,7 +66,7 @@ Local `main` is ahead of `sanad-final/main`. Do not push without explicit owner 
 
 Expected recent commits:
 
-1. TASK-035 Qatar research pack (current local work).
+1. TASK-035 Qatar research pack (`b57cb31`) plus WORKLOG pointer (`017652c`).
 2. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A.
 2. TASK-025 global identity correction (docs + small landing copy update, `artifacts/sanad` tsc PASS).
 3. TASK-024 freeze note.

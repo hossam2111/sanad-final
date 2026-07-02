@@ -113,7 +113,7 @@ Acceptance:
 - `sanad` TypeScript passes.
 - Full gate passes 50/50 + 53/53 + 12/12.
 
-### TASK-035 · Qatar market research and response pack — DONE(local research, commit pending)
+### TASK-035 · Qatar market research and response pack — DONE(committed)
 Research Qatar's existing digital health stack and prepare the answer to "what does SANAD add?"
 
 Acceptance:
