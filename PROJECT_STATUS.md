@@ -61,6 +61,7 @@ Current mode: **SUNDAY GLOBAL LEADERSHIP FREEZE** — gate green, critical-path 
 `e39fc9a` is pushed to `sanad-final/main` with the first TASK-020 readiness roadmap.
 Local `main` is ahead by readiness commits for global identity correction, TASK-021 rehearsal, and TASK-024 freeze.
 The global identity correction includes one small verified landing-page copy change (`artifacts/sanad` tsc PASS).
+Additional local readiness docs now include region-profile audit, stakeholder cue cards, and a country-neutral leadership one-pager.
 Do not push without explicit owner authorization.
 
 ## 6) Rules for whoever picks this up — قواعد لمن يستكمل

@@ -46,16 +46,23 @@ Qatar, UAE, KSA, and others are deployment profiles/audience talk tracks.
      citizen record/consent, family consented profile.
    - Rehearsal screenshots are local under `output/playwright/` and intentionally not committed.
 
+7. Completed the next low-risk meeting-prep tasks.
+   - Added `speckit/11-REGION-PROFILE-AUDIT.md` for TASK-030.
+   - Added presenter cue cards to `DEMO_RUNBOOK.md` for TASK-031.
+   - Added `speckit/12-LEADERSHIP-ONE-PAGER.md` for TASK-032.
+   - These are documentation/readiness changes only.
+
 ## Current Git State To Expect
 
 Local `main` is ahead of `sanad-final/main`. Do not push without explicit owner authorization.
 
 Expected recent commits:
 
-1. Global identity correction (current work: docs + small landing copy update, `artifacts/sanad` tsc PASS).
-2. TASK-024 freeze note.
-3. TASK-021 browser rehearsal record.
-4. TASK-020 readiness roadmap on `sanad-final/main`.
+1. TASK-030/TASK-031/TASK-032 region audit + stakeholder cue cards + one-pager (current local work).
+2. TASK-025 global identity correction (docs + small landing copy update, `artifacts/sanad` tsc PASS).
+3. TASK-024 freeze note.
+4. TASK-021 browser rehearsal record.
+5. TASK-020 readiness roadmap on `sanad-final/main`.
 
 There is an untracked local `output/` folder containing Playwright screenshots from rehearsal. It is
 evidence only and intentionally not committed.

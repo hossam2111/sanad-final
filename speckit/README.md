@@ -32,6 +32,8 @@ the current reference demo dataset, not the product's identity. Arabic tagline:
 | [08-CONVENTIONS.md](08-CONVENTIONS.md) | Write code that passes review — style, patterns, recipes |
 | [09-ROADMAP-TASKS.md](09-ROADMAP-TASKS.md) | Pick a task — prioritized backlog with acceptance criteria |
 | [10-GLOBAL-DEPLOYMENT-READINESS.md](10-GLOBAL-DEPLOYMENT-READINESS.md) | Keep global product identity stable while supporting country-specific deployment profiles |
+| [11-REGION-PROFILE-AUDIT.md](11-REGION-PROFILE-AUDIT.md) | Know which screens are profile-aware vs KSA reference dataset before demoing region configurability |
+| [12-LEADERSHIP-ONE-PAGER.md](12-LEADERSHIP-ONE-PAGER.md) | One-page country-neutral leadership brief for the meeting |
 
 Also read [`PROJECT_STATUS.md`](../PROJECT_STATUS.md) at repo root — live done/in-progress/remaining state.
 

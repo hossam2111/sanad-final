@@ -68,6 +68,20 @@ Stakeholder cues:
 - Investor / board: "This is a platform, not a one-off national demo: branding, roles, governance,
   AI provider control, and integrations are configurable by deployment."
 
+Presenter cue cards:
+- Doctor: Show `1000000001` and say: "SANAD does not replace the physician; it compresses risk,
+  evidence, and next-best action into one auditable view."
+- Citizen: Show consent/privacy and say: "The citizen can see and control access; revocation has
+  immediate operational impact."
+- Ministry / government: Show Dashboard, Audit Trail, Data Sovereignty, and AI Brain. Say: "The
+  government controls policy, auditability, and the AI provider layer."
+- Hospital operator: Show hospital/clinical scoping if asked. Say: "Operational intelligence is
+  useful only if boundaries remain intact."
+- Insurance / payer: Show anomaly/consent story if asked. Say: "Review becomes faster, but evidence
+  stays consent-gated."
+- Investor / board: Show 12 portals and the green gate result. Say: "This is a repeatable platform
+  with deployment profiles, not bespoke software for one country."
+
 Deployment profile cue:
 - Use the region switcher to show deployment configurability, not product identity changes.
 - Say clearly: "The current clinical and sovereignty evidence uses the KSA reference demo dataset.

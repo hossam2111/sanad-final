@@ -67,7 +67,7 @@ Acceptance:
 
 ## P1 — Only If Sunday Story Needs It
 
-### TASK-030 · Region profile polish audit — OPEN
+### TASK-030 · Region profile polish audit — DONE(local docs, commit pending)
 Check all region-aware screens and document whether deployment profiles are visible without changing
 SANAD's global identity.
 
@@ -76,7 +76,7 @@ Acceptance:
 - List screens that still use KSA-specific seeded data or language, and label them as reference dataset.
 - Fix only small copy/UI issues that are low risk.
 
-### TASK-031 · Demo runbook stakeholder cue cards — OPEN
+### TASK-031 · Demo runbook stakeholder cue cards — DONE(local docs, commit pending)
 Add presenter cue cards for each stakeholder: doctor, citizen, ministry, hospital, insurer,
 investor.
 
@@ -84,6 +84,15 @@ Acceptance:
 - Each cue is one or two sentences.
 - No new functionality required.
 - Useful even if internet or external AI provider is unavailable.
+
+### TASK-032 · Country-neutral leadership one-pager — DONE(local docs, commit pending)
+Create a concise one-page brief that explains SANAD globally, separates KSA reference dataset from
+product identity, and gives safe closing language.
+
+Acceptance:
+- Country-neutral and meeting-ready.
+- States what SANAD is and is not.
+- Includes safe wording for KSA reference dataset and global deployment story.
 
 ## P2 — Post-Meeting Product Expansion
 
