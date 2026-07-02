@@ -91,7 +91,11 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
       status = hit.status;
     } else {
       const [user] = await db.select({ status: usersTable.status }).from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-      status = user?.status ?? (userId.match(/^[A-Z]{3}-\d{3}$/) ? "active" : "revoked"); // if deleted from db, treat as revoked (but allow demo mock users)
+      // Missing DB row → revoked, EXCEPT demo-format ids (ADM-001…) outside
+      // production: demo tokens are minted from the in-memory CREDENTIALS map
+      // and may have no users row. In production the strict rule always applies.
+      const isDemoId = process.env["NODE_ENV"] !== "production" && /^[A-Z]{3}-\d{3}$/.test(userId);
+      status = user?.status ?? (isDemoId ? "active" : "revoked");
       userStatusCache.set(userId, { status, ts: Date.now() });
     }
     

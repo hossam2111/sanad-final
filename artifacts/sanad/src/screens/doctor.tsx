@@ -36,6 +36,7 @@ import { useAiDecision, useAuditLog } from "@/hooks/use-ai-decision";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 import { T } from "@/lib/terms";
 import { useQuery } from "@tanstack/react-query";
 import { format, isValid } from "date-fns";
@@ -152,6 +153,7 @@ function medicationBadgeVariant(isActive: boolean): NonNullable<TimelineEvent["b
 
 export default function DoctorDashboard() {
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { config } = useRegionStore();
 
   
   const [searchId, setSearchId] = useState("");
@@ -329,7 +331,7 @@ export default function DoctorDashboard() {
   const handleRegisterPatient = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegError("");
-    if (!/^\d{10}$/.test(regForm.nationalId)) { setRegError(text("National ID must be exactly 10 digits", "رقم الهوية يجب أن يكون 10 أرقام")); return; }
+    if (!/^\d{10}$/.test(regForm.nationalId)) { setRegError(text(`${config.idLabelEn} must be exactly 10 digits`, `${config.idLabel} يجب أن يكون 10 أرقام`)); return; }
     setRegLoading(true);
     try {
       const res = await apiFetch("/api/patients", {
@@ -593,7 +595,7 @@ export default function DoctorDashboard() {
           <div className="relative" ref={searchRef}>
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
-              placeholder={text("Name or National ID...", "الاسم أو رقم الهوية...")}
+              placeholder={text(`Name or ${config.idLabelEn}...`, `الاسم أو ${config.idLabel}...`)}
               className="pl-9 w-48 sm:w-64"
               value={searchQuery || searchId}
               onChange={(e) => {
@@ -675,7 +677,7 @@ export default function DoctorDashboard() {
               <form onSubmit={handleRegisterPatient} className="p-6 space-y-4 overflow-y-auto">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-full lg:col-span-2">
-                    <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text("National ID (10 digits)", "رقم الهوية (10 أرقام)")}</label>
+                    <label className="text-[12px] font-medium text-muted-foreground mb-1 block">{text(`${config.idLabelEn} (10 digits)`, `${config.idLabel} (10 أرقام)`)}</label>
                     <Input value={regForm.nationalId} onChange={e => setRegForm(f=>({...f,nationalId:e.target.value}))} placeholder="1000000051" maxLength={10} required dir="ltr" />
                   </div>
                   <div className="col-span-full lg:col-span-2">

@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSseAlerts } from "@/hooks/use-sse-alerts";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 import { T } from "@/lib/terms";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
@@ -358,6 +359,7 @@ function AppointmentBooking({ patientId }: { patientId: number }) {
 export default function CitizenPortal() {
   const { user: authUser } = useAuth();
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { config } = useRegionStore();
   const [loginId, setLoginId] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -423,11 +425,11 @@ export default function CitizenPortal() {
             <CardBody className="p-7">
               <form onSubmit={handleLogin} className="space-y-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text("National ID", "رقم الهوية الوطنية")}</label>
+                  <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{text(config.idLabelEn, config.idLabel)}</label>
                   <Input
                     value={loginId}
                     onChange={e => setLoginId(e.target.value)}
-                    placeholder={text("Enter your 10-digit National ID", "أدخل رقم هويتك المكوّن من 10 أرقام")}
+                    placeholder={text(`Enter your ${config.idLabelEn}`, `أدخل ${config.idLabel}`)}
                     className="font-mono text-sm h-11 rounded-2xl"
                     autoFocus
                   />
@@ -465,7 +467,7 @@ export default function CitizenPortal() {
           <CardBody className="py-16 text-center">
             <AlertCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="font-bold text-foreground mb-1">{text("No Records Found", "لا توجد سجلات")}</p>
-            <p className="text-sm text-muted-foreground mb-4">{text("National ID", "رقم الهوية")} <span className="font-mono" dir="ltr">{loginId}</span> {text("was not found.", "غير موجود.")}</p>
+            <p className="text-sm text-muted-foreground mb-4">{text(config.idLabelEn, config.idLabel)} <span className="font-mono" dir="ltr">{loginId}</span> {text("was not found.", "غير موجود.")}</p>
             <Button variant="outline" size="sm" onClick={() => { setIsLoggedIn(false); setLoginId(""); }}>{text("Try Again", "إعادة المحاولة")}</Button>
           </CardBody>
         </Card>
@@ -590,7 +592,7 @@ export default function CitizenPortal() {
                 </div>
                 <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground justify-center sm:justify-start">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-center sm:text-start">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">{text("ID", "الهوية")}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">{text(config.idLabelEn, config.idLabel)}</span>
                     <span className="font-mono font-semibold text-foreground bg-secondary/50 px-2 py-0.5 rounded-md" dir="ltr">{patient.nationalId}</span>
                   </div>
                   <div className="w-1 h-1 rounded-full bg-border hidden sm:block" />

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   LineChart, Line, AreaChart, Area, Legend, ReferenceLine
@@ -88,6 +89,7 @@ type ViewTab = "inventory" | "predictions" | "distribution" | "reorder";
 
 export default function SupplyChainPortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { config } = useRegionStore();
   const [activeTab, setActiveTab] = useState<ViewTab>("inventory");
   const [reorderResults, setReorderResults] = useState<Record<string, ReorderResult>>({});
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -184,7 +186,7 @@ export default function SupplyChainPortal() {
           {criticals > 0 ? text(`${criticals} Critical Shortages`, `${criticals} نقص حرج`) : text("No Critical Shortages", "لا يوجد نقص حرج")}
         </div>
         <div className="ms-auto font-mono text-[11px] text-muted-foreground bg-secondary border border-border px-3 py-1.5 rounded-full">
-          {text("Inventory Value:", "قيمة المخزون:")} {text("SAR", "ر.س")} {data?.summary?.totalInventoryValue?.toLocaleString()}
+          {text("Inventory Value:", "قيمة المخزون:")} {text(config.currencyEn, config.currency)} {data?.summary?.totalInventoryValue?.toLocaleString()}
         </div>
       </div>
 
@@ -230,7 +232,7 @@ export default function SupplyChainPortal() {
           icon={AlertTriangle} iconBg={criticals > 0 ? "bg-danger-bg" : "bg-success-bg"} iconColor={criticals > 0 ? "text-danger" : "text-success"}
         />
         <KpiCard title={text("Adequate Stock", "مخزون كافٍ")} value={data?.summary?.adequate ?? 0} sub={text("Lines fully stocked", "أصناف مكتملة المخزون")} icon={CheckCircle2} iconBg="bg-success-bg" iconColor="text-success" />
-        <KpiCard title={text("Inventory Value", "قيمة المخزون")} value={`${text("SAR", "ر.س")} ${data?.summary?.totalInventoryValue?.toLocaleString()}`} sub={text("Current stock value", "قيمة المخزون الحالية")} icon={BarChart2} iconBg="bg-primary/10" iconColor="text-primary" />
+        <KpiCard title={text("Inventory Value", "قيمة المخزون")} value={`${text(config.currencyEn, config.currency)} ${data?.summary?.totalInventoryValue?.toLocaleString()}`} sub={text("Current stock value", "قيمة المخزون الحالية")} icon={BarChart2} iconBg="bg-primary/10" iconColor="text-primary" />
       </div>
 
       {/* Tabs */}

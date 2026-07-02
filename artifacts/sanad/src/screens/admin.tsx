@@ -105,6 +105,7 @@ import {
 } from "recharts";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--success))", "hsl(var(--warning))", "hsl(var(--destructive))", "hsl(var(--accent))", "hsl(var(--info))", "hsl(var(--primary))"];
 const RISK_COLORS = { Low: "hsl(var(--success))", Medium: "hsl(var(--warning))", High: "hsl(var(--risk-high))", Critical: "hsl(var(--destructive))" };
@@ -752,6 +753,7 @@ const DEMO_USERS = [
 
 export default function AdminDashboard() {
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { regionId, config, changeRegion, regions } = useRegionStore();
   const { data: statsRaw, isLoading: statsLoading, refetch: refetchStats } = useGetAdminStats();
   const { data: popHealth, isLoading: healthLoading } = useGetPopulationHealth();
   const { data: intelligence } = useNationalIntelligence();
@@ -871,7 +873,7 @@ export default function AdminDashboard() {
                 <Target className="w-6 h-6 text-primary" />
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
-                {text("Ministry of Health Command Center", "وزارة الصحة — مركز القيادة")}
+                {text(`${config.ministryNameEn} Command Center`, `${config.ministryName} — مركز القيادة`)}
               </h1>
             </div>
             <p className="text-muted-foreground font-medium max-w-2xl text-[13px] sm:text-sm leading-relaxed">
@@ -880,6 +882,15 @@ export default function AdminDashboard() {
           </div>
           
           <div className="flex items-center gap-3 shrink-0">
+            <select
+              value={regionId}
+              onChange={(e) => changeRegion(e.target.value)}
+              className="text-xs font-bold px-3 py-2.5 rounded-xl border border-border bg-background text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              {Object.values(regions).map(r => (
+                <option key={r.id} value={r.id}>{r.flag} {locale === "ar" ? r.countryName : r.countryNameEn}</option>
+              ))}
+            </select>
             <span className="text-[11px] font-mono font-bold bg-background/50 border border-border rounded-xl px-4 py-2.5 text-foreground backdrop-blur-sm shadow-sm" dir="ltr">
               {new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" })}
             </span>
