@@ -14,6 +14,13 @@
 
 ---
 
+## 2026-07-02 07:15 · claude-lead · TASK-018
+- Status: DONE — Commit: eeb22cf (insurance claim currency via regionConfig, bilingual)
+- Note: a PowerShell Set-Content attempt CORRUPTED Arabic in insurance.tsx (PS 5.1 read the
+  UTF-8 file as cp1252) — reverted and redone with the Edit tool. RULE: never bulk-rewrite
+  files containing Arabic through PS 5.1 pipes; use the Edit tool's replace_all.
+- Next in wave 2: TASK-014 (pharmacy/lab/hospital/emergency region rollout), TASK-017.
+
 ## 2026-07-02 07:00 · claude-lead · TASK-015 + TASK-016 (wave 2 started)
 - Status: DONE
 - Commits: fb432e8 (login region branding), 2c7909f (saved-narrative replay)
