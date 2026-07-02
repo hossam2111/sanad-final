@@ -248,6 +248,15 @@ export default function DoctorDashboard() {
 
   const markReadMutation = useMarkAlertRead();
 
+  // TASK-016: last persisted transcript — shown instantly until a fresh stream replaces it
+  const savedNarrativeQc = useQueryClient();
+  const { data: savedNarrative } = useQuery({
+    queryKey: ["saved-narrative", patient?.id],
+    queryFn: () => apiFetch(`/api/ai/narrative/${patient!.id}/saved`).then(r => r.json()),
+    enabled: !!patient?.id,
+    staleTime: 60_000,
+  });
+
   const fetchNarrative = useCallback(async () => {
     if (!patient?.id || narrativeLoading) return;
     setNarrativeText("");
@@ -282,8 +291,10 @@ export default function DoctorDashboard() {
       setNarrativeText(`⚠️ Failed to connect to AI: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setNarrativeLoading(false);
+      // fresh transcript was persisted server-side — refresh the saved-narrative cache
+      savedNarrativeQc.invalidateQueries({ queryKey: ["saved-narrative", patient?.id] });
     }
-  }, [patient?.id, narrativeLoading]);
+  }, [patient?.id, narrativeLoading, savedNarrativeQc]);
 
   const sendChatQuestion = useCallback(async () => {
     if (!patient?.id || !chatQuestion.trim() || chatLoading) return;
@@ -1853,7 +1864,23 @@ export default function DoctorDashboard() {
                   ref={narrativeRef}
                   className="sanad-print-hidden min-h-[220px] rounded-2xl bg-secondary border border-border p-5 relative"
                 >
-                  {!narrativeText && !narrativeLoading && (
+                  {!narrativeText && !narrativeLoading && savedNarrative?.saved && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-info-bg text-info border border-info/30">
+                          <Clock className="w-3 h-3" />
+                          {text("Last saved summary", "آخر ملخص محفوظ")}
+                        </span>
+                        <span className="text-[11px] text-muted-foreground" dir="ltr">
+                          {savedNarrative.savedAt ? format(new Date(savedNarrative.savedAt), "dd MMM yyyy HH:mm") : ""}
+                        </span>
+                      </div>
+                      <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap leading-relaxed text-sm">
+                        {savedNarrative.narrative}
+                      </div>
+                    </div>
+                  )}
+                  {!narrativeText && !narrativeLoading && !savedNarrative?.saved && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-muted-foreground">
                       <Brain className="w-8 h-8 opacity-25" />
                       <p className="text-sm">{text("Click", "اضغط")} <strong>{text("Generate Narrative", "توليد السرد")}</strong> {text("to get a live AI clinical summary", "للحصول على ملخّص سريري فوري بالذكاء الاصطناعي")}</p>

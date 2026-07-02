@@ -333,6 +333,34 @@ async function buildPatientContext(
   };
 }
 
+// GET /api/ai/narrative/:patientId/saved — latest persisted transcript (TASK-016)
+router.get("/narrative/:patientId/saved", async (req, res) => {
+  const patientId = parseInt(req.params["patientId"]!);
+  if (isNaN(patientId)) {
+    res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patientId" });
+    return;
+  }
+  if (!(await requireOwnPatient(req, res, patientId))) return;
+
+  const [row] = await db
+    .select({ id: aiDecisionsTable.id, details: aiDecisionsTable.details, createdAt: aiDecisionsTable.createdAt })
+    .from(aiDecisionsTable)
+    .where(and(eq(aiDecisionsTable.patientId, patientId), sql`${aiDecisionsTable.details} ->> 'narrative' IS NOT NULL`))
+    .orderBy(desc(aiDecisionsTable.id))
+    .limit(1);
+
+  if (!row) {
+    res.json({ saved: false });
+    return;
+  }
+  res.json({
+    saved: true,
+    decisionId: row.id,
+    narrative: (row.details as Record<string, unknown>)["narrative"],
+    savedAt: row.createdAt,
+  });
+});
+
 // ─── Claude AI Brain — Streaming Clinical Narrative ───────────────────────────
 // GET /api/ai/narrative/:patientId
 // Streams a real AI-generated clinical summary via SSE
