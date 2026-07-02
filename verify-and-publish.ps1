@@ -85,7 +85,9 @@ if ($SkipSeed) {
 } else {
   Info "Running: pnpm --filter @workspace/scripts seed"
   Push-Location $root
-  & pnpm --filter "@workspace/scripts" seed
+  # cmd /c with merged stderr — PS 5.1 + ErrorActionPreference=Stop would otherwise
+  # turn benign node stderr warnings (e.g. pg SSL-mode notice) into a fatal error
+  & cmd /c "pnpm --filter @workspace/scripts seed 2>&1"
   $seedExit = $LASTEXITCODE
   Pop-Location
   if ($seedExit -ne 0) {
