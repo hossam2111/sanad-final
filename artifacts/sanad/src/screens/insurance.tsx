@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart, Legend
@@ -174,6 +175,8 @@ type AiRec = { recommendation: string; flags: string[] } | null;
 
 export default function InsurancePortal() {
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { config: regionConfig } = useRegionStore();
+  const CUR = text(regionConfig.currencyEn, regionConfig.currency);
   const [searchId, setSearchId] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
@@ -273,7 +276,7 @@ export default function InsurancePortal() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <KpiCard title={text("Active Policies", "الوثائق النشطة")} value={dashboard.totalPolicies?.toLocaleString()} sub={text("National coverage", "تغطية وطنية")} icon={Users} iconBg="bg-secondary" iconColor="text-secondary-foreground" />
                 <KpiCard title={text("Total Claims", "إجمالي المطالبات")} value={dashboard.totalClaims?.toLocaleString()} sub={text(`${dashboard.pendingClaims} awaiting review`, `${dashboard.pendingClaims} بانتظار المراجعة`)} icon={Shield} iconBg="bg-primary/10" iconColor="text-primary" />
-                <KpiCard title={text("Total Payout", "إجمالي المدفوعات")} value={`${text("SAR", "ر.س")} ${(dashboard.totalPayout / 1000).toFixed(0)}K`} sub={text(`Avg SAR ${dashboard.avgClaimValue?.toLocaleString()} per claim`, `متوسط ${dashboard.avgClaimValue?.toLocaleString()} ر.س للمطالبة`)} icon={DollarSign} iconBg="bg-success-bg" iconColor="text-success" />
+                <KpiCard title={text("Total Payout", "إجمالي المدفوعات")} value={`${CUR} ${(dashboard.totalPayout / 1000).toFixed(0)}K`} sub={text(`Avg ${regionConfig.currencyEn} ${dashboard.avgClaimValue?.toLocaleString()} per claim`, `متوسط ${dashboard.avgClaimValue?.toLocaleString()} ${regionConfig.currency} للمطالبة`)} icon={DollarSign} iconBg="bg-success-bg" iconColor="text-success" />
                 <KpiCard title={text("Fraud Flagged", "حالات احتيال موسومة")} value={dashboard.fraudSuspected} sub={text(`${dashboard.fraudRate}% fraud rate`, `معدّل الاحتيال ${dashboard.fraudRate}%`)} icon={ShieldAlert} iconBg="bg-danger-bg" iconColor="text-danger" />
               </div>
 
@@ -408,7 +411,7 @@ export default function InsurancePortal() {
                       { label: text("Fraud Rate", "معدل الاحتيال"), value: `${dashboard.fraudRate}%`, color: "text-danger" },
                       { label: text("High-Risk Policies", "وثائق مرتفعة الخطورة"), value: dashboard.highRiskPolicies, color: "text-risk-high" },
                       { label: text("Critical Policies", "وثائق حرجة"), value: dashboard.criticalPolicies, color: "text-danger" },
-                      { label: text("Avg Claim Value", "متوسط قيمة المطالبة"), value: `${text("SAR", "ر.س")} ${dashboard.avgClaimValue?.toLocaleString()}`, color: "text-primary" },
+                      { label: text("Avg Claim Value", "متوسط قيمة المطالبة"), value: `${CUR} ${dashboard.avgClaimValue?.toLocaleString()}`, color: "text-primary" },
                     ].map((s, i) => (
                       <div key={i} className="flex items-center justify-between">
                         <p className="text-xs text-muted-foreground">{s.label}</p>
@@ -494,7 +497,7 @@ export default function InsurancePortal() {
                     </div>
                     <div className="px-6 py-4 flex flex-col items-center justify-center min-w-[150px] bg-primary/10">
                       <DataLabel label={text("Monthly Premium", "القسط الشهري")}>
-                        <p className="text-2xl font-bold text-primary">{text("SAR", "ر.س")} {patient.monthlyPremium?.toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-primary">{CUR} {patient.monthlyPremium?.toLocaleString()}</p>
                       </DataLabel>
                       <p className="text-xs text-muted-foreground mt-1">{patient.riskMultiplier}{text("× risk factor", "× معامل الخطورة")}</p>
                     </div>
@@ -502,7 +505,7 @@ export default function InsurancePortal() {
                       <DataLabel label={text("Total Claims", "إجمالي المطالبات")}>
                         <p className="text-2xl font-bold text-foreground">{patient.totalClaims}</p>
                       </DataLabel>
-                      <p className="text-xs text-muted-foreground mt-1">{text("SAR", "ر.س")} {patient.totalClaimValue?.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{CUR} {patient.totalClaimValue?.toLocaleString()}</p>
                     </div>
                   </div>
                 </CardBody>
@@ -559,7 +562,7 @@ export default function InsurancePortal() {
                   <Card>
                     <CardHeader>
                       <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-primary" /><CardTitle>{text("Premium Breakdown", "تفصيل القسط")}</CardTitle></div>
-                      <p className="text-sm font-bold text-primary ml-auto">{text("SAR", "ر.س")} {patient.monthlyPremium}{text("/mo", "/شهر")}</p>
+                      <p className="text-sm font-bold text-primary ml-auto">{CUR} {patient.monthlyPremium}{text("/mo", "/شهر")}</p>
                     </CardHeader>
                     <CardBody>
                       <div className="h-36">
@@ -633,7 +636,7 @@ export default function InsurancePortal() {
                               <p className="text-xs text-muted-foreground">{claim.hospital} · {claim.date}</p>
                             </div>
                             <div className="text-right shrink-0 mr-2">
-                              <p className="text-base font-bold text-foreground">{text("SAR", "ر.س")} {claim.estimatedCost?.toLocaleString()}</p>
+                              <p className="text-base font-bold text-foreground">{CUR} {claim.estimatedCost?.toLocaleString()}</p>
                               <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color} border ${cfg.border}`}>{locale === "ar" ? cfg.labelAr : cfg.label}</span>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
