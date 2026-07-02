@@ -44,15 +44,17 @@ gate runs and demos (it broke a gate run mid-flight on 2026-07-02).
 
 ## 3) Current step — الخطوة الحالية
 
-**Wave 1 (TASK-001…013) COMPLETE** — all P0/P1/P2 closed (details in speckit/WORKLOG.md).
-Current: **Wave 2** in `speckit/09-ROADMAP-TASKS.md` — region rollout to remaining portals
-(TASK-014), login region branding (TASK-015), narrative replay UI (TASK-016), real user
-enable/disable end-to-end (TASK-017).
+**Waves 1 AND 2 COMPLETE (TASK-001…019)** — tag `demo-ready-v9`. Latest gate:
+50/50 scenario + 53/53 ownership (incl. live user-revocation) + 12/12 portal smoke.
+Current mode: **FEATURE FREEZE** — stability and rehearsal only until Sunday.
 
 ## 4) Remaining steps — الخطوات المتبقية
 
-Wave 2 backlog with acceptance criteria: **`speckit/09-ROADMAP-TASKS.md`**. Before Sunday:
-rehearse DEMO_RUNBOOK 16-step flow (now includes AI Brain + region switcher closing beats).
+1. Owner rehearses the DEMO_RUNBOOK 16-step flow end-to-end in a browser (incl. new beats:
+   AI Brain key card, region switcher, live user revocation).
+2. Owner decides on pushing the ~24 local commits: `git push -u sanad-final main`.
+3. Optional post-Sunday backlog stays in speckit/09-ROADMAP-TASKS.md.
+⚠️ Keep any server-restarting background cron OFF during rehearsals and the demo.
 
 ## 5) Unpushed commits — كوميتات غير مدفوعة (بانتظار إذن المالك)
 

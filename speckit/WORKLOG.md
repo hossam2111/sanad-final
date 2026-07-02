@@ -14,6 +14,21 @@
 
 ---
 
+## 2026-07-02 08:00 · claude-lead · TASK-014 + TASK-017 + TASK-019 — WAVE 2 COMPLETE
+- Status: DONE — Commits: 16ff11a (region rollout pharmacy/lab/emergency), a802d9a (live user
+  revocation), c47677e (12-portal smoke). Tag: demo-ready-v9.
+- Gate: 50/50 scenario + 53/53 ownership (5 new revocation assertions) + 12/12 smoke — ALL GREEN.
+- Key findings/fixes this window:
+  - Admin lacked /api/users in ROLE_PERMISSIONS → User Registry was silently 403-ing and
+    falling back to local demo data. Fixed + seeded 12 users rows (ids = JWT userIds,
+    upsert → reseed restores active) + status-cache invalidation → revocation bites on the
+    target's NEXT request (live demo beat documented in RUNBOOK).
+  - Frontend runs on :3000 (not :3001 as memory claimed); API health at /api/livez. A "both
+    servers DOWN" scare was a wrong-port probe + zombie EADDRINUSE listeners.
+  - Gate broke mid-run AGAIN with the ECONNRESET/REFUSED signature (external restart), clean
+    rerun immediately after passed everything. Keep any server-restarting cron OFF.
+- Wave 2 fully closed: TASK-014/015/016/017/018/019 all DONE.
+
 ## 2026-07-02 07:15 · claude-lead · TASK-018
 - Status: DONE — Commit: eeb22cf (insurance claim currency via regionConfig, bilingual)
 - Note: a PowerShell Set-Content attempt CORRUPTED Arabic in insurance.tsx (PS 5.1 read the
