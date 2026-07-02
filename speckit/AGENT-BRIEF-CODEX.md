@@ -50,6 +50,7 @@ Qatar, UAE, KSA, and others are deployment profiles/audience talk tracks.
    - Added `speckit/11-REGION-PROFILE-AUDIT.md` for TASK-030.
    - Added presenter cue cards to `DEMO_RUNBOOK.md` for TASK-031.
    - Added `speckit/12-LEADERSHIP-ONE-PAGER.md` for TASK-032.
+   - Added `speckit/13-LEADERSHIP-QA.md` for TASK-033.
    - These are documentation/readiness changes only.
 
 ## Current Git State To Expect
@@ -58,7 +59,7 @@ Local `main` is ahead of `sanad-final/main`. Do not push without explicit owner 
 
 Expected recent commits:
 
-1. TASK-030/TASK-031/TASK-032 region audit + stakeholder cue cards + one-pager (current local work).
+1. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A (current local work).
 2. TASK-025 global identity correction (docs + small landing copy update, `artifacts/sanad` tsc PASS).
 3. TASK-024 freeze note.
 4. TASK-021 browser rehearsal record.

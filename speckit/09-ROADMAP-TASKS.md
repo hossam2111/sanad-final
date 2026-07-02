@@ -94,6 +94,15 @@ Acceptance:
 - States what SANAD is and is not.
 - Includes safe wording for KSA reference dataset and global deployment story.
 
+### TASK-033 · Leadership Q&A / objection handling — DONE(local docs, commit pending)
+Create short safe answers for predictable leadership questions: country identity, production status,
+AI decision authority, replacement risk, defensibility, and deployment requirements.
+
+Acceptance:
+- Answers are country-neutral.
+- No overclaiming production deployment.
+- Useful live in the meeting.
+
 ## P2 — Post-Meeting Product Expansion
 
 ### TASK-040 · Doctor Morning Rounds queue — OPEN

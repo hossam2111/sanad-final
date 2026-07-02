@@ -21,6 +21,13 @@
 - Gate: docs-only readiness additions; not rerun. Current verified baseline remains `artifacts/sanad` TypeScript PASS, verify-and-publish DryRun 50/50 + 53/53 + 12/12, and browser rehearsal 4/4.
 - Notes: Region audit separates deployment-profile UI from KSA reference dataset evidence. Demo runbook now includes presenter cue cards for doctor, citizen, ministry/government, hospital, insurance/payer, and investor/board. One-pager gives safe country-neutral meeting language.
 
+## 2026-07-03 01:25 · codex · TASK-033
+- Status: DONE
+- Commit: pending docs(readiness): add leadership objection handling [TASK-033]
+- Files: speckit/13-LEADERSHIP-QA.md, speckit/README.md, speckit/09-ROADMAP-TASKS.md, speckit/AGENT-BRIEF-CODEX.md, speckit/WORKLOG.md
+- Gate: docs-only readiness addition; not rerun.
+- Notes: Added short safe answers for country identity, production status, system replacement, AI authority, defensibility, KSA reference data, and production deployment requirements.
+
 ## 2026-07-03 00:00 · codex · TASK-025
 - Status: DONE
 - Commit: pending docs(positioning): restore global SANAD identity [TASK-025]
