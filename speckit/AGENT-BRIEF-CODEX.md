@@ -53,13 +53,21 @@ Qatar, UAE, KSA, and others are deployment profiles/audience talk tracks.
    - Added `speckit/13-LEADERSHIP-QA.md` for TASK-033.
    - These are documentation/readiness changes only.
 
+8. Completed Qatar-specific research pack.
+   - Added `speckit/14-QATAR-MARKET-RESEARCH-BRIEF.md` for TASK-035.
+   - Sources include PHCC/MyHealth, HMC Oracle Cerner EHR, Qatar NHS 2024-2030, HMC Strategy
+     2024-2030, TASMU, Nar'aakom, Qatar privacy law, and Qatar AI strategy.
+   - Core answer: Qatar has strong systems of record/service channels; SANAD adds the governed
+     intelligence, consent, audit, and AI control layer above them.
+
 ## Current Git State To Expect
 
 Local `main` is ahead of `sanad-final/main`. Do not push without explicit owner authorization.
 
 Expected recent commits:
 
-1. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A (current local work).
+1. TASK-035 Qatar research pack (current local work).
+2. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A.
 2. TASK-025 global identity correction (docs + small landing copy update, `artifacts/sanad` tsc PASS).
 3. TASK-024 freeze note.
 4. TASK-021 browser rehearsal record.

@@ -113,6 +113,14 @@ Acceptance:
 - `sanad` TypeScript passes.
 - Full gate passes 50/50 + 53/53 + 12/12.
 
+### TASK-035 · Qatar market research and response pack — DONE(local research, commit pending)
+Research Qatar's existing digital health stack and prepare the answer to "what does SANAD add?"
+
+Acceptance:
+- Uses current external sources.
+- Distinguishes existing Qatar assets from SANAD's added layer.
+- Includes expected questions, safe answers, demo ordering, and Arabic one-minute answer.
+
 ## P2 — Post-Meeting Product Expansion
 
 ### TASK-040 · Doctor Morning Rounds queue — OPEN
