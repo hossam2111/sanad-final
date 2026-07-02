@@ -19,7 +19,7 @@ Acceptance:
 - Roadmap reflects Sunday priorities, not stale completed tasks.
 - WORKLOG and Codex handoff record what changed and what remains.
 
-### TASK-021 · Manual rehearsal pass — OPEN (recommended next)
+### TASK-021 · Manual rehearsal pass — DONE(local, see `git log -1`)
 Run `DEMO_RUNBOOK.md` end-to-end in the browser with both servers up. Record exact PASS/FAIL notes
 in WORKLOG.
 

@@ -14,6 +14,13 @@
 
 ---
 
+## 2026-07-02 22:09 · codex · TASK-021
+- Status: DONE
+- Commit: self docs(rehearsal): record Qatar critical-path pass [TASK-021] (see `git log -1`)
+- Files: speckit/WORKLOG.md, speckit/09-ROADMAP-TASKS.md, PROJECT_STATUS.md
+- Gate: Browser rehearsal PASS 4/4 after API restart to clear auth rate-limit: admin Qatar branding + Data Sovereignty + AI Brain, doctor critical patient, citizen record/consent, family consented profile.
+- Notes: Full verify gate was already green this session: 50/50 + 53/53 + 12/12. Rehearsal screenshots were generated locally under `output/playwright/`: qatar-admin-readiness.png, qatar-doctor-critical-patient.png, qatar-citizen-consent.png, qatar-family-profile.png. Screenshots are not committed.
+
 ## 2026-07-02 22:00 · codex · TASK-020
 - Status: DONE
 - Commit: self docs(speckit): prepare Qatar leadership roadmap [TASK-020] (see `git log -1`)

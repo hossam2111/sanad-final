@@ -64,8 +64,9 @@ This pass adds/updates speckit docs. Do not delete the existing REVIEW-FIXES ent
    Suggested commit:
    `docs(speckit): prepare Qatar leadership roadmap [TASK-020]`
 
-2. Do TASK-021 next:
-   Run the demo manually and record PASS/FAIL notes.
+2. TASK-021 is done locally in `d00b6f8`.
+   Browser rehearsal passed 4/4: admin Qatar readiness, doctor critical patient, citizen record/consent, family consented profile.
+   Screenshots are local under `output/playwright/` and are intentionally not committed.
 
 3. Do TASK-024 last before the meeting:
    Run `.\verify-and-publish.ps1 -DryRun` and freeze the platform if green.

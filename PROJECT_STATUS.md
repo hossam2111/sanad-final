@@ -14,7 +14,7 @@
 + 34/34 unit + TypeScript clean ×3 packages. **No blocking items — DB fully migrated** (system_settings +
 ai_decisions.details are live in Neon; the previous TASK-001 blocker is resolved).
 
-**Platform is Qatar leadership meeting ready, pending final rehearsal/freeze.** New since last update: AI Brain runtime key management
+**Platform is Qatar leadership meeting ready; critical-path rehearsal passed, pending final freeze.** New since last update: AI Brain runtime key management
 (encrypted, admin-only), GCC region switcher (7 regions, bilingual, white-label pitch),
 narrative persistence, consent expiry enforcement, users-status revocation pipeline.
 
@@ -50,8 +50,8 @@ Current mode: **SUNDAY QATAR READINESS** — stability, rehearsal, Qatar talk-tr
 
 ## 4) Remaining steps — الخطوات المتبقية
 
-1. Rehearse the DEMO_RUNBOOK flow end-to-end in a browser, including the new Qatar Leadership Talk Track.
-2. Rehearse the three optional browser flows printed by the gate if time allows.
+1. Manual browser rehearsal passed for the Qatar critical path: admin Qatar readiness, doctor critical patient, citizen record/consent, family consented profile.
+2. Keep both servers running for live review: web `:3000`, API `:8080`.
 3. Freeze the platform for the Sunday Qatar leadership meeting unless a rehearsal-blocking issue appears.
 4. Post-meeting expansion backlog stays in speckit/09-ROADMAP-TASKS.md and speckit/10-QATAR-LEADERSHIP-READINESS.md.
 ⚠️ Keep any server-restarting background cron OFF during rehearsals and the demo.
