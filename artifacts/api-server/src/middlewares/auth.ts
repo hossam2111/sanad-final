@@ -26,7 +26,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
   // patient-scoped endpoint enforces ownership (lib/ownership.ts): a citizen
   // token only resolves its own record, on /api/ai and everywhere else.
   citizen: ["/api/patients", "/api/lab-results", "/api/medications", "/api/visits", "/api/appointments", "/api/consent", "/api/ai", "/api/alerts"],
-  admin: ["/api/admin", "/api/patients", "/api/ai", "/api/ai-control", "/api/alerts", "/api/lab", "/api/medications", "/api/visits", "/api/appointments"],
+  admin: ["/api/admin", "/api/patients", "/api/ai", "/api/ai-control", "/api/alerts", "/api/lab", "/api/medications", "/api/visits", "/api/appointments", "/api/users"],
   // Every portal renders the system-alerts bell in the shared layout, so every
   // role gets read access to /api/alerts (writes are still role-checked in the
   // route handlers).
@@ -44,6 +44,11 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 
 const userStatusCache = new Map<string, { status: string; ts: number }>();
 const CACHE_TTL_MS = 60 * 1000; // 1 minute
+
+/** Called by the users route on status change so revocation takes effect immediately. */
+export function invalidateUserStatus(userId: string) {
+  userStatusCache.delete(userId);
+}
 
 // Evict expired entries every 5 minutes
 setInterval(() => {

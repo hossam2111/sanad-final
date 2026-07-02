@@ -107,9 +107,13 @@ The **risk level** (Low / Medium / High / Critical) is what drives triage decisi
 The index number supports explainability and ranking.
 
 ### On User Administration
-The User Registry tab shows Enable/Disable controls that are UI-only in the demo.
-Production identity management requires integration with LDAP / SAML / OAuth.
-The "Demo Mode" badge is displayed on that tab.
+The User Registry tab is LIVE (TASK-017): Revoke/Restore writes `users.status`, is audited
+in the Isnād chain, and kills the target user's active tokens **on their very next request**
+(the middleware status cache is invalidated on change). Powerful demo beat:
+1. Login as doctor in a second browser tab.
+2. Admin → User Registry → Revoke `dr.rashidi` → doctor's next click → 401 logout.
+3. Restore → doctor works again. Reseeding resets all users to active.
+Production deployments would still integrate LDAP / SAML / OAuth for identity lifecycle.
 
 ---
 

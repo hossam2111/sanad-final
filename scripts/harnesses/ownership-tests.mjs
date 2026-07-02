@@ -137,5 +137,18 @@ check("Dr. Rashidi sees KAMC-RYD scoped patients (18 patients)", pts2.total === 
 const emPts = await (await get("/api/patients", emergency)).json();
 check("Emergency Unit sees ALL 50 patients (Break-glass)", emPts.total === 50, `got ${emPts.total}`);
 
+console.log("\n── User revocation: users.status kills live tokens instantly ──");
+const putStatus = (id, status) => fetch(`${API}/api/users/${id}/status`, {
+  method: "PUT", headers: { Authorization: `Bearer ${admin}`, "Content-Type": "application/json" },
+  body: JSON.stringify({ status }),
+});
+const revoke = await putStatus("DOC-001", "revoked");
+check("admin revokes DOC-001 → 200", revoke.status === 200, `got ${revoke.status}`);
+check("revoked doctor token → 401 immediately (cache invalidated)", (await get("/api/patients", doctor)).status === 401);
+const restore = await putStatus("DOC-001", "active");
+check("admin restores DOC-001 → 200", restore.status === 200, `got ${restore.status}`);
+check("restored doctor token works again → 200", (await get("/api/patients", doctor)).status === 200);
+check("doctor cannot change user status → 403", (await fetch(`${API}/api/users/ADM-001/status`, { method: "PUT", headers: { Authorization: `Bearer ${doctor}`, "Content-Type": "application/json" }, body: JSON.stringify({ status: "revoked" }) })).status === 403);
+
 console.log(`\n══ ${pass} passed, ${fail} failed ══`);
 process.exitCode = fail ? 1 : 0;

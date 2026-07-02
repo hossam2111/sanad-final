@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { invalidateUserStatus } from "../middlewares/auth.js";
 
 export const usersRouter = Router();
 
@@ -102,6 +103,9 @@ usersRouter.put("/:id/status", async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    // Drop the middleware's 60s status cache — revocation must bite on the very next request
+    invalidateUserStatus(id!);
 
     const { ipAddress, userAgent } = extractRequestMeta(req);
     await writeAudit({

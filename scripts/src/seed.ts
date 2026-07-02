@@ -38,7 +38,7 @@ import {
   patientsTable, medicationsTable, visitsTable, labResultsTable,
   alertsTable, consentTable, appointmentsTable, aiDecisionsTable,
   staffAssignmentsTable, purchaseOrdersTable, aiRetrainJobsTable,
-  familyRelationshipsTable
+  familyRelationshipsTable, usersTable
 } from "@workspace/db";
 
 // ── Deterministic PRNG ────────────────────────────────────────────────────────
@@ -640,6 +640,32 @@ async function seed() {
   ];
   await db.insert(familyRelationshipsTable).values(familyRelationships);
   console.log(`Inserted ${familyRelationships.length} family relationships`);
+
+  // ── users registry (upsert — table is NOT truncated, so revocations done in a
+  // demo are reset to active on reseed; the middleware status check reads these
+  // rows by the JWT userId). Login itself uses the in-memory CREDENTIALS map,
+  // so password_hash here is a placeholder, never verified.
+  const DUMMY_HASH = "$2b$10$seedplaceholderhash.notusedforlogin.demo000000000000";
+  const demoUsers = [
+    { id: "ADM-001", nationalId: "9000000001", fullName: "Eng. Saad Al-Otaibi",    role: "admin",        hospitalId: null },
+    { id: "DOC-001", nationalId: "9000000002", fullName: "Dr. Ahmed Al-Rashidi",   role: "doctor",       hospitalId: "KAMC-RYD" },
+    { id: "EMP-001", nationalId: "9000000003", fullName: "Unit 7 — Riyadh Central",role: "emergency",    hospitalId: null },
+    { id: "LAB-001", nationalId: "9000000004", fullName: "Sara Al-Otaibi",         role: "lab",          hospitalId: null },
+    { id: "PHA-001", nationalId: "9000000005", fullName: "Hassan Al-Ghamdi",       role: "pharmacy",     hospitalId: null },
+    { id: "HOS-001", nationalId: "9000000006", fullName: "Operations Manager",     role: "hospital",     hospitalId: "KAMC-RYD" },
+    { id: "INS-001", nationalId: "9000000007", fullName: "Nora Al-Qahtani",        role: "insurance",    hospitalId: null },
+    { id: "AIC-001", nationalId: "9000000008", fullName: "Dr. Khalid Al-Mansouri", role: "ai-control",   hospitalId: null },
+    { id: "RES-001", nationalId: "9000000009", fullName: "Dr. Reem Al-Zahrani",    role: "research",     hospitalId: null },
+    { id: "CIT-001", nationalId: "1000000001", fullName: "Mohammed Al-Ghamdi",     role: "citizen",      hospitalId: null },
+    { id: "FAM-001", nationalId: "9000000011", fullName: "Fatima Al-Ghamdi",       role: "family",       hospitalId: null },
+    { id: "SUP-001", nationalId: "9000000012", fullName: "Ibrahim Al-Dosari",      role: "supply-chain", hospitalId: null },
+  ];
+  for (const u of demoUsers) {
+    await db.insert(usersTable)
+      .values({ ...u, passwordHash: DUMMY_HASH, status: "active" })
+      .onConflictDoUpdate({ target: usersTable.id, set: { status: "active", updatedAt: new Date() } });
+  }
+  console.log(`Upserted ${demoUsers.length} demo users (registry + revocation demo)`);
 
   // ai_decisions / events / audit_log start EMPTY — they accumulate from real
   // engine runs during the demo (no fabricated decision history).
