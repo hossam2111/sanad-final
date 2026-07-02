@@ -337,11 +337,8 @@ async function buildPatientContext(
 // GET /api/ai/narrative/:patientId
 // Streams a real AI-generated clinical summary via SSE
 router.get("/narrative/:patientId", async (req, res) => {
-  if (!process.env["OPENAI_API_KEY"]) {
-    res.status(503).json({ error: "AI_UNAVAILABLE", message: "OPENAI_API_KEY not configured" });
-    return;
-  }
-
+  // Provider resolution (admin-configured key → env key → Demo Mode) happens
+  // inside streamClinicalNarrative — no env gate here.
   const patientId = parseInt(req.params["patientId"]!);
   if (isNaN(patientId)) {
     res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patientId" });
@@ -397,11 +394,6 @@ router.get("/narrative/:patientId", async (req, res) => {
 // ─── Claude AI Brain — Clinical Q&A ──────────────────────────────────────────
 // POST /api/ai/chat/:patientId   body: { question: string }
 router.post("/chat/:patientId", validate(chatSchema), async (req, res) => {
-  if (!process.env["OPENAI_API_KEY"]) {
-    res.status(503).json({ error: "AI_UNAVAILABLE", message: "OPENAI_API_KEY not configured" });
-    return;
-  }
-
   const patientId = parseInt(String(req.params["patientId"]));
   if (isNaN(patientId)) {
     res.status(400).json({ error: "BAD_REQUEST", message: "Invalid patientId" });

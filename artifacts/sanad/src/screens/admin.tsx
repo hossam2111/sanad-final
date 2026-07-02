@@ -335,11 +335,11 @@ function ComplianceDashboard() {
   if (!data) return <div className="text-center text-danger py-16">{text("Failed to load compliance data","تعذّر تحميل بيانات الامتثال")}</div>;
 
   const TIER_COLORS: Record<string, string> = {
-    "Critical — PHI": "bg-danger/10 text-danger border-danger/30",
-    "Sensitive — PII": "bg-warning-bg text-warning border-warning/30",
-    "Internal — Clinical": "bg-info-bg text-info border-info/30",
-    "Restricted — Aggregate": "bg-primary/10 text-primary border-primary/30",
-    "Public": "bg-success-bg text-success border-success/30",
+    "PHI — Protected Health Information": "bg-danger/10 text-danger border-danger/30",
+    "Clinical Decision Data": "bg-warning-bg text-warning border-warning/30",
+    "Anonymized Research Data": "bg-info-bg text-info border-info/30",
+    "Audit & Compliance Logs": "bg-primary/10 text-primary border-primary/30",
+    "Insurance & Billing Data": "bg-success-bg text-success border-success/30",
   };
 
   return (
@@ -373,8 +373,8 @@ function ComplianceDashboard() {
               <div key={a.article} className="flex items-start gap-2 p-3 rounded-lg border border-border bg-muted/30">
                 <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs font-bold text-foreground">{text(a.article, a.article)}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{text(a.description, a.description)}</p>
+                  <p className="text-xs font-bold text-foreground">{a.article}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{a.note}</p>
                 </div>
               </div>
             ))}
@@ -419,12 +419,12 @@ function ComplianceDashboard() {
         <CardBody>
           <div className="space-y-2">
             {(data.dataClassification ?? []).map((tier: any) => (
-              <div key={tier.tier} className={`flex items-center justify-between p-3 rounded-lg border ${TIER_COLORS[tier.tier] ?? "bg-muted/20 border-border text-foreground"}`}>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-bold">{text(tier.tier, tier.tier)}</span>
-                  <span className="text-xs opacity-70">{text(tier.examples, tier.examples)}</span>
+              <div key={tier.class} className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg border ${TIER_COLORS[tier.class] ?? "bg-muted/20 border-border text-foreground"}`}>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold">{tier.class}</p>
+                  <p className="text-xs opacity-70 truncate">{tier.examples}</p>
                 </div>
-                <div className="text-right shrink-0">
+                <div className="sm:text-end shrink-0">
                   <p className="text-xs font-semibold">{text("Retention","الاحتفاظ")}: {tier.retention}</p>
                   <p className="text-[11px] opacity-70">{tier.accessControl}</p>
                 </div>
@@ -483,6 +483,173 @@ function ComplianceDashboard() {
         </Card>
       </div>
     </div>
+  );
+}
+
+function AiBrainCard() {
+  const { text, dir } = useLanguage();
+  const [current, setCurrent] = React.useState<any>(null);
+  const [provider, setProvider] = React.useState("gemini");
+  const [model, setModel] = React.useState("");
+  const [apiKey, setApiKey] = React.useState("");
+  const [baseUrl, setBaseUrl] = React.useState("");
+  const [busy, setBusy] = React.useState<"" | "test" | "save" | "remove">("");
+  const [result, setResult] = React.useState<{ ok: boolean; msg: string } | null>(null);
+
+  const load = React.useCallback(() => {
+    apiFetch("/api/admin/ai-settings").then(r => r.json()).then(setCurrent).catch(() => {});
+  }, []);
+  React.useEffect(load, [load]);
+
+  const presets: Record<string, { defaultModel: string; keyHint: string }> = current?.presets ?? {
+    gemini: { defaultModel: "gemini-2.5-flash", keyHint: "AIza..." },
+    openai: { defaultModel: "gpt-4o-mini", keyHint: "sk-..." },
+    anthropic: { defaultModel: "claude-haiku-4-5-20251001", keyHint: "sk-ant-..." },
+  };
+
+  const body = () => ({ provider, model: model.trim() || undefined, apiKey: apiKey.trim(), baseUrl: baseUrl.trim() || undefined });
+
+  const handleTest = async () => {
+    setBusy("test"); setResult(null);
+    try {
+      const r = await apiFetch("/api/admin/ai-settings/test", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(apiKey ? body() : {}) });
+      const d = await r.json();
+      setResult({ ok: !!d.ok, msg: d.message + (d.latencyMs ? ` (${d.latencyMs}ms)` : "") });
+    } catch (e) {
+      setResult({ ok: false, msg: String(e) });
+    } finally { setBusy(""); }
+  };
+
+  const handleSave = async () => {
+    if (!apiKey.trim()) { setResult({ ok: false, msg: text("API key is required", "مفتاح API مطلوب") }); return; }
+    setBusy("save"); setResult(null);
+    try {
+      const r = await apiFetch("/api/admin/ai-settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body()) });
+      const d = await r.json();
+      if (r.ok) {
+        setResult({ ok: true, msg: text(`Saved — brain is now ${d.provider} · ${d.model}`, `تم الحفظ — العقل الآن ${d.provider} · ${d.model}`) });
+        setApiKey("");
+        load();
+      } else {
+        setResult({ ok: false, msg: d.message ?? "Failed" });
+      }
+    } catch (e) {
+      setResult({ ok: false, msg: String(e) });
+    } finally { setBusy(""); }
+  };
+
+  const handleRemove = async () => {
+    setBusy("remove"); setResult(null);
+    try {
+      await apiFetch("/api/admin/ai-settings", { method: "DELETE" });
+      setResult({ ok: true, msg: text("Removed — reverted to environment/demo mode", "تمت الإزالة — عاد النظام لوضع البيئة/التجريبي") });
+      load();
+    } catch (e) {
+      setResult({ ok: false, msg: String(e) });
+    } finally { setBusy(""); }
+  };
+
+  const inputCls = "w-full rounded-xl border border-border bg-background text-foreground text-sm px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/40";
+  const sourceLabel = current?.source === "admin-panel" ? text("Admin panel", "لوحة الأدمن")
+    : current?.source === "environment" ? text("Environment variables", "متغيرات البيئة")
+    : text("Demo Mode — no key configured", "الوضع التجريبي — لا يوجد مفتاح");
+
+  return (
+    <Card className="col-span-full" dir={dir}>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Brain className="w-4 h-4 text-primary" />
+          <CardTitle>{text("AI Brain — Model & API Key", "عقل النظام — النموذج ومفتاح API")}</CardTitle>
+        </div>
+        {current && (
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${current.demoMode ? "bg-warning-bg text-warning border-warning/30" : "bg-success-bg text-success border-success/30"}`}>
+            {current.demoMode ? <AlertTriangle className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+            {current.demoMode ? text("Demo Mode", "وضع تجريبي") : `${current.provider} · ${current.model}`}
+          </span>
+        )}
+      </CardHeader>
+      <CardBody className="space-y-4">
+        <p className="text-sm text-muted-foreground">
+          {text(
+            "Plug in the API key of the model that powers clinical narratives and Q&A. Key is AES-256 encrypted at rest and never shown again after saving.",
+            "أدخل مفتاح API للنموذج الذي يشغّل الملخصات السريرية والأسئلة الذكية. يُشفَّر المفتاح بمعيار AES-256 ولا يُعرض مرة أخرى بعد الحفظ.",
+          )}
+        </p>
+
+        {current && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-3 rounded-xl bg-muted/30 border border-border">
+            {[
+              [text("Source", "المصدر"), sourceLabel],
+              [text("Provider", "المزود"), current.provider ?? "—"],
+              [text("Model", "النموذج"), current.model ?? "—"],
+              [text("Key", "المفتاح"), current.maskedKey ?? "—"],
+            ].map(([k, v]) => (
+              <div key={String(k)}>
+                <p className="text-[11px] text-muted-foreground uppercase tracking-wide mb-0.5">{k}</p>
+                <p className="text-xs font-bold text-foreground font-mono" dir="ltr">{v}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label className="text-[11px] text-muted-foreground uppercase tracking-wide block mb-1">{text("Provider", "المزود")}</label>
+            <select value={provider} onChange={e => { setProvider(e.target.value); setModel(""); }} className={inputCls}>
+              <option value="gemini">Google Gemini</option>
+              <option value="openai">OpenAI</option>
+              <option value="anthropic">Anthropic Claude</option>
+              <option value="custom">{text("Custom (OpenAI-compatible)", "مخصص (متوافق مع OpenAI)")}</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[11px] text-muted-foreground uppercase tracking-wide block mb-1">{text("Model", "النموذج")}</label>
+            <input value={model} onChange={e => setModel(e.target.value)} dir="ltr"
+              placeholder={provider !== "custom" ? presets[provider]?.defaultModel : "model-name"} className={inputCls} />
+          </div>
+          <div>
+            <label className="text-[11px] text-muted-foreground uppercase tracking-wide block mb-1">{text("API Key", "مفتاح API")}</label>
+            <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} dir="ltr"
+              placeholder={provider !== "custom" ? presets[provider]?.keyHint : "sk-..."} className={inputCls} autoComplete="off" />
+          </div>
+        </div>
+
+        {provider === "custom" && (
+          <div>
+            <label className="text-[11px] text-muted-foreground uppercase tracking-wide block mb-1">{text("Base URL", "رابط الخدمة")}</label>
+            <input value={baseUrl} onChange={e => setBaseUrl(e.target.value)} dir="ltr"
+              placeholder="https://api.example.com/v1" className={inputCls} />
+          </div>
+        )}
+
+        {result && (
+          <div className={`flex items-start gap-2 p-3 rounded-xl text-sm border ${result.ok ? "bg-success-bg text-success border-success/30" : "bg-danger-bg text-danger border-danger/30"}`}>
+            {result.ok ? <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" /> : <XCircle className="w-4 h-4 mt-0.5 shrink-0" />}
+            <span className="break-all" dir="ltr">{result.msg}</span>
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          <button onClick={handleTest} disabled={!!busy}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-background text-foreground font-bold text-sm hover:bg-muted transition-colors disabled:opacity-60">
+            <Zap className="w-4 h-4" />
+            {busy === "test" ? text("Testing…", "جارٍ الاختبار…") : text("Test Connection", "اختبار الاتصال")}
+          </button>
+          <button onClick={handleSave} disabled={!!busy || !apiKey.trim()}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 transition-colors disabled:opacity-60">
+            <CheckCircle2 className="w-4 h-4" />
+            {busy === "save" ? text("Saving…", "جارٍ الحفظ…") : text("Save & Activate", "حفظ وتفعيل")}
+          </button>
+          {current?.configured && (
+            <button onClick={handleRemove} disabled={!!busy}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-danger/30 bg-danger-bg text-danger font-bold text-sm hover:bg-danger/20 transition-colors disabled:opacity-60 ms-auto">
+              <X className="w-4 h-4" />
+              {busy === "remove" ? text("Removing…", "جارٍ الإزالة…") : text("Remove Key", "إزالة المفتاح")}
+            </button>
+          )}
+        </div>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -1363,6 +1530,9 @@ export default function AdminDashboard() {
         {/* ── Maintenance ───────────────────────────────────────── */}
         <TabsContent value="maintenance">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {/* AI Brain — model & API key management */}
+            <AiBrainCard />
+
             {/* Reset Demo */}
             <Card>
               <CardHeader><RefreshCw className="w-4 h-4 text-warning"/><CardTitle>{text("Demo Environment","بيئة العرض")}</CardTitle></CardHeader>

@@ -1,13 +1,18 @@
 import OpenAI from "openai";
 import type { AiDecisionResult } from "./decision-engine.js";
+import { getEffectiveAiSettings, buildClient, type AiSettings } from "./ai-settings.js";
 
-const openai = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] || "placeholder" });
+// Legacy env-based OpenAI client — used only as a last-resort fallback when
+// the admin-configured provider fails mid-request and OPENAI_API_KEY exists.
+const envOpenAiKey = () => {
+  const k = process.env["OPENAI_API_KEY"];
+  return k && k !== "placeholder" ? k : null;
+};
 
-// Gemini 2.5 Flash via OpenAI-compatible endpoint — automatic fallback
-const gemini = new OpenAI({
-  apiKey: process.env["GEMINI_API_KEY"] || "placeholder",
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-});
+function providerLabel(s: AiSettings): string {
+  const names: Record<string, string> = { gemini: "Gemini", openai: "OpenAI", anthropic: "Claude", custom: "Custom" };
+  return `${names[s.provider] ?? s.provider} · ${s.model}`;
+}
 
 export interface PatientContext {
   name: string;
@@ -118,14 +123,6 @@ function detectLanguage(name: string): "ar" | "en" {
   return /[؀-ۿ]/.test(name) ? "ar" : "en";
 }
 
-function isQuotaError(err: unknown): boolean {
-  if (err instanceof Error) {
-    const msg = err.message.toLowerCase();
-    return msg.includes("429") || msg.includes("quota") || msg.includes("rate limit") || msg.includes("insufficient_quota");
-  }
-  return false;
-}
-
 function generateMockClinicalNarrative(ctx: PatientContext, lang: "ar" | "en"): string {
   const { decision } = ctx;
   if (lang === "ar") {
@@ -169,7 +166,7 @@ The Digital Twin simulation projects a **${decision.digitalTwin.riskTrajectory}*
 ${decision.recommendations.map((r, i) => `${i + 1}. ${r}`).join("\n")}`;
 }
 
-/** Stream a clinical narrative — tries OpenAI first, falls back to Gemini 2.5 Flash on quota errors */
+/** Stream a clinical narrative using the admin-configured AI Brain (falls back to env keys, then Demo Mode) */
 export async function streamClinicalNarrative(
   ctx: PatientContext,
   onChunk: (text: string, provider: string) => void,
@@ -177,12 +174,9 @@ export async function streamClinicalNarrative(
   onError: (err: Error) => void,
 ): Promise<void> {
   const lang = detectLanguage(ctx.name);
+  const settings = await getEffectiveAiSettings();
 
-  const hasRealKeys = 
-    (process.env["OPENAI_API_KEY"] && process.env["OPENAI_API_KEY"] !== "placeholder") ||
-    (process.env["GEMINI_API_KEY"] && process.env["GEMINI_API_KEY"] !== "placeholder");
-
-  if (!hasRealKeys) {
+  if (!settings) {
     const narrative = generateMockClinicalNarrative(ctx, lang);
     const chunks = narrative.split(" ");
     let i = 0;
@@ -212,44 +206,32 @@ export async function streamClinicalNarrative(
     onDone();
   };
 
-  // Gemini is primary (free quota), OpenAI is the fallback for the demo
-  const useGeminiFirst = !!process.env["GEMINI_API_KEY"] && process.env["GEMINI_API_KEY"] !== "placeholder";
-
-  if (useGeminiFirst) {
-    try {
-      await tryStream(gemini, "gemini-2.5-flash", "Gemini 2.5 Flash");
-    } catch (err) {
-      if (process.env["OPENAI_API_KEY"] && process.env["OPENAI_API_KEY"] !== "placeholder") {
-        try {
-          await tryStream(openai, "gpt-4o", "OpenAI GPT-4o");
-        } catch (openaiErr) {
-          onError(openaiErr instanceof Error ? openaiErr : new Error(String(openaiErr)));
-        }
-      } else {
-        onError(err instanceof Error ? err : new Error(String(err)));
+  try {
+    await tryStream(buildClient(settings), settings.model, providerLabel(settings));
+  } catch (err) {
+    // Last-resort fallback: legacy env OpenAI key, if it isn't what just failed
+    const fallbackKey = envOpenAiKey();
+    if (fallbackKey && !(settings.provider === "openai" && settings.apiKey === fallbackKey)) {
+      try {
+        await tryStream(new OpenAI({ apiKey: fallbackKey }), "gpt-4o", "OpenAI GPT-4o (fallback)");
+      } catch (fallbackErr) {
+        onError(fallbackErr instanceof Error ? fallbackErr : new Error(String(fallbackErr)));
       }
-    }
-  } else {
-    try {
-      await tryStream(openai, "gpt-4o", "OpenAI GPT-4o");
-    } catch (err) {
+    } else {
       onError(err instanceof Error ? err : new Error(String(err)));
     }
   }
 }
 
-/** Single-turn Q&A — tries OpenAI first, falls back to Gemini on quota errors */
+/** Single-turn Q&A using the admin-configured AI Brain (falls back to env keys, then Demo Mode) */
 export async function askClinicalQuestion(
   ctx: PatientContext,
   question: string,
 ): Promise<string> {
   const lang = detectLanguage(ctx.name);
+  const settings = await getEffectiveAiSettings();
 
-  const hasRealKeys = 
-    (process.env["OPENAI_API_KEY"] && process.env["OPENAI_API_KEY"] !== "placeholder") ||
-    (process.env["GEMINI_API_KEY"] && process.env["GEMINI_API_KEY"] !== "placeholder");
-
-  if (!hasRealKeys) {
+  if (!settings) {
     const isArabic = lang === "ar";
     if (isArabic) {
       return `بناءً على استفسارك الموجه للنظام حول المريض **${ctx.name}**:\n\n- المريض يعاني حالياً من **${ctx.chronicConditions.join("، ") || "لا توجد حالات مسجلة"}**.\n- يُظهر تحليل الذكاء الاصطناعي درجة خطورة **${ctx.decision.riskScore}/100** ومستوى إلحاح **${ctx.decision.urgency}**.\n- الإجراء الموصى به هو: **${ctx.decision.primaryAction}**.\n\nتوصية سريرية: يرجى متابعة المريض لضمان الالتزام بالأدوية وفحص المؤشرات الحيوية بانتظام. (تشغيل تجريبي - بدون اتصال بالمزود)`;
@@ -273,15 +255,13 @@ export async function askClinicalQuestion(
     return response.choices[0]?.message?.content ?? "No response generated.";
   };
 
-  // Gemini is primary (free quota), OpenAI is the fallback
-  const useGeminiFirst = !!process.env["GEMINI_API_KEY"] && process.env["GEMINI_API_KEY"] !== "placeholder";
-  if (useGeminiFirst) {
-    try {
-      return await tryAsk(gemini, "gemini-2.5-flash");
-    } catch {
-      if (process.env["OPENAI_API_KEY"] && process.env["OPENAI_API_KEY"] !== "placeholder") return await tryAsk(openai, "gpt-4o");
-      throw new Error("All AI providers unavailable");
+  try {
+    return await tryAsk(buildClient(settings), settings.model);
+  } catch (err) {
+    const fallbackKey = envOpenAiKey();
+    if (fallbackKey && !(settings.provider === "openai" && settings.apiKey === fallbackKey)) {
+      return await tryAsk(new OpenAI({ apiKey: fallbackKey }), "gpt-4o");
     }
+    throw err instanceof Error ? err : new Error(String(err));
   }
-  return await tryAsk(openai, "gpt-4o");
 }
