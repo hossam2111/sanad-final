@@ -562,7 +562,7 @@ export default function InsurancePortal() {
                   <Card>
                     <CardHeader>
                       <div className="flex items-center gap-2"><DollarSign className="w-4 h-4 text-primary" /><CardTitle>{text("Premium Breakdown", "تفصيل القسط")}</CardTitle></div>
-                      <p className="text-sm font-bold text-primary ml-auto">{CUR} {patient.monthlyPremium}{text("/mo", "/شهر")}</p>
+                      <p className="text-sm font-bold text-primary ms-auto">{CUR} {patient.monthlyPremium}{text("/mo", "/شهر")}</p>
                     </CardHeader>
                     <CardBody>
                       <div className="h-36">

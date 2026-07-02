@@ -660,11 +660,9 @@ async function seed() {
     { id: "FAM-001", nationalId: "9000000011", fullName: "Fatima Al-Ghamdi",       role: "family",       hospitalId: null },
     { id: "SUP-001", nationalId: "9000000012", fullName: "Ibrahim Al-Dosari",      role: "supply-chain", hospitalId: null },
   ];
-  for (const u of demoUsers) {
-    await db.insert(usersTable)
-      .values({ ...u, passwordHash: DUMMY_HASH, status: "active" })
-      .onConflictDoUpdate({ target: usersTable.id, set: { status: "active", updatedAt: new Date() } });
-  }
+  await db.insert(usersTable)
+    .values(demoUsers.map(u => ({ ...u, passwordHash: DUMMY_HASH, status: "active" })))
+    .onConflictDoUpdate({ target: usersTable.id, set: { status: "active", updatedAt: new Date() } });
   console.log(`Upserted ${demoUsers.length} demo users (registry + revocation demo)`);
 
   // ai_decisions / events / audit_log start EMPTY — they accumulate from real

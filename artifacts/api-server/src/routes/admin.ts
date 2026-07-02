@@ -565,6 +565,10 @@ router.get("/compliance", async (req, res) => {
 
 const AI_PROVIDERS: AiProvider[] = ["gemini", "openai", "anthropic", "custom"];
 
+function resolveAiModel(model: string | undefined, provider: AiProvider): string {
+  return model?.trim() || (provider !== "custom" ? PROVIDER_PRESETS[provider].defaultModel : "");
+}
+
 function requireAdminRole(req: import("express").Request, res: import("express").Response): boolean {
   if (req.role !== "admin") {
     res.status(403).json({ error: "FORBIDDEN", message: "Only the admin role can manage AI Brain settings" });
@@ -615,7 +619,7 @@ router.put("/ai-settings", async (req, res) => {
     return res.status(400).json({ error: "BAD_REQUEST", message: "baseUrl is required for a custom provider" });
   }
 
-  const resolvedModel = model?.trim() || (provider !== "custom" ? PROVIDER_PRESETS[provider as Exclude<AiProvider, "custom">].defaultModel : "");
+  const resolvedModel = resolveAiModel(model, provider as AiProvider);
   if (!resolvedModel) {
     return res.status(400).json({ error: "BAD_REQUEST", message: "model is required for a custom provider" });
   }
@@ -666,7 +670,7 @@ router.post("/ai-settings/test", aiSettingsTestLimiter, async (req, res) => {
 
   let candidate;
   if (apiKey && provider && AI_PROVIDERS.includes(provider as AiProvider)) {
-    const resolvedModel = model?.trim() || (provider !== "custom" ? PROVIDER_PRESETS[provider as Exclude<AiProvider, "custom">].defaultModel : "");
+    const resolvedModel = resolveAiModel(model, provider as AiProvider);
     candidate = { provider: provider as AiProvider, model: resolvedModel, apiKey: apiKey.trim(), baseUrl: baseUrl?.trim() || undefined };
   } else {
     candidate = await getEffectiveAiSettings();

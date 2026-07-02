@@ -6,6 +6,7 @@ import { checkDrugInteractions, calculateRiskScore, generatePredictions } from "
 import { runDecisionEngine } from "../lib/decision-engine.js";
 import { streamClinicalNarrative, askClinicalQuestion, type PatientContext } from "../lib/claude-brain.js";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
+import { logger } from "../lib/logger.js";
 import { requireOwnPatient } from "../lib/ownership.js";
 import { z } from "zod";
 import { validate } from "../middlewares/validate.js";
@@ -406,9 +407,9 @@ router.get("/narrative/:patientId", async (req, res) => {
         res.write(`data: ${JSON.stringify({ text: chunk, provider })}\n\n`);
       },
       async () => {
-        res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-        res.end();
-        
+        // Persist BEFORE signalling done — the doctor UI refetches the saved
+        // narrative the moment the stream ends, so writing after res.end()
+        // races the refetch and can serve a stale transcript.
         if (!isNaN(decisionId)) {
           try {
             // Scope to THIS patient's decision — the patientId is already
@@ -424,9 +425,11 @@ router.get("/narrative/:patientId", async (req, res) => {
                 .where(and(eq(aiDecisionsTable.id, decisionId), eq(aiDecisionsTable.patientId, patientId)));
             }
           } catch (dbErr) {
-            console.error("Failed to persist narrative:", dbErr);
+            logger.error({ err: dbErr, decisionId, patientId }, "Failed to persist narrative");
           }
         }
+        res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+        res.end();
       },
       (err) => {
         if (!res.writableEnded) {

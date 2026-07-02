@@ -6,6 +6,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { writeAudit, extractRequestMeta } from "../lib/audit.js";
 import { invalidateUserStatus } from "../middlewares/auth.js";
+import { logger } from "../lib/logger.js";
 
 export const usersRouter = Router();
 
@@ -32,7 +33,7 @@ usersRouter.get("/", async (req, res) => {
     }).from(usersTable);
     res.json(users);
   } catch (error) {
-    console.error("Error fetching users:", error);
+    logger.error({ err: error }, "Error fetching users");
     res.status(500).json({ error: "Failed to fetch users" });
   }
 });
@@ -68,7 +69,7 @@ usersRouter.post("/", async (req, res) => {
 
     res.status(201).json(newUser);
   } catch (error) {
-    console.error("Error creating user:", error);
+    logger.error({ err: error }, "Error creating user");
     res.status(500).json({ error: "Failed to create user" });
   }
 });
@@ -80,7 +81,7 @@ usersRouter.delete("/:id", async (req, res) => {
     await db.delete(usersTable).where(eq(usersTable.id, id));
     res.status(204).send();
   } catch (error) {
-    console.error("Error deleting user:", error);
+    logger.error({ err: error }, "Error deleting user");
     res.status(500).json({ error: "Failed to delete user" });
   }
 });
@@ -120,7 +121,7 @@ usersRouter.put("/:id/status", async (req, res) => {
 
     res.json(updatedUser);
   } catch (error) {
-    console.error("Error updating user status:", error);
+    logger.error({ err: error }, "Error updating user status");
     res.status(500).json({ error: "Failed to update user status" });
   }
 });

@@ -66,7 +66,7 @@ stable execution. Skipping this step may cause ECONNRESET on the first request.
 11. Admin → **Maintenance** → Export Audit Logs → download CSV
 
 ### Closing — 1 min
-12. Admin → **Data Sovereignty tab** → PDPL compliance (6 articles), KSA sovereign cloud, data classification matrix
+12. Admin → **Data Sovereignty tab** → PDPL compliance (6 articles), KSA sovereign cloud, data classification matrix (switch the region selector back to 🇸🇦 KSA first — the sovereignty data describes the KSA deployment)
 13. Admin → **Maintenance → AI Brain** → show runtime model/key management (provider dropdown,
     encrypted key, Test Connection) — "the Ministry controls the brain, not the vendor"
 14. Admin header → **Region switcher** (🇸🇦→🇦🇪→🇶🇦) → ministry name/ID label/currency re-brand live —

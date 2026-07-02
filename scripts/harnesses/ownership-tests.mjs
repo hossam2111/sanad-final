@@ -23,7 +23,6 @@ const post = (path, token, body) => fetch(`${API}${path}`, {
   method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
   body: JSON.stringify(body),
 });
-const patch = (path, token) => fetch(`${API}${path}`, { method: "PATCH", headers: { Authorization: `Bearer ${token}` } });
 
 const citizen = await login("citizen_demo", "Citizen@2026");
 const doctor = await login("dr.rashidi", "Doctor@2026");

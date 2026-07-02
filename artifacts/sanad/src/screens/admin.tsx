@@ -538,8 +538,7 @@ function AiBrainCard() {
 
   const load = React.useCallback(() => {
     apiFetch("/api/admin/ai-settings").then(r => r.json()).then(setCurrent).catch(() => {});
-    queryClient.invalidateQueries({ queryKey: ["ai-settings"] }); // keep the dashboard pill in sync
-  }, [queryClient]);
+  }, []);
   React.useEffect(load, [load]);
 
   const presets: Record<string, { defaultModel: string; keyHint: string }> = current?.presets ?? {
@@ -571,6 +570,7 @@ function AiBrainCard() {
         setResult({ ok: true, msg: text(`Saved — brain is now ${d.provider} · ${d.model}`, `تم الحفظ — العقل الآن ${d.provider} · ${d.model}`) });
         setApiKey("");
         load();
+        queryClient.invalidateQueries({ queryKey: ["ai-settings"] });
       } else {
         setResult({ ok: false, msg: d.message ?? "Failed" });
       }
@@ -585,6 +585,7 @@ function AiBrainCard() {
       await apiFetch("/api/admin/ai-settings", { method: "DELETE" });
       setResult({ ok: true, msg: text("Removed — reverted to environment/demo mode", "تمت الإزالة — عاد النظام لوضع البيئة/التجريبي") });
       load();
+      queryClient.invalidateQueries({ queryKey: ["ai-settings"] });
     } catch (e) {
       setResult({ ok: false, msg: String(e) });
     } finally { setBusy(""); }
