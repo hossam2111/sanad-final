@@ -14,6 +14,17 @@
 
 ---
 
+## 2026-07-02 07:00 · claude-lead · TASK-015 + TASK-016 (wave 2 started)
+- Status: DONE
+- Commits: fb432e8 (login region branding), 2c7909f (saved-narrative replay)
+- Gate: 50/50 + 48/48 + 4/4 — ALL GREEN (full run WITH seed; note: a -SkipSeed run
+  false-failed 2 assertions because the prior run had already dispensed the Atorvastatin rx —
+  reconfirmed the "never -SkipSeed" rule the hard way)
+- Notes: TASK-016 adds GET /api/ai/narrative/:patientId/saved (ownership-gated, jsonb
+  narrative-exists filter) + doctor UI instant replay with saved-at badge + query invalidation
+  after fresh stream. Remaining wave-2: TASK-014 (region rollout to 5 portals), TASK-017
+  (real user enable/disable), TASK-018 (insurance currency).
+
 ## 2026-07-02 06:30 · claude-lead · REVIEW of Gemini wave + wave-1 closure
 - Status: DONE
 - Commits: 4da6e84 (curated re-author of Gemini's 86feca3+224e78d), 725d102 (region switcher
