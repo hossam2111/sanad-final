@@ -44,7 +44,7 @@ Acceptance:
 - No stale "unpushed commits" language for `02a9a77`.
 - Points readers to `speckit/10-QATAR-LEADERSHIP-READINESS.md`.
 
-### TASK-024 · Final gate and freeze note — OPEN
+### TASK-024 · Final gate and freeze note — DONE(local freeze note, see `git log -1`)
 Run the full gate once before the meeting window and record the result.
 
 Acceptance:

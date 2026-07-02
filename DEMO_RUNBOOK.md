@@ -13,6 +13,13 @@ pnpm dev
 .\verify-and-publish.ps1 -DryRun
 ```
 
+### Presentation-day guardrails
+- Do not run the full gate repeatedly in the final minutes before the meeting. The auth/login
+  limiter can return temporary 429s after many rapid scripted logins. If that happens, restart the
+  API once or allow the limiter window to cool down; do not change code for this.
+- Keep server-restarting background jobs off during the meeting.
+- Keep the web server on `:3000` and API on `:8080`.
+
 ### Why the seed step is mandatory
 Neon (serverless PostgreSQL) closes idle connections after ~5 minutes of inactivity.
 Running the seed before a presentation warms the connection pool and guarantees
