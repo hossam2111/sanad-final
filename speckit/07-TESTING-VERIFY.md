@@ -13,9 +13,10 @@ agents: paste its tail output into speckit/WORKLOG.md with your task entry.
 Steps: (1) .env credential sanity → (2) API liveness :8080 → (3) **seed** (never skip — warms
 Neon; PS 5.1 note: seed is invoked via `cmd /c … 2>&1` because pg's SSL-mode stderr warning
 would otherwise kill the script under ErrorActionPreference=Stop) → (4) scenario-tests
-46 assertions → (5) ownership-tests 42 assertions.
+50 assertions → (5) ownership-tests 53 assertions → (6) smoke tests 12 portals.
 
-Expected final state: `ALL CHECKS PASSED` + `46 passed, 0 failed` + `4x passed, 0 failed`.
+Expected final state: `ALL CHECKS PASSED` + `50 passed, 0 failed` + `53 passed, 0 failed`
++ `12 passed, 0 failed`.
 -DryRun only suppresses the final push commands — always use it; pushing is owner-only.
 
 ## Test layers
@@ -23,8 +24,9 @@ Expected final state: `ALL CHECKS PASSED` + `46 passed, 0 failed` + `4x passed, 
 | Layer | Where | Count | Run |
 |-------|-------|-------|-----|
 | Unit (decision engine) | api-server/src/lib/decision-engine.test.ts | 24 | `pnpm --filter @workspace/api-server test` |
-| Scenario S1–S7 + JWT | scripts/harnesses/scenario-tests.mjs | 46 | via gate or `node scripts/harnesses/scenario-tests.mjs` |
-| Ownership/BOLA + scoping | scripts/harnesses/ownership-tests.mjs | 42 | via gate or direct node |
+| Scenario S1–S8 + JWT | scripts/harnesses/scenario-tests.mjs | 50 | via gate or `node scripts/harnesses/scenario-tests.mjs` |
+| Ownership/BOLA + scoping | scripts/harnesses/ownership-tests.mjs | 53 | via gate or direct node |
+| Smoke login | scripts/harnesses/smoke.mjs | 12 portals | via gate or direct node |
 | TypeScript | 3 packages | — | see README rule #4 |
 
 ## The seven scenarios (seed-engineered patients — DO NOT break them)

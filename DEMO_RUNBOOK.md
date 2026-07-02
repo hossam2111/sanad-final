@@ -39,6 +39,41 @@ stable execution. Skipping this step may cause ECONNRESET on the first request.
 
 ---
 
+## Qatar Leadership Talk Track
+
+Use this section when the audience is Qatari leadership or a GCC investment/government panel.
+
+Opening line:
+"SANAD is a sovereign AI health intelligence layer. It does not replace national systems; it sits
+above them to connect clinical safety, citizen consent, operational visibility, and government
+governance."
+
+Stakeholder cues:
+- Doctor: "The clinician remains accountable; AI shortens the path from risk signal to explainable
+  action."
+- Citizen: "The citizen controls consent, and access is visible and revocable."
+- Ministry / government: "Leadership gets national health intelligence, auditability, AI governance,
+  and data-sovereignty evidence in one control layer."
+- Hospital operator: "Hospitals get operational insight without breaking patient or hospital
+  boundaries."
+- Insurance / payer: "Payers get faster, consent-safe review and anomaly signals."
+- Investor / board: "The same platform can expand across GCC markets because branding, roles,
+  governance, and AI provider control are configurable."
+
+Qatar region cue:
+- Use the region switcher to show Qatar as a first-class GCC deployment story.
+- When showing the current Data Sovereignty seeded evidence, follow step 12 and switch back to KSA
+  first if the screen language/data describes the KSA deployment.
+- Say clearly: "This dataset is the current KSA demo seed; the architecture is region-configurable
+  for Qatar."
+
+Do not promise before Sunday:
+- Live integration with Qatar production systems.
+- Production hosting location or regulatory approval already completed.
+- Autonomous clinical or insurance decisions without human review.
+
+---
+
 ## Recommended 8-Minute Demo Flow
 
 ### Opening (Admin) — 2 min

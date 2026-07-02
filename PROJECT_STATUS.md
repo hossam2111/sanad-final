@@ -9,12 +9,12 @@
 
 ## 1) Where we are — الوضع الحالي
 
-**Quality gate: ALL GREEN (2026-07-02 06:20)** — 50/50 scenario (incl. new S8 supply-chain)
-+ 48/48 ownership (incl. AI-settings admin-only) + 4/4 Playwright smoke + 34/34 unit +
-TypeScript clean ×3 packages. **No blocking items — DB fully migrated** (system_settings +
+**Quality gate: ALL GREEN (2026-07-02 21:54)** — 50/50 scenario (incl. S8 supply-chain)
++ 53/53 ownership (incl. live user revocation + AI-settings admin-only) + 12/12 Playwright smoke
++ 34/34 unit + TypeScript clean ×3 packages. **No blocking items — DB fully migrated** (system_settings +
 ai_decisions.details are live in Neon; the previous TASK-001 blocker is resolved).
 
-**Platform is Ministry-demo ready.** New since last update: AI Brain runtime key management
+**Platform is Qatar leadership meeting ready, pending final rehearsal/freeze.** New since last update: AI Brain runtime key management
 (encrypted, admin-only), GCC region switcher (7 regions, bilingual, white-label pitch),
 narrative persistence, consent expiry enforcement, users-status revocation pipeline.
 
@@ -46,24 +46,20 @@ gate runs and demos (it broke a gate run mid-flight on 2026-07-02).
 
 **Waves 1 AND 2 COMPLETE (TASK-001…019)** — tag `demo-ready-v9`. Latest gate:
 50/50 scenario + 53/53 ownership (incl. live user-revocation) + 12/12 portal smoke.
-Current mode: **FEATURE FREEZE** — stability and rehearsal only until Sunday.
+Current mode: **SUNDAY QATAR READINESS** — stability, rehearsal, Qatar talk-track, and final gate/freeze only until the meeting.
 
 ## 4) Remaining steps — الخطوات المتبقية
 
-1. Owner rehearses the DEMO_RUNBOOK 16-step flow end-to-end in a browser (incl. new beats:
-   AI Brain key card, region switcher, live user revocation).
-2. Owner decides on pushing the ~24 local commits: `git push -u sanad-final main`.
-3. Optional post-Sunday backlog stays in speckit/09-ROADMAP-TASKS.md.
+1. Rehearse the DEMO_RUNBOOK flow end-to-end in a browser, including the new Qatar Leadership Talk Track.
+2. Rehearse the three optional browser flows printed by the gate if time allows.
+3. Freeze the platform for the Sunday Qatar leadership meeting unless a rehearsal-blocking issue appears.
+4. Post-meeting expansion backlog stays in speckit/09-ROADMAP-TASKS.md and speckit/10-QATAR-LEADERSHIP-READINESS.md.
 ⚠️ Keep any server-restarting background cron OFF during rehearsals and the demo.
 
-## 5) Unpushed commits — كوميتات غير مدفوعة (بانتظار إذن المالك)
+## 5) Remote state — حالة الريموت
 
-`git log sanad-final/main..HEAD` at last update:
-- (new) speckit + PROJECT_STATUS + AI Brain + verify fix ← this session's commits
-- 16909ca fix(runbook) · fa575bf feat(admin) Data Sovereignty · b749c02 feat(ai-engine) ·
-  df0bfda feat(presentation) UAE · d6abea6 fix(auth)
-
-Push (owner only): `git push -u sanad-final main`
+`02a9a77` is pushed to `sanad-final/main`. Current local changes after that are docs-only
+Qatar readiness updates and should be reviewed/committed before the final meeting freeze.
 
 ## 6) Rules for whoever picks this up — قواعد لمن يستكمل
 

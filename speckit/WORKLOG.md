@@ -14,6 +14,20 @@
 
 ---
 
+## 2026-07-02 22:00 · codex · TASK-020
+- Status: DONE
+- Commit: self docs(speckit): prepare Qatar leadership roadmap [TASK-020] (see `git log -1`)
+- Files: speckit/10-QATAR-LEADERSHIP-READINESS.md, speckit/09-ROADMAP-TASKS.md, speckit/README.md, speckit/07-TESTING-VERIFY.md, speckit/AGENT-BRIEF-CODEX.md, DEMO_RUNBOOK.md, PROJECT_STATUS.md
+- Gate: PASS after API restart to clear auth rate-limit: verify-and-publish DryRun 50/50 scenario + 53/53 ownership + 12/12 smoke.
+- Notes: Reframed speckit for the Sunday Qatar leadership meeting. Added stakeholder messages for doctor, patient/citizen, ministry/government, hospital, insurance, and investor/board. Also completed TASK-022 by adding a Qatar Leadership Talk Track to DEMO_RUNBOOK and reconciled PROJECT_STATUS for pushed `02a9a77`. First gate attempt hit auth 429 from repeated runs; restarted API only, reran gate, and it passed fully. Next recommended task: TASK-021 manual rehearsal.
+
+## 2026-07-02 21:39 · codex · REVIEW-FIXES
+- Status: DONE
+- Commit: 02a9a77 fix(review): persist narrative before stream end, pino logging, RTL margins, dedup resolveAiModel, batch seed upsert, cache invalidation placement, runbook region note
+- Files: artifacts/api-server/src/routes/ai.ts, artifacts/api-server/src/routes/users.ts, artifacts/sanad/src/components/ErrorBoundary.tsx, artifacts/sanad/src/screens/insurance.tsx, artifacts/api-server/src/routes/admin.ts, artifacts/sanad/src/screens/admin.tsx, scripts/src/seed.ts, scripts/harnesses/ownership-tests.mjs, DEMO_RUNBOOK.md, speckit/AGENT-BRIEF-CODEX.md
+- Gate: lib/db tsc PASS + api-server tsc PASS + vitest 34/34 PASS + sanad tsc PASS + verify-and-publish DryRun 50/50 + 53/53 + 12/12 PASS
+- Notes: First gate run hit the documented ECONNRESET/ECONNREFUSED external server restart signature; reran the gate once without code changes and it passed fully. Pushed to sanad-final/main.
+
 ## 2026-07-02 08:00 · claude-lead · TASK-014 + TASK-017 + TASK-019 — WAVE 2 COMPLETE
 - Status: DONE — Commits: 16ff11a (region rollout pharmacy/lab/emergency), a802d9a (live user
   revocation), c47677e (12-portal smoke). Tag: demo-ready-v9.
@@ -168,4 +182,3 @@ fatal: pathspec 'SANAD_SHOT_LIST.md' did not match any files
 - Notes: Dry-run completed successfully! All tasks completed without stopping as directed.
 
 ## 2026-07-02 · gemini · MISSION-1 — Status: DONE — Commits: b40aa54, 111f509 — Gate: 50 passed, 0 failed | 48 passed, 0 failed
-

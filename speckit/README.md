@@ -28,6 +28,7 @@ decision-intelligence layer on top of them. Arabic tagline: "طبقة ذكاء �
 | [07-TESTING-VERIFY.md](07-TESTING-VERIFY.md) | Run/extend the verify gate before ANY merge |
 | [08-CONVENTIONS.md](08-CONVENTIONS.md) | Write code that passes review — style, patterns, recipes |
 | [09-ROADMAP-TASKS.md](09-ROADMAP-TASKS.md) | Pick a task — prioritized backlog with acceptance criteria |
+| [10-QATAR-LEADERSHIP-READINESS.md](10-QATAR-LEADERSHIP-READINESS.md) | Prepare the Sunday Qatar leadership meeting story and guardrails |
 
 Also read [`PROJECT_STATUS.md`](../PROJECT_STATUS.md) at repo root — live done/in-progress/remaining state.
 
@@ -38,7 +39,7 @@ Also read [`PROJECT_STATUS.md`](../PROJECT_STATUS.md) at repo root — live done
 2. **Never commit secrets.** `.env` is gitignored and must stay that way. Keys go through the
    Admin panel AI Brain card (encrypted) or `.env` locally.
 3. **Run the verify gate before claiming a task done**: `.\verify-and-publish.ps1 -DryRun`
-   (46 scenario + 42 ownership assertions + seed). See 07-TESTING-VERIFY.md.
+   (current baseline: 50 scenario + 53 ownership + 12 smoke + seed). See 07-TESTING-VERIFY.md.
 4. **TypeScript must be clean** in all three packages:
    ```
    cd lib/db && npx tsc -p tsconfig.json          # builds .d.ts (composite project)
