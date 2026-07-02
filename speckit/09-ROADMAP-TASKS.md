@@ -12,16 +12,14 @@ explicitly authorize — shared-infra write. Until then the AI Brain card saves 
 503 NOT_MIGRATED (graceful). **Acceptance**: PUT /api/admin/ai-settings 200; key survives
 `POST /reset-demo`; GET shows source=admin-panel.
 
-### TASK-002 · Unit tests for ai-settings crypto+cache — OPEN
+### TASK-002 · Unit tests for ai-settings crypto+cache — IN-PROGRESS(claude-lead: file written, run pending terminal availability)
 File: `artifacts/api-server/src/lib/ai-settings.test.ts` (vitest, NO DB — test pure parts):
 encryptSecret/decryptSecret roundtrip; tampered ciphertext throws; maskKey short/long;
 PROVIDER_PRESETS completeness (3 providers have baseUrl+defaultModel).
 **Acceptance**: `pnpm --filter @workspace/api-server test` green (24+new).
 
-### TASK-003 · Ownership assertions for ai-settings — OPEN
-Extend `scripts/harnesses/ownership-tests.mjs`: admin GET /api/admin/ai-settings → 200 with
-maskedKey|null and no full key anywhere in body; doctor → 403; citizen → 403 (blocked at
-prefix layer already — assert it stays). **Acceptance**: gate shows new assertions passing.
+### TASK-003 · Ownership assertions for ai-settings — IN-PROGRESS(claude-lead: 5 assertions
+written incl. ai-control 403 + no-key-leak regex; gate run pending terminal availability)
 
 ### TASK-004 · Demo dry-run checklist execution — OPEN (any agent with browser)
 Run the manual browser flow list in 07-TESTING-VERIFY §Manual. Record per-portal PASS/FAIL
@@ -29,7 +27,7 @@ with screenshots in WORKLOG. Any FAIL → file as new task immediately.
 
 ## P1 — high value if time remains
 
-### TASK-005 · Arabic labels for Data Sovereignty classification — OPEN
+### TASK-005 · Arabic labels for Data Sovereignty classification — DONE(claude-lead)
 `/api/admin/compliance` returns English `class`/`examples`. Add a client-side AR mapping in
 ComplianceDashboard (admin.tsx) keyed on `class`, fallback to English. Do NOT change the API.
 **Acceptance**: Arabic locale shows Arabic class names; English unchanged; tsc clean.
@@ -39,14 +37,14 @@ Testing keys fires paid API calls. Add express-rate-limit (e.g. 5/min per user) 
 POST /api/admin/ai-settings/test + writeAudit action UPDATE what="AI settings test".
 **Acceptance**: 6th rapid call → 429; audit rows appear; gate green.
 
-### TASK-007 · AI Brain status pill on admin Dashboard tab — OPEN
+### TASK-007 · AI Brain status pill on admin Dashboard tab — DONE(claude-lead)
 Small indicator near KPIs: Demo Mode (warning) vs `provider · model` (success), data from
 GET /ai-settings (React Query, 60s refetch). Reuse AiBrainCard chip styling.
 **Acceptance**: pill reflects state changes after save/remove without reload (invalidate query).
 
-### TASK-008 · Provider label surfaced in doctor narrative UI — OPEN
-SSE chunks carry `provider`. Doctor screen AI tab: show it as a small caption under the
-narrative ("Powered by: …"/"مدعوم بواسطة: …"). **Acceptance**: visible in both locales; no layout shift.
+### TASK-008 · Provider label surfaced in doctor narrative UI — DONE(pre-existing)
+Verified: doctor.tsx already captures `provider` from SSE chunks (narrativeProvider state)
+and renders it in the AI-narrative header caption (~L1796). No change needed.
 
 ## P2 — post-Sunday
 
@@ -61,5 +59,7 @@ narrative ("Powered by: …"/"مدعوم بواسطة: …"). **Acceptance**: vi
 - Pushing to any remote; credential rotation; `.env` edits.
 - drizzle-kit push against Neon (TASK-001 pattern — owner authorizes).
 - Dependency upgrades; pnpm-workspace/catalog changes.
-- verify-and-publish.ps1, seed.ts scenario data, middlewares/auth.ts — unless a task names them.
+- verify-and-publish.ps1, seed.ts scenario data, middlewares/auth.ts, **lib/audit.ts (Isnād
+  chain — synchronous transactional writes are a hard requirement; queueing/batching breaks
+  S3/S5 and loses entries on crash)** — unless a task names them.
 - SANAD_VIDEO/ production docs (separate track, owner-directed).

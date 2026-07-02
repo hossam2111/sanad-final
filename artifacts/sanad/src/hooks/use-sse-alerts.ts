@@ -21,6 +21,7 @@ export function useSseAlerts(role: string) {
   const [connected, setConnected] = useState(false);
   const esRef = useRef<EventSource | null>(null);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const retryCountRef = useRef(0);
 
   useEffect(() => {
     if (!role) return;
@@ -34,7 +35,10 @@ export function useSseAlerts(role: string) {
       const es = new EventSource(`/api/events/stream?token=${encodeURIComponent(token)}`);
       esRef.current = es;
 
-      es.onopen = () => setConnected(true);
+      es.onopen = () => {
+        setConnected(true);
+        retryCountRef.current = 0;
+      };
 
       es.addEventListener("lab_alert", (e: MessageEvent) => {
         try {
@@ -53,7 +57,9 @@ export function useSseAlerts(role: string) {
         setConnected(false);
         es.close();
         if (!destroyed) {
-          retryTimerRef.current = setTimeout(connect, 5000);
+          const timeout = Math.min(5000 * Math.pow(2, retryCountRef.current), 60000);
+          retryCountRef.current += 1;
+          retryTimerRef.current = setTimeout(connect, timeout);
         }
       };
     };
