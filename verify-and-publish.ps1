@@ -124,7 +124,7 @@ $o = Start-Process -FilePath "node" `
     Fail "ownership-tests had failures (exit $($o.ExitCode))"
     $allPassed = $false
   } else {
-    Pass "ownership-tests  42/42"
+    Pass "ownership-tests  all assertions green (count printed above)"
   }
 
 # ── Browser flows (manual — require pnpm dev on :3001) ────────────────────────

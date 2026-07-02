@@ -342,6 +342,15 @@ function ComplianceDashboard() {
     "Insurance & Billing Data": "bg-success-bg text-success border-success/30",
   };
 
+  // API returns English class names — Arabic labels are a client-side mapping (TASK-005)
+  const CLASS_AR: Record<string, string> = {
+    "PHI — Protected Health Information": "معلومات صحية محمية (PHI)",
+    "Clinical Decision Data": "بيانات القرار السريري",
+    "Anonymized Research Data": "بيانات بحثية مجهولة الهوية",
+    "Audit & Compliance Logs": "سجلات التدقيق والامتثال",
+    "Insurance & Billing Data": "بيانات التأمين والفوترة",
+  };
+
   return (
     <div className="space-y-6" dir={dir}>
       {/* Header */}
@@ -421,7 +430,7 @@ function ComplianceDashboard() {
             {(data.dataClassification ?? []).map((tier: any) => (
               <div key={tier.class} className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 rounded-lg border ${TIER_COLORS[tier.class] ?? "bg-muted/20 border-border text-foreground"}`}>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold">{tier.class}</p>
+                  <p className="text-sm font-bold">{text(tier.class, CLASS_AR[tier.class] ?? tier.class)}</p>
                   <p className="text-xs opacity-70 truncate">{tier.examples}</p>
                 </div>
                 <div className="sm:text-end shrink-0">
@@ -486,8 +495,38 @@ function ComplianceDashboard() {
   );
 }
 
+function AiBrainStatusPill() {
+  const { text, dir } = useLanguage();
+  const { data } = useQuery({
+    queryKey: ["ai-settings"],
+    queryFn: () => apiFetch("/api/admin/ai-settings").then(r => r.json()),
+    refetchInterval: 60000,
+  });
+
+  if (!data) return null;
+
+  return (
+    <div className="flex items-center justify-between gap-3 mb-4 px-4 py-2.5 rounded-xl border border-border bg-card" dir={dir}>
+      <div className="flex items-center gap-2 min-w-0">
+        <Brain className="w-4 h-4 text-primary shrink-0" />
+        <span className="text-xs font-bold text-foreground">{text("AI Brain", "عقل النظام")}</span>
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${data.demoMode ? "bg-warning-bg text-warning border-warning/30" : "bg-success-bg text-success border-success/30"}`}>
+          {data.demoMode ? <AlertTriangle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
+          {data.demoMode ? text("Demo Mode", "وضع تجريبي") : <span dir="ltr">{`${data.provider} · ${data.model}`}</span>}
+        </span>
+      </div>
+      <span className="text-[11px] text-muted-foreground shrink-0">
+        {data.demoMode
+          ? text("Configure a key in Maintenance → AI Brain", "أضف مفتاحاً من الصيانة ← عقل النظام")
+          : data.source === "admin-panel" ? text("Configured from Admin panel", "مُفعّل من لوحة الأدمن") : text("From environment variables", "من متغيرات البيئة")}
+      </span>
+    </div>
+  );
+}
+
 function AiBrainCard() {
   const { text, dir } = useLanguage();
+  const queryClient = useQueryClient();
   const [current, setCurrent] = React.useState<any>(null);
   const [provider, setProvider] = React.useState("gemini");
   const [model, setModel] = React.useState("");
@@ -498,7 +537,8 @@ function AiBrainCard() {
 
   const load = React.useCallback(() => {
     apiFetch("/api/admin/ai-settings").then(r => r.json()).then(setCurrent).catch(() => {});
-  }, []);
+    queryClient.invalidateQueries({ queryKey: ["ai-settings"] }); // keep the dashboard pill in sync
+  }, [queryClient]);
   React.useEffect(load, [load]);
 
   const presets: Record<string, { defaultModel: string; keyHint: string }> = current?.presets ?? {
@@ -860,6 +900,9 @@ export default function AdminDashboard() {
         </div>
 
         <TabsContent value="dashboard">
+
+      {/* AI Brain status pill (TASK-007) */}
+      <AiBrainStatusPill />
 
       {/* KPI Row */}
       {stats && (

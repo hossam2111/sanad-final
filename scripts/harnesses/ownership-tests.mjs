@@ -117,6 +117,19 @@ const audit = await (await get("/api/admin/audit-log?limit=15", admin)).json();
 const rows = JSON.stringify(audit);
 check("audit chain contains BREAK-GLASS entry", rows.includes("BREAK-GLASS"), "not found in last 15 entries");
 
+console.log("\n── AI Brain settings: strictly admin-only ──");
+const aiControl = await login("ai.khalid", "AiControl@2026");
+const aiSet = await get("/api/admin/ai-settings", admin);
+check("admin GET /api/admin/ai-settings → 200", aiSet.status === 200, `got ${aiSet.status}`);
+if (aiSet.status === 200) {
+  const aiBody = await aiSet.text();
+  // masked keys look like "sk-1…abcd" — a raw provider key must never appear
+  check("response never contains a full API key", !/(sk-|AIza)[A-Za-z0-9_-]{20,}/.test(aiBody), "key-like string found in body");
+}
+check("doctor GET ai-settings → 403 (prefix layer)", (await get("/api/admin/ai-settings", doctor)).status === 403);
+check("citizen GET ai-settings → 403 (prefix layer)", (await get("/api/admin/ai-settings", citizen)).status === 403);
+check("ai-control GET ai-settings → 403 (admin-only despite /api/admin access)", (await get("/api/admin/ai-settings", aiControl)).status === 403);
+
 console.log("\n══ HOSPITAL SCOPING ══");
 const pts2 = await (await get("/api/patients", doctor)).json();
 check("Dr. Rashidi sees KAMC-RYD scoped patients (18 patients)", pts2.total === 18, `got ${pts2.total}`);
