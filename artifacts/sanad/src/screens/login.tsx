@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useAuth, type UserRole } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 
 /* ────────────────────────────────────────────────────────────────────────────
    SANAD — Portal access
@@ -61,6 +62,7 @@ function SanadMark({ size = 30 }: { size?: number }) {
 export default function PortalAccess() {
   const { login } = useAuth();
   const { text, dir, locale, toggleLocale } = useLanguage();
+  const { config: regionConfig } = useRegionStore();
   const router = useRouter();
   const reduce = useReducedMotion();
   const isAr = locale === "ar";
@@ -137,6 +139,15 @@ export default function PortalAccess() {
           <SanadMark />
           <span className="text-[16px] font-bold tracking-tight text-white">{text("SANAD", "سند")}</span>
         </Link>
+
+        {/* Region branding (TASK-015) — white-label identity from the region switcher */}
+        <div className="relative flex items-center gap-2.5 -mt-8">
+          <span className="text-xl leading-none">{regionConfig.flag}</span>
+          <div>
+            <p className="text-[12px] font-bold text-white/85">{text(regionConfig.countryNameEn, regionConfig.countryName)}</p>
+            <p className="text-[10px] text-white/45">{text(regionConfig.ministryNameEn, regionConfig.ministryName)}</p>
+          </div>
+        </div>
 
         <div className="relative">
           <h1
