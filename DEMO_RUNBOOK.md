@@ -46,14 +46,15 @@ stable execution. Skipping this step may cause ECONNRESET on the first request.
 
 ---
 
-## Qatar Leadership Talk Track
+## Global Leadership Talk Track
 
-Use this section when the audience is Qatari leadership or a GCC investment/government panel.
+Use this section for any national leadership, GCC, government, or investment audience. Keep SANAD's
+identity global; adapt only the deployment profile and examples to the audience.
 
 Opening line:
-"SANAD is a sovereign AI health intelligence layer. It does not replace national systems; it sits
-above them to connect clinical safety, citizen consent, operational visibility, and government
-governance."
+"SANAD is a global sovereign AI health intelligence platform for national health systems. It does
+not replace existing systems; it sits above them to connect clinical safety, citizen consent,
+operational visibility, and government governance."
 
 Stakeholder cues:
 - Doctor: "The clinician remains accountable; AI shortens the path from risk signal to explainable
@@ -64,18 +65,18 @@ Stakeholder cues:
 - Hospital operator: "Hospitals get operational insight without breaking patient or hospital
   boundaries."
 - Insurance / payer: "Payers get faster, consent-safe review and anomaly signals."
-- Investor / board: "The same platform can expand across GCC markets because branding, roles,
-  governance, and AI provider control are configurable."
+- Investor / board: "This is a platform, not a one-off national demo: branding, roles, governance,
+  AI provider control, and integrations are configurable by deployment."
 
-Qatar region cue:
-- Use the region switcher to show Qatar as a first-class GCC deployment story.
+Deployment profile cue:
+- Use the region switcher to show deployment configurability, not product identity changes.
+- Say clearly: "The current clinical and sovereignty evidence uses the KSA reference demo dataset.
+  The product itself is global and deployment-profile driven."
 - When showing the current Data Sovereignty seeded evidence, follow step 12 and switch back to KSA
-  first if the screen language/data describes the KSA deployment.
-- Say clearly: "This dataset is the current KSA demo seed; the architecture is region-configurable
-  for Qatar."
+  first if the screen language/data describes the KSA reference deployment.
 
 Do not promise before Sunday:
-- Live integration with Qatar production systems.
+- Live integration with any production national system unless it has actually been built.
 - Production hosting location or regulatory approval already completed.
 - Autonomous clinical or insurance decisions without human review.
 
@@ -111,8 +112,8 @@ Do not promise before Sunday:
 12. Admin → **Data Sovereignty tab** → PDPL compliance (6 articles), KSA sovereign cloud, data classification matrix (switch the region selector back to 🇸🇦 KSA first — the sovereignty data describes the KSA deployment)
 13. Admin → **Maintenance → AI Brain** → show runtime model/key management (provider dropdown,
     encrypted key, Test Connection) — "the Ministry controls the brain, not the vendor"
-14. Admin header → **Region switcher** (🇸🇦→🇦🇪→🇶🇦) → ministry name/ID label/currency re-brand live —
-    "one platform, exportable across the GCC"
+14. Admin header → **Region switcher** (🇸🇦→🇦🇪→🇶🇦) → ministry name/ID label/currency profile changes live —
+    "one global platform, configurable per deployment"
 15. Admin → **User Registry** → 12 roles, all portals
 16. Admin → Reset Demo Environment (if needed for next session)
 

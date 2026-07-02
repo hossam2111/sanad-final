@@ -4,19 +4,20 @@ Current baseline: Ministry demo readiness is complete and pushed through `02a9a7
 Quality gate baseline: TypeScript clean, Vitest 34/34, verify gate 50/50 scenario + 53/53
 ownership + 12/12 smoke.
 
-Immediate context: owner has a Qatar leadership meeting on Sunday. Until then, prioritize
-rehearsal, credibility, and Qatar-specific story polish over new architecture.
+Immediate context: owner has a Sunday leadership meeting with a Qatari audience. Do not rebrand the
+product around the audience. Keep SANAD positioned as a global sovereign health intelligence
+platform, with KSA as the current reference demo dataset and Qatar as one deployment profile.
 
 Statuses: OPEN / IN-PROGRESS(agent) / DONE(commit) / BLOCKED(reason).
 
-## P0 — Sunday Qatar Meeting Readiness
+## P0 — Sunday Leadership Meeting Readiness
 
-### TASK-020 · Qatar leadership speckit refresh — DONE(local docs, commit pending)
-Update speckit for the Qatar leadership meeting and future stakeholder expansion.
+### TASK-020 · Global deployment speckit refresh — DONE(e39fc9a + follow-up local correction)
+Update speckit for stable global product identity and future stakeholder expansion.
 
 Acceptance:
-- `10-QATAR-LEADERSHIP-READINESS.md` exists and is linked from README.
-- Roadmap reflects Sunday priorities, not stale completed tasks.
+- `10-GLOBAL-DEPLOYMENT-READINESS.md` exists and is linked from README.
+- Roadmap reflects global platform identity, not stale completed tasks or country rebranding.
 - WORKLOG and Codex handoff record what changed and what remains.
 
 ### TASK-021 · Manual rehearsal pass — DONE(local, see `git log -1`)
@@ -29,20 +30,32 @@ Acceptance:
 - Any failure becomes a new TASK with file/route/screen evidence.
 - No speculative refactors during rehearsal.
 
-### TASK-022 · Qatar talk-track update — DONE(local docs, commit pending)
-Add a compact Qatar leadership talk track to `DEMO_RUNBOOK.md`.
+### TASK-022 · Leadership talk-track update — DONE(local docs)
+Add a compact leadership talk track to `DEMO_RUNBOOK.md` that starts from global SANAD identity and
+then adapts to the audience.
 
 Acceptance:
-- Covers sovereignty, AI governance, citizen trust, clinical safety, and GCC scalability.
-- Notes when to switch region to Qatar vs when KSA seeded sovereignty data is being shown.
+- Covers sovereignty, AI governance, citizen trust, clinical safety, and GCC/global scalability.
+- Notes that KSA seeded sovereignty data is reference evidence, while region profiles demonstrate configurability.
 - Stays short enough to use live in the meeting.
 
-### TASK-023 · PROJECT_STATUS reconciliation — OPEN
-Update `PROJECT_STATUS.md` to reflect pushed reality, current gate counts, and Sunday Qatar mode.
+### TASK-023 · PROJECT_STATUS reconciliation — DONE(local docs)
+Update `PROJECT_STATUS.md` to reflect pushed reality, current gate counts, and Sunday global-platform mode.
 
 Acceptance:
 - No stale "unpushed commits" language for `02a9a77`.
-- Points readers to `speckit/10-QATAR-LEADERSHIP-READINESS.md`.
+- Points readers to `speckit/10-GLOBAL-DEPLOYMENT-READINESS.md`.
+
+### TASK-025 · Restore global SANAD identity — DONE(local, see `git log -1`)
+Correct the over-specific Qatar framing. SANAD must remain a global sovereign health intelligence
+platform; KSA is the reference demo dataset; Qatar/UAE/etc. are deployment profiles and audience
+talk tracks.
+
+Acceptance:
+- No speckit source-of-truth file treats Qatar as the product identity.
+- README and DEMO_RUNBOOK start from global positioning.
+- Landing page strip/footer use global platform + KSA reference deployment wording in EN/AR.
+- WORKLOG and AGENT-BRIEF record what changed and what remains.
 
 ### TASK-024 · Final gate and freeze note — DONE(local freeze note, see `git log -1`)
 Run the full gate once before the meeting window and record the result.
@@ -54,15 +67,16 @@ Acceptance:
 
 ## P1 — Only If Sunday Story Needs It
 
-### TASK-030 · Qatar region polish audit — OPEN
-Check all region-aware screens and document whether Qatar branding is fully visible.
+### TASK-030 · Region profile polish audit — OPEN
+Check all region-aware screens and document whether deployment profiles are visible without changing
+SANAD's global identity.
 
 Acceptance:
-- List screens that correctly show Qatar branding.
-- List screens that still use KSA-specific seeded data or language.
+- List screens that correctly show configurable region profile values.
+- List screens that still use KSA-specific seeded data or language, and label them as reference dataset.
 - Fix only small copy/UI issues that are low risk.
 
-### TASK-031 · Demo runbook Qatar cue cards — OPEN
+### TASK-031 · Demo runbook stakeholder cue cards — OPEN
 Add presenter cue cards for each stakeholder: doctor, citizen, ministry, hospital, insurer,
 investor.
 
@@ -102,5 +116,5 @@ metric provenance. Do not present placeholder business metrics as live.
 - `.env`, secrets, dependency upgrades.
 - `lib/audit.ts` audit-chain semantics.
 - Major schema changes.
-- Real external Qatar integrations.
+- Real external country integrations.
 - Large new dashboards that risk destabilizing the current green demo.

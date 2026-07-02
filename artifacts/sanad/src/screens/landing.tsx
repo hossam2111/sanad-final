@@ -466,8 +466,8 @@ function DeploymentStrip() {
       <div className="mx-auto w-full max-w-[1120px] px-6 py-4 lg:px-8">
         <p className={`text-center leading-relaxed text-white/50 ${isAr ? "text-[11.5px] font-semibold" : "text-[11px] font-mono uppercase tracking-[0.14em]"}`}>
           {text(
-            "The National Health Intelligence Backbone — Kingdom of Saudi Arabia · 450+ Facilities · 13 Regions · 34.2M Immutable Records",
-            "نظام الاستخبارات الصحية الوطني — المملكة العربية السعودية · أكثر من 450 منشأة · 13 منطقة · 34.2 مليون سجل صحي محصّن",
+            "Global Health Intelligence Backbone · KSA Reference Dataset · Configurable for National Deployments",
+            "طبقة ذكاء صحي عالمية · بيانات سعودية مرجعية للعرض · قابلة للتهيئة للنشر الوطني",
           )}
         </p>
       </div>
@@ -1016,8 +1016,8 @@ function Footer() {
           <Wordmark />
           <p className="text-[12px] text-white/50">
             {text(
-              "Flagship deployment: Kingdom of Saudi Arabia — a Vision 2030 health transformation initiative.",
-              "النشر الأول: المملكة العربية السعودية — إحدى مبادرات التحول الصحي لرؤية السعودية 2030.",
+              "Reference deployment: KSA demo environment — global platform, configurable per country.",
+              "نشر مرجعي: بيئة عرض سعودية — منصة عالمية قابلة للتهيئة حسب الدولة.",
             )}
           </p>
         </div>

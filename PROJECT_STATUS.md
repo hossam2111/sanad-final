@@ -14,7 +14,7 @@
 + 34/34 unit + TypeScript clean ×3 packages. **No blocking items — DB fully migrated** (system_settings +
 ai_decisions.details are live in Neon; the previous TASK-001 blocker is resolved).
 
-**Platform is Qatar leadership meeting ready; critical-path rehearsal passed, pending final freeze.** New since last update: AI Brain runtime key management
+**Platform is global leadership meeting ready; critical-path rehearsal passed, freeze active.** New since last update: AI Brain runtime key management
 (encrypted, admin-only), GCC region switcher (7 regions, bilingual, white-label pitch),
 narrative persistence, consent expiry enforcement, users-status revocation pipeline.
 
@@ -46,20 +46,21 @@ gate runs and demos (it broke a gate run mid-flight on 2026-07-02).
 
 **Waves 1 AND 2 COMPLETE (TASK-001…019)** — tag `demo-ready-v9`. Latest gate:
 50/50 scenario + 53/53 ownership (incl. live user-revocation) + 12/12 portal smoke.
-Current mode: **SUNDAY QATAR FREEZE** — gate green, Qatar critical-path rehearsal passed, avoid code changes unless a rehearsal-blocking issue appears.
+Current mode: **SUNDAY GLOBAL LEADERSHIP FREEZE** — gate green, critical-path rehearsal passed, avoid code changes unless a rehearsal-blocking issue appears. SANAD identity is global; KSA is the reference demo dataset.
 
 ## 4) Remaining steps — الخطوات المتبقية
 
-1. Manual browser rehearsal passed for the Qatar critical path: admin Qatar readiness, doctor critical patient, citizen record/consent, family consented profile.
+1. Manual browser rehearsal passed for the leadership critical path: admin deployment profile/readiness, doctor critical patient, citizen record/consent, family consented profile.
 2. Keep both servers running for live review: web `:3000`, API `:8080`.
-3. Platform is frozen for the Sunday Qatar leadership meeting unless a rehearsal-blocking issue appears.
-4. Post-meeting expansion backlog stays in speckit/09-ROADMAP-TASKS.md and speckit/10-QATAR-LEADERSHIP-READINESS.md.
+3. Platform is frozen for the Sunday leadership meeting unless a rehearsal-blocking issue appears.
+4. Post-meeting expansion backlog stays in speckit/09-ROADMAP-TASKS.md and speckit/10-GLOBAL-DEPLOYMENT-READINESS.md.
 ⚠️ Keep any server-restarting background cron OFF during rehearsals and the demo.
 
 ## 5) Remote state — حالة الريموت
 
-`e39fc9a` is pushed to `sanad-final/main` with TASK-020 Qatar leadership roadmap.
-Local `main` is ahead by two docs-only commits for TASK-021 rehearsal and TASK-024 freeze.
+`e39fc9a` is pushed to `sanad-final/main` with the first TASK-020 readiness roadmap.
+Local `main` is ahead by readiness commits for global identity correction, TASK-021 rehearsal, and TASK-024 freeze.
+The global identity correction includes one small verified landing-page copy change (`artifacts/sanad` tsc PASS).
 Do not push without explicit owner authorization.
 
 ## 6) Rules for whoever picks this up — قواعد لمن يستكمل

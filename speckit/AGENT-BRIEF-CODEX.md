@@ -1,83 +1,85 @@
-# CODEX HANDOFF — Qatar Leadership Readiness
+# CODEX HANDOFF — Global SANAD Identity + Leadership Freeze
 
-Date: 2026-07-02
+Date: 2026-07-03
 Agent: codex
 Repo root: `C:\Users\Hossam\Desktop\sanad_cd_two`
 
-## Owner Request
+## Owner Direction
 
-The owner has a Qatar leadership meeting on Sunday. Review and update `speckit` so the project is
-ready from doctor, investor, patient, ministry/government, hospital, and insurance perspectives.
-Record everything done and everything still intended locally so another agent can continue safely.
+Do not keep changing SANAD's identity per meeting. SANAD must be positioned as a global sovereign
+health intelligence platform. KSA is the current reference demo dataset, not the product identity.
+Qatar, UAE, KSA, and others are deployment profiles/audience talk tracks.
 
-## What I Did In This Pass
+## What I Changed
 
-1. Added `speckit/10-QATAR-LEADERSHIP-READINESS.md`.
-   - Defines the meeting objective.
-   - Gives Qatar-specific positioning.
-   - Adds stakeholder messages for doctor, patient, ministry/government, hospital, insurer, and
-     investor/board.
-   - Lists the Sunday critical path and what must not be attempted before Sunday.
+1. Replaced the Qatar-specific readiness spec with a global deployment readiness spec.
+   - Added `speckit/10-GLOBAL-DEPLOYMENT-READINESS.md`.
+   - Deleted `speckit/10-QATAR-LEADERSHIP-READINESS.md`.
+   - The new file defines stable product identity, reference dataset vs deployment profile,
+     stakeholder lenses, meeting playbook, and leadership critical path.
 
 2. Updated `speckit/README.md`.
-   - Linked the new Qatar readiness file.
-   - Corrected the verify baseline to 50 scenario + 53 ownership + 12 smoke.
+   - SANAD is now described as a global sovereign AI health intelligence platform.
+   - KSA is described as the current reference demo dataset.
+   - Spec index points to `10-GLOBAL-DEPLOYMENT-READINESS.md`.
 
-3. Updated `speckit/07-TESTING-VERIFY.md`.
-   - Corrected gate counts from old 46/42 wording to current 50/53/12.
-   - Added the smoke login layer explicitly.
+3. Updated `DEMO_RUNBOOK.md`.
+   - Renamed Qatar-specific talk track to Global Leadership Talk Track.
+   - Preserved audience adaptation for Qatar/GCC without changing the product identity.
+   - Added explicit language: KSA data is the reference demo dataset; region switcher demonstrates
+     deployment configurability.
+   - Kept guardrails about 429 auth rate-limit from repeated full gates.
 
-4. Replaced `speckit/09-ROADMAP-TASKS.md`.
-   - Removed stale pre-Sunday/open-task framing.
-   - Added Sunday P0 tasks:
-     - TASK-020 Qatar leadership speckit refresh.
-     - TASK-021 Manual rehearsal pass.
-     - TASK-022 Qatar talk-track update.
-     - TASK-023 PROJECT_STATUS reconciliation.
-     - TASK-024 Final gate and freeze note.
-   - Added post-meeting product expansion tasks for doctor, patient, ministry, hospital, insurance,
-     and investor tracks.
+4. Updated `PROJECT_STATUS.md`.
+   - Current mode is global leadership freeze.
+   - KSA reference dataset is explicitly separated from global product identity.
+   - Remote/local state notes explain that local main is ahead with docs-only readiness commits.
 
-5. I did not change application code in this pass.
+5. Updated `speckit/09-ROADMAP-TASKS.md`.
+   - P0 is now Sunday Leadership Meeting Readiness, not Qatar rebranding.
+   - Region profile polish is framed as deployment-profile audit.
+   - Out of scope says no real external country integrations before the meeting.
 
-6. Added `DEMO_RUNBOOK.md` Qatar Leadership Talk Track.
-   - Opening line for Qatari/GCC leadership.
-   - Stakeholder cues for doctor, citizen, ministry/government, hospital, insurance, and investor.
-   - Qatar region cue and explicit "do not promise before Sunday" guardrails.
+6. Work already done before this correction:
+   - Full verify gate passed this session: 50/50 scenario + 53/53 ownership + 12/12 smoke.
+   - Browser rehearsal passed 4/4: admin deployment/Qatar profile readiness, doctor critical patient,
+     citizen record/consent, family consented profile.
+   - Rehearsal screenshots are local under `output/playwright/` and intentionally not committed.
 
-7. Updated `PROJECT_STATUS.md`.
-   - Corrected current gate baseline to 50/50 + 53/53 + 12/12.
-   - Changed current mode to Sunday Qatar readiness.
-   - Removed stale unpushed-commits language for `02a9a77`.
+## Current Git State To Expect
 
-## Current Local Git State To Expect
+Local `main` is ahead of `sanad-final/main`. Do not push without explicit owner authorization.
 
-At this handoff, `sanad-final/main` points at `e39fc9a` (TASK-020 Qatar leadership roadmap).
-Local `main` is ahead by two docs-only commits:
+Expected recent commits:
 
-1. `2c5806c` — TASK-021 browser rehearsal record.
-2. latest local `HEAD` — TASK-024 Qatar freeze note (see `git log -1`).
+1. Global identity correction (current work: docs + small landing copy update, `artifacts/sanad` tsc PASS).
+2. TASK-024 freeze note.
+3. TASK-021 browser rehearsal record.
+4. TASK-020 readiness roadmap on `sanad-final/main`.
 
-There is also an untracked local `output/` folder containing Playwright screenshots from rehearsal.
-Those screenshots are evidence only and intentionally not committed.
+There is an untracked local `output/` folder containing Playwright screenshots from rehearsal. It is
+evidence only and intentionally not committed.
 
-## Next Best Actions
+## Remaining Work
 
-1. TASK-021 is done locally.
-   Browser rehearsal passed 4/4: admin Qatar readiness, doctor critical patient, citizen record/consent, family consented profile.
-   Screenshots are local under `output/playwright/` and are intentionally not committed.
+Before Sunday:
 
-2. TASK-024 is done locally.
-   Full gate was green this session: 50/50 scenario + 53/53 ownership + 12/12 smoke.
-   Freeze posture is active: avoid code changes before Sunday unless a rehearsal-blocking issue appears.
+1. Avoid product/code changes unless a rehearsal-blocking issue appears.
+2. Keep `pnpm dev` servers available when rehearsing: web `:3000`, API `:8080`.
+3. If running the full gate repeatedly, restart API once or allow auth limiter cooldown if temporary
+   429s appear; do not treat that as a code defect.
+4. Use `DEMO_RUNBOOK.md` Global Leadership Talk Track.
 
-## Guardrails Until Sunday
+After Sunday:
 
-- Prefer docs, rehearsal, and tiny copy fixes.
-- Do not start major product builds unless the owner explicitly says to.
+1. Pick from `09-ROADMAP-TASKS.md` P2 product expansion.
+2. Strengthen global platform story with metric provenance, integration boundary docs, and
+   stakeholder workflows.
+
+## Guardrails
+
 - Do not touch `lib/audit.ts`.
 - Do not edit `.env` or secrets.
 - Do not upgrade dependencies.
 - Do not force push.
-- If the gate fails with ECONNRESET/ECONNREFUSED mid-run, rerun once and document it before fixing
-  anything.
+- Do not present KSA seeded evidence as proof of another country's production deployment.

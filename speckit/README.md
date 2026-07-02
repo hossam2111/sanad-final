@@ -7,13 +7,16 @@
 
 ## What is SANAD?
 
-SANAD (سند) — National AI Health Intelligence Platform for Saudi Arabia. A monorepo demo platform
-showcasing an "intelligence layer above existing health systems" (NPHIES-aligned, PDPL-compliant).
+SANAD (سند) — global sovereign AI health intelligence platform for national health systems. A
+monorepo demo platform showcasing an "intelligence layer above existing health systems"
+(current reference dataset: KSA / NPHIES-aligned / PDPL-compliant).
 12 role-based portals (doctor, citizen, emergency, admin, lab, pharmacy, hospital, insurance,
 ai-control, research, family, supply-chain) backed by one Express API and one PostgreSQL (Neon) DB.
 
-**Positioning (for any demo/pitch content):** SANAD does NOT replace Seha/Tatmeen/NPHIES — it is the
-decision-intelligence layer on top of them. Arabic tagline: "طبقة ذكاء فوق ما بُني — لا تستبدله".
+**Positioning (for any demo/pitch content):** SANAD does NOT replace Seha/Tatmeen/NPHIES or any
+country's existing national systems — it is the decision-intelligence layer on top of them. KSA is
+the current reference demo dataset, not the product's identity. Arabic tagline:
+"طبقة ذكاء فوق ما بُني — لا تستبدله".
 
 ## Spec Index
 
@@ -28,7 +31,7 @@ decision-intelligence layer on top of them. Arabic tagline: "طبقة ذكاء �
 | [07-TESTING-VERIFY.md](07-TESTING-VERIFY.md) | Run/extend the verify gate before ANY merge |
 | [08-CONVENTIONS.md](08-CONVENTIONS.md) | Write code that passes review — style, patterns, recipes |
 | [09-ROADMAP-TASKS.md](09-ROADMAP-TASKS.md) | Pick a task — prioritized backlog with acceptance criteria |
-| [10-QATAR-LEADERSHIP-READINESS.md](10-QATAR-LEADERSHIP-READINESS.md) | Prepare the Sunday Qatar leadership meeting story and guardrails |
+| [10-GLOBAL-DEPLOYMENT-READINESS.md](10-GLOBAL-DEPLOYMENT-READINESS.md) | Keep global product identity stable while supporting country-specific deployment profiles |
 
 Also read [`PROJECT_STATUS.md`](../PROJECT_STATUS.md) at repo root — live done/in-progress/remaining state.
 

@@ -14,6 +14,13 @@
 
 ---
 
+## 2026-07-03 00:00 · codex · TASK-025
+- Status: DONE
+- Commit: pending docs(positioning): restore global SANAD identity [TASK-025]
+- Files: speckit/10-GLOBAL-DEPLOYMENT-READINESS.md, speckit/10-QATAR-LEADERSHIP-READINESS.md, speckit/README.md, DEMO_RUNBOOK.md, PROJECT_STATUS.md, speckit/09-ROADMAP-TASKS.md, speckit/AGENT-BRIEF-CODEX.md, speckit/WORKLOG.md, artifacts/sanad/src/screens/landing.tsx
+- Gate: `artifacts/sanad` TypeScript PASS; landing Playwright text/screenshot check PASS (`output/playwright/global-landing-identity.png`). Same session baseline remains verify-and-publish DryRun 50/50 scenario + 53/53 ownership + 12/12 smoke, plus browser rehearsal 4/4.
+- Notes: Owner clarified that SANAD must not be re-identified per audience. Reframed SANAD as a global sovereign AI health intelligence platform; KSA is the current reference demo dataset; Qatar/UAE/etc. are deployment profiles and talk tracks. Landing page strip/footer now say global platform + KSA reference deployment in EN/AR.
+
 ## 2026-07-02 22:12 · codex · TASK-024
 - Status: DONE
 - Commit: self docs(status): freeze Qatar meeting readiness [TASK-024] (see `git log -1`)
