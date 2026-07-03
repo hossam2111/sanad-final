@@ -60,14 +60,22 @@ Qatar, UAE, KSA, and others are deployment profiles/audience talk tracks.
    - Core answer: Qatar has strong systems of record/service channels; SANAD adds the governed
      intelligence, consent, audit, and AI control layer above them.
 
+9. Added Qatar readiness folder.
+   - Added `speckit/qatar-readiness/` for TASK-036.
+   - Folder contains a start-here README, executive brief, meeting talk track, capability map,
+     deployment checklist, and source list.
+   - Purpose: keep Qatar material easy to hand to Claude/reviewers or use directly before the
+     Sunday leadership meeting.
+
 ## Current Git State To Expect
 
 Local `main` is ahead of `sanad-final/main`. Do not push without explicit owner authorization.
 
 Expected recent commits:
 
-1. TASK-035 Qatar research pack (`b57cb31`) plus WORKLOG pointer (`017652c`).
-2. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A.
+1. TASK-036 Qatar readiness folder (local, see `git log`).
+2. TASK-035 Qatar research pack (`b57cb31`) plus WORKLOG pointer (`017652c`).
+3. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A.
 2. TASK-025 global identity correction (docs + small landing copy update, `artifacts/sanad` tsc PASS).
 3. TASK-024 freeze note.
 4. TASK-021 browser rehearsal record.

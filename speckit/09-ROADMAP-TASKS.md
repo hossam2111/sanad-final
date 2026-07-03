@@ -121,6 +121,16 @@ Acceptance:
 - Distinguishes existing Qatar assets from SANAD's added layer.
 - Includes expected questions, safe answers, demo ordering, and Arabic one-minute answer.
 
+### TASK-036 · Qatar readiness folder — DONE(local commit)
+Collect all Qatar-facing meeting material into one folder so reviewers/presenters do not need to
+hunt across the broader speckit.
+
+Acceptance:
+- `speckit/qatar-readiness/` exists and has a clear `README.md`.
+- Folder includes executive brief, Arabic/English talk track, capability map, deployment checklist,
+  and source list.
+- Main speckit README, WORKLOG, and AGENT-BRIEF point to the folder.
+
 ## P2 — Post-Meeting Product Expansion
 
 ### TASK-040 · Doctor Morning Rounds queue — OPEN

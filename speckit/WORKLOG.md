@@ -14,6 +14,13 @@
 
 ---
 
+## 2026-07-03 02:10 · codex · TASK-036
+- Status: DONE
+- Commit: self docs(qatar): add readiness folder [TASK-036] (local, see `git log`)
+- Files: speckit/qatar-readiness/README.md, speckit/qatar-readiness/01-EXECUTIVE-BRIEF.md, speckit/qatar-readiness/02-MEETING-TALK-TRACK.md, speckit/qatar-readiness/03-CAPABILITY-MAP.md, speckit/qatar-readiness/04-DEPLOYMENT-CHECKLIST.md, speckit/qatar-readiness/05-SOURCES.md, speckit/README.md, speckit/09-ROADMAP-TASKS.md, speckit/AGENT-BRIEF-CODEX.md, speckit/WORKLOG.md
+- Gate: docs-only; `git diff --check` PASS. Previous full project verification in TASK-034 is green.
+- Notes: Created a single Qatar handoff folder containing meeting-ready executive brief, Arabic/English talk track, capability comparison, deployment checklist, and official/public source list. SANAD remains positioned as a global platform; Qatar is a deployment/audience profile.
+
 ## 2026-07-03 01:35 · codex · TASK-035
 - Status: DONE
 - Commit: b57cb31 docs(research): Qatar market research brief with meeting talk-track + sources [TASK-035]

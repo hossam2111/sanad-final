@@ -36,6 +36,7 @@ the current reference demo dataset, not the product's identity. Arabic tagline:
 | [12-LEADERSHIP-ONE-PAGER.md](12-LEADERSHIP-ONE-PAGER.md) | One-page country-neutral leadership brief for the meeting |
 | [13-LEADERSHIP-QA.md](13-LEADERSHIP-QA.md) | Short answers for predictable leadership objections and buyer questions |
 | [14-QATAR-MARKET-RESEARCH-BRIEF.md](14-QATAR-MARKET-RESEARCH-BRIEF.md) | Evidence-backed Qatar-specific answer: what exists, what SANAD adds, and how to position it |
+| [qatar-readiness/](qatar-readiness/README.md) | Single folder for Qatar meeting materials: executive brief, talk track, capability map, deployment checklist, and sources |
 
 Also read [`PROJECT_STATUS.md`](../PROJECT_STATUS.md) at repo root — live done/in-progress/remaining state.
 
