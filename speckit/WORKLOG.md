@@ -14,6 +14,13 @@
 
 ---
 
+## 2026-07-04 10:45 · codex · TASK-037
+- Status: DONE
+- Commit: self fix(doctor): enable appointment booking quick action [TASK-037] (local, see `git log`)
+- Files: artifacts/sanad/src/screens/doctor.tsx, speckit/09-ROADMAP-TASKS.md, speckit/AGENT-BRIEF-CODEX.md, speckit/WORKLOG.md
+- Gate: `artifacts/sanad` TypeScript PASS; Playwright doctor click audit PASS for appointment booking and prescribe modal; full `verify-and-publish.ps1 -DryRun` PASS 50/50 scenario + 53/53 ownership + 12/12 smoke.
+- Notes: User reported "حجز الموعد" not working and suspected dead buttons. Confirmed with Playwright that the doctor Book Appt button existed but opened nothing, while Prescribe Medication opened correctly. Added a doctor appointment modal using existing `/api/appointments` APIs. Playwright booked demo appointments for patient `1000000009`; the full gate reseeded the demo DB afterward.
+
 ## 2026-07-03 02:10 · codex · TASK-036
 - Status: DONE
 - Commit: self docs(qatar): add readiness folder [TASK-036] (local, see `git log`)

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGetPatientByNationalIdQueryKey } from "@workspace/api-client-react";
 import { apiFetch } from "@/lib/api";
 import {
@@ -65,6 +65,56 @@ type PredictionWarning = {
   recommendation: string;
   confidence: "low" | "moderate" | "high";
 };
+
+type AppointmentOptions = {
+  hospitals: string[];
+  departments: string[];
+  services: Record<string, string[]>;
+};
+
+async function fetchAppointmentOptions(): Promise<AppointmentOptions> {
+  const [hospitalsRes, departmentsRes] = await Promise.all([
+    apiFetch("/api/appointments/hospitals"),
+    apiFetch("/api/appointments/departments"),
+  ]);
+  if (!hospitalsRes.ok || !departmentsRes.ok) throw new Error("Failed to load appointment options");
+  const hospitalsData = await hospitalsRes.json() as { hospitals: string[] };
+  const departmentsData = await departmentsRes.json() as { departments: string[]; services: Record<string, string[]> };
+  return {
+    hospitals: hospitalsData.hospitals ?? [],
+    departments: departmentsData.departments ?? [],
+    services: departmentsData.services ?? {},
+  };
+}
+
+async function fetchAppointmentSlots(date: string, hospital: string, department: string): Promise<string[]> {
+  const params = new URLSearchParams({ date, hospital, department });
+  const res = await apiFetch(`/api/appointments/slots?${params}`);
+  if (!res.ok) throw new Error("Failed to load appointment slots");
+  const data = await res.json() as { slots: string[] };
+  return data.slots ?? [];
+}
+
+async function createAppointment(payload: {
+  patientId: number;
+  hospital: string;
+  department: string;
+  service: string;
+  date: string;
+  time: string;
+  notes?: string;
+}) {
+  const res = await apiFetch("/api/appointments", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string; message?: string };
+    throw new Error(body.message || body.error || "Failed to book appointment");
+  }
+  return res.json() as Promise<{ appointment: { referenceNo?: string; appointmentDate: string; appointmentTime: string } }>;
+}
 
 const predictionSeverityStyle: Record<string, { bg: string; border: string; icon: string; badge: "destructive" | "warning" | "info" | "outline" | "success" | "default"  }> = {
   critical: { bg: "bg-risk-critical-bg", border: "border-risk-critical/25", icon: "text-risk-critical", badge: "destructive" },
@@ -965,9 +1015,7 @@ export default function DoctorDashboard() {
                   {/* Right Side: Quick Actions */}
                   <div className="flex md:flex-col items-center md:items-end gap-3 shrink-0 mt-4 md:mt-0">
                     <PrescribeModal patientId={patient.id} nationalId={patient.nationalId} />
-                    <Button variant="outline" className="w-full sm:w-auto min-w-[160px] rounded-xl shadow-sm font-bold border-border bg-card hover:bg-secondary transition-colors">
-                      <CalendarDays className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" /> {text("Book Appt", "حجز موعد")}
-                    </Button>
+                    <BookAppointmentModal patientId={patient.id} patientName={patient.fullName} />
                   </div>
 
                 </div>
@@ -2009,6 +2057,225 @@ export default function DoctorDashboard() {
         </div>
       )}
     </Layout>
+  );
+}
+
+function BookAppointmentModal({ patientId, patientName }: { patientId: number; patientName: string }) {
+  const { text } = useLanguage();
+  const queryClient = useQueryClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const [isOpen, setIsOpen] = useState(false);
+  const [hospital, setHospital] = useState("");
+  const [department, setDepartment] = useState("");
+  const [service, setService] = useState("");
+  const [date, setDate] = useState(today);
+  const [time, setTime] = useState("");
+  const [notes, setNotes] = useState("");
+  const [bookingError, setBookingError] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+
+  const { data: options, isLoading: optionsLoading } = useQuery({
+    queryKey: ["doctor-appointment-options"],
+    queryFn: fetchAppointmentOptions,
+    enabled: isOpen,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: slots = [], isFetching: slotsLoading } = useQuery({
+    queryKey: ["doctor-appointment-slots", date, hospital, department],
+    queryFn: () => fetchAppointmentSlots(date, hospital, department),
+    enabled: isOpen && !!date && !!hospital && !!department,
+  });
+
+  const bookMutation = useMutation({
+    mutationFn: createAppointment,
+    onSuccess: (res) => {
+      const appt = res.appointment;
+      setConfirmation(text(
+        `Appointment booked for ${appt.appointmentDate} at ${appt.appointmentTime}${appt.referenceNo ? ` (${appt.referenceNo})` : ""}.`,
+        `تم حجز الموعد بتاريخ ${appt.appointmentDate} الساعة ${appt.appointmentTime}${appt.referenceNo ? ` (${appt.referenceNo})` : ""}.`
+      ));
+      setBookingError("");
+      setTime("");
+      setNotes("");
+      void queryClient.invalidateQueries({ queryKey: ["admin-appointments"] });
+    },
+    onError: (error: Error) => {
+      setConfirmation("");
+      setBookingError(error.message);
+    },
+  });
+
+  const services = department ? options?.services?.[department] ?? [] : [];
+  const canBook = !!hospital && !!department && !!date && !!time && !bookMutation.isPending;
+
+  const resetAndClose = () => {
+    setIsOpen(false);
+    setBookingError("");
+    setConfirmation("");
+  };
+
+  const handleBook = () => {
+    if (!canBook) return;
+    setBookingError("");
+    setConfirmation("");
+    bookMutation.mutate({
+      patientId,
+      hospital,
+      department,
+      service: service || department,
+      date,
+      time,
+      notes,
+    });
+  };
+
+  return (
+    <>
+      <Button
+        variant="outline"
+        onClick={() => setIsOpen(true)}
+        className="w-full sm:w-auto min-w-[160px] rounded-xl shadow-sm font-bold border-border bg-card hover:bg-secondary transition-colors"
+      >
+        <CalendarDays className="w-4 h-4 me-2" /> {text("Book Appt", "حجز موعد")}
+      </Button>
+
+      {isOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={resetAndClose}>
+          <div className="w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+              <div>
+                <h3 className="font-bold text-foreground text-base">{text("Book Appointment", "حجز موعد")}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{patientName}</p>
+              </div>
+              <button onClick={resetAndClose} className="text-muted-foreground hover:text-foreground" aria-label={text("Close", "إغلاق")}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {optionsLoading ? (
+                <div className="rounded-xl bg-secondary p-4 text-sm text-muted-foreground">
+                  {text("Loading appointment options...", "جارٍ تحميل خيارات الموعد...")}
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label className="space-y-1.5">
+                      <span className="text-xs font-semibold text-muted-foreground">{text("Hospital", "المستشفى")}</span>
+                      <select
+                        value={hospital}
+                        onChange={(e) => { setHospital(e.target.value); setTime(""); }}
+                        className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">{text("Select hospital...", "اختر المستشفى...")}</option>
+                        {options?.hospitals.map((item) => <option key={item} value={item}>{item}</option>)}
+                      </select>
+                    </label>
+
+                    <label className="space-y-1.5">
+                      <span className="text-xs font-semibold text-muted-foreground">{text("Department", "القسم")}</span>
+                      <select
+                        value={department}
+                        onChange={(e) => { setDepartment(e.target.value); setService(""); setTime(""); }}
+                        className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        <option value="">{text("Select department...", "اختر القسم...")}</option>
+                        {options?.departments.map((item) => <option key={item} value={item}>{item}</option>)}
+                      </select>
+                    </label>
+
+                    <label className="space-y-1.5">
+                      <span className="text-xs font-semibold text-muted-foreground">{text("Service", "الخدمة")}</span>
+                      <select
+                        value={service}
+                        onChange={(e) => setService(e.target.value)}
+                        disabled={!department || services.length === 0}
+                        className="w-full px-3 py-2 text-sm border border-border rounded-xl bg-background focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-60"
+                      >
+                        <option value="">{text("General consultation", "استشارة عامة")}</option>
+                        {services.map((item) => <option key={item} value={item}>{item}</option>)}
+                      </select>
+                    </label>
+
+                    <label className="space-y-1.5">
+                      <span className="text-xs font-semibold text-muted-foreground">{text("Date", "التاريخ")}</span>
+                      <Input type="date" value={date} min={today} onChange={(e) => { setDate(e.target.value); setTime(""); }} />
+                    </label>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold text-muted-foreground mb-2">{text("Available time slots", "المواعيد المتاحة")}</p>
+                    {!hospital || !department || !date ? (
+                      <div className="rounded-xl bg-secondary p-4 text-sm text-muted-foreground">
+                        {text("Select hospital, department, and date to show slots.", "اختر المستشفى والقسم والتاريخ لعرض المواعيد.")}
+                      </div>
+                    ) : slotsLoading ? (
+                      <div className="rounded-xl bg-secondary p-4 text-sm text-muted-foreground">
+                        {text("Checking availability...", "جارٍ فحص الإتاحة...")}
+                      </div>
+                    ) : slots.length === 0 ? (
+                      <div className="rounded-xl bg-warning-bg border border-warning/30 p-4 text-sm text-warning">
+                        {text("No available slots for this date.", "لا توجد مواعيد متاحة في هذا التاريخ.")}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {slots.map((slot) => (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setTime(slot)}
+                            className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all border ${
+                              time === slot
+                                ? "bg-primary text-white border-primary"
+                                : "bg-background border-border text-foreground hover:border-primary hover:text-primary"
+                            }`}
+                          >
+                            {slot}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <label className="space-y-1.5 block">
+                    <span className="text-xs font-semibold text-muted-foreground">{text("Notes", "ملاحظات")}</span>
+                    <Input
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      placeholder={text("Reason for visit or clinical notes...", "سبب الزيارة أو ملاحظات سريرية...")}
+                    />
+                  </label>
+
+                  {bookingError && (
+                    <div className="rounded-xl bg-danger-bg border border-danger/30 px-4 py-3 text-sm text-danger font-medium">
+                      {bookingError}
+                    </div>
+                  )}
+
+                  {confirmation && (
+                    <div className="rounded-xl bg-success-bg border border-success/30 px-4 py-3 text-sm text-success font-medium">
+                      {confirmation}
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <Button onClick={handleBook} disabled={!canBook} className="flex-1">
+                      <CalendarDays className="w-4 h-4" />
+                      {bookMutation.isPending ? text("Booking...", "جارٍ الحجز...") : text("Confirm Appointment", "تأكيد الموعد")}
+                    </Button>
+                    <Button variant="outline" onClick={resetAndClose} className="flex-1">
+                      {text("Close", "إغلاق")}
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
 

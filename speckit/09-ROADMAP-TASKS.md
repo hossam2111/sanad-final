@@ -131,6 +131,17 @@ Acceptance:
   and source list.
 - Main speckit README, WORKLOG, and AGENT-BRIEF point to the folder.
 
+### TASK-037 · Doctor appointment booking button — DONE(local commit)
+Fix the doctor portal "Book Appt / حجز موعد" quick action, which rendered as a button but had no
+booking behavior.
+
+Acceptance:
+- Button opens a doctor booking modal for the loaded patient.
+- Modal loads hospitals, departments, services, available slots, and posts to `/api/appointments`.
+- Browser automation confirms booking success and verifies the prescribe-medication button still
+  opens its modal.
+- `artifacts/sanad` TypeScript passes.
+
 ## P2 — Post-Meeting Product Expansion
 
 ### TASK-040 · Doctor Morning Rounds queue — OPEN

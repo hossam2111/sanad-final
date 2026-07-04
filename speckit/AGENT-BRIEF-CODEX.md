@@ -67,15 +67,22 @@ Qatar, UAE, KSA, and others are deployment profiles/audience talk tracks.
    - Purpose: keep Qatar material easy to hand to Claude/reviewers or use directly before the
      Sunday leadership meeting.
 
+10. Fixed doctor appointment booking.
+    - Added `BookAppointmentModal` to `artifacts/sanad/src/screens/doctor.tsx` for TASK-037.
+    - The previous "Book Appt / حجز موعد" button had no click behavior.
+    - Playwright audit confirmed: doctor login -> patient `1000000009` -> book appointment modal
+      opens -> slot booking confirms with `APT-...`; prescribe-medication modal still opens.
+
 ## Current Git State To Expect
 
 Local `main` is ahead of `sanad-final/main`. Do not push without explicit owner authorization.
 
 Expected recent commits:
 
-1. TASK-036 Qatar readiness folder (local, see `git log`).
-2. TASK-035 Qatar research pack (`b57cb31`) plus WORKLOG pointer (`017652c`).
-3. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A.
+1. TASK-037 doctor appointment booking button (local, see `git log`).
+2. TASK-036 Qatar readiness folder (local, see `git log`).
+3. TASK-035 Qatar research pack (`b57cb31`) plus WORKLOG pointer (`017652c`).
+4. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A.
 2. TASK-025 global identity correction (docs + small landing copy update, `artifacts/sanad` tsc PASS).
 3. TASK-024 freeze note.
 4. TASK-021 browser rehearsal record.
