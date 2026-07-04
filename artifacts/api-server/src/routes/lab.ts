@@ -111,7 +111,7 @@ router.get("/patient/:nationalId", async (req, res) => {
 
   const patient = patients[0]!;
 
-  if (req.role && ["doctor", "lab", "pharmacy"].includes(req.role)) {
+  if (req.role && ["doctor", "pharmacy"].includes(req.role)) {
     if (!req.username) {
       res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
       return;

@@ -72,9 +72,10 @@ router.get("/readyz", async (_req, res) => {
   });
 });
 
-router.get("/healthz", async (_req, res) => {
+router.get("/healthz", async (req, res) => {
   const database = await checkDatabase();
   const ready = !draining && database.ok && database.withinThreshold;
+  const soft = req.query["soft"] === "1";
 
   const payload = {
     status: ready ? "ok" : database.ok ? "degraded" : "unhealthy",
@@ -89,7 +90,7 @@ router.get("/healthz", async (_req, res) => {
     ...buildInfo(),
   };
 
-  res.status(ready ? 200 : 503).json(payload);
+  res.status(soft ? 200 : ready ? 200 : 503).json(payload);
 });
 
 export default router;

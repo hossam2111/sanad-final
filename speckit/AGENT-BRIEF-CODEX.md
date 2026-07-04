@@ -73,16 +73,23 @@ Qatar, UAE, KSA, and others are deployment profiles/audience talk tracks.
     - Playwright audit confirmed: doctor login -> patient `1000000009` -> book appointment modal
       opens -> slot booking confirms with `APT-...`; prescribe-medication modal still opens.
 
+11. Completed all-portal click audit fixes.
+    - Ran `output/playwright/portal-click-audit.mjs` across all 12 portals.
+    - Fixed admin health URL/soft status, hospital overview role fallback, lab portal demo access,
+      and supply-chain low-stock alert fetch.
+    - Final audit: 12 portals, 34 safe clicks, 0 bad responses, 0 failed requests, 0 page errors.
+
 ## Current Git State To Expect
 
 Local `main` is ahead of `sanad-final/main`. Do not push without explicit owner authorization.
 
 Expected recent commits:
 
-1. TASK-037 doctor appointment booking button (local, see `git log`).
-2. TASK-036 Qatar readiness folder (local, see `git log`).
-3. TASK-035 Qatar research pack (`b57cb31`) plus WORKLOG pointer (`017652c`).
-4. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A.
+1. TASK-038 all-portal click audit fixes (local, see `git log`).
+2. TASK-037 doctor appointment booking button (local, see `git log`).
+3. TASK-036 Qatar readiness folder (local, see `git log`).
+4. TASK-035 Qatar research pack (`b57cb31`) plus WORKLOG pointer (`017652c`).
+5. TASK-030/TASK-031/TASK-032/TASK-033 region audit + stakeholder cue cards + one-pager + Q&A.
 2. TASK-025 global identity correction (docs + small landing copy update, `artifacts/sanad` tsc PASS).
 3. TASK-024 freeze note.
 4. TASK-021 browser rehearsal record.

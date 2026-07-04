@@ -14,6 +14,13 @@
 
 ---
 
+## 2026-07-04 11:05 · codex · TASK-038
+- Status: DONE
+- Commit: self fix(portals): clear all-portal click audit bad responses [TASK-038] (local, see `git log`)
+- Files: artifacts/api-server/src/routes/health.ts, artifacts/api-server/src/routes/hospital.ts, artifacts/api-server/src/routes/lab.ts, artifacts/sanad/src/screens/admin.tsx, artifacts/sanad/src/screens/supply-chain.tsx, speckit/09-ROADMAP-TASKS.md, speckit/AGENT-BRIEF-CODEX.md, speckit/WORKLOG.md
+- Gate: portal click audit PASS across 12 portals: 34 safe clicks, 0 bad responses, 0 failed requests, 0 errors. `lib/db` TypeScript PASS; `api-server` TypeScript PASS; `sanad` TypeScript PASS; API Vitest 34/34 PASS; full `verify-and-publish.ps1 -DryRun` PASS 50/50 scenario + 53/53 ownership + 12/12 smoke.
+- Notes: User requested "زرار زرار وتاب تاب" across all portals. Fixed real bad responses from the audit: admin health path/status handling, hospital overview 403 for hospital role, lab portal 403 for demo lab account, and supply-chain LOW_STOCK alert fetch hitting the patient-scoped alerts endpoint. Remaining suspicious audit items were menu/theme/devtools icon controls skipped as non-workflow noise.
+
 ## 2026-07-04 10:45 · codex · TASK-037
 - Status: DONE
 - Commit: self fix(doctor): enable appointment booking quick action [TASK-037] (local, see `git log`)

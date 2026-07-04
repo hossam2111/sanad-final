@@ -702,7 +702,7 @@ async function fetchAppointmentsSummary() {
 }
 
 async function fetchSystemHealth() {
-  const res = await apiFetch("/api/health/healthz");
+  const res = await apiFetch("/api/healthz?soft=1");
   return res.json();
 }
 

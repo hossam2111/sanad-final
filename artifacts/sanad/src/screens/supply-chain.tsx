@@ -97,9 +97,9 @@ export default function SupplyChainPortal() {
   const [lowStockAlerts, setLowStockAlerts] = useState<LowStockAlert[]>([]);
 
   React.useEffect(() => {
-    apiFetch("/api/alerts?type=LOW_STOCK&limit=10")
+    apiFetch("/api/alerts/system?limit=10")
       .then(r => r.json())
-      .then(data => setLowStockAlerts(data.alerts ?? []));
+      .then(data => setLowStockAlerts((data.alerts ?? []).filter((a: { alertType?: string }) => a.alertType === "LOW_STOCK")));
   }, []);
 
   const qc = useQueryClient();

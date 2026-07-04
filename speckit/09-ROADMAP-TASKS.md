@@ -142,6 +142,16 @@ Acceptance:
   opens its modal.
 - `artifacts/sanad` TypeScript passes.
 
+### TASK-038 · All-portal click audit fixes — DONE(local commit)
+Run automated browser audit across all 12 portals, walking visible safe tabs/buttons and fixing real
+bad-response issues.
+
+Acceptance:
+- Browser audit reaches all 12 portals with zero page errors.
+- Real bad responses found by audit are fixed or documented as expected.
+- `lib/db` TypeScript, `api-server` TypeScript, `sanad` TypeScript, API Vitest, and full dry-run
+  gate pass.
+
 ## P2 — Post-Meeting Product Expansion
 
 ### TASK-040 · Doctor Morning Rounds queue — OPEN

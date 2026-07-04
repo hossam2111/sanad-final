@@ -17,7 +17,7 @@ router.use((req, res, next) => {
 
 router.get("/overview", async (req, res) => {
   let hospitalFilter: string | null = null;
-  if (req.role !== "admin") {
+  if (req.role === "doctor") {
     if (!req.username) {
       res.status(403).json({ error: "FORBIDDEN", message: "Clinical token missing username" });
       return;
@@ -27,6 +27,8 @@ router.get("/overview", async (req, res) => {
       res.status(403).json({ error: "FORBIDDEN", message: "Staff not assigned to a hospital" });
       return;
     }
+  } else if (req.role === "hospital" && req.username) {
+    hospitalFilter = await getStaffHospitalId(req.username);
   }
 
   const today = new Date();
