@@ -14,6 +14,19 @@
 
 ---
 
+## 2026-07-04 · claude-lead · TASK-039 + TASK-040 + PRODUCTION DEPLOY — country-open identity shipped
+- Status: DONE — Commits: 56083b5 (de-localization sweep: 27 Saudi-only strings across 7 screens
+  → national/profile-driven framing; landing numbers globalized; en-SA → en-GB), 51888a9 (region
+  switcher in every portal header — country-open identity visible everywhere)
+- Gate: 50/50 + 53/53 + 12/12 ALL GREEN (one external-restart rerun + one auth-429 cooldown per
+  documented protocols)
+- Deploy: `vercel --prod` executed (owner mandate); VERIFIED live — Arabic global-identity strings
+  present in production HTML at sanad-final.vercel.app. GitHub→Vercel integration also resumed.
+- Notes: heatmap region names + facility names remain KSA reference dataset (documented in
+  11-REGION-PROFILE-AUDIT). Demo-day warning: repeated logins trip the auth rate-limiter (429) —
+  restart API once (touch src/index.ts mtime) to clear. Post-meeting UI backlog: color-system
+  unification, first-visit country picker, profile-linked regional map data.
+
 ## 2026-07-04 11:05 · codex · TASK-038
 - Status: DONE
 - Commit: self fix(portals): clear all-portal click audit bad responses [TASK-038] (local, see `git log`)
