@@ -323,7 +323,7 @@ function ReceiptModal({ receipt, onClose }: { receipt: DispenseReceipt; onClose:
       </style></head><body>
       <div class="header">
         <div class="logo">🏥 SANAD</div>
-        <div class="sub">National AI Health Platform — Ministry of Health, Kingdom of Saudi Arabia</div>
+        <div class="sub">SANAD — Sovereign AI Health Intelligence Platform</div>
         <div class="ref">REF: ${receipt.refNo}</div>
         <div class="timestamp">${receipt.dispensedAt}</div>
       </div>
@@ -452,7 +452,7 @@ export default function PharmacyPortal() {
           patient: data.patient.name,
           nationalId: data.patient.nationalId,
           pharmacist: pharmacistName,
-          dispensedAt: new Date(result.dispensedAt ?? Date.now()).toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" }),
+          dispensedAt: new Date(result.dispensedAt ?? Date.now()).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }),
           insurance: result.insurance ?? presc.insurance,
           supplyChainStatus: result.supplyChainStatus,
           safe: presc.dispenseCheck?.safe ?? true,
@@ -497,9 +497,9 @@ export default function PharmacyPortal() {
         .footer { border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 24px; font-size: 11px; color: #888; display: flex; justify-content: space-between; }
         .allergy-bar { background: #dc2626; color: white; border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: bold; margin-bottom: 16px; }
       </style></head><body>
-      <div class="header"><h1>🏥 SANAD National Health Platform</h1>
-        <p>Ministry of Health — Kingdom of Saudi Arabia</p>
-        <p>${locale === "ar" ? "قائمة الوصفات الفعّالة" : "Active Prescription List"} — ${data.patient.nationalId} · ${new Date().toLocaleDateString("en-SA")}</p>
+      <div class="header"><h1>🏥 SANAD Health Intelligence Platform</h1>
+        <p>${regionConfig.ministryNameEn} — ${regionConfig.countryNameEn}</p>
+        <p>${locale === "ar" ? "قائمة الوصفات الفعّالة" : "Active Prescription List"} — ${data.patient.nationalId} · ${new Date().toLocaleDateString("en-GB")}</p>
       </div>
       ${data.patient.allergies?.length ? `<div class="allergy-bar">⚠ ${locale === "ar" ? "حساسية معروفة" : "KNOWN ALLERGIES"}: ${data.patient.allergies.join(" · ")}</div>` : ""}
       <div class="patient-row">

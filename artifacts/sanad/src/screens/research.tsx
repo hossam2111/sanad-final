@@ -47,7 +47,7 @@ const CLINICAL_STUDIES = [
   },
   {
     id: "SANAD-2024-002",
-    title: "AI-Guided Antihypertensive Therapy Optimization — Riyadh Region",
+    title: "AI-Guided Antihypertensive Therapy Optimization — Gulf Region Cohort",
     status: "active",
     phase: "Phase II",
     cohortSize: 4200,
@@ -63,7 +63,7 @@ const CLINICAL_STUDIES = [
   },
   {
     id: "MOH-2024-003",
-    title: "Metabolic Syndrome Prevalence & Progression in Saudi Adults 35-65",
+    title: "Metabolic Syndrome Prevalence & Progression in Middle East Adults 35-65",
     status: "completed",
     phase: "Observational",
     cohortSize: 8900,

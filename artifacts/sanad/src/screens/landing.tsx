@@ -100,7 +100,7 @@ const TRACE_CASES: TraceCase[] = [
     en: "An unconscious patient's critical profile reaches the paramedic in under a second — and the ER is ready before the ambulance moves.",
     ar: "الملف الحرج لمريضٍ فاقد للوعي يصل إلى المسعف في أقل من ثانية — وقسم الطوارئ جاهز قبل أن تتحرك سيارة الإسعاف.",
     rows: [
-      { tag: "SIGNAL", main: "ems.scan — citizen ID verified", note: "unconscious patient · unit 7, Riyadh", time: "09:14:02" },
+      { tag: "SIGNAL", main: "ems.scan — citizen ID verified", note: "unconscious patient · response unit 7", time: "09:14:02" },
       { tag: "ENGINE", accent: true, main: "01 · Clinical Decision Support", note: "blood O− · allergy: penicillin · anticoagulant active", time: "+118 ms" },
       { tag: "DECIDE", main: "critical profile → paramedic display", note: "bleed-risk protocol · avoid penicillin", time: "+342 ms" },
       { tag: "ACTION", main: "ER pre-armed — trauma bay 4 reserved", note: "ETA 11 min · team paged", time: "09:14:05" },
@@ -231,7 +231,7 @@ function LiveMetricsPanel() {
   const metrics = [
     { label: text("AI Decisions / hr", "قرارات ذكاء / ساعة"), value: decisionCount, color: "#4D9FFF", live: true },
     { label: text("Avg Response", "متوسط الاستجابة"), value: "< 400ms", color: "#22c55e", live: false },
-    { label: text("Facilities", "المنشآت"), value: "450+", color: "#a78bfa", live: false },
+    { label: text("Country Profiles", "ملفات الدول"), value: "6+", color: "#a78bfa", live: false },
     { label: text("Chain Integrity", "سلامة السلسلة"), value: "100%", color: "#22c55e", live: false },
   ];
 
@@ -483,7 +483,7 @@ function NationalFabric() {
   const reduce = useReducedMotion();
 
   const nodes = [
-    { label: "Citizen", label_ar: "المواطن", sub: "34.2M verified identities", sub_ar: "34.2 مليون هوية موثَّقة", highlight: false },
+    { label: "Citizen", label_ar: "المواطن", sub: "National-ID verified access", sub_ar: "دخول موثَّق بالهوية الوطنية", highlight: false },
     { label: "National ID Resolution", label_ar: "تحقيق الهوية الوطنية", sub: "Master Patient Index · zero-collision matching", sub_ar: "فهرس المريض الرئيسي · تطابق بلا تعارض", highlight: false },
     { label: "FHIR Interoperability Layer", label_ar: "طبقة التوافق FHIR", sub: "Structured clinical data · national schema", sub_ar: "بيانات سريرية منظمة · مخطط وطني موحد", highlight: false },
     { label: "AI Orchestrator", label_ar: "المنسّق بالذكاء الاصطناعي", sub: "9 engines · confidence-scored · reasoning attached", sub_ar: "9 محركات · مدرجة بالثقة · مرفق بها التعليل", highlight: true },
@@ -779,8 +779,8 @@ function Scale() {
   const { text, locale } = useLanguage();
   const isAr = locale === "ar";
   const stats = [
-    { value: "34.2M", en: "Citizen health records", ar: "سجل صحي للمواطنين" },
-    { value: "450+", en: "Hospitals & clinics connected", ar: "مستشفى وعيادة متصلة" },
+    { value: "100M+", en: "Record capacity per national deployment", ar: "سعة سجلات لكل نشر وطني" },
+    { value: "6+", en: "Country deployment profiles, GCC-ready", ar: "ملفات نشر للدول، جاهزة خليجياً" },
     { value: "<1s", en: "Emergency record retrieval", ar: "استدعاء سجل الطوارئ" },
     { value: "99.99%", en: "Availability architecture", ar: "معمارية الجاهزية" },
   ];
@@ -1024,9 +1024,9 @@ function Footer() {
         <div className="flex flex-col justify-between gap-3 border-t border-white/[0.06] pt-6 sm:flex-row sm:items-center">
           <p className="text-[11.5px] text-white/45">{text("© 2026 Sanad Technologies", "© 2026 شركة سند للتقنية")}</p>
           {locale === "ar" ? (
-            <p className="text-[11.5px] font-semibold text-white/40">صُمّمت وبُنيت في الرياض — SANAD HEALTH</p>
+            <p className="text-[11.5px] font-semibold text-white/40">سيادية بالتصميم · لكل دولة — SANAD HEALTH</p>
           ) : (
-            <p className="font-mono text-[11px] tracking-[0.08em] text-white/40" dir="ltr">SANAD HEALTH — DESIGNED AND BUILT IN RIYADH</p>
+            <p className="font-mono text-[11px] tracking-[0.08em] text-white/40" dir="ltr">SANAD HEALTH — SOVEREIGN BY DESIGN · BUILT FOR EVERY NATION</p>
           )}
         </div>
       </div>

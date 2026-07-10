@@ -442,7 +442,7 @@ export default function CitizenPortal() {
             </CardBody>
           </Card>
           <p className="text-center text-xs text-muted-foreground mt-5 leading-relaxed">
-            {text("Your data is protected under the Saudi Personal Data Protection Law (PDPL) and national health data governance standards.", "بياناتك محمية بموجب نظام حماية البيانات الشخصية السعودي (PDPL) ومعايير حوكمة البيانات الصحية الوطنية.")}
+            {text("Your data is protected under your country's data-protection law and national health data governance standards.", "بياناتك محمية بموجب قانون حماية البيانات في دولتك ومعايير حوكمة البيانات الصحية الوطنية.")}
           </p>
         </div>
       </Layout>
@@ -1134,7 +1134,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
         <div className="flex-1">
           <p className="font-bold text-foreground text-sm">{text("Your Data. Your Control.", "بياناتك. تحت سيطرتك.")}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {text("You decide who can access your health information and for what purpose. All consent changes are logged and audited per MOH Circular 42/1445.", "أنت من يقرّر مَن يطّلع على معلوماتك الصحية ولأي غرض. تُسجَّل جميع تغييرات الموافقة وتُدقَّق وفق تعميم وزارة الصحة 42/1445.")}
+            {text("You decide who can access your health information and for what purpose. All consent changes are logged and audited per national health data regulations.", "أنت من يقرّر مَن يطّلع على معلوماتك الصحية ولأي غرض. تُسجَّل جميع تغييرات الموافقة وتُدقَّق وفق لوائح البيانات الصحية الوطنية.")}
           </p>
         </div>
         <div className="flex items-center gap-3 text-xs shrink-0">
@@ -1268,7 +1268,7 @@ function ConsentTab({ nationalId, patientName }: { nationalId: string; patientNa
       {/* Legal footer */}
       <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-secondary/30 text-[10px] text-muted-foreground">
         <Lock className="w-3 h-3 shrink-0" />
-        {text("All consent actions are cryptographically logged and immutable · PDPL-compliant · MOH Circular 42/1445", "تُسجَّل جميع إجراءات الموافقة تشفيريًا وبصورة غير قابلة للتعديل · متوافقة مع PDPL · تعميم وزارة الصحة 42/1445")}
+        {text("All consent actions are cryptographically logged and immutable · compliant with national data-protection law", "تُسجَّل جميع إجراءات الموافقة تشفيريًا وبصورة غير قابلة للتعديل · متوافقة مع قانون حماية البيانات الوطني")}
       </div>
     </div>
   );

@@ -176,7 +176,7 @@ export default function PortalAccess() {
               {text("OPERATIONAL", "تعمل")}
             </span>
             <span>9 {text("ENGINES", "محركات")}</span>
-            <span>13 {text("REGIONS", "منطقة")}</span>
+            <span>6+ {text("COUNTRY PROFILES", "ملفات دول")}</span>
             <span>24/7</span>
           </div>
         </div>
@@ -184,8 +184,8 @@ export default function PortalAccess() {
         <p className="relative flex items-center gap-2 text-[11px] text-white/30">
           <Lock className="h-3 w-3" />
           {text(
-            "RBAC-governed · Encrypted sessions · Audited per MOH Circular 42/1445",
-            "وصول مُدار بالصلاحيات · جلسات مشفّرة · تدقيق وفق تعميم وزارة الصحة 42/1445",
+            "RBAC-governed · Encrypted sessions · Audited per national health data regulations",
+            "وصول مُدار بالصلاحيات · جلسات مشفّرة · تدقيق وفق لوائح البيانات الصحية الوطنية",
           )}
         </p>
       </aside>

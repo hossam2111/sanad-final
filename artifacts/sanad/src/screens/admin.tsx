@@ -307,7 +307,7 @@ function AuditFeed() {
                   </div>
                   <p className="text-muted-foreground mt-0.5 truncate">{entry.what}</p>
                   <p className="text-xs text-muted-foreground/70 mt-0.5" dir="ltr">
-                    {new Date(entry.createdAt).toLocaleString("en-SA")}
+                    {new Date(entry.createdAt).toLocaleString("en-GB")}
                     {entry.ipAddress && ` · ${entry.ipAddress}`}
                   </p>
                 </div>
@@ -359,7 +359,7 @@ function ComplianceDashboard() {
         <div className="p-2 rounded-lg bg-primary/10"><Shield className="w-6 h-6 text-primary" /></div>
         <div>
           <h2 className="text-xl font-bold text-foreground">{text("Data Sovereignty & PDPL Compliance","السيادة الرقمية والامتثال لنظام PDPL")}</h2>
-          <p className="text-sm text-muted-foreground">{text("Saudi Personal Data Protection Law — SDAIA Certified","نظام حماية البيانات الشخصية السعودي — معتمد من هيئة SDAIA")}</p>
+          <p className="text-sm text-muted-foreground">{text("National data-protection law compliance — certified per sovereign regulator (reference deployment: PDPL/SDAIA)","الامتثال لقانون حماية البيانات الوطني — اعتماد الجهة السيادية (النشر المرجعي: PDPL/SDAIA)")}</p>
         </div>
         <div className="ms-auto">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-success-bg text-success border border-success/30">
@@ -397,7 +397,7 @@ function ComplianceDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Globe className="w-4 h-4 text-primary" />
-            {text("Data Residency — KSA Sovereign Cloud","إقامة البيانات — السحابة السيادية السعودية")}
+            {text("Data Residency — National Sovereign Cloud","إقامة البيانات — السحابة السيادية الوطنية")}
           </CardTitle>
         </CardHeader>
         <CardBody>
@@ -893,7 +893,7 @@ export default function AdminDashboard() {
               ))}
             </select>
             <span className="text-[11px] font-mono font-bold bg-background/50 border border-border rounded-xl px-4 py-2.5 text-foreground backdrop-blur-sm shadow-sm" dir="ltr">
-              {new Date().toLocaleString("en-SA", { dateStyle: "medium", timeStyle: "short" })}
+              {new Date().toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
             </span>
             <button
               onClick={() => { setShowResetModal(true); setResetState("idle"); setResetMsg(""); }}
@@ -994,7 +994,7 @@ export default function AdminDashboard() {
             <Card className="col-span-full lg:col-span-7">
               <CardHeader>
                 <MapPin className="w-4 h-4 text-primary" />
-                <CardTitle>{text("National Risk Heatmap — KSA", "خريطة الخطورة الوطنية — المملكة")}</CardTitle>
+                <CardTitle>{text(`National Risk Heatmap — ${config.countryNameEn}`, `خريطة الخطورة الوطنية — ${config.countryName}`)}</CardTitle>
                 <Badge variant="outline" className="ms-auto text-[10px]">
                   {text(`${stats.regionalStats.filter((r: RegionalStat) => r.riskLevel === "critical").length} critical regions`, `${stats.regionalStats.filter((r: RegionalStat) => r.riskLevel === "critical").length} مناطق حرجة`)}
                 </Badge>
