@@ -13,6 +13,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { useLanguage } from "@/contexts/language-context";
+import { useRegionStore } from "@/hooks/useRegionStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 
@@ -167,6 +168,7 @@ export function Layout({ children, role, localized = false }: { children: React.
   const config = roleConfigs[role];
   const { user: authUser, logout } = useAuth();
   const { locale, dir, text, toggleLocale } = useLanguage();
+  const { regionId, changeRegion, regions } = useRegionStore();
   const router = useRouter();
   const [showAlerts, setShowAlerts] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -341,6 +343,18 @@ export function Layout({ children, role, localized = false }: { children: React.
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Country deployment profile — visible in every portal (country-open identity) */}
+            <select
+              value={regionId}
+              onChange={(e) => changeRegion(e.target.value)}
+              title={text("Deployment profile", "ملف النشر")}
+              className="h-8 rounded-full border border-border bg-card px-2 text-[13px] shadow-sm transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-primary/25 cursor-pointer"
+            >
+              {Object.values(regions).map(r => (
+                <option key={r.id} value={r.id}>{r.flag} {locale === "ar" ? r.countryName : r.countryNameEn}</option>
+              ))}
+            </select>
+
             <button
               type="button"
               onClick={toggleLocale}
